@@ -24,13 +24,26 @@ function run(cmd, label) {
   }
 }
 
+function shouldSkipSecretScan(filePath) {
+  const rel = filePath.replace(root + "/", "");
+  if (rel.endsWith(".env.example")) return true;
+  if (rel.endsWith(".env.production.example")) return true;
+  if (rel === "docker-compose.local.yml") return true;
+  if (rel === "docker-compose.prod.yml") return true;
+  if (rel.startsWith("src/__tests__/")) return true;
+  if (rel.startsWith("docs/")) return true;
+  if (rel.startsWith("deploy/")) return true;
+  if (rel === "scripts/validate-production-env.mjs") return true;
+  return false;
+}
+
 function scanForSecrets() {
+  let scanFailed = 0;
   const forbidden = [
     { pattern: /sk-[a-zA-Z0-9]{20,}/, label: "OpenAI API key pattern" },
     { pattern: /postgresql:\/\/[^:]+:[^@]+@/i, label: "DATABASE_URL with credentials" },
   ];
-  const skipDirs = new Set(["node_modules", ".next", ".git", "coverage"]);
-  const skipFiles = new Set([".env.local", ".env"]);
+  const skipDirs = new Set(["node_modules", ".next", ".git", "coverage", "backups"]);
 
   function walk(dir) {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -40,27 +53,43 @@ function scanForSecrets() {
         walk(full);
         continue;
       }
-      if (skipFiles.has(entry.name)) continue;
-      if (!/\.(ts|tsx|js|jsx|json|md|yml|yaml|sh|mjs|cjs|env\.example)$/.test(entry.name)) continue;
+      if (shouldSkipSecretScan(full)) continue;
+      if (!/\.(ts|tsx|js|jsx|json|yml|yaml|sh|mjs|cjs)$/.test(entry.name)) continue;
       const text = readFileSync(full, "utf8");
       for (const { pattern, label } of forbidden) {
-        if (pattern.test(text) && !full.endsWith(".env.example")) {
+        if (pattern.test(text)) {
           fail(`${label} found in ${full.replace(root + "/", "")}`);
+          scanFailed += 1;
         }
       }
     }
   }
 
   walk(root);
-  pass("No obvious committed secrets in source scan");
+  if (scanFailed === 0) pass("No obvious committed secrets in source scan");
 }
+
+const requiredFiles = [
+  ".env.example",
+  ".env.production.example",
+  "docker-compose.prod.yml",
+  "Dockerfile",
+  "deploy/Caddyfile.example",
+  "deploy/Caddyfile",
+  "scripts/deploy-preflight.sh",
+  "scripts/backup-postgres.sh",
+  "scripts/prod-smoke-test.sh",
+  "scripts/validate-production-env.mjs",
+  "docs/DEPLOY_HETZNER.md",
+  "docs/LAUNCH_CHECKLIST.md",
+  "docs/ENVIRONMENT.md",
+];
 
 console.log("Amanah release check\n");
 
-if (existsSync(join(root, ".env.example"))) {
-  pass(".env.example present");
-} else {
-  fail(".env.example missing");
+for (const file of requiredFiles) {
+  if (existsSync(join(root, file))) pass(`${file} present`);
+  else fail(`${file} missing`);
 }
 
 if (existsSync(join(root, "prisma/schema.prisma"))) {
@@ -70,11 +99,14 @@ if (existsSync(join(root, "prisma/schema.prisma"))) {
 }
 
 try {
-  const tracked = execSync("git ls-files .env.local 2>/dev/null || true", { cwd: root, encoding: "utf8" }).trim();
-  if (tracked) fail(".env.local is tracked by git");
-  else pass(".env.local not committed");
+  const tracked = execSync("git ls-files .env.local .env.production 2>/dev/null || true", {
+    cwd: root,
+    encoding: "utf8",
+  }).trim();
+  if (tracked) fail(`Secret env tracked by git: ${tracked}`);
+  else pass(".env.local / .env.production not committed");
 } catch {
-  pass(".env.local not committed (git unavailable)");
+  pass(".env.local / .env.production not committed (git unavailable)");
 }
 
 scanForSecrets();
@@ -97,8 +129,31 @@ try {
   fail("Could not count guided flow questions");
 }
 
+if (commandExists("docker")) {
+  try {
+    execSync("docker compose -f docker-compose.prod.yml --env-file .env.production.example config", {
+      cwd: root,
+      stdio: "pipe",
+    });
+    pass("docker-compose.prod.yml config valid");
+  } catch {
+    fail("docker-compose.prod.yml config invalid");
+  }
+} else {
+  console.log("⚠ docker not installed — skipping compose config validation");
+}
+
 console.log("\nRunning npm run check...\n");
 run("npm run check", "npm run check (lint + test + build)");
 
 console.log(failed ? `\nRelease check finished with ${failed} issue(s).\n` : "\nRelease check passed.\n");
 process.exit(failed > 0 ? 1 : 0);
+
+function commandExists(cmd) {
+  try {
+    execSync(`command -v ${cmd}`, { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
+}

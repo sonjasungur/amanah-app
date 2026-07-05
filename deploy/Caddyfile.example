@@ -1,0 +1,25 @@
+# Copy to deploy/Caddyfile and replace the domain before production deploy.
+# cp deploy/Caddyfile.example deploy/Caddyfile
+
+amanah.example.com {
+	encode gzip
+
+	reverse_proxy app:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
+
+# Optional: redirect www to apex
+# www.amanah.example.com {
+# 	redir https://amanah.example.com{uri} permanent
+# }

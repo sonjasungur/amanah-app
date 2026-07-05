@@ -24,6 +24,7 @@ describe("API health", () => {
     expect(body.storageMode).toBeDefined();
     expect(body.knowledgeEntriesCount).toBeGreaterThanOrEqual(10);
     expect(body.guidedFlowQuestionsCount).toBeGreaterThanOrEqual(20);
+    expect(body.environment).toBeDefined();
   });
 });
 

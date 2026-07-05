@@ -1,0 +1,92 @@
+# AmanahOrdner — Production stack (Hetzner / VPS)
+# Usage:
+#   cp .env.production.example .env.production   # edit secrets locally, never commit
+#   cp deploy/Caddyfile.example deploy/Caddyfile # set your domain
+#   ./scripts/deploy-preflight.sh
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Only Caddy is public (80/443). App and Postgres stay on the internal network.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: amanah-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amanah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:-amanah}
+    volumes:
+      - amanah_pg_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amanah_internal
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amanah-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in env file}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in env file}
+      AUTH_SECRET: ${AUTH_SECRET:-${SESSION_SECRET}}
+      AMANAH_SERVER_STORAGE: ${AMANAH_SERVER_STORAGE:-postgres}
+      AMANAH_AI_ENABLED: ${AMANAH_AI_ENABLED:-true}
+      AMANAH_AI_PROVIDER: ${AMANAH_AI_PROVIDER:-rules}
+      AMANAH_KNOWLEDGE_RETRIEVAL: ${AMANAH_KNOWLEDGE_RETRIEVAL:-keyword}
+      AMANAH_EMBEDDING_PROVIDER: ${AMANAH_EMBEDDING_PROVIDER:-none}
+      AMANAH_KNOWLEDGE_TOP_K: ${AMANAH_KNOWLEDGE_TOP_K:-3}
+      NEXT_PUBLIC_AUTH_MODE: ${NEXT_PUBLIC_AUTH_MODE:-api}
+      NEXT_PUBLIC_STORAGE_MODE: ${NEXT_PUBLIC_STORAGE_MODE:-api}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://amanah.example.com}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-${NEXT_PUBLIC_SITE_URL}}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      AI_PROVIDER: ${AI_PROVIDER:-rules}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    networks:
+      - amanah_internal
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: amanah-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - amanah_internal
+
+networks:
+  amanah_internal:
+    driver: bridge
+
+volumes:
+  amanah_pg_prod:
+    name: amanah_pg_prod
+  caddy_data:
+    name: amanah_caddy_data
+  caddy_config:
+    name: amanah_caddy_config

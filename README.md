@@ -247,6 +247,24 @@ npm start
 
 Empfohlen: Vercel, mit Environment Variables aus `.env.example`.
 
+## Production (Hetzner)
+
+See full guides:
+
+- [docs/DEPLOY_HETZNER.md](docs/DEPLOY_HETZNER.md) — Docker + Caddy + Postgres deploy
+- [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) — environment variables
+- [docs/LAUNCH_CHECKLIST.md](docs/LAUNCH_CHECKLIST.md) — pre-launch checklist
+
+Quick start on server:
+
+```bash
+cp .env.production.example .env.production   # edit secrets
+cp deploy/Caddyfile.example deploy/Caddyfile # set domain
+./scripts/deploy-preflight.sh
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+BASE_URL=https://your-domain.de ./scripts/prod-smoke-test.sh
+```
+
 ## Roadmap
 
 ### Phase 1 — MVP (aktuell)

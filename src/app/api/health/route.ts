@@ -9,6 +9,7 @@ import { getServerRepository } from "@/lib/server/repository";
 import { getAiProviderName, isAiEnabled, requiresExternalAiConsent } from "@/lib/ai/config";
 import { getAllEntries } from "@/lib/knowledge/entries";
 import { getQuestionPlanCount } from "@/lib/guided-flow/question-plan";
+import { getPublicEnvironmentLabel } from "@/lib/server/production-config";
 
 export async function GET() {
   const serverStorage = getServerStorageMode();
@@ -21,6 +22,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: "ok",
+    environment: getPublicEnvironmentLabel(),
     authMode: getPublicAuthMode(),
     storageMode: getPublicStorageMode(),
     serverStorage,
