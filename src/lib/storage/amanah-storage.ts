@@ -3,6 +3,7 @@ import { extractDataFromImport, normalizeData } from "@/lib/domain/migration";
 import { validateImportData } from "@/lib/domain/validation";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { localStorageProvider } from "./local-storage-provider";
+import { resolveStorageProvider } from "./storage-config";
 import { STORAGE_KEY, type StorageProvider } from "./types";
 
 export { STORAGE_KEY };
@@ -14,6 +15,9 @@ export function setStorageProvider(p: StorageProvider): void {
 }
 
 export function getStorageProvider(): StorageProvider {
+  if (typeof window !== "undefined") {
+    return resolveStorageProvider();
+  }
   return provider;
 }
 
