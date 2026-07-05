@@ -49,10 +49,20 @@ if [[ -f "$ENV_FILE" ]]; then
   source "$ENV_FILE"
   set +a
 
-  if node scripts/validate-production-env.mjs; then
-    pass "production env validation passed"
+  if command -v node >/dev/null 2>&1; then
+    if node scripts/validate-production-env.mjs; then
+      pass "production env validation passed"
+    else
+      fail "production env validation failed"
+    fi
   else
-    fail "production env validation failed"
+    echo "⚠ node not installed — using bash env checks"
+    [[ -n "${DATABASE_URL:-}" ]] && pass "DATABASE_URL set" || fail "DATABASE_URL missing"
+    [[ -n "${SESSION_SECRET:-}" ]] && [[ ${#SESSION_SECRET} -ge 32 ]] && pass "SESSION_SECRET length OK" || fail "SESSION_SECRET invalid"
+    [[ "${NEXT_PUBLIC_AUTH_MODE:-}" == "api" ]] && pass "NEXT_PUBLIC_AUTH_MODE=api" || fail "NEXT_PUBLIC_AUTH_MODE must be api"
+    [[ "${NEXT_PUBLIC_STORAGE_MODE:-}" == "api" ]] && pass "NEXT_PUBLIC_STORAGE_MODE=api" || fail "NEXT_PUBLIC_STORAGE_MODE must be api"
+    [[ "${AMANAH_SERVER_STORAGE:-}" == "postgres" ]] && pass "AMANAH_SERVER_STORAGE=postgres" || fail "AMANAH_SERVER_STORAGE must be postgres"
+    [[ "${AMANAH_AI_PROVIDER:-rules}" == "rules" || "${AMANAH_AI_PROVIDER:-}" == "rules" ]] && pass "AI provider rules (default)" || echo "⚠ AI provider: ${AMANAH_AI_PROVIDER:-unset}"
   fi
 
   if [[ -n "${OPENAI_API_KEY:-}" ]]; then
