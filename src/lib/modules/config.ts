@@ -8,6 +8,8 @@ export const moduleConfigs: ModuleConfig[] = [
     icon: "🆘",
     path: "/dashboard/notfallkarte",
     criticalFields: ["emergencyCard.name", "emergencyCard.emergencyContact1.name", "emergencyCard.emergencyContact1.phone"],
+    requiredFields: ["emergencyCard.name", "emergencyCard.emergencyContact1.name", "emergencyCard.emergencyContact1.phone"],
+    warningFields: ["emergencyCard.familyDoctor", "emergencyCard.medications"],
   },
   {
     id: "krankheit",

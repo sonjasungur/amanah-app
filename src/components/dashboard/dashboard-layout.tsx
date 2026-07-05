@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { moduleConfigs } from "@/lib/modules/config";
 import { StorageControls } from "@/components/storage/storage-controls";
+import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { cn } from "@/lib/utils/cn";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               🤖 Assistent
             </Link>
           </nav>
+          <SaveStatusIndicator className="px-1" />
           <StorageControls />
         </aside>
         <div className="lg:col-span-3">{children}</div>

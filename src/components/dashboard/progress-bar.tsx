@@ -1,11 +1,12 @@
 "use client";
 
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { pickDataFields } from "@/lib/store/store-utils";
 import { calculateProgress } from "@/lib/utils/progress";
 
 export function ProgressBar() {
   const store = useAmanahStore();
-  const progress = calculateProgress(store as Parameters<typeof calculateProgress>[0]);
+  const progress = calculateProgress(pickDataFields(store));
 
   return (
     <div className="w-full">

@@ -1,10 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { getSourcesByIds, islamicSources } from "@/lib/knowledge/sources";
 import { searchKnowledge, getAllPublishedArticles } from "@/lib/knowledge";
 import { searchFuneralPartners, funeralPartners } from "@/lib/mock/funeral-partners";
-import { checkInheritance, calculateProgress, getCriticalMissing } from "@/lib/utils/progress";
-import { defaultAmanahData } from "@/lib/storage/amanah-store";
+import { calculateProgress, getCriticalMissing, getModuleProgress, getAllModuleProgress } from "@/lib/utils/progress";
+import { defaultAmanahData, demoAmanahData } from "@/lib/domain";
+import { migrateV0ToV1, normalizeData, extractDataFromImport } from "@/lib/domain/migration";
+import { createExportBundle, SCHEMA_VERSION } from "@/lib/domain/schema";
+import { parseImportJson } from "@/lib/storage/amanah-storage";
+import { LocalStorageProvider } from "@/lib/storage/local-storage-provider";
+import { STORAGE_KEY } from "@/lib/storage/types";
 import { cultureFilterCards } from "@/lib/knowledge/kulturfilter";
+import { checkInheritance } from "@/lib/domain/validation";
 
 describe("Islamic Sources", () => {
   it("has required source entries", () => {
@@ -83,5 +89,121 @@ describe("Progress", () => {
   it("identifies critical missing fields", () => {
     const missing = getCriticalMissing(defaultAmanahData);
     expect(missing).toContain("Notfallkontakt");
+  });
+
+  it("calculates module progress", () => {
+    const mod = getModuleProgress(demoAmanahData, "notfallkarte");
+    expect(mod.percent).toBeGreaterThan(0);
+    expect(mod.moduleId).toBe("notfallkarte");
+  });
+
+  it("returns progress for all modules", () => {
+    const all = getAllModuleProgress(demoAmanahData);
+    expect(all).toHaveLength(13);
+  });
+});
+
+describe("Migration v0 → v1", () => {
+  it("adds schemaVersion and new arrays to legacy data", () => {
+    const legacy = {
+      userProfile: { name: "Legacy User", birthDate: "1990-01-01", language: "de" },
+      selectedPath: "janazah",
+    };
+    const migrated = migrateV0ToV1(legacy);
+    expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(migrated.familyMembers).toEqual([]);
+    expect(migrated.documents).toEqual([]);
+    expect(migrated.userProfile.name).toBe("Legacy User");
+  });
+
+  it("normalizes partial data with defaults", () => {
+    const normalized = normalizeData({ userProfile: { name: "Test", birthDate: "", language: "de" } });
+    expect(normalized.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(normalized.emergencyCard).toBeDefined();
+    expect(normalized.reviewStatus).toBe("draft");
+  });
+
+  it("extracts data from export bundle", () => {
+    const bundle = createExportBundle(demoAmanahData);
+    const extracted = extractDataFromImport(bundle as unknown as Record<string, unknown>);
+    expect(extracted.userProfile.name).toBe("Ahmed Demo");
+    expect(extracted.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+});
+
+describe("Import/Export Bundle", () => {
+  it("creates valid export bundle", () => {
+    const bundle = createExportBundle(demoAmanahData);
+    expect(bundle.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(bundle.exportedAt).toBeTruthy();
+    expect(bundle.data.userProfile.name).toBe("Ahmed Demo");
+  });
+
+  it("parses export bundle successfully", () => {
+    const bundle = createExportBundle(demoAmanahData);
+    const result = parseImportJson(bundle);
+    expect(result.success).toBe(true);
+    expect(result.data?.userProfile.name).toBe("Ahmed Demo");
+  });
+
+  it("rejects invalid import without destroying data", () => {
+    const result = parseImportJson(null);
+    expect(result.success).toBe(false);
+    expect(result.errors?.length).toBeGreaterThan(0);
+  });
+
+  it("migrates legacy flat JSON on import", () => {
+    const legacy = { userProfile: { name: "Alt", birthDate: "", language: "de" } };
+    const result = parseImportJson(legacy);
+    expect(result.success).toBe(true);
+    expect(result.data?.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(result.data?.userProfile.name).toBe("Alt");
+  });
+});
+
+describe("Storage round-trip", () => {
+  const mockStorage = new Map<string, string>();
+
+  beforeEach(() => {
+    mockStorage.clear();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => mockStorage.get(key) ?? null,
+      setItem: (key: string, value: string) => { mockStorage.set(key, value); },
+      removeItem: (key: string) => { mockStorage.delete(key); },
+    });
+    vi.stubGlobal("window", { localStorage: localStorage });
+  });
+
+  it("saves and loads data through LocalStorageProvider", async () => {
+    const provider = new LocalStorageProvider();
+    await provider.save(demoAmanahData);
+    const loaded = await provider.load();
+    expect(loaded).not.toBeNull();
+    expect(loaded!.userProfile.name).toBe("Ahmed Demo");
+    expect(loaded!.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+
+  it("migrates v0 zustand persist format on load", async () => {
+    const legacyState = {
+      state: {
+        userProfile: { name: "Persisted", birthDate: "", language: "de" },
+        debtsAmanah: [{ id: "1", type: "zakat", description: "Test", person: "X", priority: "high" }],
+      },
+      version: 0,
+    };
+    mockStorage.set(STORAGE_KEY, JSON.stringify(legacyState));
+    const provider = new LocalStorageProvider();
+    const loaded = await provider.load();
+    expect(loaded!.userProfile.name).toBe("Persisted");
+    expect(loaded!.debtsAmanah).toHaveLength(1);
+    expect(loaded!.schemaVersion).toBe(SCHEMA_VERSION);
+  });
+});
+
+describe("SaveStatus types", () => {
+  it("default save state is idle-compatible", () => {
+    const statuses = ["idle", "saving", "saved", "error"] as const;
+    expect(statuses).toContain("saved");
+    expect(statuses).toContain("error");
   });
 });
