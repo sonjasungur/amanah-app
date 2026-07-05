@@ -140,6 +140,26 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d --bui
 3. Rebuild: `docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build`
 4. If DB migration failed, restore from backup: `./scripts/restore-postgres.sh ...`
 
+## Shared server (existing Caddy on 80/443)
+
+If another app already uses ports 80/443 (e.g. on `gemeinsam1-prod`):
+
+```bash
+cd /opt/amanah-app
+git pull origin main
+./scripts/init-production-env.sh          # once — generates .env.production
+./scripts/deploy-shared-server.sh         # app + postgres on localhost:3001
+./scripts/backup-postgres.sh              # test backup
+```
+
+Public HTTPS: add `deploy/Caddyfile.shared-snippet` to your existing Caddy and set DNS for your Amanah domain.
+
+Dedicated server (own Caddy):
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production --profile caddy up -d --build
+```
+
 ## Architecture
 
 ```

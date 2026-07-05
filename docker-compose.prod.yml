@@ -30,6 +30,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_AUTH_MODE: ${NEXT_PUBLIC_AUTH_MODE:-api}
+        NEXT_PUBLIC_STORAGE_MODE: ${NEXT_PUBLIC_STORAGE_MODE:-api}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://amanah.example.com}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-${NEXT_PUBLIC_SITE_URL}}
     container_name: amanah-app
     restart: unless-stopped
     environment:
@@ -63,6 +68,7 @@ services:
       - amanah_internal
 
   caddy:
+    profiles: ["caddy"]
     image: caddy:2-alpine
     container_name: amanah-caddy
     restart: unless-stopped
