@@ -18,6 +18,7 @@ const MEDICAL_PATTERNS = [
 
 const FATWA_PATTERNS = [
   /fatwa/i, /halal.*haram/i, /ist es erlaubt/i, /darf ich islamisch/i, /schär/i, /fiqh.*urteil/i,
+  /gib mir eine fatwa/i, /fatwa.*erb/i,
 ];
 
 const INHERITANCE_CALC_PATTERNS = [
@@ -31,7 +32,7 @@ const VALIDITY_PATTERNS = [
 
 const DIAGNOSIS_PATTERNS = [/was habe ich/i, /habe ich krebs/i, /diagnose/i];
 
-const TREATMENT_PATTERNS = [/soll ich.*nehmen/i, /welche behandlung/i, /operieren/i];
+const TREATMENT_PATTERNS = [/soll ich.*nehmen/i, /welche behandlung/i, /operieren/i, /behandlung.*ablehn/i, /soll ich.*ablehnen/i];
 
 export function classifyUserIntent(text: string): UserIntent {
   const t = text.toLowerCase();

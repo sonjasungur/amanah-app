@@ -7,6 +7,8 @@ import { getAiConsent } from "@/lib/ai/consent-client";
 import { useI18n } from "@/lib/i18n/context";
 import { AiConsentBanner } from "@/components/ai/ai-consent-banner";
 import { AiSuggestionCard } from "@/components/ai/ai-suggestion-card";
+import { AiKnowledgeResult } from "@/components/ai/ai-knowledge-result";
+import type { KnowledgeCitation } from "@/lib/ai/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Textarea, Select } from "@/components/ui/input";
@@ -27,6 +29,12 @@ export function AiAssistantPanel() {
   const [tone, setTone] = useState<FamilyMessageTone>("liebevoll");
   const [knowledgeQ, setKnowledgeQ] = useState("");
   const [knowledgeA, setKnowledgeA] = useState("");
+  const [knowledgeMeta, setKnowledgeMeta] = useState<{
+    blocked?: boolean;
+    noSource?: boolean;
+    citations?: KnowledgeCitation[];
+    suggestedNextStep?: string;
+  } | null>(null);
   const [consentGranted, setConsentGranted] = useState(() => getAiConsent() === "granted");
 
   useEffect(() => {
@@ -123,17 +131,39 @@ export function AiAssistantPanel() {
     setLoading(null);
   };
 
-  const runKnowledge = async () => {
-    if (!knowledgeQ.trim()) return;
+  const runKnowledge = async (question?: string) => {
+    const q = (question ?? knowledgeQ).trim();
+    if (!q) return;
+    setKnowledgeQ(q);
     setLoading("knowledge");
     try {
-      const r = await postAi("/api/ai/knowledge", { question: knowledgeQ });
-      setKnowledgeA(r.blocked ? (r.message || r.answer) : r.answer);
+      const r = await postAi("/api/ai/knowledge", { question: q });
+      if (r.blocked) {
+        setKnowledgeA(r.message || r.answer);
+        setKnowledgeMeta({ blocked: true, citations: [] });
+      } else {
+        setKnowledgeA(r.answer);
+        setKnowledgeMeta({
+          blocked: false,
+          noSource: r.noSource,
+          citations: r.citations,
+          suggestedNextStep: r.suggestedNextStep,
+        });
+      }
     } catch {
       setKnowledgeA(t("ai.error.generic"));
+      setKnowledgeMeta(null);
     }
     setLoading(null);
   };
+
+  const faqQuestions = [
+    t("knowledge.faq.notfallmappe"),
+    t("knowledge.faq.vorsorgevollmacht"),
+    t("knowledge.faq.ghuslKafan"),
+    t("knowledge.faq.sadaqaJariya"),
+    t("knowledge.faq.digitalerNachlass"),
+  ];
 
   return (
     <div className="space-y-6">
@@ -230,6 +260,14 @@ export function AiAssistantPanel() {
 
       <Card>
         <CardTitle className="text-base">{t("ai.knowledge")}</CardTitle>
+        <p className="text-xs text-muted mt-1">{t("knowledge.basis")}</p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {faqQuestions.map((q) => (
+            <Button key={q} size="sm" variant="outline" onClick={() => runKnowledge(q)} disabled={!!loading}>
+              {q}
+            </Button>
+          ))}
+        </div>
         <div className="flex gap-2 mt-3">
           <input
             className="flex-1 rounded-xl border border-primary/20 px-3 py-2 text-sm"
@@ -237,11 +275,19 @@ export function AiAssistantPanel() {
             onChange={(e) => setKnowledgeQ(e.target.value)}
             placeholder={t("ai.knowledgePlaceholder")}
           />
-          <Button size="sm" onClick={runKnowledge} disabled={!!loading}>
+          <Button size="sm" onClick={() => runKnowledge()} disabled={!!loading}>
             {loading === "knowledge" ? "…" : t("ai.askBtn")}
           </Button>
         </div>
-        {knowledgeA && <p className="text-sm mt-3 p-3 bg-sand rounded-xl whitespace-pre-wrap">{knowledgeA}</p>}
+        {knowledgeA && (
+          <AiKnowledgeResult
+            answer={knowledgeA}
+            blocked={knowledgeMeta?.blocked}
+            noSource={knowledgeMeta?.noSource}
+            citations={knowledgeMeta?.citations}
+            suggestedNextStep={knowledgeMeta?.suggestedNextStep}
+          />
+        )}
       </Card>
 
       <p className="text-xs text-muted">{t("ai.disclaimerShort")}</p>

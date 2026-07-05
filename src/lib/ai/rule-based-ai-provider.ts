@@ -4,10 +4,9 @@ import {
   getCriticalMissing,
   getRecommendedNextStep,
 } from "@/lib/domain/validation";
-import { searchKnowledge } from "@/lib/knowledge";
-import { getSourcesByIds } from "@/lib/knowledge/sources";
-import { DOMAIN_DISCLAIMER } from "./safety";
 import { buildFamilyMessageContext, labelForField, moduleTitle } from "./context";
+import { answerKnowledgeQuestion } from "./knowledge-answer";
+import { DOMAIN_DISCLAIMER } from "./safety";
 import type {
   AmanahAIProvider,
   AiProviderName,
@@ -170,22 +169,7 @@ export class RuleBasedAIProvider implements AmanahAIProvider {
   }
 
   async knowledge(question: string): Promise<KnowledgeResult> {
-    const results = searchKnowledge(question);
-    if (results.length === 0) {
-      return {
-        answer: "Dazu habe ich in der Wissensbasis keinen passenden Orientierungstext. Bitte Imam/Gelehrte oder Fachperson konsultieren.",
-        blocked: false,
-        disclaimer: DOMAIN_DISCLAIMER,
-      };
-    }
-    const article = results[0];
-    const sources = getSourcesByIds(article.sourceIds.slice(0, 3));
-    return {
-      answer: `${article.summary}\n\nPraktisch: Dokumentiere deine Wünsche im passenden Modul und lasse sie fachlich prüfen.`,
-      sources: sources.map((s) => `${s.reference}: ${s.title}`),
-      blocked: false,
-      disclaimer: DOMAIN_DISCLAIMER + " Keine Fatwa, keine Rechtsberatung.",
-    };
+    return answerKnowledgeQuestion(question);
   }
 }
 

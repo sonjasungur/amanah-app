@@ -102,6 +102,28 @@ Siehe `.env.example`:
 - Im Druckdialog: „Als PDF speichern" wählen
 - Exporte: AmanahOrdner Komplett, Notfallkarte, Janazah-Anweisung, Testament-Report, Schulden-Liste, Familienbrief
 
+## Knowledge Base (Phase 3B)
+
+### Default: Keyword Retrieval (no cost)
+
+```env
+AMANAH_KNOWLEDGE_RETRIEVAL=keyword    # keyword | embedding | hybrid
+AMANAH_EMBEDDING_PROVIDER=none         # none | openai (optional, server-side)
+AMANAH_EMBEDDING_MODEL=                # e.g. text-embedding-3-small
+```
+
+Antworten im Knowledge Helper basieren **nur auf kuratierten Einträgen** mit Quellenangabe — keine freie Halluzination.
+
+| API | Beschreibung |
+|-----|-------------|
+| `GET /api/knowledge/search?q=...` | Keyword-Suche |
+| `GET /api/knowledge/entries` | Produktive Einträge (DE) |
+| `GET /api/knowledge/entries/[id]` | Einzeleintrag |
+
+Neue Einträge in `src/lib/knowledge/entries.ts` ergänzen. Nur `reviewed` oder sichere `draft`/`low`-Einträge erscheinen im Assistenten.
+
+**Keine Rechtsberatung, keine Medizinberatung, keine Fatwa** — bei individuellen Fragen Redirect auf Fachperson.
+
 ## AI Companion (Phase 3A)
 
 ### Provider-Modi

@@ -3,7 +3,8 @@ import { getAiModelFast, getOpenAiApiKey } from "./config";
 import { SYSTEM_PROMPT } from "./prompts";
 import { RuleBasedAIProvider } from "./rule-based-ai-provider";
 import { mockAIProvider } from "./mock-ai-provider";
-import type { AmanahAIProvider, AiProviderName, FamilyMessageTone } from "./types";
+import { answerKnowledgeQuestion } from "./knowledge-answer";
+import type { AmanahAIProvider, AiProviderName, FamilyMessageTone, KnowledgeResult } from "./types";
 
 export class OpenAIProvider extends RuleBasedAIProvider implements AmanahAIProvider {
   readonly name: AiProviderName = "openai";
@@ -39,6 +40,10 @@ export class OpenAIProvider extends RuleBasedAIProvider implements AmanahAIProvi
       `Verbessere stilistisch (Ton: ${tone}), behalte Inhalt:\n${base.message}`
     );
     return enhanced ? { ...base, message: enhanced } : base;
+  }
+
+  async knowledge(question: string): Promise<KnowledgeResult> {
+    return answerKnowledgeQuestion(question, { useOpenAI: !!getOpenAiApiKey() });
   }
 
   async chat(messages: { role: string; content: string }[], _context?: Record<string, unknown>): Promise<string> {

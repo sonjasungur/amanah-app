@@ -75,10 +75,25 @@ export interface FamilyMessageResult {
   disclaimer: string;
 }
 
+export interface KnowledgeCitation {
+  entryId: string;
+  title: string;
+  category: string;
+  sourceLabel: string;
+  sourceUrl?: string;
+  reviewedStatus: string;
+  orientationNote?: string;
+}
+
 export interface KnowledgeResult {
   answer: string;
-  sources?: string[];
+  citations?: KnowledgeCitation[];
+  usedEntryIds?: string[];
+  safetyLevel?: "general_allowed" | "legal_sensitive" | "medical_sensitive" | "religious_sensitive";
   blocked: boolean;
+  noSource?: boolean;
+  suggestedNextStep?: string;
+  sources?: string[];
   disclaimer: string;
 }
 
