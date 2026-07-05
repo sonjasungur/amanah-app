@@ -38,9 +38,12 @@ Siehe `.env.example`:
 
 | Variable | Beschreibung | Default |
 |----------|-------------|---------|
-| `AI_PROVIDER` | `mock` oder `openai` | `mock` |
-| `OPENAI_API_KEY` | OpenAI API Key | — |
-| `OPENAI_MODEL` | OpenAI Modell | `gpt-4o-mini` |
+| `AMANAH_AI_PROVIDER` | `rules`, `mock` oder `openai` | `rules` |
+| `AMANAH_AI_ENABLED` | KI ein/aus | `true` |
+| `AMANAH_AI_MODEL_FAST` | Schnelles Modell (OpenAI) | Env/OpenAI default |
+| `AMANAH_AI_MODEL_SMART` | Smartes Modell (OpenAI) | Env/OpenAI default |
+| `OPENAI_API_KEY` | OpenAI API Key (nur Server) | — |
+| `AI_PROVIDER` | Legacy-Alias für Provider | `rules` |
 | `NEXT_PUBLIC_APP_URL` | App URL | `http://localhost:3000` |
 
 ## Wichtige Routen
@@ -99,18 +102,61 @@ Siehe `.env.example`:
 - Im Druckdialog: „Als PDF speichern" wählen
 - Exporte: AmanahOrdner Komplett, Notfallkarte, Janazah-Anweisung, Testament-Report, Schulden-Liste, Familienbrief
 
-## AI Provider
+## AI Companion (Phase 3A)
 
-### Mock (Default)
+### Provider-Modi
 
-Hochwertige Mock-Antworten aus der lokalen Knowledge Base. Funktioniert ohne API Key.
+| Modus | Env | Kosten | API-Key |
+|-------|-----|--------|---------|
+| **rules** (Default) | `AMANAH_AI_PROVIDER=rules` | Keine | Nein |
+| **mock** | `AMANAH_AI_PROVIDER=mock` | Keine | Nein |
+| **openai** | `AMANAH_AI_PROVIDER=openai` + `OPENAI_API_KEY` | Extern | Ja (nur Server) |
+
+```env
+AMANAH_AI_PROVIDER=rules          # mock | rules | openai
+AMANAH_AI_ENABLED=true            # false deaktiviert KI-Routen
+AMANAH_AI_MODEL_FAST=             # optional, z.B. gpt-4o-mini
+AMANAH_AI_MODEL_SMART=            # optional für komplexere Aufgaben
+OPENAI_API_KEY=                   # nur serverseitig, nie im Frontend
+```
+
+Ohne API-Key funktionieren **mock** und **rules** vollständig — Build und App laufen sofort.
+
+### KI-Funktionen
+
+| API | Beschreibung |
+|-----|-------------|
+| `POST /api/ai/next-question` | Wichtigste Lücke + nächste Frage |
+| `POST /api/ai/completion-review` | Priorisierte offene Punkte |
+| `POST /api/ai/extract` | Freitext → Feldvorschläge (nicht auto-gespeichert) |
+| `POST /api/ai/family-message` | Familiennachricht-Entwurf |
+| `POST /api/ai/knowledge` | Einfache Wissensfragen mit Disclaimer |
+| `GET /api/ai/status` | Provider-Status + Consent-Hinweis |
+
+### Datenschutz & Sicherheit
+
+- **Keine Fatwa, keine Rechtsberatung, keine Medizinberatung**
+- Externe KI (OpenAI) nur nach **Nutzer-Einwilligung** im UI
+- Datenminimierung: nur nötige Felder pro Funktion
+- Keine KI-Aufrufe bei Autosave — nur bei expliziter Nutzeraktion
+- Safety Guardrails blockieren verbotene Fragestellungen
+
+### Legacy Chat
+
+`POST /api/ai` — Freier Chat (Mock/Rules/OpenAI mit Consent)
+
+## AI Provider (Legacy)
+
+### Mock / Rules (Default)
+
+Regelbasierte und Mock-Antworten aus der lokalen Knowledge Base. Funktioniert ohne API Key.
 
 ### OpenAI (Optional)
 
 ```env
-AI_PROVIDER=openai
+AMANAH_AI_PROVIDER=openai
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o-mini
+AMANAH_AI_MODEL_FAST=gpt-4o-mini
 ```
 
 Der Amanah-Assistent:

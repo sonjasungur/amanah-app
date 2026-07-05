@@ -7,6 +7,7 @@ import { moduleConfigs } from "@/lib/modules/config";
 import { getAllModuleProgress, getCriticalMissing, getRecommendedNextStep } from "@/lib/utils/progress";
 import { exportEmergencyFolder } from "@/lib/storage/amanah-storage";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
+import { AiDashboardCard } from "@/components/ai/ai-dashboard-card";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { StorageControls } from "@/components/storage/storage-controls";
 import { PathSelector } from "@/components/onboarding/path-selector";
@@ -93,6 +94,8 @@ export default function DashboardPage() {
           </Button>
         </Link>
       </Card>
+
+      <AiDashboardCard />
 
       <section>
         <h2 className="text-xl font-bold text-primary mb-4">Alle Module</h2>
