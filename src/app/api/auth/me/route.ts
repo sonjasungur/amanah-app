@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSessionByToken, getUserById } from "@/lib/server/memory-store";
+import { getServerRepository } from "@/lib/server/repository";
 import { getBearerToken, sessionToResponse } from "@/lib/server/auth-utils";
 
 export async function GET(request: Request) {
@@ -8,12 +8,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
   }
 
-  const session = getSessionByToken(token);
+  const repo = getServerRepository();
+  const session = await repo.getSessionByToken(token);
   if (!session) {
     return NextResponse.json({ error: "Sitzung abgelaufen." }, { status: 401 });
   }
 
-  const user = getUserById(session.userId);
+  const user = await repo.getUserById(session.userId);
   if (!user) {
     return NextResponse.json({ error: "Benutzer nicht gefunden." }, { status: 401 });
   }

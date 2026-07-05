@@ -1,5 +1,5 @@
-# Local Postgres for AmanahOrdner development (optional — Phase 2B+)
-# Start: docker compose -f docker-compose.local.yml up -d
+# Local Postgres for AmanahOrdner development (Phase 2C)
+# Start: docker compose -f docker-compose.local.yml up -d postgres
 # Do NOT delete volumes in production without backup.
 
 services:
@@ -9,14 +9,14 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: amanah
-      POSTGRES_PASSWORD: amanah_dev
-      POSTGRES_DB: amanah
+      POSTGRES_PASSWORD: amanah_dev_password
+      POSTGRES_DB: amanah_dev
     ports:
-      - "5432:5432"
+      - "5436:5432"
     volumes:
       - amanah_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U amanah -d amanah"]
+      test: ["CMD-SHELL", "pg_isready -U amanah -d amanah_dev"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -1,4 +1,14 @@
-import { getSessionByToken, getUserById } from "./memory-store";
+import { getServerRepository } from "./repository";
+
+export async function getAuthenticatedUserId(request: Request): Promise<string | null> {
+  const token = getBearerToken(request);
+  if (!token) return null;
+  const repo = getServerRepository();
+  const session = await repo.getSessionByToken(token);
+  if (!session) return null;
+  const user = await repo.getUserById(session.userId);
+  return user ? user.id : null;
+}
 
 export function getBearerToken(request: Request): string | null {
   const header = request.headers.get("Authorization");
@@ -6,16 +16,10 @@ export function getBearerToken(request: Request): string | null {
   return header.slice(7);
 }
 
-export function getAuthenticatedUserId(request: Request): string | null {
-  const token = getBearerToken(request);
-  if (!token) return null;
-  const session = getSessionByToken(token);
-  if (!session) return null;
-  const user = getUserById(session.userId);
-  return user ? user.id : null;
-}
-
-export function sessionToResponse(session: { token: string; expiresAt: string }, user: { id: string; email: string; name: string; createdAt: string }) {
+export function sessionToResponse(
+  session: { token: string; expiresAt: string },
+  user: { id: string; email: string; name: string; createdAt: string }
+) {
   return {
     session: {
       token: session.token,
@@ -24,3 +28,5 @@ export function sessionToResponse(session: { token: string; expiresAt: string },
     },
   };
 }
+
+export { getServerRepository };

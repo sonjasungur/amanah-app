@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticateUser, createSession } from "@/lib/server/memory-store";
-import { sessionToResponse } from "@/lib/server/auth-utils";
+import { getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
 
 export async function POST(request: Request) {
   try {
@@ -11,12 +10,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "E-Mail und Passwort erforderlich." }, { status: 400 });
     }
 
-    const user = await authenticateUser(email, password);
+    const repo = getServerRepository();
+    const user = await repo.authenticateUser(email, password);
     if (!user) {
       return NextResponse.json({ error: "E-Mail oder Passwort ungültig." }, { status: 401 });
     }
 
-    const session = createSession(user.id);
+    const session = await repo.createSession(user.id);
     return NextResponse.json(sessionToResponse(session, user));
   } catch {
     return NextResponse.json({ error: "Anmeldung fehlgeschlagen." }, { status: 500 });

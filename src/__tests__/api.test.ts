@@ -1,21 +1,38 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { GET as healthGET } from "@/app/api/health/route";
 import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { POST as loginPOST } from "@/app/api/auth/login/route";
 import { GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
 import { demoAmanahData } from "@/lib/domain/demo-data";
+import { resetServerRepository } from "@/lib/server/repository";
 
 describe("API health", () => {
-  it("returns ok status", async () => {
+  beforeEach(() => {
+    resetServerRepository();
+    delete process.env.AMANAH_SERVER_STORAGE;
+    delete process.env.DATABASE_URL;
+  });
+
+  it("returns ok status with config fields", async () => {
     const res = await healthGET();
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.status).toBe("ok");
-    expect(body.storage).toBe("memory");
+    expect(body.serverStorage).toBe("memory");
+    expect(body.dbConfigured).toBe(false);
+    expect(body.authMode).toBeDefined();
+    expect(body.storageMode).toBeDefined();
   });
 });
 
 describe("API auth + amanah", () => {
+  beforeEach(() => {
+    resetServerRepository();
+    globalThis.__amanahMemoryStore = undefined;
+    delete process.env.AMANAH_SERVER_STORAGE;
+    delete process.env.DATABASE_URL;
+  });
+
   it("registers, logs in, and stores amanah data", async () => {
     const email = `api-${Date.now()}@test.de`;
 
