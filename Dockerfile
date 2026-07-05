@@ -8,6 +8,12 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma/
 RUN npm ci
 
+FROM deps AS migrate
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npx prisma generate
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 FROM base AS builder
 ARG NEXT_PUBLIC_AUTH_MODE=api
 ARG NEXT_PUBLIC_STORAGE_MODE=api
@@ -37,10 +43,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY scripts/docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN chmod +x ./docker-entrypoint.sh \
