@@ -14,7 +14,7 @@ import { PathSelector } from "@/components/onboarding/path-selector";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
-import { AlertTriangle, ArrowRight, Bot, Download, FileText, Heart } from "lucide-react";
+import { AlertTriangle, ArrowRight, Bot, Compass, Download, FileText, Heart } from "lucide-react";
 
 export default function DashboardPage() {
   const store = useAmanahStore();
@@ -46,8 +46,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Link href="/dashboard/assistent">
+        <Link href="/dashboard/ausfuellen">
           <Button variant="secondary">
+            <Compass size={18} className="mr-2" /> {t("guidedFlow.title")}
+          </Button>
+        </Link>
+        <Link href="/dashboard/assistent">
+          <Button variant="outline">
             <Bot size={18} className="mr-2" /> Assistent
           </Button>
         </Link>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { getCriticalMissing } from "@/lib/utils/progress";
@@ -7,10 +8,10 @@ import { getAiConsent } from "@/lib/ai/consent-client";
 import { AiAssistantPanel } from "@/components/ai/ai-assistant-panel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { useI18n } from "@/lib/i18n/context";
-import { Bot, Send, BookOpen, Mail, ListChecks, Languages, AlertCircle } from "lucide-react";
+import { Bot, Send, BookOpen, Mail, ListChecks, Languages, AlertCircle, Compass } from "lucide-react";
 
 const quickActions = [
   {
@@ -86,6 +87,16 @@ export default function AssistentPage() {
 
   return (
     <div className="space-y-8">
+      <Card className="border-primary/20 bg-primary/5">
+        <CardTitle className="flex items-center gap-2">
+          <Compass size={20} /> {t("guidedFlow.title")}
+        </CardTitle>
+        <p className="text-sm text-muted mt-2">{t("guidedFlow.subtitle")}</p>
+        <Link href="/dashboard/ausfuellen" className="inline-block mt-4">
+          <Button>{t("guidedFlow.start")}</Button>
+        </Link>
+      </Card>
+
       <AiAssistantPanel />
 
       <section className="border-t border-primary/10 pt-8 space-y-6">

@@ -124,6 +124,18 @@ Neue Einträge in `src/lib/knowledge/entries.ts` ergänzen. Nur `reviewed` oder 
 
 **Keine Rechtsberatung, keine Medizinberatung, keine Fatwa** — bei individuellen Fragen Redirect auf Fachperson.
 
+## Guided Fill-In (Phase 3C)
+
+Geführter Ausfüllmodus unter `/dashboard/ausfuellen`:
+
+| API | Beschreibung |
+|-----|-------------|
+| `POST /api/guided-flow/next` | Nächste Frage + Fortschritt |
+| `POST /api/guided-flow/parse-answer` | Antwort → Vorschläge (ohne Auto-Save) |
+| `POST /api/guided-flow/apply` | Bestätigte Updates anwenden |
+
+24 priorisierte Fragen, rule-based Parser, Allowlist für Feldpfade. Fortschritt in LocalStorage.
+
 ## AI Companion (Phase 3A)
 
 ### Provider-Modi
