@@ -61,3 +61,13 @@ export function resolveQuestion(questionId: string | null): GuidedQuestion | nul
   if (!questionId) return null;
   return getQuestionById(questionId) ?? null;
 }
+
+export function getSkippedQuestionDetails(skippedQuestionIds: string[]): GuidedQuestion[] {
+  return skippedQuestionIds
+    .map((id) => getQuestionById(id))
+    .filter((q): q is GuidedQuestion => q !== undefined);
+}
+
+export function unskipQuestion(questionId: string, skippedQuestions: string[]): string[] {
+  return skippedQuestions.filter((id) => id !== questionId);
+}

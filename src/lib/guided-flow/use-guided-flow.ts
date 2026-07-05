@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { GUIDED_FLOW_STORAGE_KEY } from "@/lib/guided-flow/config";
+import { resolveQuestion, unskipQuestion } from "@/lib/guided-flow/flow-engine";
 import type {
   FlowMode,
   FlowProgress,
@@ -197,14 +198,22 @@ export function useGuidedFlow() {
         setCurrentQuestion(next.question);
         setFlowProgress(next.flowProgress);
         if (next.done) {
-          setState((s) => ({ ...s, flowMode: "done", currentQuestionId: null }));
+          setState((s) => {
+            const done = { ...s, flowMode: "done" as FlowMode, currentQuestionId: null };
+            persistState(done);
+            return done;
+          });
         } else if (next.question) {
-          setState((s) => ({
-            ...s,
-            flowMode: "asking",
-            currentQuestionId: next.question.id,
-            answerDraft: "",
-          }));
+          setState((s) => {
+            const asking = {
+              ...s,
+              flowMode: "asking" as FlowMode,
+              currentQuestionId: next.question.id,
+              answerDraft: "",
+            };
+            persistState(asking);
+            return asking;
+          });
         }
       } catch (e) {
         setState((s) => ({ ...s, error: e instanceof Error ? e.message : "Fehler" }));
@@ -247,14 +256,22 @@ export function useGuidedFlow() {
       setCurrentQuestion(r.question);
       setFlowProgress(r.flowProgress);
       if (r.done) {
-        setState((s) => ({ ...s, flowMode: "done", currentQuestionId: null }));
+        setState((s) => {
+          const done = { ...s, flowMode: "done" as FlowMode, currentQuestionId: null };
+          persistState(done);
+          return done;
+        });
       } else if (r.question) {
-        setState((s) => ({
-          ...s,
-          flowMode: "asking",
-          currentQuestionId: r.question.id,
-          answerDraft: "",
-        }));
+        setState((s) => {
+          const asking = {
+            ...s,
+            flowMode: "asking" as FlowMode,
+            currentQuestionId: r.question.id,
+            answerDraft: "",
+          };
+          persistState(asking);
+          return asking;
+        });
       }
     } catch (e) {
       setState((s) => ({ ...s, error: e instanceof Error ? e.message : "Fehler" }));
@@ -274,13 +291,49 @@ export function useGuidedFlow() {
 
   const pauseFlow = useCallback(() => {
     setState((s) => {
-      const next = { ...s, flowMode: "idle" as FlowMode };
+      const next = { ...s, flowMode: "paused" as FlowMode };
       persistState(next);
       return next;
     });
+    setCurrentQuestion(null);
   }, []);
 
+  const resumeFlow = useCallback(async () => {
+    setState((s) => ({ ...s, flowMode: "asking" as FlowMode, error: null }));
+    const resumed = resolveQuestion(state.currentQuestionId);
+    if (resumed) {
+      setCurrentQuestion(resumed);
+      return;
+    }
+    await loadNextQuestion();
+  }, [state.currentQuestionId, loadNextQuestion]);
+
+  const retrySkippedQuestion = useCallback(
+    async (questionId: string) => {
+      const newSkipped = unskipQuestion(questionId, state.skippedQuestions);
+      setState((s) => {
+        const next = {
+          ...s,
+          skippedQuestions: newSkipped,
+          flowMode: "asking" as FlowMode,
+          currentQuestionId: questionId,
+          answerDraft: "",
+          error: null,
+        };
+        persistState(next);
+        return next;
+      });
+      const q = resolveQuestion(questionId);
+      setCurrentQuestion(q);
+      setSuccessMessage(null);
+      setPreviewItems([]);
+    },
+    [state.skippedQuestions]
+  );
+
   useEffect(() => {
+    const persisted = loadPersistedState();
+    if (persisted.flowMode === "paused" || persisted.flowMode === "done") return;
     if (state.flowMode === "idle" && !currentQuestion && !loading) {
       loadNextQuestion();
     }
@@ -300,5 +353,7 @@ export function useGuidedFlow() {
     skipQuestion,
     discardPreview,
     pauseFlow,
+    resumeFlow,
+    retrySkippedQuestion,
   };
 }

@@ -22,6 +22,8 @@ describe("API health", () => {
     expect(body.dbConfigured).toBe(false);
     expect(body.authMode).toBeDefined();
     expect(body.storageMode).toBeDefined();
+    expect(body.knowledgeEntriesCount).toBeGreaterThanOrEqual(10);
+    expect(body.guidedFlowQuestionsCount).toBeGreaterThanOrEqual(20);
   });
 });
 

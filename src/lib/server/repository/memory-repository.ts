@@ -89,6 +89,10 @@ export class MemoryRepository implements ServerRepository {
     return this.saveAmanahData(userId, normalizeData({ ...existing, ...partial }));
   }
 
+  async deleteAmanahData(userId: string): Promise<void> {
+    getMemoryStore().amanahData.delete(userId);
+  }
+
   async checkConnection(): Promise<boolean> {
     return true;
   }

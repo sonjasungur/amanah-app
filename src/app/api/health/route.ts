@@ -7,6 +7,8 @@ import {
 } from "@/lib/server/config";
 import { getServerRepository } from "@/lib/server/repository";
 import { getAiProviderName, isAiEnabled, requiresExternalAiConsent } from "@/lib/ai/config";
+import { getAllEntries } from "@/lib/knowledge/entries";
+import { getQuestionPlanCount } from "@/lib/guided-flow/question-plan";
 
 export async function GET() {
   const serverStorage = getServerStorageMode();
@@ -27,6 +29,8 @@ export async function GET() {
     aiEnabled: isAiEnabled(),
     aiProvider: getAiProviderName(),
     aiRequiresConsent: requiresExternalAiConsent(),
+    knowledgeEntriesCount: getAllEntries().length,
+    guidedFlowQuestionsCount: getQuestionPlanCount(),
     timestamp: new Date().toISOString(),
     disclaimer: "Orientierung und Vorbereitung — keine Garantie auf Vollständigkeit oder rechtliche Wirksamkeit.",
   });

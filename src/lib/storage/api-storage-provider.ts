@@ -31,8 +31,11 @@ export class ApiStorageProvider implements StorageProvider {
   }
 
   async clear(): Promise<void> {
-    const empty = normalizeData({});
-    await this.save(empty);
+    const res = await fetch("/api/amanah", {
+      method: "DELETE",
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) throw new Error("Löschen der Server-Daten fehlgeschlagen.");
   }
 }
 

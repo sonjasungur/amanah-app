@@ -34,9 +34,27 @@ const DIAGNOSIS_PATTERNS = [/was habe ich/i, /habe ich krebs/i, /diagnose/i];
 
 const TREATMENT_PATTERNS = [/soll ich.*nehmen/i, /welche behandlung/i, /operieren/i, /behandlung.*ablehn/i, /soll ich.*ablehnen/i];
 
+const AUTO_NOTIFY_PATTERNS = [
+  /informiere.*angehörig/i,
+  /informiere.*familie/i,
+  /benachrichtige.*automatisch/i,
+  /automatisch.*verschick/i,
+  /automatisch.*senden/i,
+  /angehörige.*automatisch/i,
+];
+
+const ISLAMIC_INHERITANCE_PATTERNS = [
+  /erbe.*islamisch/i,
+  /islamisch.*erbe/i,
+  /islamisch.*korrekt.*verteil/i,
+  /wie verteile ich mein erbe/i,
+];
+
 export function classifyUserIntent(text: string): UserIntent {
   const t = text.toLowerCase();
+  if (AUTO_NOTIFY_PATTERNS.some((p) => p.test(t))) return "blocked";
   if (FATWA_PATTERNS.some((p) => p.test(t))) return "fatwa";
+  if (ISLAMIC_INHERITANCE_PATTERNS.some((p) => p.test(t))) return "inheritance_calculation";
   if (INHERITANCE_CALC_PATTERNS.some((p) => p.test(t))) return "inheritance_calculation";
   if (VALIDITY_PATTERNS.some((p) => p.test(t))) return "validity";
   if (DIAGNOSIS_PATTERNS.some((p) => p.test(t))) return "diagnosis";
@@ -50,7 +68,7 @@ export function classifyUserIntent(text: string): UserIntent {
 }
 
 const BLOCKED_INTENTS: UserIntent[] = [
-  "legal", "medical", "fatwa", "inheritance_calculation", "validity", "diagnosis", "treatment",
+  "legal", "medical", "fatwa", "inheritance_calculation", "validity", "diagnosis", "treatment", "blocked",
 ];
 
 export function enforceAiSafety(text: string, feature?: string): SafetyResult {
@@ -87,6 +105,8 @@ export function safeResponseTemplate(intent: UserIntent): string {
       return `${BLOCKED_REDIRECT}\n\nBei religiösen Urteilsfragen verweise ich auf qualifizierte Imam/Gelehrte — keine Fatwa.`;
     case "inheritance_calculation":
       return `${BLOCKED_REDIRECT}\n\nErbanteile können hier nicht verbindlich berechnet werden. Nutze den Orientierungs-Check im Testament-Modul und konsultiere Imam/Gelehrte und Anwalt/Notar.`;
+    case "blocked":
+      return `${BLOCKED_REDIRECT}\n\nAmanah sendet nichts automatisch an Angehörige. Exportiere und teile Dokumente nur bewusst und sicher.`;
     default:
       return `${BLOCKED_REDIRECT}\n\n${DOMAIN_DISCLAIMER}`;
   }

@@ -1,6 +1,6 @@
 import type { ModuleId } from "@/lib/domain/types";
 
-export type FlowMode = "idle" | "asking" | "reviewing" | "saved" | "skipped" | "done";
+export type FlowMode = "idle" | "paused" | "asking" | "reviewing" | "saved" | "skipped" | "done";
 
 export type ExpectedAnswerType =
   | "text"

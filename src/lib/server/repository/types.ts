@@ -24,5 +24,6 @@ export interface ServerRepository {
   getAmanahData(userId: string): Promise<AmanahOrdnerData | null>;
   saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData>;
   patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData>;
+  deleteAmanahData(userId: string): Promise<void>;
   checkConnection?(): Promise<boolean>;
 }

@@ -6,8 +6,10 @@ import { pickDataFields } from "@/lib/store/store-utils";
 import { moduleConfigs } from "@/lib/modules/config";
 import { getAllModuleProgress, getCriticalMissing, getRecommendedNextStep } from "@/lib/utils/progress";
 import { exportEmergencyFolder } from "@/lib/storage/amanah-storage";
+import { openReadableEmergencyExport } from "@/lib/export/readable-emergency-export";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
 import { AiDashboardCard } from "@/components/ai/ai-dashboard-card";
+import { DashboardStatusCard } from "@/components/dashboard/dashboard-status-card";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { StorageControls } from "@/components/storage/storage-controls";
 import { PathSelector } from "@/components/onboarding/path-selector";
@@ -66,10 +68,15 @@ export default function DashboardPage() {
             <Heart size={18} className="mr-2" /> Notfallkarte
           </Button>
         </Link>
+        <Button variant="outline" onClick={() => openReadableEmergencyExport(data)}>
+          <Download size={18} className="mr-2" /> {t("export.readableBtn")}
+        </Button>
         <Button variant="outline" onClick={() => exportEmergencyFolder(data)}>
-          <Download size={18} className="mr-2" /> {t("storage.emergencyExport")}
+          <Heart size={18} className="mr-2" /> {t("storage.emergencyExport")}
         </Button>
       </div>
+
+      <DashboardStatusCard />
 
       {critical.length > 0 && (
         <Card className="border-warning/40 bg-warning/5">

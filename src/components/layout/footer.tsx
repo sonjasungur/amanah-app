@@ -32,6 +32,7 @@ export function Footer() {
             <h4 className="font-semibold text-white mb-3">Rechtliches</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="/datenschutz" className="hover:text-accent">Datenschutz</Link></li>
+              <li><Link href="/sicherheit" className="hover:text-accent">Sicherheit</Link></li>
               <li><Link href="/impressum" className="hover:text-accent">Impressum</Link></li>
               <li><Link href="/partner" className="hover:text-accent">Partner</Link></li>
             </ul>

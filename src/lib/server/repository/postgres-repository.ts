@@ -115,6 +115,10 @@ export class PostgresRepository implements ServerRepository {
     return this.saveAmanahData(userId, normalizeData({ ...existing, ...partial }));
   }
 
+  async deleteAmanahData(userId: string): Promise<void> {
+    await prisma.amanahData.deleteMany({ where: { userId } });
+  }
+
   async checkConnection(): Promise<boolean> {
     try {
       await prisma.$queryRaw`SELECT 1`;

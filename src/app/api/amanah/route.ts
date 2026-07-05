@@ -44,3 +44,21 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Aktualisieren fehlgeschlagen." }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  const userId = await getAuthenticatedUserId(request);
+  if (!userId) {
+    return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
+  }
+
+  try {
+    const repo = getServerRepository();
+    await repo.deleteAmanahData(userId);
+    return NextResponse.json({
+      success: true,
+      message: "Amanah-Daten gelöscht. Dein Benutzerkonto bleibt bestehen.",
+    });
+  } catch {
+    return NextResponse.json({ error: "Löschen fehlgeschlagen." }, { status: 500 });
+  }
+}
