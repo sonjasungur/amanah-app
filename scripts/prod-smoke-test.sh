@@ -28,6 +28,8 @@ check "/dashboard"
 check "/datenschutz"
 check "/sicherheit"
 check "/api/knowledge/entries"
+check "/dashboard/assistent"
+check "/dashboard/ausfuellen"
 
 HEALTH="$(curl -s "${BASE_URL}/api/health")"
 echo "Health: ${HEALTH}" | head -c 400

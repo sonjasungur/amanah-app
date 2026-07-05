@@ -1,22 +1,20 @@
 # Add this block to an existing Caddy (e.g. gemeinsam1-prod) once DNS points to the server.
-# Replace YOUR-AMANAH-DOMAIN.de with the real domain.
-#
 # Prerequisites:
 #   - Amanah app on network gemeinsam1-prod_internal (docker-compose.prod.nocaddy.yml)
 #   - Container name: amanah-app
-#   - DNS A/AAAA record → server IP
+#   - DNS A record amanahordner.de → server IP
 
-YOUR-AMANAH-DOMAIN.de {
+amanahordner.de {
 	encode gzip
 	reverse_proxy amanah-app:3000
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
 	}
 }
 
-# Optional www redirect:
-# www.YOUR-AMANAH-DOMAIN.de {
-# 	redir https://YOUR-AMANAH-DOMAIN.de{uri} permanent
-# }
+www.amanahordner.de {
+	redir https://amanahordner.de{uri} permanent
+}

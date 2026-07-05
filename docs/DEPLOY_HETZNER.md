@@ -154,6 +154,24 @@ git pull origin main
 
 Public HTTPS: add `deploy/Caddyfile.shared-snippet` to your existing Caddy and set DNS for your Amanah domain.
 
+```bash
+# After DNS A record amanahordner.de → server IP:
+./scripts/set-production-site-url.sh https://amanahordner.de
+./scripts/install-shared-caddy.sh
+docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml \
+  --env-file .env.production up -d --build
+BASE_URL=https://amanahordner.de ./scripts/prod-smoke-test.sh
+```
+
+### DNS (required before public HTTPS)
+
+| Record | Type | Value |
+|--------|------|-------|
+| `@` (amanahordner.de) | A | Your Hetzner server IP (e.g. `167.233.152.17`) |
+| `www` | A | Same IP (optional; Caddy redirects to apex) |
+
+Verify: `dig +short amanahordner.de A` must return the server IP before claiming go-live success.
+
 Dedicated server (own Caddy):
 
 ```bash
