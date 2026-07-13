@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils/cn";
 
-/** Compact MW monogram — used in header and as app icon source */
+/** Mihrab arch + held document — app icon & header symbol (no letterforms) */
 export function LogoMark({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <svg
@@ -12,11 +12,12 @@ export function LogoMark({ size = 40, className }: { size?: number; className?: 
       className={cn("rounded-xl shrink-0", className)}
       aria-hidden
     >
-      <rect width="512" height="512" rx="96" fill="#0B1511"/>
-      <path d="M112 392V208c0-48 48-88 144-88s144 40 144 88v184" stroke="#166534" strokeWidth="14" fill="none" strokeLinecap="round"/>
-      <path d="M148 340V172l52 96 52-96v168" stroke="#F8FAFC" strokeWidth="36" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <path d="M268 340V172l44 68 44-68v168" stroke="#F8FAFC" strokeWidth="36" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-      <circle cx="256" cy="128" r="10" fill="#15803D"/>
+      <rect width="512" height="512" rx="96" fill="#0B1511" />
+      <path fill="#166534" d="M72 424V248c0-108 184-132 184-132s184 24 184 132v176H72z" />
+      <rect x="152" y="184" width="208" height="248" rx="24" fill="#F8FAFC" />
+      <rect x="188" y="232" width="136" height="20" rx="10" fill="#14532D" />
+      <rect x="188" y="276" width="96" height="20" rx="10" fill="#14532D" opacity="0.55" />
+      <circle cx="256" cy="376" r="18" fill="#15803D" />
     </svg>
   );
 }
