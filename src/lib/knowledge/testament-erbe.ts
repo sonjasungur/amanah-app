@@ -29,7 +29,7 @@ export const testamentArticles: KnowledgeArticle[] = [
     title: "Waṣiyya — frei verfügbar bis maximal ein Drittel",
     summary: "Der frei verfügbare Teil des Nachlasses ist klassisch auf ein Drittel begrenzt.",
     content:
-      "Mit der Waṣiyya kannst du bis zu einem Drittel deines Nachlasses für Nicht-Pflicht-Erben, Sadaqa Jariya oder andere Zwecke bestimmen. Mehr als ein Drittel erfordert die Zustimmung der Erben. Pflicht-Erben können nicht vollständig ausgeschlossen werden.",
+      "Mit der Waṣiyya kannst du bis zu einem Drittel deines Nachlasses für Nicht-Pflicht-Erben, Sadaqa Jariya oder andere Zwecke bestimmen — klassisch begrenzt, fachlich prüfen. Mehr als ein Drittel erfordert in klassischer Sicht die Zustimmung der Erben. Pflicht-Erben können nicht willkürlich ausgeschlossen werden.",
     sourceIds: ["hadith-wasiyyah-third", "quran-nisa-4-11"],
     reviewStatus: "needs_scholar_review",
     category: "testament",

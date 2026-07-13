@@ -15,6 +15,7 @@ export { testamentArticles } from "./testament-erbe";
 export { patientenverfuegungArticles } from "./patientenverfuegung";
 export { sadaqaJariyaArticles } from "./sadaqa-jariya";
 export { ghuslKafanArticles } from "./ghusl-kafan";
+export { wissenTopics } from "./wissen-topics";
 
 export * from "./types";
 export * from "./config";

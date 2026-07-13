@@ -8,7 +8,7 @@ export const islamicSources: Record<string, IslamicSource> = {
     reference: "Qur'an, Sura an-Nisāʾ 4:11",
     translationDe:
       "Allah hat euch bezüglich eurer Kinder vorgeschrieben: Dem männlichen Geschlecht das Gleiche wie dem weiblichen Geschlecht von dem, was die Eltern und nächsten Verwandten hinterlassen.",
-    note: "Bei Detailfragen bitte Imam/Gelehrte fragen.",
+    note: "Die genannten Erbanteile werden nach Berücksichtigung von Vermächtnissen und bestehenden Schulden angewendet — keine individuelle Erbberatung. Details mit Imam/Gelehrten und Anwalt klären.",
   },
   "quran-nisa-4-12": {
     id: "quran-nisa-4-12",
@@ -17,7 +17,7 @@ export const islamicSources: Record<string, IslamicSource> = {
     reference: "Qur'an, Sura an-Nisāʾ 4:12",
     translationDe:
       "Euch ist vorgeschrieben: Eure Frauen erhalten ein Viertel von dem, was ihr hinterlasst, wenn ihr keine Kinder habt.",
-    note: "Bei Detailfragen bitte Imam/Gelehrte fragen.",
+    note: "Erbregeln im Qur'an setzen Vermächtnisse und Schulden voraus — Einzelheiten fachlich prüfen, nicht selbst interpretieren.",
   },
   "quran-nisa-4-176": {
     id: "quran-nisa-4-176",
@@ -32,37 +32,37 @@ export const islamicSources: Record<string, IslamicSource> = {
     id: "hadith-sadaqa-jariya",
     type: "hadith",
     title: "Drei fortlaufende Taten nach dem Tod",
-    reference: "Sahih Muslim / Riyad as-Salihin — Hadith über fortlaufende Taten",
+    reference: "Sahih Muslim, Hadith 1631",
     translationDe:
       "Wenn der Mensch stirbt, enden seine Taten außer drei: fortlaufende Sadaqa, nützliches Wissen und ein rechtschaffenes Kind, das für ihn bittet.",
-    note: "Genaue Hadithnummer in fachlicher Prüfung.",
+    note: "Sinngemäße Übersetzung — bei Detailfragen Imam/Gelehrte fragen.",
   },
   "hadith-janazah-hasten": {
     id: "hadith-janazah-hasten",
     type: "hadith",
     title: "Janazah nicht verzögern",
-    reference: "Sahih al-Bukhari — Hadith über Beschleunigung der Janazah",
+    reference: "Sahih al-Bukhari, Hadith 1315; Sahih Muslim, Hadith 944c",
     translationDe:
       "Beschleunigt die Janazah. Wenn sie rechtschaffen war, ist es ein Gutes, das ihr ihr zukommen lasst. Wenn sie anders war, ist es ein Übel, das ihr von euch abwendet.",
-    note: "Genaue Hadithnummer in fachlicher Prüfung.",
+    note: "Sinngemäße Übersetzung.",
   },
   "hadith-wasiyyah-third": {
     id: "hadith-wasiyyah-third",
     type: "hadith",
     title: "Waṣiyya bis maximal ein Drittel",
-    reference: "Hadith von Saʿd ibn Abī Waqqāṣ",
+    reference: "Sahih al-Bukhari, Hadith 2742; Sahih Muslim, Hadith 1628a",
     translationDe:
       "Ein Drittel, und ein Drittel ist viel.",
-    note: "Klassische Begrenzung der freien Verfügung. Details mit Imam/Gelehrten prüfen.",
+    note: "Klassische Begrenzung der freien Verfügung (Waṣiyya) — nicht als pauschale Rechtsregel für Deutschland. Details mit Imam/Gelehrten und Anwalt prüfen.",
   },
-  "hadith-debts": {
-    id: "hadith-debts",
+  "hadith-debts-deceased": {
+    id: "hadith-debts-deceased",
     type: "hadith",
-    title: "Schulden des Verstorbenen",
-    reference: "Hadithe über Schulden und Verantwortung vor dem Totengebet",
+    title: "Ernsthaftigkeit von Schulden — Übernahme für Verstorbenen",
+    reference: "Sahih al-Bukhari, Hadith 2289",
     translationDe:
-      "Schulden des Verstorbenen müssen vor der Verteilung des Erbes beglichen werden.",
-    note: "Referenz zu prüfen — needsScholarReview.",
+      "Ein Mann starb und hinterließ Schulden. Der Gesandte Allahs (Friede sei auf ihm) fragte, wer die Schulden für ihn übernehmen würde. Abu Qatada sagte, er übernehme sie. Daraufhin verrichtete er das Totengebet für ihn.",
+    note: "Die Überlieferung verdeutlicht, wie ernst offene Schulden genommen wurden. Sie ersetzt keine individuelle religiöse oder rechtliche Beurteilung — daraus folgt nicht, dass heute ein Totengebet generell zu verweigern ist.",
   },
   "quran-barzakh": {
     id: "quran-barzakh",
@@ -113,4 +113,9 @@ export const islamicSources: Record<string, IslamicSource> = {
 
 export function getSourcesByIds(ids: string[]): IslamicSource[] {
   return ids.map((id) => islamicSources[id]).filter(Boolean);
+}
+
+/** Only Qur'an and Sahih hadith — for religious citations */
+export function getPrimarySourcesByIds(ids: string[]): IslamicSource[] {
+  return getSourcesByIds(ids).filter((s) => s.type === "quran" || s.type === "hadith");
 }

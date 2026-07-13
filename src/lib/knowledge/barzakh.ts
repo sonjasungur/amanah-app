@@ -38,10 +38,10 @@ export const barzakhArticles: KnowledgeArticle[] = [
     id: "barzakh-debts",
     slug: "schulden-amanah",
     title: "Schulden und Amanah",
-    summary: "Offene Schulden und anvertraute Rechte müssen vor dem Erben geklärt werden.",
+    summary: "Offene Schulden und anvertraute Rechte sollten vor der Erbverteilung bedacht werden.",
     content:
-      "Schulden des Verstorbenen haben Vorrang vor der Erbverteilung. Amanah (anvertraute Güter) müssen zurückgegeben werden. Die Familie sollte eine Liste vorbereiten.",
-    sourceIds: ["hadith-debts"],
+      "Die genannten Erbanteile im Qur'an setzen Vermächtnisse und bestehende Schulden voraus. Amanah (anvertraute Güter) sollten zurückgegeben werden. Die Familie sollte eine Liste vorbereiten und fachlich (Anwalt/Imam) klären — keine pauschale Rangfolge ohne Beratung.",
+    sourceIds: ["quran-nisa-4-11", "quran-nisa-4-12", "hadith-debts-deceased"],
     reviewStatus: "needs_scholar_review",
     category: "barzakh",
   },
@@ -52,7 +52,7 @@ export const barzakhArticles: KnowledgeArticle[] = [
     summary: "Beziehungen klären, bevor es zu spät ist.",
     content:
       "Wer um Vergebung bitten möchte, sollte dies zu Lebzeiten tun. Eine Liste von Menschen, bei denen man um Vergebung bittet, entlastet die Familie und das Gewissen.",
-    sourceIds: ["hadith-debts"],
+    sourceIds: [],
     reviewStatus: "reviewed",
     category: "barzakh",
   },

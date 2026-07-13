@@ -116,7 +116,7 @@ export const cultureFilterCards: CultureFilterCard[] = [
       "Teure Bestattungen und Feiern belasten Familien oft erheblich.",
     whatToCheck:
       "Einfache, würdevolle Bestattung planen. Sadaqa Jariya statt teurer kultureller Pflichten.",
-    sourceIds: ["hadith-debts", "hadith-janazah-hasten"],
+    sourceIds: ["hadith-janazah-hasten"],
     reviewStatus: "needs_scholar_review",
   },
 ];
