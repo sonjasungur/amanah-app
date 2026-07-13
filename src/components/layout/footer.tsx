@@ -13,6 +13,8 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-3">Wissen</h4>
             <ul className="space-y-2 text-sm">
+              <li><Link href="/konvertierte" className="hover:text-accent">Für Konvertierte</Link></li>
+              <li><Link href="/wissen" className="hover:text-accent font-medium">Alle Wissensthemen</Link></li>
               <li><Link href="/janazah-kompass" className="hover:text-accent">Janazah-Kompass</Link></li>
               <li><Link href="/barzakh" className="hover:text-accent">Barzakh</Link></li>
               <li><Link href="/testament-erbe" className="hover:text-accent">Testament & Erbe</Link></li>

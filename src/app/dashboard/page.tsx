@@ -5,18 +5,12 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { moduleConfigs } from "@/lib/modules/config";
 import { getAllModuleProgress, getCriticalMissing, getRecommendedNextStep } from "@/lib/utils/progress";
-import { exportEmergencyFolder } from "@/lib/storage/amanah-storage";
-import { openReadableEmergencyExport } from "@/lib/export/readable-emergency-export";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
-import { AiDashboardCard } from "@/components/ai/ai-dashboard-card";
-import { DashboardStatusCard } from "@/components/dashboard/dashboard-status-card";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
-import { StorageControls } from "@/components/storage/storage-controls";
-import { PathSelector } from "@/components/onboarding/path-selector";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
-import { AlertTriangle, ArrowRight, Bot, Compass, Download, FileText, Heart } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Compass, Shield } from "lucide-react";
 
 export default function DashboardPage() {
   const store = useAmanahStore();
@@ -27,67 +21,84 @@ export default function DashboardPage() {
   const moduleProgress = getAllModuleProgress(data);
   const greeting = store.emergencyCard.name || store.userProfile.name || "dort";
 
-  const progressMap = Object.fromEntries(moduleProgress.map((m) => [m.moduleId, m.percent]));
+  const openTasks = moduleProgress
+    .filter((m) => m.percent < 80)
+    .sort((a, b) => a.percent - b.percent)
+    .slice(0, 3);
+  const modById = Object.fromEntries(moduleConfigs.map((m) => [m.id, m]));
+  const overallPercent = moduleProgress.length
+    ? Math.round(moduleProgress.reduce((s, m) => s + m.percent, 0) / moduleProgress.length)
+    : 0;
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-card to-accent/5 border border-primary/10 p-6 md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+    <div className="space-y-6">
+      <header className="rounded-2xl bg-gradient-to-br from-primary/10 via-card to-accent/5 border border-primary/10 p-6 md:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
           <div>
             <p className="text-accent font-medium text-sm mb-1">Assalamu alaikum</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-              Willkommen, {greeting}
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-primary">Willkommen, {greeting}</h1>
           </div>
           <SaveStatusIndicator className="shrink-0" />
         </div>
-        <p className="text-muted mb-6">
-          Dein AmanahOrdner hilft dir, Wünsche und Pflichten geordnet vorzubereiten — zur Orientierung, ohne Garantie auf Vollständigkeit oder rechtliche Wirksamkeit.
+        <p className="text-muted text-sm mb-4 max-w-xl">
+          {overallPercent >= 70
+            ? "Gute Basis — halte deinen Ordner aktuell."
+            : "Schritt für Schritt vorbereiten — zur Orientierung, ohne Garantie auf Vollständigkeit."}
         </p>
         <ProgressBar />
+      </header>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        <Card className="border-primary/20 bg-primary/5 p-6">
+          <CardTitle className="text-base mb-2">{t("dashboard.next")}</CardTitle>
+          <p className="text-sm text-muted mb-4">{nextStep.title}</p>
+          <Link href={nextStep.path}>
+            <Button type="button">
+              Weiter <ArrowRight size={16} className="ml-2" />
+            </Button>
+          </Link>
+        </Card>
+
+        <Card className="p-6">
+          <CardTitle className="text-base mb-2">Amanah-Check</CardTitle>
+          <p className="text-sm text-muted mb-4">15 Fragen — wo stehst du wirklich?</p>
+          <Link href="/check">
+            <Button variant="secondary" type="button">Check starten</Button>
+          </Link>
+        </Card>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Link href="/dashboard/ausfuellen">
-          <Button variant="secondary">
-            <Compass size={18} className="mr-2" /> {t("guidedFlow.title")}
-          </Button>
-        </Link>
-        <Link href="/dashboard/assistent">
-          <Button variant="outline">
-            <Bot size={18} className="mr-2" /> Assistent
-          </Button>
-        </Link>
-        <Link href="/dashboard/pdf">
-          <Button variant="outline">
-            <FileText size={18} className="mr-2" /> PDF & Export
-          </Button>
-        </Link>
-        <Link href="/dashboard/notfallkarte">
-          <Button variant="outline">
-            <Heart size={18} className="mr-2" /> Notfallkarte
-          </Button>
-        </Link>
-        <Button variant="outline" onClick={() => openReadableEmergencyExport(data)}>
-          <Download size={18} className="mr-2" /> {t("export.readableBtn")}
-        </Button>
-        <Button variant="outline" onClick={() => exportEmergencyFolder(data)}>
-          <Heart size={18} className="mr-2" /> {t("storage.emergencyExport")}
-        </Button>
-      </div>
-
-      <DashboardStatusCard />
+      {openTasks.length > 0 && (
+        <Card className="p-6">
+          <CardTitle className="text-base mb-3">Offene Aufgaben (max. 3)</CardTitle>
+          <ul className="space-y-2">
+            {openTasks.map((m) => (
+              <li key={m.moduleId}>
+                <Link
+                  href={modById[m.moduleId]?.path ?? "/dashboard"}
+                  className="flex items-center justify-between gap-3 text-sm py-2 min-h-[44px] hover:text-accent"
+                >
+                  <span>{modById[m.moduleId]?.title ?? m.moduleId}</span>
+                  <span className="text-muted font-medium">{m.percent}%</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link href="/dashboard/ausfuellen" className="inline-block mt-3 text-sm text-accent hover:underline">
+            <Compass size={14} className="inline mr-1" /> Geführt ausfüllen
+          </Link>
+        </Card>
+      )}
 
       {critical.length > 0 && (
-        <Card className="border-warning/40 bg-warning/5">
-          <CardTitle className="flex items-center gap-2 text-warning">
-            <AlertTriangle size={20} /> {t("dashboard.critical")}
+        <Card className="border-warning/40 bg-warning/5 p-6">
+          <CardTitle className="flex items-center gap-2 text-warning text-base">
+            <AlertTriangle size={18} /> {t("dashboard.critical")}
           </CardTitle>
-          <p className="text-xs text-muted mt-1">{t("validation.criticalHint")}</p>
-          <ul className="space-y-2 mt-3">
-            {critical.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-warning shrink-0" />
+          <ul className="space-y-1 mt-2">
+            {critical.slice(0, 3).map((item) => (
+              <li key={item} className="text-sm text-muted flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
                 {item}
               </li>
             ))}
@@ -95,76 +106,18 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardTitle>{t("dashboard.next")}</CardTitle>
-        <p className="text-muted text-sm mb-4">
-          Basierend auf deinem gewählten Weg und deinem Fortschritt — fachliche Prüfung empfohlen.
+      <Card className="p-4 flex items-start gap-3 bg-sand/50 border-primary/10">
+        <Shield size={18} className="text-primary shrink-0 mt-0.5" aria-hidden />
+        <p className="text-xs text-muted">
+          Daten werden lokal auf deinem Gerät gespeichert. Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
         </p>
-        <Link href={nextStep.path}>
-          <Button>
-            {nextStep.title} <ArrowRight size={16} className="ml-2" />
-          </Button>
-        </Link>
       </Card>
 
-      <AiDashboardCard />
-
-      <section>
-        <h2 className="text-xl font-bold text-primary mb-4">Alle Module</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {moduleConfigs.map((mod) => {
-            const pct = progressMap[mod.id] ?? 0;
-            return (
-              <Link key={mod.id} href={mod.path}>
-                <Card className="h-full hover:border-primary/30 hover:shadow-md transition-all group">
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">{mod.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-semibold text-primary group-hover:text-primary-light transition-colors">
-                          {mod.title}
-                        </h3>
-                        <span className="text-xs font-bold text-primary shrink-0">{pct}%</span>
-                      </div>
-                      <p className="text-sm text-muted mt-1">{mod.description}</p>
-                      <div className="h-1.5 bg-sand rounded-full overflow-hidden mt-2">
-                        <div
-                          className="h-full bg-primary/70 rounded-full transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {!store.selectedPath && (
-        <section className="rounded-2xl border border-dashed border-primary/20 p-6">
-          <h2 className="text-lg font-bold text-primary text-center mb-2">
-            Noch kein Startweg gewählt?
-          </h2>
-          <p className="text-sm text-muted text-center mb-6">
-            Wähle, womit du beginnen möchtest — du kannst jederzeit alle Module nutzen.
-          </p>
-          <PathSelector />
-        </section>
+      {overallPercent >= 100 && (
+        <p className="text-sm text-success flex items-center gap-2">
+          <CheckCircle2 size={16} /> Alle Module bearbeitet — regelmäßig aktualisieren.
+        </p>
       )}
-
-      {store.selectedPath && (
-        <div className="text-center">
-          <Link href="/" className="text-sm text-primary hover:underline">
-            Startweg ändern →
-          </Link>
-        </div>
-      )}
-
-      <div className="lg:hidden">
-        <StorageControls />
-      </div>
     </div>
   );
 }

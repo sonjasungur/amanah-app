@@ -55,6 +55,35 @@ export interface IslamicSource {
   note?: string;
 }
 
+export type WissenFilter =
+  | "islam"
+  | "recht"
+  | "familie"
+  | "digital"
+  | "finanzen"
+  | "konvertierte"
+  | "unverheiratete"
+  | "erste-schritte";
+
+export interface WissenMeta {
+  filters: WissenFilter[];
+  urgency: "hoch" | "mittel" | "spaeter";
+  audience: string[];
+  shortAnswer: string;
+}
+
+export interface RichKnowledgeDetails {
+  whyImportant: string;
+  ifMissing: string;
+  prepareItems: string[];
+  documents: string[];
+  safeStorage: string;
+  tellFamily: string;
+  commonMistakes: string[];
+  nextStepLabel: string;
+  nextStepHref: string;
+}
+
 export interface KnowledgeArticle {
   id: string;
   slug: string;
@@ -64,6 +93,8 @@ export interface KnowledgeArticle {
   sourceIds: string[];
   reviewStatus: ReviewStatus;
   category: string;
+  details?: RichKnowledgeDetails;
+  wissenMeta?: WissenMeta;
 }
 
 export interface CultureFilterCard {

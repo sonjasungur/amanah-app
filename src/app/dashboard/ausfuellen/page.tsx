@@ -21,6 +21,7 @@ import {
   PlayCircle,
   RotateCcw,
   SkipForward,
+  Trash2,
 } from "lucide-react";
 
 export default function AusfuellenPage() {
@@ -34,6 +35,8 @@ export default function AusfuellenPage() {
     previewItems,
     loading,
     successMessage,
+    questionHistory,
+    saveAndContinue,
     parseAnswer,
     applyUpdates,
     skipQuestion,
@@ -41,6 +44,9 @@ export default function AusfuellenPage() {
     pauseFlow,
     resumeFlow,
     retrySkippedQuestion,
+    resetFlow,
+    goBack,
+    loadNextQuestion,
   } = useGuidedFlow();
 
   const isReviewing = state.flowMode === "reviewing";
@@ -49,10 +55,13 @@ export default function AusfuellenPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Link href="/dashboard/assistent" className="text-primary hover:underline text-sm flex items-center gap-1">
           <ArrowLeft size={16} /> Assistent
         </Link>
+        <Button variant="ghost" size="sm" onClick={resetFlow} disabled={loading}>
+          <Trash2 size={14} className="mr-1" /> Demo zurücksetzen
+        </Button>
       </div>
 
       <div>
@@ -68,9 +77,9 @@ export default function AusfuellenPage() {
             <span>{t("guidedFlow.progress")}</span>
             <span className="font-medium">{flowProgress.percent}%</span>
           </div>
-          <div className="h-2 bg-sand rounded-full overflow-hidden">
+          <div className="h-2.5 bg-sand rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary/70 transition-all duration-500"
+              className="h-full bg-accent transition-all duration-500 rounded-full"
               style={{ width: `${flowProgress.percent}%` }}
             />
           </div>
@@ -101,10 +110,7 @@ export default function AusfuellenPage() {
             <Link href="/dashboard">
               <Button>{t("nav.dashboard")}</Button>
             </Link>
-            <Button
-              variant="outline"
-              onClick={() => openReadableEmergencyExport(pickDataFields(store))}
-            >
+            <Button variant="outline" onClick={() => openReadableEmergencyExport(pickDataFields(store))}>
               <FileText size={16} className="mr-2" /> {t("export.readableBtn")}
             </Button>
           </div>
@@ -128,18 +134,32 @@ export default function AusfuellenPage() {
                 className="min-h-[100px]"
                 disabled={loading}
               />
-              <p className="text-xs text-muted">{t("guidedFlow.noAutoSave")}</p>
+              {state.clarificationNeeded.length > 0 && (
+                <ul className="text-sm text-warning bg-warning/10 rounded-lg p-3 space-y-1">
+                  {state.clarificationNeeded.map((c) => (
+                    <li key={c}>• {c}</li>
+                  ))}
+                </ul>
+              )}
               <div className="flex flex-wrap gap-2">
-                <Button onClick={parseAnswer} disabled={loading || !state.answerDraft.trim()}>
-                  {loading ? "…" : t("guidedFlow.checkSuggestion")}
+                <Button onClick={saveAndContinue} disabled={loading || !state.answerDraft.trim()}>
+                  {loading ? "…" : "Antwort speichern und weiter"}
+                </Button>
+                <Button variant="outline" onClick={parseAnswer} disabled={loading || !state.answerDraft.trim()}>
+                  Vorschlag prüfen
                 </Button>
                 {currentQuestion.canSkip && (
                   <Button variant="outline" onClick={skipQuestion} disabled={loading}>
-                    <SkipForward size={16} className="mr-1" /> {t("guidedFlow.skip")}
+                    <SkipForward size={16} className="mr-1" /> Später beantworten
+                  </Button>
+                )}
+                {questionHistory.length > 0 && (
+                  <Button variant="ghost" onClick={goBack} disabled={loading}>
+                    <ArrowLeft size={16} className="mr-1" /> Zurück
                   </Button>
                 )}
                 <Button variant="ghost" onClick={pauseFlow} disabled={loading}>
-                  <PauseCircle size={16} className="mr-1" /> {t("guidedFlow.continueLater")}
+                  <PauseCircle size={16} className="mr-1" /> Pausieren
                 </Button>
               </div>
             </>
@@ -150,7 +170,12 @@ export default function AusfuellenPage() {
           )}
 
           {state.error && (
-            <p className="text-sm text-warning bg-warning/10 rounded-lg p-3">{state.error}</p>
+            <div className="text-sm text-danger bg-danger/10 rounded-lg p-3 space-y-2">
+              <p>{state.error}</p>
+              <Button size="sm" variant="outline" onClick={loadNextQuestion} disabled={loading}>
+                Erneut versuchen
+              </Button>
+            </div>
           )}
 
           {isReviewing && (
@@ -165,8 +190,25 @@ export default function AusfuellenPage() {
           )}
         </Card>
       ) : !isPaused && !currentQuestion && state.flowMode !== "done" ? (
-        <Card className="p-6 text-center">
-          <p className="text-muted">{loading ? "…" : t("guidedFlow.loading")}</p>
+        <Card className="p-6 text-center space-y-4">
+          {loading ? (
+            <p className="text-muted">{t("guidedFlow.loading")}</p>
+          ) : (
+            <>
+              <p className="text-muted">{t("guidedFlow.loading")}</p>
+              {state.error && (
+                <p className="text-sm text-danger bg-danger/10 rounded-lg p-3">{state.error}</p>
+              )}
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button onClick={loadNextQuestion} disabled={loading}>
+                  <RotateCcw size={16} className="mr-1" /> Erneut laden
+                </Button>
+                <Button variant="outline" onClick={resetFlow} disabled={loading}>
+                  Demo zurücksetzen
+                </Button>
+              </div>
+            </>
+          )}
         </Card>
       ) : null}
 
@@ -186,9 +228,7 @@ export default function AusfuellenPage() {
         </Card>
       )}
 
-      <p className="text-xs text-muted text-center">
-        {t("guidedFlow.disclaimerShort")}
-      </p>
+      <p className="text-xs text-muted text-center">{t("guidedFlow.disclaimerShort")}</p>
     </div>
   );
 }
