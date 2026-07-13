@@ -3,7 +3,7 @@ import { SourcesSection, ReviewBadge } from "@/components/knowledge/sources-sect
 import { Disclaimer } from "@/components/ui/disclaimer";
 
 export const metadata = {
-  title: "Islam oder Kultur? — AmanahOrdner",
+  title: "Islam oder Kultur? — Amanah Vorsorge",
   description: "Unterscheide islamische Pflichten von kulturellen Gewohnheiten bei Janazah und Trauer.",
 };
 

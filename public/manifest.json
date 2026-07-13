@@ -1,11 +1,11 @@
 {
-  "name": "AmanahOrdner",
-  "short_name": "AmanahOrdner",
-  "description": "Islamisch vorbereitet — Vorsorge für Muslime in Deutschland",
+  "name": "Amanah Vorsorge",
+  "short_name": "Amanah Vorsorge",
+  "description": "Dein Notfall- und Vorsorgeplan für Familie, Krankheit und Todesfall.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f8fb",
-  "theme_color": "#070f1c",
+  "background_color": "#F7F8FA",
+  "theme_color": "#0B1220",
   "orientation": "portrait-primary",
   "icons": [
     {

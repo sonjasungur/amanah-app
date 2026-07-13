@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Impressum — AmanahOrdner",
-  description: "Impressum und Anbieterkennzeichnung für AmanahOrdner.",
+  title: "Impressum — Amanah Vorsorge",
+  description: "Impressum und Anbieterkennzeichnung für Amanah Vorsorge.",
 };
 
 export default function ImpressumPage() {
@@ -13,7 +13,7 @@ export default function ImpressumPage() {
         <section className="rounded-2xl bg-card border border-primary/10 p-6">
           <h2 className="text-lg font-semibold text-primary mb-4">Anbieter</h2>
           <p className="leading-relaxed">
-            AmanahOrdner<br />
+            Amanah Vorsorge<br />
             [Firmenname / Projektname — Platzhalter]<br />
             [Straße und Hausnummer]<br />
             [PLZ Ort]<br />
@@ -59,7 +59,7 @@ export default function ImpressumPage() {
           <p className="leading-relaxed text-sm">
             Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
-            AmanahOrdner ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
+            Amanah Vorsorge ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
           </p>
         </section>
 

@@ -4,7 +4,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Patientenverfügung — AmanahOrdner",
+  title: "Patientenverfügung — Amanah Vorsorge",
   description: "Patientenverfügung, Vorsorgevollmacht und religiöse Wünsche für muslimische Familien.",
 };
 

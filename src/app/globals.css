@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3efe6;
-  --foreground: #070f1c;
-  --primary: #070f1c;
-  --primary-light: #0f2540;
-  --accent: #c45c26;
-  --accent-light: #e07a3a;
-  --accent-secondary: #b87333;
-  --sand: #e8e2d6;
-  --card: #fffdf9;
-  --muted: #4a5568;
-  --danger: #b83232;
-  --warning: #c47f17;
-  --success: #1a7a4a;
-  --navy: #070f1c;
+  --background: #F7F8FA;
+  --foreground: #101828;
+  --primary: #0F4C5C;
+  --primary-light: #156575;
+  --accent: #C58A2A;
+  --accent-light: #D4A04A;
+  --accent-secondary: #C58A2A;
+  --sand: #E4E7EC;
+  --card: #FFFFFF;
+  --muted: #475467;
+  --border: #E4E7EC;
+  --danger: #B42318;
+  --warning: #B7791F;
+  --success: #27865A;
+  --navy: #0B1220;
 }
 
 @theme inline {
@@ -28,6 +29,7 @@
   --color-sand: var(--sand);
   --color-card: var(--card);
   --color-muted: var(--muted);
+  --color-border: var(--border);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
@@ -39,6 +41,8 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 @media print {

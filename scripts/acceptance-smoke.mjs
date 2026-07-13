@@ -25,6 +25,7 @@ const routes = [
   "/dashboard/familiengespraech",
   "/dashboard/familie",
   "/dashboard/ausfuellen",
+  "/preise",
   "/konvertierte",
 ];
 
@@ -51,18 +52,25 @@ async function main() {
     heroHeadline: home?.snippet?.includes("Familie nicht raten") ?? false,
     heroCta: false,
     checkPage: false,
+    preiseFree: false,
   };
 
   if (home?.ok) {
     const full = await (await fetch(`${BASE}/`)).text();
-    checks.heroHeadline = full.includes("Familie nicht raten müssen");
-    checks.heroCta = full.includes("Kostenlosen Amanah-Check starten") && full.includes('href="/check"');
+    checks.heroHeadline = full.includes("Familie nicht raten muss");
+    checks.heroCta = full.includes("3-Minuten-Check") && full.includes('href="/check"');
   }
 
   const checkHtml = results.find((r) => r.path === "/check");
   if (checkHtml?.ok) {
     const full = await (await fetch(`${BASE}/check`)).text();
     checks.checkPage = full.includes("Amanah-Check");
+  }
+
+  const preiseHtml = results.find((r) => r.path === "/preise");
+  if (preiseHtml?.ok) {
+    const full = await (await fetch(`${BASE}/preise`)).text();
+    checks.preiseFree = full.includes("Amanah-Check") && full.includes("0 €");
   }
 
   const failed = results.filter((r) => !r.ok || r.hasError);

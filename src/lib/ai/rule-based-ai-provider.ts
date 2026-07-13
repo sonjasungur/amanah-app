@@ -155,10 +155,10 @@ export class RuleBasedAIProvider implements AmanahAIProvider {
     const fd = (ctx.funeralDirector as string) || "den von mir benannten Bestatter";
 
     const templates: Record<FamilyMessageTone, string> = {
-      liebevoll: `Liebe Familie,\n\nich bereite meinen AmanahOrdner vor, damit ihr im schwersten Moment Orientierung habt. Bitte kontaktiert im Notfall zuerst ${contact}. Mir ist eine würdevolle islamische Bestattung wichtig — ${fd} und unsere Moschee können euch unterstützen.\n\nDies ist mein Entwurf zur Vorbereitung — bitte mit Imam/Gelehrten und ggf. Anwalt fachlich prüfen lassen.\n\nIn Liebe,\n${name}`,
-      sachlich: `An meine Angehörigen,\n\nim Notfall bitte ${contact} informieren. Bestattung: islamische Grundsätze, zeitnahe Beisetzung. Bestatter: ${fd}.\n\nDetails im AmanahOrdner. Keine Rechtsberatung — fachliche Prüfung empfohlen.\n\n${name}`,
-      kurz: `Im Notfall: ${contact} anrufen. Janazah-Wünsche und Details im AmanahOrdner. — ${name}`,
-      ausfuehrlich: `Liebe Familie,\n\nmit meinem AmanahOrdner möchte ich euch im Fall meines Todes oder einer schweren Krankheit Orientierung geben — nicht Entscheidungen abnehmen.\n\nNotfallkontakt: ${contact}\nBestattung: islamische Grundsätze, ${fd}\n\nBitte keine aufwendigen kulturellen Trauerfeiern, die finanziell belasten. Stattdessen Dua und einfache Sadaqa Jariya.\n\nAlle Details im Ordner. Bitte Imam/Gelehrte und Anwalt/Notar zur fachlichen Prüfung hinzuziehen.\n\n${name}`,
+      liebevoll: `Liebe Familie,\n\nich bereite meinen Amanah Vorsorge vor, damit ihr im schwersten Moment Orientierung habt. Bitte kontaktiert im Notfall zuerst ${contact}. Mir ist eine würdevolle islamische Bestattung wichtig — ${fd} und unsere Moschee können euch unterstützen.\n\nDies ist mein Entwurf zur Vorbereitung — bitte mit Imam/Gelehrten und ggf. Anwalt fachlich prüfen lassen.\n\nIn Liebe,\n${name}`,
+      sachlich: `An meine Angehörigen,\n\nim Notfall bitte ${contact} informieren. Bestattung: islamische Grundsätze, zeitnahe Beisetzung. Bestatter: ${fd}.\n\nDetails im Amanah Vorsorge. Keine Rechtsberatung — fachliche Prüfung empfohlen.\n\n${name}`,
+      kurz: `Im Notfall: ${contact} anrufen. Janazah-Wünsche und Details im Amanah Vorsorge. — ${name}`,
+      ausfuehrlich: `Liebe Familie,\n\nmit meinem Amanah Vorsorge möchte ich euch im Fall meines Todes oder einer schweren Krankheit Orientierung geben — nicht Entscheidungen abnehmen.\n\nNotfallkontakt: ${contact}\nBestattung: islamische Grundsätze, ${fd}\n\nBitte keine aufwendigen kulturellen Trauerfeiern, die finanziell belasten. Stattdessen Dua und einfache Sadaqa Jariya.\n\nAlle Details im Ordner. Bitte Imam/Gelehrte und Anwalt/Notar zur fachlichen Prüfung hinzuziehen.\n\n${name}`,
     };
 
     return {

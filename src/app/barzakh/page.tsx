@@ -4,7 +4,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Barzakh — AmanahOrdner",
+  title: "Barzakh — Amanah Vorsorge",
   description: "Was ist Barzakh? Orientierung zu Sadaqa Jariya, Schulden und dem Leben nach dem Tod.",
 };
 

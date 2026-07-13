@@ -50,7 +50,7 @@ function JanazahPrintView() {
     <div className="print-view max-w-2xl mx-auto p-8 bg-white">
       <div className="text-center mb-8 border-b-2 border-primary pb-4">
         <h1 className="text-2xl font-bold text-primary">Janazah-Wünsche</h1>
-        <p className="text-sm text-muted">AmanahOrdner — {new Date().toLocaleDateString("de-DE")}</p>
+        <p className="text-sm text-muted">Amanah Vorsorge — {new Date().toLocaleDateString("de-DE")}</p>
       </div>
       <PrintSection title="Grundwünsche">
         <PrintField label="Islamische Bestattung" value={d.janazahWishes.islamicBurialDesired} />
@@ -156,7 +156,7 @@ function FamilienbriefPrintView() {
 type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "schulden" | "familienbrief";
 
 const exportOptions: { id: PrintTarget; title: string; description: string; icon: string }[] = [
-  { id: "full", title: "AmanahOrdner als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
+  { id: "full", title: "Amanah Vorsorge als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
   { id: "notfallkarte", title: "Notfallkarte", description: "Kompakte Karte für den Notfall", icon: "🆘" },
   { id: "janazah", title: "Janazah-Bericht", description: "Islamische Bestattungswünsche", icon: "🕌" },
   { id: "testament", title: "Testament-Bericht", description: "Erbprofil mit Ampelcheck", icon: "📜" },

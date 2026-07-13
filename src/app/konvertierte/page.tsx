@@ -5,7 +5,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Users, HeartHandshake, FileText, Phone } from "lucide-react";
 
 export const metadata = {
-  title: "Für Konvertierte & alleinstehende Muslime — AmanahOrdner",
+  title: "Für Konvertierte & alleinstehende Muslime — Amanah Vorsorge",
 };
 
 const checklist = [

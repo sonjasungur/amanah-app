@@ -4,7 +4,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Testament & Erbe — AmanahOrdner",
+  title: "Testament & Erbe — Amanah Vorsorge",
   description: "Islamisches Erbrecht: Farāʾiḍ, Waṣiyya und deutsches Recht für Muslime in Deutschland.",
 };
 
