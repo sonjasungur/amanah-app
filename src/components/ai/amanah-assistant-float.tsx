@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { useI18n } from "@/lib/i18n/context";
 
 export function AmanahAssistantFloat() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [input, setInput] = useState("");
@@ -44,7 +46,7 @@ export function AmanahAssistantFloat() {
     setLoading(false);
   };
 
-  if (typeof window !== "undefined" && window.location.pathname.includes("/print")) return null;
+  if (pathname.includes("/print") || pathname === "/check") return null;
 
   return (
     <div className="no-print">
