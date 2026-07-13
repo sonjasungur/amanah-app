@@ -3,107 +3,131 @@ import type { ReactNode } from "react";
 import type { KnowledgeArticle } from "@/lib/types";
 import { SourcesSection } from "@/components/knowledge/sources-section";
 import { PrimarySourcesList } from "@/components/ui/primary-source-card";
-import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { AlertCircle, BookOpen, ChevronRight, FileText, Heart, HelpCircle, MapPin } from "lucide-react";
+import { BookOpen, FileText, Target, Users } from "lucide-react";
 
-function Section({ icon: Icon, title, children }: { icon: typeof Heart; title: string; children: ReactNode }) {
+function Section({ icon: Icon, title, children }: { icon: typeof BookOpen; title: string; children: ReactNode }) {
   return (
-    <div className="space-y-2">
-      <h4 className="font-semibold text-primary flex items-center gap-2 text-sm">
-        <Icon size={16} className="text-accent shrink-0" aria-hidden />
+    <section className="space-y-3">
+      <h4 className="font-bold text-foreground flex items-center gap-2 text-base">
+        <Icon size={18} className="text-primary shrink-0" aria-hidden />
         {title}
       </h4>
-      <div className="text-sm text-muted leading-relaxed pl-6">{children}</div>
-    </div>
+      <div className="text-body text-muted leading-relaxed pl-7">{children}</div>
+    </section>
   );
 }
 
 export function RichArticleCard({ article }: { article: KnowledgeArticle }) {
   const d = article.details;
+  const shortIntro = article.wissenMeta?.shortAnswer ?? article.summary;
 
   if (!d) {
     return (
-      <Card className="hover:border-primary/20 transition-colors">
+      <Card className="space-y-5">
         <CardTitle>{article.title}</CardTitle>
-        <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
-        <p className="text-muted leading-relaxed">{article.content}</p>
-        <PrimarySourcesList sourceIds={article.sourceIds} />
+        <Section icon={BookOpen} title="Kurz erklärt">
+          <p>{shortIntro}</p>
+        </Section>
+        <PrimarySourcesList sourceIds={article.sourceIds} title="Qur'an und authentische Sunnah" />
+        <p className="text-body text-muted">{article.content}</p>
         <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
       </Card>
     );
   }
 
-  const reflectionQuestions = [
-    "Habe ich die wichtigsten Punkte schriftlich festgehalten?",
-    "Weiß mindestens eine Vertrauensperson, wo die Unterlagen liegen?",
-    "Habe ich mit Angehörigen ein ruhiges Gespräch geplant?",
+  const familyQuestions = [
+    "Wo finde ich deine Unterlagen im Ernstfall?",
+    "Wer ist deine Vertrauensperson für Entscheidungen?",
+    "Welche Wünsche sind dir persönlich und islamisch besonders wichtig?",
   ];
 
   return (
-    <Card className="hover:border-primary/20 transition-colors space-y-5">
+    <Card className="space-y-8">
       <div>
-        <CardTitle className="text-xl">{article.title}</CardTitle>
-        <p className="text-sm text-muted mt-3 leading-relaxed">{article.summary}</p>
+        <CardTitle className="text-page-title">{article.title}</CardTitle>
       </div>
 
-      <Section icon={Heart} title="Warum ist das wichtig?">
-        <p>{d.whyImportant}</p>
+      <Section icon={BookOpen} title="Kurz erklärt">
+        <p>{shortIntro}</p>
+        <p className="mt-3">{d.whyImportant}</p>
       </Section>
 
       {article.sourceIds.length > 0 && (
-        <Section icon={BookOpen} title="Islamische Grundlage">
-          <PrimarySourcesList sourceIds={article.sourceIds} />
-          <p className="text-xs text-muted mt-3">Erklärungen sind Einordnung — nicht Teil des Qur&apos;an oder Hadith.</p>
+        <Section icon={BookOpen} title="Qur'an und authentische Sunnah">
+          <PrimarySourcesList sourceIds={article.sourceIds} title="" />
+          <p className="text-sm text-muted mt-4">
+            Die Übersetzungen sind sinngemäß. Erklärungen sind Einordnung — nicht Teil des Qur&apos;an oder Hadith.
+          </p>
         </Section>
       )}
 
       <Section icon={FileText} title="Praktische Bedeutung">
-        <ul className="list-disc space-y-1 pl-4">
+        <ul className="list-disc space-y-2 pl-4">
           {d.prepareItems.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
-        <p className="mt-3 font-medium text-primary text-xs">Dokumente & Nachweise</p>
-        <ul className="list-disc space-y-1 pl-4 mt-1">
-          {d.documents.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+        {d.documents.length > 0 && (
+          <>
+            <p className="mt-4 font-semibold text-foreground text-sm">Dokumente & Nachweise</p>
+            <ul className="list-disc space-y-1 pl-4 mt-2">
+              {d.documents.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </>
+        )}
       </Section>
 
-      <Section icon={HelpCircle} title="Fragen zur Selbstreflexion">
-        <ul className="list-disc space-y-1 pl-4">
-          {reflectionQuestions.map((q) => (
+      <Section icon={Users} title="Was sollte ich mit meiner Familie klären?">
+        <p>{d.tellFamily}</p>
+        <ul className="list-disc space-y-2 pl-4 mt-3">
+          {familyQuestions.map((q) => (
             <li key={q}>{q}</li>
           ))}
         </ul>
       </Section>
 
-      <Section icon={AlertCircle} title="Mögliche Warnsignale">
-        <p className="mb-2">{d.ifMissing}</p>
-        <ul className="list-disc space-y-1 pl-4">
-          {d.commonMistakes.map((item) => (
+      <Section icon={Target} title="Mein nächster Schritt">
+        <p>{d.ifMissing}</p>
+        <ul className="list-disc space-y-2 pl-4 mt-3">
+          {d.commonMistakes.slice(0, 3).map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
+        <p className="mt-3 text-sm">{d.safeStorage}</p>
       </Section>
-
-      <Section icon={MapPin} title="Aufbewahrung & Familie">
-        <p>{d.safeStorage}</p>
-        <p className="mt-2">{d.tellFamily}</p>
-      </Section>
-
-      <div className="pt-2 border-t border-primary/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <Link href={d.nextStepHref}>
-          <Button type="button">
-            {d.nextStepLabel} <ChevronRight size={16} className="ml-1" />
-          </Button>
-        </Link>
-        <p className="text-xs text-muted">Keine Rechtsberatung, keine medizinische Beratung, keine Fatwa.</p>
-      </div>
 
       <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} hidePrimary={article.sourceIds.length > 0} />
+
+      <p className="text-sm text-muted border-t border-border pt-4">
+        Keine Rechtsberatung, keine medizinische Beratung, keine Fatwa.
+      </p>
     </Card>
+  );
+}
+
+/** Form CTA block — always after knowledge content on detail pages */
+export function WissenFormCta({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
+  return (
+    <div className="mt-10 rounded-2xl border border-emerald/30 bg-accent-soft p-6 md:p-8">
+      <h2 className="text-section-title font-bold text-foreground mb-3">Jetzt festhalten</h2>
+      <p className="text-body text-muted mb-5 leading-relaxed">
+        Wenn du bereit bist, kannst du deine Wünsche Schritt für Schritt in deinem persönlichen Ordner dokumentieren.
+      </p>
+      <Link
+        href={href}
+        className="inline-flex items-center justify-center rounded-xl font-semibold bg-emerald text-white hover:bg-primary-hover px-7 py-3.5 text-lg min-h-[48px] transition-all"
+      >
+        {label}
+      </Link>
+    </div>
   );
 }

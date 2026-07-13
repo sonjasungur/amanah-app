@@ -46,6 +46,24 @@ export const islamicSources: Record<string, IslamicSource> = {
       "Beschleunigt die Janazah. Wenn sie rechtschaffen war, ist es ein Gutes, das ihr ihr zukommen lasst. Wenn sie anders war, ist es ein Übel, das ihr von euch abwendet.",
     note: "Sinngemäße Übersetzung.",
   },
+  "hadith-bukhari-janazah-1315": {
+    id: "hadith-bukhari-janazah-1315",
+    type: "hadith",
+    title: "Janazah beschleunigen",
+    reference: "Sahih al-Bukhari, Hadith 1315",
+    translationDe:
+      "Beschleunigt die Janazah. Wenn sie rechtschaffen war, ist es ein Gutes, das ihr ihr zukommen lasst. Wenn sie anders war, ist es ein Übel, das ihr von euch abwendet.",
+    note: "Sinngemäße Übersetzung — keine individuelle Fatwa.",
+  },
+  "hadith-muslim-janazah-944c": {
+    id: "hadith-muslim-janazah-944c",
+    type: "hadith",
+    title: "Janazah nicht verzögern",
+    reference: "Sahih Muslim, Hadith 944c",
+    translationDe:
+      "Beschleunigt die Janazah. Wenn sie rechtschaffen war, ist es ein Gutes, das ihr ihr zukommen lasst. Wenn sie anders war, ist es ein Übel, das ihr von euch abwendet.",
+    note: "Sinngemäße Übersetzung — keine individuelle Fatwa.",
+  },
   "hadith-wasiyyah-third": {
     id: "hadith-wasiyyah-third",
     type: "hadith",

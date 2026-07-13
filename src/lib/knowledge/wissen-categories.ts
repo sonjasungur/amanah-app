@@ -20,25 +20,25 @@ export const WISSEN_CATEGORY_CONFIG: Record<WissenCategoryId, WissenCategoryConf
   notfall: {
     id: "notfall",
     label: "Notfall und Gesundheit",
-    accent: "#0F766E",
+    accent: "#2563EB",
     topicIds: ["w-notfall", "w-pv", "w-vollmacht", "w-betreuung"],
   },
   janazah: {
     id: "janazah",
     label: "Abschied und Janazah",
-    accent: "#1E3A5F",
+    accent: "#6D28D9",
     topicIds: ["w-janazah", "w-ghusl", "w-bestattung", "w-familie"],
   },
   vermoegen: {
     id: "vermoegen",
     label: "Vermögen und Verantwortung",
-    accent: "#64748B",
+    accent: "#0F6470",
     topicIds: ["w-testament", "w-schulden", "w-digital"],
   },
   akhira: {
     id: "akhira",
     label: "Akhira und Weiterwirken",
-    accent: "#166534",
+    accent: "#087A4E",
     topicIds: ["w-sadaqa"],
   },
 };
@@ -63,4 +63,8 @@ export function categoryForTopicId(topicId: string): WissenCategoryId {
     if (WISSEN_CATEGORY_CONFIG[cat].topicIds.includes(topicId)) return cat;
   }
   return "notfall";
+}
+
+export function topicCountForCategory(catId: WissenCategoryId): number {
+  return WISSEN_CATEGORY_CONFIG[catId].topicIds.length;
 }

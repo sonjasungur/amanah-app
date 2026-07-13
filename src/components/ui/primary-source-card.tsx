@@ -11,8 +11,8 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 /** Displays Qur'an or Sahih hadith only — no fiqh/blog sources */
-export function PrimarySourceCard({ source }: { source: IslamicSource }) {
-  const [open, setOpen] = useState(false);
+export function PrimarySourceCard({ source, defaultOpen = false }: { source: IslamicSource; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   if (source.type !== "quran" && source.type !== "hadith") return null;
 
   return (
@@ -47,14 +47,14 @@ export function PrimarySourceCard({ source }: { source: IslamicSource }) {
   );
 }
 
-export function PrimarySourcesList({ sourceIds }: { sourceIds: string[] }) {
+export function PrimarySourcesList({ sourceIds, title = "Islamische Primärquellen" }: { sourceIds: string[]; title?: string }) {
   const sources = getPrimarySourcesByIds(sourceIds);
   if (sources.length === 0) return null;
   return (
     <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-primary">Islamische Primärquellen</h4>
+      {title ? <h4 className="text-sm font-semibold text-primary">{title}</h4> : null}
       {sources.map((s) => (
-        <PrimarySourceCard key={s.id} source={s} />
+        <PrimarySourceCard key={s.id} source={s} defaultOpen={sourceIds.length <= 2} />
       ))}
     </div>
   );

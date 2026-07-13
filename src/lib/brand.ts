@@ -5,8 +5,11 @@ export const BRAND = {
   subtitle: "Islamische Vorsorge für Notfall, Janazah und Akhira",
   /** @deprecated use subtitle — kept for gradual migration */
   tagline: "Islamische Vorsorge für Notfall, Janazah und Akhira",
+  heroEyebrow: "ISLAMISCHE VORSORGE",
   claim: "Ich entscheide heute, was später wichtig ist.",
   heroTitle: "Damit meine Familie weiß, was mir wichtig ist.",
+  heroDescription:
+    "Halte fest, wer für dich handeln darf und welche persönlichen und islamischen Wünsche deine Familie kennen soll.",
   description:
     "Halte fest, wer für dich handeln darf, wo wichtige Dokumente liegen und welche persönlichen und islamischen Wünsche berücksichtigt werden sollen.",
   trustLine: "Für Muslime in Deutschland · Quellenbasiert · Vertraulich",
@@ -15,7 +18,7 @@ export const BRAND = {
     "Islamische Vorsorge für Notfall, Janazah und Akhira. Halte heute fest, was deiner Familie später wichtig sein soll.",
   manifestName: "Mein Wille – Islamische Vorsorge",
   manifestShortName: "Mein Wille",
-  themeColor: "#0B1511",
+  themeColor: "#071A16",
   ctaPrimary: "Kostenlos prüfen, was noch fehlt",
   ctaSecondary: "Direkt geführt ausfüllen",
 } as const;

@@ -31,9 +31,9 @@ export const wissenTopics: KnowledgeArticle[] = [
     safeStorage: "In Mein Wille, zusätzlich Ausdruck beim Bestatter und bei einer Vertrauensperson. Nicht nur im Kopf einer Person.",
     tellFamily: "Wo der Ordner liegt, wer den Bestatter anruft, dass islamische Grundsätze Vorrang haben — und dass sie nicht alles allein entscheiden müssen.",
     commonMistakes: ["Mündliche Absprachen ohne Dokument", "Nur kulturelle Traditionen statt islamischer Mindestanforderungen", "Kein Bestatter-Kontakt in Deutschland", "Wünsche erst im Sterbebett — dann oft zu spät"],
-    nextStepLabel: "Janazah-Wünsche im Ordner festhalten",
+    nextStepLabel: "Janazah-Wünsche jetzt festhalten",
     nextStepHref: "/dashboard/janazah",
-  }, ["hadith-janazah-hasten"]),
+  }, ["hadith-bukhari-janazah-1315", "hadith-muslim-janazah-944c"]),
   topic("w-ghusl", "ghusl-kafan", "Ghusl & Kafan", "Totenwaschung und Leichentuch sind zentrale islamische Rituale — plane sie konkret.", "ghusl-kafan", {
     whyImportant: "Ghusl und Kafan sind Teil der Würde des Verstorbenen. In Deutschland übernehmen oft Moschee, Bestatter oder Familie — wer was darf, muss vorher geklärt sein.",
     ifMissing: "Falsche Personen waschen, Verzögerung, unnötige Kosten, familiäre Konflikte über Geschlechterregeln, Unsicherheit im Krankenhaus.",

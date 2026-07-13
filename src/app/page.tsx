@@ -1,179 +1,287 @@
 import Link from "next/link";
-import { Logo } from "@/components/layout/logo";
 import { MobileStickyCta } from "@/components/layout/mobile-sticky-cta";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
 import {
-  FeatureList,
   FreeVsPaidSummary,
+  OutcomeCard,
+  PricingCard,
   SectionHeader,
+  StepCard,
   TrustStrip,
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
-import { Button } from "@/components/ui/button";
+import { COLORS } from "@/lib/design-tokens";
+import { Button, linkButtonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import {
   Activity,
   ClipboardCheck,
+  Compass,
   FileSignature,
   HeartPulse,
+  ListChecks,
   Scale,
   Smartphone,
+  Sparkles,
+  Target,
   Users,
 } from "lucide-react";
 
-const FOR_WHO = [
-  "Muslime in Deutschland",
-  "Eltern und Ehepaare",
-  "Konvertierte",
-  "Alleinlebende",
-  "Menschen ohne klare Vertrauensperson",
-  "Familien mit nicht muslimischen Angehörigen",
-];
-
-const BENEFITS = [
-  "Überblick über meine offenen Vorsorgethemen",
-  "Klare nächste Schritte für mich",
-  "Persönliche Notfallinformationen",
-  "Dokumentierte Wünsche für Familie und Janazah",
-  "Familienbrief und Notfallkarte",
-  "Strukturierter Vorsorgeordner mit Export",
-];
-
-const WHY = [
-  "Meine Familie erhält Klarheit.",
-  "Meine wichtigen Wünsche gehen nicht verloren.",
-  "Ich beginne mit einem kleinen, machbaren Schritt.",
+const OUTCOMES = [
+  {
+    icon: Users,
+    title: "Klarheit für meine Familie",
+    description: "Vertrauenspersonen, Kontakte und Wünsche an einem Ort — ohne Rätselraten im Ernstfall.",
+    accent: COLORS.catNotfall,
+  },
+  {
+    icon: ListChecks,
+    title: "Meine Wünsche festhalten",
+    description: "Persönliche und islamische Entscheidungen dokumentieren, bevor es Zeitdruck gibt.",
+    accent: COLORS.catJanazah,
+  },
+  {
+    icon: Compass,
+    title: "Islamische Orientierung",
+    description: "Quellenbasiertes Wissen — zwischen deutschem Recht und islamischen Grundsätzen.",
+    accent: COLORS.catAkhira,
+  },
+  {
+    icon: Target,
+    title: "Schritt für Schritt vorbereiten",
+    description: "Check, Prioritäten und geführtes Ausfüllen — ohne alles auf einmal erledigen zu müssen.",
+    accent: COLORS.catVermogen,
+  },
 ];
 
 const STEPS = [
-  { n: "1", title: "Check starten", text: "In wenigen Minuten sehe ich, was noch fehlt." },
-  { n: "2", title: "Nächsten Schritt wählen", text: "Priorisierte Empfehlung — ohne Überforderung." },
-  { n: "3", title: "Geführt dokumentieren", text: "Schritt für Schritt in meinem persönlichen Ordner." },
+  {
+    step: "1",
+    title: "Prüfen",
+    text: "Der Vorsorge-Check zeigt in wenigen Minuten, was noch fehlt.",
+    icon: ClipboardCheck,
+  },
+  {
+    step: "2",
+    title: "Priorisieren",
+    text: "Du erhältst eine klare Empfehlung — ohne Überforderung.",
+    icon: Sparkles,
+  },
+  {
+    step: "3",
+    title: "Festhalten",
+    text: "Schritt für Schritt in deinem persönlichen Ordner dokumentieren.",
+    icon: FileSignature,
+  },
 ];
 
 const AREAS = [
-  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche." },
-  { icon: FileSignature, title: "Vollmachten und Vertrauenspersonen", text: "Wer darf im Ernstfall für mich entscheiden?" },
-  { icon: Activity, title: "Janazah und Bestattungswünsche", text: "Islamische Grundsätze verständlich festhalten." },
-  { icon: Scale, title: "Testament, Erbe und Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen." },
-  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext." },
-  { icon: Users, title: "Familie, Akhira und gute Taten", text: "Briefe, Sadaqa Jariya und Herzensprojekte." },
+  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche.", accent: COLORS.catNotfall },
+  { icon: FileSignature, title: "Vollmachten", text: "Wer darf im Ernstfall für dich entscheiden?", accent: COLORS.catNotfall },
+  { icon: Activity, title: "Janazah und Bestattung", text: "Islamische Grundsätze verständlich festhalten.", accent: COLORS.catJanazah },
+  { icon: Scale, title: "Testament, Erbe, Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen.", accent: COLORS.catVermogen },
+  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext.", accent: COLORS.catVermogen },
+  { icon: Users, title: "Familie und Akhira", text: "Briefe, Sadaqa Jariya und Herzensprojekte.", accent: COLORS.catAkhira },
 ];
 
 const PRICING_TEASER = [
-  { name: "Basic", price: "29 €", note: "Wichtigste Dokumente" },
-  { name: "Komplett", price: "79 €", note: "Alle Module — empfohlen" },
-  { name: "Familie", price: "99 €", note: "Zwei Profile" },
+  { name: "Basic", price: "29 €", note: "Wichtigste Dokumente", highlighted: false },
+  { name: "Komplett", price: "79 €", note: "Alle Module — empfohlen", highlighted: true },
+  { name: "Familie", price: "99 €", note: "Zwei Profile", highlighted: false },
 ];
+
+function HeroCheckInfoCard({ className }: { className?: string }) {
+  const points = [
+    "Welche Bereiche noch offen sind",
+    "Was du zuerst klären solltest",
+    "Welchen Schritt du als Nächstes angehen kannst",
+  ];
+  return (
+    <aside
+      className={cn(
+        "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 md:p-7 shadow-2xl",
+        className
+      )}
+    >
+      <h2 className="text-lg font-bold text-white mb-4 leading-snug">
+        Nach dem kostenlosen Check weißt du:
+      </h2>
+      <ul className="space-y-3 mb-5">
+        {points.map((point) => (
+          <li key={point} className="flex items-start gap-3 text-base text-white/90">
+            <span className="w-2 h-2 rounded-full bg-emerald shrink-0 mt-2" aria-hidden />
+            {point}
+          </li>
+        ))}
+      </ul>
+      <p className="text-sm text-white/65 leading-relaxed">
+        Dein Ergebnis basiert auf deinen Antworten – ohne Bewertung.
+      </p>
+    </aside>
+  );
+}
 
 export default function HomePage() {
   return (
     <div className="pb-28 md:pb-0">
       {/* Hero */}
-      <section className="relative bg-navy text-white py-10 md:py-14">
-        <div className="max-w-3xl mx-auto px-4">
-          <Logo variant="hero" tone="light" className="mb-5" />
-          <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4 max-w-xl">
-            {BRAND.heroTitle}
-          </h1>
-          <p className="text-base md:text-lg text-white/85 leading-relaxed mb-6 max-w-xl">
-            {BRAND.description}
-          </p>
-          <div className="flex flex-col gap-3 max-w-md">
-            <Link href="/check">
-              <Button size="lg" className="w-full font-semibold min-h-[48px]">
-                <ClipboardCheck size={18} className="mr-2" /> {BRAND.ctaPrimary}
-              </Button>
-            </Link>
-            <Link href="/dashboard/ausfuellen" className="text-center sm:text-left">
-              <span className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] text-base text-white/90 underline-offset-4 hover:underline">
-                {BRAND.ctaSecondary}
-              </span>
-            </Link>
-          </div>
-          <div className="mt-6">
-            <TrustStrip items={[...BRAND_TRUST_ITEMS]} />
-          </div>
-          <p className="text-sm text-white/70 mt-5 italic max-w-lg">{BRAND.claim}</p>
-        </div>
-      </section>
-
-      {/* Für wen + Nutzen */}
-      <section className="py-12 md:py-14 max-w-5xl mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-          <div>
-            <SectionHeader title="Für wen?" description="Wenn du heute Klarheit schaffen willst — für Notfall, Krankheit, Janazah und Akhira." />
-            <FeatureList items={FOR_WHO} />
-          </div>
-          <div>
-            <SectionHeader title="Was du bekommst" description="Persönlicher Nutzen — nicht nur Funktionen." />
-            <FeatureList items={BENEFITS} />
-          </div>
-        </div>
-        <div className="mt-10">
-          <FreeVsPaidSummary />
-        </div>
-      </section>
-
-      {/* So funktioniert es + Warum */}
-      <section className="py-12 md:py-14 bg-card border-y border-border">
-        <div className="max-w-5xl mx-auto px-4">
-          <SectionHeader title="So funktioniert es" description="Du musst nicht alles heute erledigen. Der erste Überblick dauert nur wenige Minuten." />
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {STEPS.map((s) => (
-              <div key={s.n} className="rounded-xl border border-border p-5 bg-background">
-                <span className="text-sm font-bold text-primary">{s.n}</span>
-                <h3 className="font-semibold text-foreground mt-1 mb-2">{s.title}</h3>
-                <p className="text-base text-muted">{s.text}</p>
+      <section
+        className="relative text-white py-12 md:py-16 overflow-hidden"
+        style={{
+          background: `radial-gradient(ellipse 80% 60% at 70% 0%, ${COLORS.primary}35 0%, transparent 55%), linear-gradient(165deg, ${COLORS.navy} 0%, ${COLORS.brandDark} 100%)`,
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid lg:grid-cols-[1fr_320px] gap-10 items-start">
+            <div className="max-w-xl">
+              <p className="text-sm md:text-base font-bold uppercase tracking-[0.2em] text-emerald mb-4">
+                {BRAND.heroEyebrow}
+              </p>
+              <h1 className="text-display font-bold mb-4">{BRAND.heroTitle}</h1>
+              <p className="text-body-lg text-white/90 leading-relaxed mb-7 max-w-lg">{BRAND.heroDescription}</p>
+              <div className="flex flex-col gap-3 max-w-md">
+                <Link
+                  href="/check"
+                  className={linkButtonClassName({ size: "lg", className: "w-full font-bold min-h-[52px] text-lg shadow-lg shadow-emerald/25" })}
+                >
+                  <ClipboardCheck size={20} className="mr-2" aria-hidden /> {BRAND.ctaPrimary}
+                </Link>
+                <Link href="/dashboard/ausfuellen" className="text-center sm:text-left">
+                  <span className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] text-base text-white/90 underline-offset-4 hover:text-emerald hover:underline font-medium">
+                    {BRAND.ctaSecondary}
+                  </span>
+                </Link>
               </div>
-            ))}
-          </div>
-          <ul className="space-y-2">
-            {WHY.map((w) => (
-              <li key={w} className="text-base text-muted flex gap-2">
-                <span className="text-primary">•</span> {w}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* Bereiche */}
-      <section className="py-12 md:py-14 max-w-5xl mx-auto px-4">
-        <SectionHeader title="Was du vorbereiten kannst" description="Notfall, Entscheidungsunfähigkeit, Janazah und Akhira — mehr als nur Testament und Erbe." />
-        <div className="grid sm:grid-cols-2 gap-3">
-          {AREAS.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="flex gap-4 rounded-xl border border-border bg-card p-4 min-h-[44px]">
-              <Icon size={22} className="text-primary shrink-0 mt-0.5" aria-hidden />
-              <div>
-                <h3 className="font-semibold text-foreground text-base">{title}</h3>
-                <p className="text-sm text-muted mt-1">{text}</p>
+              <div className="mt-6 lg:hidden">
+                <HeroCheckInfoCard />
               </div>
+              <div className="mt-6">
+                <TrustStrip items={[...BRAND_TRUST_ITEMS]} />
+              </div>
+              <p className="text-base text-white/75 mt-5 italic max-w-lg">{BRAND.claim}</p>
             </div>
-          ))}
+            <HeroCheckInfoCard className="hidden lg:block" />
+          </div>
+        </div>
+      </section>
+
+      {/* Ergebnis-Karten */}
+      <section className="py-14 md:py-18 bg-background">
+        <div className="max-w-6xl mx-auto px-4">
+          <SectionHeader
+            title="Was du damit erreichst"
+            description="Vier klare Ergebnisse — statt langer Listen."
+            accent={COLORS.emerald}
+          />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {OUTCOMES.map((o) => (
+              <OutcomeCard key={o.title} {...o} />
+            ))}
+          </div>
+          <p className="text-body text-muted mt-8 max-w-3xl leading-relaxed">
+            Gedacht für Muslime in Deutschland — Eltern, Konvertierte, Alleinlebende und Familien mit unterschiedlichen
+            Hintergründen, die heute Klarheit schaffen wollen.
+          </p>
+          <div className="mt-10">
+            <FreeVsPaidSummary />
+          </div>
+        </div>
+      </section>
+
+      {/* So funktioniert es */}
+      <section className="py-14 md:py-18 bg-accent-soft border-y border-border">
+        <div className="max-w-6xl mx-auto px-4">
+          <SectionHeader
+            title="So funktioniert es"
+            description="Du musst nicht alles heute erledigen. Der erste Überblick dauert nur wenige Minuten."
+            accent={COLORS.primary}
+          />
+          <div className="grid md:grid-cols-3 gap-5 relative">
+            <div className="hidden md:block absolute top-1/2 left-[16%] right-[16%] h-0.5 bg-primary/20 -translate-y-8" aria-hidden />
+            {STEPS.map((s) => (
+              <StepCard key={s.step} {...s} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Vorsorgebereiche */}
+      <section className="py-14 md:py-18 bg-card">
+        <div className="max-w-6xl mx-auto px-4">
+          <SectionHeader
+            title="Was du vorbereiten kannst"
+            description="Notfall, Entscheidungsunfähigkeit, Janazah und Akhira — mehr als nur Testament und Erbe."
+            accent={COLORS.catJanazah}
+          />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {AREAS.map(({ icon: Icon, title, text, accent }) => (
+              <div
+                key={title}
+                className="group rounded-2xl border border-border bg-background p-5 md:p-6 min-h-[44px] hover:shadow-md hover:border-primary/25 transition-all"
+              >
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 [&_svg]:text-[var(--area-accent)]"
+                  style={{ backgroundColor: `${accent}18`, ["--area-accent" as string]: accent }}
+                >
+                  <Icon size={24} aria-hidden />
+                </div>
+                <h3 className="text-card-title font-bold text-foreground group-hover:text-primary transition-colors">{title}</h3>
+                <p className="text-body text-muted mt-2 leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       <AkhiraSection />
 
-      {/* Preise kompakt */}
-      <section className="py-12 md:py-14 max-w-5xl mx-auto px-4">
-        <SectionHeader
-          title="Preise — klar getrennt"
-          description="Starte kostenlos. Vollständige Dokumentation und Exporte sind als Einmalpakete geplant — Kauf derzeit noch nicht aktiv."
-        />
-        <div className="grid sm:grid-cols-3 gap-4 mb-6">
-          {PRICING_TEASER.map((p) => (
-            <div key={p.name} className={cn("rounded-xl border bg-card p-5 text-center", p.name === "Komplett" ? "border-primary ring-2 ring-primary/15" : "border-border")}>
-              <p className="font-bold text-foreground">{p.name}</p>
-              <p className="text-2xl font-bold text-foreground my-1">{p.price}</p>
-              <p className="text-sm text-muted">{p.note}</p>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="/check"><Button size="lg" className="w-full sm:w-auto">{BRAND.ctaPrimary}</Button></Link>
-          <Link href="/preise"><Button size="lg" variant="outline" className="w-full sm:w-auto">Alle Preise ansehen</Button></Link>
+      {/* Preise Teaser */}
+      <section className="py-14 md:py-18 bg-background">
+        <div className="max-w-6xl mx-auto px-4">
+          <SectionHeader
+            title="Preise — klar getrennt"
+            description="Starte kostenlos. Vollständige Dokumentation und Exporte sind als Einmalpakete geplant."
+            accent={COLORS.emerald}
+          />
+          <div className="grid sm:grid-cols-3 gap-5 mb-8">
+            {PRICING_TEASER.map((p) => (
+              <PricingCard
+                key={p.name}
+                name={p.name}
+                price={p.price}
+                description={p.note}
+                features={[]}
+                highlighted={p.highlighted}
+                cta={
+                  p.highlighted ? (
+                    <Link href="/preise">
+                      <Button className="w-full" variant="primary">
+                        Alle Preise ansehen
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/preise">
+                      <Button className="w-full" variant="outline">
+                        Details
+                      </Button>
+                    </Link>
+                  )
+                }
+              />
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/check">
+              <Button size="lg" className="w-full sm:w-auto">
+                {BRAND.ctaPrimary}
+              </Button>
+            </Link>
+            <Link href="/preise">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                Alle Preise ansehen
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 

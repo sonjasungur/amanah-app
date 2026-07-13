@@ -12,6 +12,7 @@ import {
   clearCheckState,
   type CheckState,
 } from "@/lib/check/state-machine";
+import { CHECK_LABELS } from "@/lib/design-tokens";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowLeft, CheckCircle2, ChevronRight, Loader2, RotateCcw } from "lucide-react";
@@ -92,20 +93,27 @@ export function AmanahCheck() {
   if (state.phase === "intro") {
     const hasProgress = Object.keys(state.answers).length > 0 || state.index > 0;
     return (
-      <Card className="max-w-lg mx-auto p-8 text-center space-y-6 relative z-20" data-testid="check-intro">
-        <h2 className="text-xl font-bold text-primary">Bereit für deinen Amanah-Check?</h2>
-        <p className="text-muted text-sm">
-          {CHECK_TOTAL} kurze Ja/Nein-Fragen zu deiner Situation und Vorbereitung. Du kannst jederzeit zurückgehen — Antworten bleiben erhalten.
-        </p>
-        <div className="flex flex-col gap-3">
-          <Button type="button" size="lg" onClick={start} data-testid="check-start">
-            {hasProgress ? "Fortsetzen" : "Check starten"}
-          </Button>
-          {hasProgress && (
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
-              <RotateCcw size={14} className="mr-1" /> Neu beginnen
+      <Card className="max-w-lg mx-auto overflow-hidden shadow-lg border-border relative z-20" data-testid="check-intro">
+        <div className="bg-primary-dark px-6 py-8 text-center text-white">
+          <div className="w-14 h-14 rounded-2xl bg-emerald/20 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 size={28} className="text-emerald" aria-hidden />
+          </div>
+          <h2 className="text-xl font-bold">Bereit für deinen Vorsorge-Check?</h2>
+        </div>
+        <div className="p-8 space-y-6">
+          <p className="text-muted text-body leading-relaxed">
+            {CHECK_TOTAL} kurze Ja/Nein-Fragen zu deiner Situation und Vorbereitung. Du kannst jederzeit zurückgehen — Antworten bleiben erhalten.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button type="button" size="lg" onClick={start} data-testid="check-start" className="w-full">
+              {hasProgress ? CHECK_LABELS.continueButton : CHECK_LABELS.startButton}
             </Button>
-          )}
+            {hasProgress && (
+              <Button type="button" variant="ghost" size="sm" onClick={reset}>
+                <RotateCcw size={14} className="mr-1" /> Neu beginnen
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
     );
@@ -154,7 +162,7 @@ export function AmanahCheck() {
           aria-valuemax={100}
           aria-label={`Fortschritt: ${progressPercent} Prozent`}
         >
-          <div className="h-full bg-accent transition-all duration-300 rounded-full" style={{ width: `${progressPercent}%` }} />
+          <div className="h-full bg-emerald transition-all duration-300 rounded-full" style={{ width: `${progressPercent}%` }} />
         </div>
         <p className="text-xs uppercase tracking-wide text-accent font-semibold mb-2">
           {q.category === "profil" ? "Deine Situation" : "Vorbereitung"}
@@ -167,10 +175,10 @@ export function AmanahCheck() {
             data-testid="check-answer-yes"
             onClick={() => answer(true)}
             aria-pressed={currentAnswer === true}
-            className={`flex-1 min-h-[52px] rounded-xl font-semibold text-lg shadow-md active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[52px] rounded-xl font-bold text-lg shadow-md active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
               currentAnswer === true
-                ? "bg-accent text-white ring-2 ring-accent ring-offset-2"
-                : "bg-accent text-white hover:bg-accent-light"
+                ? "bg-emerald text-white ring-2 ring-emerald ring-offset-2"
+                : "bg-emerald text-white hover:bg-primary-hover"
             }`}
           >
             Ja
@@ -180,10 +188,10 @@ export function AmanahCheck() {
             data-testid="check-answer-no"
             onClick={() => answer(false)}
             aria-pressed={currentAnswer === false}
-            className={`flex-1 min-h-[52px] rounded-xl border-2 font-semibold text-lg active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[52px] rounded-xl border-2 font-bold text-lg active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
               currentAnswer === false
-                ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/30 ring-offset-2"
-                : "border-primary/30 bg-card text-primary hover:bg-sand"
+                ? "border-foreground/30 bg-foreground/5 text-foreground ring-2 ring-border ring-offset-2"
+                : "border-border bg-card text-muted hover:border-foreground/20 hover:bg-background"
             }`}
           >
             Nein

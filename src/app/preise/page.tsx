@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
+import { CHECK_LABELS } from "@/lib/design-tokens";
 import { PageHeader, PricingCard } from "@/components/marketing/marketing-ui";
-import { Button } from "@/components/ui/button";
+import { Button, linkButtonClassName } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { ChevronDown } from "lucide-react";
 
 export const metadata = {
   title: `Preise — ${BRAND.name}`,
-  description: "Kostenlos starten mit Amanah-Check und Wissen. Vollständige Vorsorgepakete in Vorbereitung — Mein Wille.",
+  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vollständige Vorsorgepakete in Vorbereitung — Mein Wille.",
 };
 
 const MAIN_PACKAGES = [
@@ -64,83 +65,82 @@ const COMPARE_ROWS = [
 ];
 
 function CompareCell({ value }: { value: boolean | string }) {
-  if (value === true) return <span className="text-success">✓</span>;
+  if (value === true) return <span className="text-emerald font-bold">✓</span>;
   if (value === false) return <span className="text-muted">—</span>;
-  return <span className="text-sm text-muted">{value}</span>;
+  return <span className="text-base text-muted">{value}</span>;
 }
 
 export default function PreisePage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10 pb-16">
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14 pb-16">
       <PageHeader
         eyebrow="Transparent & fair"
         title="Preise"
-        description="Einmalzahlung geplant — kein Abo. Der kostenlose Amanah-Check ist bereits verfügbar."
+        description="Einmalzahlung geplant — kein Abo. Der kostenlose Vorsorge-Check ist bereits verfügbar."
       />
 
-      <div className="rounded-xl border border-warning/40 bg-warning/5 p-4 mb-10 text-base text-muted">
-        Die kostenpflichtigen Pakete befinden sich in Vorbereitung. Der kostenlose Amanah-Check ist bereits verfügbar.
+      <div className="rounded-xl border border-border bg-accent-soft p-5 mb-12 text-body text-muted">
+        Die kostenpflichtigen Pakete befinden sich in Vorbereitung. Der kostenlose {CHECK_LABELS.nav} ist bereits verfügbar.
       </div>
 
-      {/* Kostenlos */}
-      <section className="mb-14">
-        <h2 className="text-xl font-bold text-primary mb-4">Kostenlos starten</h2>
-        <Card className="border-success/30 bg-success/5 p-6 max-w-xl">
-          <h3 className="text-2xl font-bold text-primary">Amanah-Check — 0 €</h3>
-          <ul className="mt-4 space-y-2 text-base text-muted">
-            <li>✓ Persönlicher Vorsorge-Check</li>
-            <li>✓ Überblick über offene Bereiche</li>
-            <li>✓ Wissensartikel</li>
-            <li>✓ Empfehlung für den nächsten Schritt</li>
+      <section className="mb-16">
+        <h2 className="text-section-title font-bold text-foreground mb-6">Kostenlos starten</h2>
+        <Card className="border-2 border-emerald/40 bg-card p-8 md:p-10 max-w-2xl shadow-sm">
+          <div className="inline-block px-3 py-1 rounded-full bg-emerald/15 text-emerald text-xs font-bold uppercase tracking-wide mb-4">
+            Kostenlos
+          </div>
+          <h3 className="text-3xl md:text-4xl font-bold text-foreground">{CHECK_LABELS.freeCard}</h3>
+          <ul className="mt-6 space-y-3 text-body text-muted">
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Persönlicher Vorsorge-Check</li>
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Überblick über offene Bereiche</li>
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Wissensartikel</li>
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Empfehlung für den nächsten Schritt</li>
           </ul>
-          <Link href="/check" className="inline-block mt-6">
-            <Button size="lg">Kostenlosen Check starten</Button>
+          <Link href="/check" className={linkButtonClassName({ size: "lg", className: "inline-block mt-8" })}>
+            Kostenlosen Check starten
           </Link>
         </Card>
       </section>
 
-      {/* Hauptpakete */}
-      <section className="mb-14">
-        <h2 className="text-xl font-bold text-primary mb-6">Deine vollständige Vorsorge</h2>
-        <div className="grid lg:grid-cols-3 gap-5">
+      <section className="mb-16">
+        <h2 className="text-section-title font-bold text-foreground mb-8">Deine vollständige Vorsorge</h2>
+        <div className="grid lg:grid-cols-3 gap-6">
           {MAIN_PACKAGES.map((pkg) => (
             <PricingCard key={pkg.id} {...pkg} disabled />
           ))}
         </div>
 
-        {/* Desktop Vergleich */}
-        <div className="hidden md:block mt-10 overflow-x-auto">
-          <table className="w-full text-base border border-border rounded-xl overflow-hidden">
-            <thead className="bg-background">
+        <div className="hidden md:block mt-12 overflow-x-auto rounded-2xl border border-border">
+          <table className="w-full text-base">
+            <thead className="bg-accent-soft">
               <tr>
-                <th className="text-left p-3 font-semibold text-primary">Funktion</th>
-                <th className="p-3 font-semibold text-primary">Basic</th>
-                <th className="p-3 font-semibold text-primary">Komplett</th>
-                <th className="p-3 font-semibold text-primary">Familie</th>
+                <th className="text-left p-4 font-bold text-foreground">Funktion</th>
+                <th className="p-4 font-bold text-foreground">Basic</th>
+                <th className="p-4 font-bold text-primary">Komplett</th>
+                <th className="p-4 font-bold text-foreground">Familie</th>
               </tr>
             </thead>
             <tbody>
               {COMPARE_ROWS.map((row) => (
                 <tr key={row.label} className="border-t border-border">
-                  <td className="p-3 text-muted">{row.label}</td>
-                  <td className="p-3 text-center"><CompareCell value={row.basic} /></td>
-                  <td className="p-3 text-center"><CompareCell value={row.komplett} /></td>
-                  <td className="p-3 text-center"><CompareCell value={row.familie} /></td>
+                  <td className="p-4 text-muted">{row.label}</td>
+                  <td className="p-4 text-center"><CompareCell value={row.basic} /></td>
+                  <td className="p-4 text-center bg-emerald/5"><CompareCell value={row.komplett} /></td>
+                  <td className="p-4 text-center"><CompareCell value={row.familie} /></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* Mobile Vergleich */}
-        <div className="md:hidden mt-8 space-y-3">
+        <div className="md:hidden mt-10 space-y-4">
           {MAIN_PACKAGES.map((pkg) => (
-            <details key={pkg.id} className="rounded-xl border border-border bg-card p-4">
-              <summary className="font-semibold text-primary cursor-pointer min-h-[44px] flex items-center justify-between">
+            <details key={pkg.id} className="rounded-2xl border border-border bg-card p-5">
+              <summary className="font-bold text-foreground cursor-pointer min-h-[44px] flex items-center justify-between text-lg">
                 {pkg.name} — {pkg.price}
-                <ChevronDown size={18} className="text-muted" />
+                <ChevronDown size={20} className="text-muted" />
               </summary>
-              <ul className="mt-3 space-y-1 text-base text-muted">
+              <ul className="mt-4 space-y-2 text-body text-muted">
                 {pkg.features.map((f) => (
                   <li key={f}>✓ {f}</li>
                 ))}
@@ -150,21 +150,22 @@ export default function PreisePage() {
         </div>
       </section>
 
-      {/* Themenpakete */}
-      <section className="mb-10">
-        <details className="rounded-xl border border-border bg-card p-4">
-          <summary className="font-semibold text-primary cursor-pointer min-h-[44px]">Weitere Einzelpakete</summary>
-          <div className="grid sm:grid-cols-2 gap-4 mt-4">
+      <section className="mb-12">
+        <details className="rounded-2xl border border-border bg-card p-5">
+          <summary className="font-bold text-foreground cursor-pointer min-h-[44px] text-lg">Weitere Einzelpakete</summary>
+          <div className="grid sm:grid-cols-2 gap-5 mt-5">
             {TOPIC_PACKAGES.map((pkg) => (
-              <div key={pkg.name} className="rounded-lg border border-border p-4">
-                <h4 className="font-bold text-primary">{pkg.name}</h4>
-                <p className="text-xl font-bold text-primary my-1">{pkg.price}</p>
-                <ul className="text-base text-muted space-y-1">
+              <div key={pkg.name} className="rounded-xl border border-border p-5">
+                <h4 className="font-bold text-foreground text-lg">{pkg.name}</h4>
+                <p className="text-2xl font-bold text-primary my-2">{pkg.price}</p>
+                <ul className="text-body text-muted space-y-1.5">
                   {pkg.features.map((f) => (
                     <li key={f}>✓ {f}</li>
                   ))}
                 </ul>
-                <Button className="w-full mt-4" disabled>Noch nicht verfügbar</Button>
+                <Button className="w-full mt-5" disabled>
+                  Noch nicht verfügbar
+                </Button>
               </div>
             ))}
           </div>

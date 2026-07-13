@@ -31,7 +31,15 @@ describe("verified source references", () => {
     expect(testament?.sourceIds).not.toContain("hadith-debts");
   });
 
-  it("displays muslim 944c for janazah hasten", () => {
+  it("displays muslim 944c and bukhari 1315 on janazah topic", () => {
+    const janazah = wissenTopics.find((t) => t.slug === "janazah-wuensche");
+    expect(janazah?.sourceIds).toContain("hadith-bukhari-janazah-1315");
+    expect(janazah?.sourceIds).toContain("hadith-muslim-janazah-944c");
+    expect(islamicSources["hadith-bukhari-janazah-1315"].reference).toMatch(/1315/);
+    expect(islamicSources["hadith-muslim-janazah-944c"].reference).toMatch(/944c/);
+  });
+
+  it("displays muslim 944c for janazah hasten combined source", () => {
     const src = islamicSources["hadith-janazah-hasten"];
     expect(src.reference).toMatch(/944c/);
     expect(src.reference).toMatch(/1315/);

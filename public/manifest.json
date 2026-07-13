@@ -4,8 +4,8 @@
   "description": "Islamische Vorsorge für Notfall, Janazah und Akhira. Halte heute fest, was deiner Familie später wichtig sein soll.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F7FAF8",
-  "theme_color": "#0B1511",
+  "background_color": "#F4F7F6",
+  "theme_color": "#071A16",
   "orientation": "portrait-primary",
   "icons": [
     {

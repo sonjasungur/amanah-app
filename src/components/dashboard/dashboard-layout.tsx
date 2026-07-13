@@ -36,7 +36,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileNavOpen(false)}
                 className={cn(
                   "block px-3 py-2.5 rounded-lg text-sm min-h-[44px] flex items-center gap-2",
-                  isActive(pathname, item.href) ? "bg-primary text-white font-medium" : "hover:bg-sand text-muted"
+                  isActive(pathname, item.href) ? "bg-primary text-white font-semibold shadow-sm" : "hover:bg-accent-soft text-muted hover:text-foreground"
                 )}
                 aria-current={isActive(pathname, item.href) ? "page" : undefined}
               >
@@ -67,7 +67,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileNavOpen(false)}
                 className={cn(
                   "block px-3 py-2 rounded-lg text-sm min-h-[44px] flex items-center gap-2",
-                  isActive(pathname, mod.path) ? "bg-primary/10 text-primary font-medium" : "hover:bg-sand text-muted"
+                  isActive(pathname, mod.path) ? "bg-accent-soft text-primary font-semibold border border-emerald/20" : "hover:bg-accent-soft/60 text-muted"
                 )}
               >
                 <span aria-hidden>{mod.icon}</span> {mod.title}

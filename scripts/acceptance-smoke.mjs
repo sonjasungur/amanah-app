@@ -26,6 +26,7 @@ const routes = [
   "/dashboard/familie",
   "/dashboard/ausfuellen",
   "/preise",
+  "/brand-review",
   "/konvertierte",
 ];
 
@@ -54,6 +55,7 @@ async function main() {
     heroCta: false,
     checkPage: false,
     preiseFree: false,
+    wissenSearch: false,
   };
 
   if (home?.ok) {
@@ -66,13 +68,19 @@ async function main() {
   const checkHtml = results.find((r) => r.path === "/check");
   if (checkHtml?.ok) {
     const full = await (await fetch(`${BASE}/check`)).text();
-    checks.checkPage = full.includes("Amanah-Check");
+    checks.checkPage = full.includes("Dein islamischer Vorsorge-Check");
   }
 
   const preiseHtml = results.find((r) => r.path === "/preise");
   if (preiseHtml?.ok) {
     const full = await (await fetch(`${BASE}/preise`)).text();
-    checks.preiseFree = full.includes("Amanah-Check") && full.includes("0 €");
+    checks.preiseFree = full.includes("Vorsorge-Check") && full.includes("0 €");
+  }
+
+  const wissenHtml = results.find((r) => r.path === "/wissen");
+  if (wissenHtml?.ok) {
+    const full = await (await fetch(`${BASE}/wissen`)).text();
+    checks.wissenSearch = full.includes("Worüber möchtest du mehr wissen?");
   }
 
   const failed = results.filter((r) => !r.ok || r.hasError);

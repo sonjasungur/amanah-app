@@ -61,9 +61,9 @@ export default function KonvertiertePage() {
       <Card className="bg-primary text-white mb-10">
         <Phone className="mb-3 text-accent" size={28} />
         <h2 className="text-xl font-bold mb-2">Erster Schritt heute</h2>
-        <p className="text-white/80 text-sm mb-4">Starte mit dem Amanah-Check — er erkennt deine Situation und empfiehlt konkrete nächste Schritte.</p>
+        <p className="text-white/80 text-sm mb-4">Starte mit dem Vorsorge-Check — er erkennt deine Situation und empfiehlt konkrete nächste Schritte.</p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/check"><Button size="lg">Amanah-Check starten</Button></Link>
+          <Link href="/check"><Button size="lg">Vorsorge-Check starten</Button></Link>
           <Link href="/dashboard/familie"><Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">Familienbrief vorbereiten</Button></Link>
           <Link href="/dashboard/notfallkarte"><Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">Notfallkontakt</Button></Link>
         </div>

@@ -14,7 +14,7 @@ export const localeNames: Record<Locale, string> = {
 export const translations: Record<Locale, Record<string, string>> = {
   de: {
     "nav.home": "Startseite",
-    "nav.check": "Amanah-Check",
+    "nav.check": "Vorsorge-Check",
     "nav.dashboard": "Mein Ordner",
     "nav.prices": "Preise",
     "nav.knowledge": "Wissen",
