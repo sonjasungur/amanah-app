@@ -5,7 +5,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Users, HeartHandshake, FileText, Phone } from "lucide-react";
 
 export const metadata = {
-  title: "Für Konvertierte & alleinstehende Muslime — Amanah Vorsorge",
+  title: "Für Konvertierte & alleinstehende Muslime — Mein Wille",
 };
 
 const checklist = [
@@ -63,7 +63,7 @@ export default function KonvertiertePage() {
         <h2 className="text-xl font-bold mb-2">Erster Schritt heute</h2>
         <p className="text-white/80 text-sm mb-4">Starte mit dem Amanah-Check — er erkennt deine Situation und empfiehlt konkrete nächste Schritte.</p>
         <div className="flex flex-wrap gap-3">
-          <Link href="/check"><Button size="lg" className="bg-accent hover:bg-accent-light text-white">Amanah-Check starten</Button></Link>
+          <Link href="/check"><Button size="lg">Amanah-Check starten</Button></Link>
           <Link href="/dashboard/familie"><Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">Familienbrief vorbereiten</Button></Link>
           <Link href="/dashboard/notfallkarte"><Button size="lg" variant="outline" className="border-white/40 text-white hover:bg-white/10">Notfallkontakt</Button></Link>
         </div>

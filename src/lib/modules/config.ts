@@ -117,5 +117,5 @@ export const startPaths = [
   { id: "barzakh", title: "Ich möchte Barzakh und Sadaqa Jariya vorbereiten", icon: "🌙", path: "/dashboard/barzakh" },
   { id: "familie", title: "Ich möchte meine Familie informieren", icon: "👨‍👩‍👧‍👦", path: "/dashboard/familie" },
   { id: "emergency", title: "Ich habe einen akuten Todesfall", icon: "🆘", path: "/akuter-todesfall" },
-  { id: "complete", title: "Ich möchte den kompletten Amanah Vorsorge erstellen", icon: "📁", path: "/dashboard" },
+  { id: "complete", title: "Ich möchte meine Vorsorge vollständig dokumentieren", icon: "📁", path: "/dashboard" },
 ];

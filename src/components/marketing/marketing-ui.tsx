@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export function PageHeader({ eyebrow, title, description, className }: { eyebrow?: string; title: string; description?: string; className?: string }) {
   return (
     <header className={cn("mb-8", className)}>
-      {eyebrow && <p className="text-sm font-semibold uppercase tracking-wide text-accent mb-2">{eyebrow}</p>}
+      {eyebrow && <p className="text-sm font-semibold uppercase tracking-wide text-primary mb-2">{eyebrow}</p>}
       <h1 className="text-2xl md:text-3xl font-bold text-primary leading-tight">{title}</h1>
       {description && <p className="text-base text-muted mt-3 max-w-2xl leading-relaxed">{description}</p>}
     </header>
@@ -27,7 +27,7 @@ export function TrustStrip({ items }: { items: string[] }) {
     <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-white/80">
       {items.map((item) => (
         <li key={item} className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" aria-hidden />
+          <span className="w-1.5 h-1.5 rounded-full bg-primary-light shrink-0" aria-hidden />
           {item}
         </li>
       ))}
@@ -40,7 +40,7 @@ export function FeatureList({ items, icon: Icon }: { items: string[]; icon?: Rea
     <ul className="space-y-3">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-3 text-base text-muted">
-          {Icon ? <Icon size={18} className="text-accent shrink-0 mt-0.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-accent mt-2 shrink-0" />}
+          {Icon ? <Icon size={18} className="text-primary shrink-0 mt-0.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />}
           {item}
         </li>
       ))}
@@ -66,7 +66,7 @@ export function FreeVsPaidSummary() {
       <div className="rounded-2xl border border-border bg-card p-5">
         <h3 className="font-bold text-primary text-lg mb-3">Mit kostenpflichtigem Paket</h3>
         <FeatureList items={["Strukturierte Eingabe und dauerhafte Dokumentation", "Vollständige Vorsorgemodule", "PDF-Ordner und Exporte", "Familienbrief und erweiterte Funktionen"]} />
-        <p className="text-sm text-muted mt-4">Kauf derzeit in Vorbereitung — siehe <Link href="/preise" className="text-accent hover:underline">Preise</Link>.</p>
+        <p className="text-sm text-muted mt-4">Kauf derzeit in Vorbereitung — siehe <Link href="/preise" className="text-primary hover:underline">Preise</Link>.</p>
       </div>
     </div>
   );
@@ -90,8 +90,8 @@ export function PricingCard({
   disabled?: boolean;
 }) {
   return (
-    <article className={cn("rounded-2xl border bg-card p-6 flex flex-col h-full", highlighted ? "border-accent ring-2 ring-accent/20" : "border-border")}>
-      {highlighted && <p className="text-xs font-bold uppercase text-accent mb-2">Empfohlen</p>}
+    <article className={cn("rounded-2xl border bg-card p-6 flex flex-col h-full", highlighted ? "border-primary ring-2 ring-primary/20" : "border-border")}>
+      {highlighted && <p className="text-xs font-bold uppercase text-primary mb-2">Empfohlen</p>}
       <h3 className="text-xl font-bold text-primary">{name}</h3>
       <p className="text-3xl font-bold text-primary mt-2">{price}</p>
       <p className="text-base text-muted mt-2 mb-4">{description}</p>

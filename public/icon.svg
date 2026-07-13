@@ -1,18 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="AmanahOrdner">
-  <defs>
-    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#d4a574"/>
-      <stop offset="100%" stop-color="#c45c26"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="108" fill="#070f1c"/>
-  <!-- Mihrab arch -->
-  <path d="M128 380V180c0-44 36-80 80-80h96c44 0 80 36 80 80v200" stroke="url(#gold)" stroke-width="14" fill="none" stroke-linecap="round"/>
-  <!-- Scroll / document -->
-  <rect x="176" y="200" width="160" height="200" rx="16" fill="#f3efe6" stroke="#c45c26" stroke-width="8"/>
-  <path d="M208 260h96M208 300h72M208 340h88" stroke="#070f1c" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
-  <!-- Seal ring -->
-  <circle cx="256" cy="160" r="52" stroke="url(#gold)" stroke-width="10" fill="#0f2540"/>
-  <circle cx="256" cy="160" r="28" stroke="url(#gold)" stroke-width="6" fill="none"/>
-  <path d="M256 132v56M228 160h56" stroke="url(#gold)" stroke-width="6" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="Mein Wille">
+  <rect width="512" height="512" rx="96" fill="#0B1511"/>
+  <!-- Mihrab-inspired arch frame -->
+  <path d="M112 392V208c0-48 48-88 144-88s144 40 144 88v184" stroke="#166534" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <!-- MW monogram -->
+  <path d="M148 340V172l52 96 52-96v168" stroke="#F8FAFC" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M268 340V172l44 68 44-68v168" stroke="#F8FAFC" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="128" r="10" fill="#15803D"/>
 </svg>

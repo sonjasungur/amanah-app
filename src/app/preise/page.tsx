@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 
 export const metadata = {
   title: `Preise — ${BRAND.name}`,
-  description: "Kostenlos starten mit Amanah-Check und Wissen. Vollständige Vorsorgepakete in Vorbereitung.",
+  description: "Kostenlos starten mit Amanah-Check und Wissen. Vollständige Vorsorgepakete in Vorbereitung — Mein Wille.",
 };
 
 const MAIN_PACKAGES = [

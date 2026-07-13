@@ -10,7 +10,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", type = "button", children, ...props }, ref) => {
     const variants = {
       primary: "bg-primary text-white hover:bg-primary-light shadow-md hover:shadow-lg",
-      secondary: "bg-accent text-white hover:bg-accent-light shadow-md",
+      secondary: "bg-primary-dark text-white hover:bg-primary shadow-md",
       outline: "border-2 border-primary text-primary hover:bg-primary/5",
       ghost: "text-primary hover:bg-primary/5",
       danger: "bg-danger text-white hover:bg-danger/90",
@@ -25,7 +25,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          "inline-flex items-center justify-center rounded-xl font-medium transition-colors disabled:opacity-50",
+          "inline-flex items-center justify-center rounded-xl font-medium transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
           variants[variant],
           sizes[size],
           className

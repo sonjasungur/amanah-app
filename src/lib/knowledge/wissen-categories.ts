@@ -20,25 +20,25 @@ export const WISSEN_CATEGORY_CONFIG: Record<WissenCategoryId, WissenCategoryConf
   notfall: {
     id: "notfall",
     label: "Notfall und Gesundheit",
-    accent: "#0F4C5C",
+    accent: "#0F766E",
     topicIds: ["w-notfall", "w-pv", "w-vollmacht", "w-betreuung"],
   },
   janazah: {
     id: "janazah",
     label: "Abschied und Janazah",
-    accent: "#3D5A80",
+    accent: "#1E3A5F",
     topicIds: ["w-janazah", "w-ghusl", "w-bestattung", "w-familie"],
   },
   vermoegen: {
     id: "vermoegen",
     label: "Vermögen und Verantwortung",
-    accent: "#C58A2A",
+    accent: "#64748B",
     topicIds: ["w-testament", "w-schulden", "w-digital"],
   },
   akhira: {
     id: "akhira",
     label: "Akhira und Weiterwirken",
-    accent: "#27865A",
+    accent: "#166534",
     topicIds: ["w-sadaqa"],
   },
 };

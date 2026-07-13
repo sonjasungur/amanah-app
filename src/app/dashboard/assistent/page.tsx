@@ -18,7 +18,7 @@ const quickActions = [
     id: "guide",
     label: "Leitfaden",
     icon: BookOpen,
-    prompt: "Erkläre mir Schritt für Schritt, wie ich meinen Amanah Vorsorge am besten ausfülle. Was sollte ich zuerst tun?",
+    prompt: "Erkläre mir Schritt für Schritt, wie ich meinen Mein Wille am besten ausfülle. Was sollte ich zuerst tun?",
   },
   {
     id: "family_letter",
@@ -30,7 +30,7 @@ const quickActions = [
     id: "summary",
     label: "Zusammenfassung",
     icon: ListChecks,
-    prompt: "Fasse alle meine bisherigen Angaben im Amanah Vorsorge übersichtlich zusammen — nach Modulen gegliedert.",
+    prompt: "Fasse alle meine bisherigen Angaben im Mein Wille übersichtlich zusammen — nach Modulen gegliedert.",
   },
   {
     id: "translate",
@@ -42,7 +42,7 @@ const quickActions = [
     id: "open_points",
     label: "Offene Punkte",
     icon: AlertCircle,
-    prompt: "Welche wichtigen Punkte fehlen noch in meinem Amanah Vorsorge? Was sollte ich als Nächstes ausfüllen?",
+    prompt: "Welche wichtigen Punkte fehlen noch in meinem Mein Wille? Was sollte ich als Nächstes ausfüllen?",
   },
 ];
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Sadaqa Jariya — Amanah Vorsorge",
+  title: "Sadaqa Jariya — Mein Wille",
   description: "Fortlaufende Wohltätigkeit für den Barzakh — Wissen und Projekte über Gemeinsam1 e.V.",
 };
 
@@ -37,7 +37,7 @@ export default function SadaqaJariyaPage() {
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-primary mb-2">Projekte über Gemeinsam1 e.V.</h2>
         <p className="text-muted text-sm mb-6">
-          Ausgewählte Sadaqa-Jariya-Projekte — Spenden laufen direkt über den Verein, nicht über Amanah Vorsorge.
+          Ausgewählte Sadaqa-Jariya-Projekte — Spenden laufen direkt über den Verein, nicht über Mein Wille.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-5">
@@ -73,14 +73,14 @@ export default function SadaqaJariyaPage() {
       </div>
 
       <div className="rounded-2xl bg-sand border border-accent/30 p-6 mb-10">
-        <h3 className="font-semibold text-primary mb-2">Trennung: Amanah Vorsorge & Gemeinsam1</h3>
+        <h3 className="font-semibold text-primary mb-2">Trennung: Mein Wille & Gemeinsam1</h3>
         <p className="text-sm text-muted leading-relaxed">
-          Amanah Vorsorge ist ein digitales Vorsorgeprodukt zur Dokumentation deiner Wünsche und Pläne.
+          Mein Wille ist ein digitales Vorsorgeprodukt zur Dokumentation deiner Wünsche und Pläne.
           Spenden und Projekte laufen ausschließlich über{" "}
           <a href="https://gemeinsam1.de" target="_blank" rel="noopener noreferrer" className="text-primary-light underline">
             Gemeinsam1 e.V.
           </a>{" "}
-          — getrennt von Amanah Vorsorge. Wir verknüpfen nur, damit du deine Sadaqa-Jariya-Vorsorge planen kannst.
+          — getrennt von Mein Wille. Wir verknüpfen nur, damit du deine Sadaqa-Jariya-Vorsorge planen kannst.
         </p>
       </div>
 

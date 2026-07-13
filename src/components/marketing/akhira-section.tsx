@@ -35,7 +35,7 @@ export function AkhiraSection() {
         <button
           type="button"
           onClick={() => setSourceOpen(!sourceOpen)}
-          className="text-sm font-medium text-accent hover:underline min-h-[44px]"
+          className="text-sm font-medium text-primary hover:underline min-h-[44px]"
           aria-expanded={sourceOpen}
         >
           {sourceOpen ? "Quelle ausblenden" : "Islamische Primärquelle anzeigen (Sahih Muslim 1631)"}

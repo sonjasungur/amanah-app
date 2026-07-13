@@ -287,7 +287,7 @@ export const GUIDED_QUESTION_PLAN: GuidedQuestion[] = [
     id: "gf-user-name",
     moduleId: "notfallkarte",
     fieldPath: "userProfile.name",
-    questionText: "Wie möchtest du in deinem Amanah Vorsorge genannt werden?",
+    questionText: "Wie soll dein Name in deinem Vorsorgeordner erscheinen?",
     helpText: "Dein Name für Begrüßung und Dokumente.",
     sensitivity: "low",
     expectedAnswerType: "text",

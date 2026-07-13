@@ -9,31 +9,31 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <h4 className="font-bold text-white mb-2">{BRAND.name}</h4>
-            <p className="text-sm text-white/70">{BRAND.tagline}</p>
-            <p className="text-sm text-white/60 mt-2">{BRAND.emotional}</p>
+            <p className="text-sm text-white/70">{BRAND.subtitle}</p>
+            <p className="text-sm text-white/60 mt-2 italic">{BRAND.claim}</p>
           </div>
           <div>
             <h4 className="font-semibold text-white mb-3">Wissen</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/wissen" className="hover:text-accent">Alle Themen</Link></li>
-              <li><Link href="/konvertierte" className="hover:text-accent">Für Konvertierte</Link></li>
-              <li><Link href="/janazah-kompass" className="hover:text-accent">Janazah-Kompass</Link></li>
+              <li><Link href="/wissen" className="hover:text-primary-light">Alle Themen</Link></li>
+              <li><Link href="/konvertierte" className="hover:text-primary-light">Für Konvertierte</Link></li>
+              <li><Link href="/janazah-kompass" className="hover:text-primary-light">Janazah-Kompass</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-white mb-3">Service</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/check" className="hover:text-accent">Amanah-Check</Link></li>
-              <li><Link href="/preise" className="hover:text-accent">Preise</Link></li>
-              <li><Link href="/dashboard" className="hover:text-accent">Mein Ordner</Link></li>
+              <li><Link href="/check" className="hover:text-primary-light">Amanah-Check</Link></li>
+              <li><Link href="/preise" className="hover:text-primary-light">Preise</Link></li>
+              <li><Link href="/dashboard" className="hover:text-primary-light">Mein Ordner</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-white mb-3">Rechtliches</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/datenschutz" className="hover:text-accent">Datenschutz</Link></li>
-              <li><Link href="/sicherheit" className="hover:text-accent">Sicherheit</Link></li>
-              <li><Link href="/impressum" className="hover:text-accent">Impressum</Link></li>
+              <li><Link href="/datenschutz" className="hover:text-primary-light">Datenschutz</Link></li>
+              <li><Link href="/sicherheit" className="hover:text-primary-light">Sicherheit</Link></li>
+              <li><Link href="/impressum" className="hover:text-primary-light">Impressum</Link></li>
             </ul>
           </div>
         </div>

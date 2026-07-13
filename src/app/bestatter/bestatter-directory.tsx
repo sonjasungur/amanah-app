@@ -31,7 +31,7 @@ function PartnerCard({ partner }: { partner: FuneralPartner }) {
         <div className="flex flex-wrap gap-2">
           {partner.partner && (
             <span className="inline-flex items-center rounded-full bg-primary text-white px-3 py-1 text-xs font-medium">
-              Amanah Vorsorge Partner
+              Mein Wille Partner
             </span>
           )}
           {partner.verified && (

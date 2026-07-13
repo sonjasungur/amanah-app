@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Janazah-Kompass — Amanah Vorsorge",
+  title: "Janazah-Kompass — Mein Wille",
   description: "Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung in Deutschland.",
 };
 
@@ -36,7 +36,7 @@ export default function JanazahKompassPage() {
       <div className="mt-10 rounded-2xl bg-gradient-to-br from-primary/5 to-sand border border-primary/10 p-8 text-center">
         <h2 className="text-xl font-bold text-primary mb-2">Eigene Janazah-Wünsche dokumentieren</h2>
         <p className="text-sm text-muted mb-5 max-w-md mx-auto">
-          Im Amanah Vorsorge kannst du deine Wünsche zu Ghusl, Kafan, Beisetzung und Familienbotschaft festhalten —
+          Im Mein Wille kannst du deine Wünsche zu Ghusl, Kafan, Beisetzung und Familienbotschaft festhalten —
           damit deine Angehörigen im schwersten Moment Klarheit haben.
         </p>
         <Link href="/dashboard/janazah">

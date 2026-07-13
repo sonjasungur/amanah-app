@@ -49,7 +49,8 @@ async function main() {
 
   const home = results.find((r) => r.path === "/");
   const checks = {
-    heroHeadline: home?.snippet?.includes("Familie nicht raten") ?? false,
+    brandName: false,
+    heroHeadline: false,
     heroCta: false,
     checkPage: false,
     preiseFree: false,
@@ -57,8 +58,9 @@ async function main() {
 
   if (home?.ok) {
     const full = await (await fetch(`${BASE}/`)).text();
-    checks.heroHeadline = full.includes("Familie nicht raten muss");
-    checks.heroCta = full.includes("3-Minuten-Check") && full.includes('href="/check"');
+    checks.brandName = full.includes("Mein Wille");
+    checks.heroHeadline = full.includes("Damit meine Familie weiß, was mir wichtig ist");
+    checks.heroCta = full.includes("Kostenlos prüfen, was noch fehlt") && full.includes('href="/check"');
   }
 
   const checkHtml = results.find((r) => r.path === "/check");

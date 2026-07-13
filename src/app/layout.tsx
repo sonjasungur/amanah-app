@@ -13,14 +13,26 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: `${BRAND.name} — ${BRAND.tagline}`,
-  description: BRAND.description,
+  title: BRAND.metadataTitle,
+  description: BRAND.metadataDescription,
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: BRAND.name },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: BRAND.shortName },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    title: BRAND.metadataTitle,
+    description: BRAND.metadataDescription,
+    siteName: BRAND.name,
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B1220",
+  themeColor: BRAND.themeColor,
   width: "device-width",
   initialScale: 1,
 };

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Partner werden — Amanah Vorsorge",
+  title: "Partner werden — Mein Wille",
   description: "Partnerschaften für Bestatter, Moscheen/Vereine und Anwälte/Notare.",
 };
 
@@ -17,7 +17,7 @@ const sections = [
     features: [
       "Kostenloser Basiseintrag mit regionalem Profil",
       "Verifiziertes Partner-Badge und 24/7-Sichtbarkeit",
-      "Direkte Verknüpfung mit Amanah Vorsorge-Nutzerwünschen",
+      "Direkte Verknüpfung mit Mein Wille-Nutzerwünschen",
     ],
     cta: { label: "Bestatter-Verzeichnis ansehen", href: "/bestatter" },
     buttonLabel: "Interesse anmelden",
@@ -59,7 +59,7 @@ export default function PartnerPage() {
         <p className="text-accent font-medium mb-2">Gemeinsam stärker</p>
         <h1 className="text-3xl font-bold text-primary mb-3">Partner werden</h1>
         <p className="text-muted max-w-2xl mx-auto leading-relaxed">
-          Amanah Vorsorge verbindet Muslime in Deutschland mit vertrauenswürdigen Partnern —
+          Mein Wille verbindet Muslime in Deutschland mit vertrauenswürdigen Partnern —
           im Alltag und im schwersten Moment.
         </p>
       </div>

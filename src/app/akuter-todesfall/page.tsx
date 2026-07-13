@@ -2,7 +2,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Akuter Todesfall — Amanah Vorsorge" };
+export const metadata = { title: "Akuter Todesfall — Mein Wille" };
 
 const steps = [
   { num: 1, title: "Arzt / Totenschein", desc: "Hausarzt oder Notarzt kontaktieren. Totenschein ausstellen lassen." },

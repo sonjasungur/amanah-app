@@ -24,14 +24,14 @@ export const pricingPlans: PricingPlan[] = [
   },
   {
     id: "basic-pdf",
-    name: "Amanah Vorsorge Basic PDF",
+    name: "Mein Wille Basic PDF",
     price: "29 €",
     features: ["Notfallkarte", "Janazah-Wünsche", "Familienbrief", "PDF-Export"],
     category: "one_time",
   },
   {
     id: "complete",
-    name: "Amanah Vorsorge Komplett",
+    name: "Mein Wille Komplett",
     price: "79 €",
     features: ["Alle 13 Module", "Vollständiger PDF-Ordner", "JSON-Export", "Ampelcheck Erbe"],
     category: "one_time",
