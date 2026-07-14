@@ -11,11 +11,11 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Eine Notfallmappe bündelt wichtige Kontakte, Dokumenthinweise und Wünsche — zur Orientierung für Angehörige im Ernstfall.",
     content:
-      "Eine Notfallmappe (AmanahOrdner) hilft Angehörigen, im Ernstfall schneller zu handeln. Typische Inhalte: Notfallkontakte, medizinische Hinweise, Vorsorgevollmacht/Patientenverfügung (Hinweise, nicht die Originale), Bestattungswünsche, Schuldenhinweise, digitaler Nachlass und ein Familienbrief. Der AmanahOrdner ersetzt keine Rechtsberatung und garantiert keine Vollständigkeit — fachliche Prüfung empfohlen.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Eine Notfallmappe (Mein Wille) hilft Angehörigen, im Ernstfall schneller zu handeln. Typische Inhalte: Notfallkontakte, medizinische Hinweise, Vorsorgevollmacht/Patientenverfügung (Hinweise, nicht die Originale), Bestattungswünsche, Schuldenhinweise, digitaler Nachlass und ein Familienbrief. Mein Wille ersetzt keine Rechtsberatung und garantiert keine Vollständigkeit — fachliche Prüfung empfohlen.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
-    tags: ["Notfallmappe", "AmanahOrdner", "Vorbereitung", "Familie"],
+    tags: ["Notfallmappe", "Mein Wille", "Vorbereitung", "Familie"],
     lastReviewedAt: REVIEWED,
   },
   {
@@ -26,8 +26,8 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Benenne eine oder mehrere Vertrauenspersonen, die im Notfall zuerst informiert werden sollen.",
     content:
-      "Notfallkontakte sind Personen, die im Krankheits- oder Todesfall zuerst erreicht werden sollen — z. B. Ehepartner, Geschwister oder eine Vertrauensperson. Notiere Name, Telefonnummer und Beziehung. Ergänze optional eine zweite Kontaktperson. Der AmanahOrdner speichert diese Angaben zur Vorbereitung; rechtliche Vertretung regelt separat eine Vorsorgevollmacht — bitte Anwalt/Notar oder Beratungsstelle konsultieren.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Notfallkontakte sind Personen, die im Krankheits- oder Todesfall zuerst erreicht werden sollen — z. B. Ehepartner, Geschwister oder eine Vertrauensperson. Notiere Name, Telefonnummer und Beziehung. Ergänze optional eine zweite Kontaktperson. Mein Wille speichert diese Angaben zur Vorbereitung; rechtliche Vertretung regelt separat eine Vorsorgevollmacht — bitte Anwalt/Notar oder Beratungsstelle konsultieren.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Notfallkontakt", "Vertrauensperson", "Telefon", "Familie"],
@@ -41,8 +41,8 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Eine Übersicht hilft Angehörigen, relevante Unterlagen zu finden — ohne Passwörter oder sensible Zugangsdaten zu speichern.",
     content:
-      "Eine Dokumentenübersicht listet, wo wichtige Unterlagen aufbewahrt werden: z. B. Ausweis, Versicherungen, Vorsorgevollmacht, Patientenverfügung, Testament, Mietvertrag, Kontounterlagen. Im AmanahOrdner werden nur Hinweise dokumentiert — keine Passwörter. Originale und rechtliche Wirksamkeit müssen separat geprüft werden. Fachliche Prüfung durch Anwalt/Notar empfohlen.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Eine Dokumentenübersicht listet, wo wichtige Unterlagen aufbewahrt werden: z. B. Ausweis, Versicherungen, Vorsorgevollmacht, Patientenverfügung, Testament, Mietvertrag, Kontounterlagen. In Mein Wille werden nur Hinweise dokumentiert — keine Passwörter. Originale und rechtliche Wirksamkeit müssen separat geprüft werden. Fachliche Prüfung durch Anwalt/Notar empfohlen.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Dokumente", "Übersicht", "Aufbewahrung", "Vorsorge"],
@@ -56,7 +56,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Eine Vorsorgevollmacht bestimmt, wer im Krankheitsfall für dich handeln darf — rechtliche Details bitte fachlich prüfen.",
     content:
-      "Mit einer Vorsorgevollmacht kannst du eine Person benennen, die in deinem Namen handeln darf, wenn du es selbst nicht mehr kannst — z. B. bei Behörden, Banken oder Verträgen. Form, Umfang und Wirksamkeit hängen vom deutschen Recht ab. Der AmanahOrdner hilft, deine Wünsche zu dokumentieren — ersetzt keine Rechtsberatung. Bitte Anwalt, Notar oder Bundesjustizministerium (Orientierung) konsultieren.",
+      "Mit einer Vorsorgevollmacht kannst du eine Person benennen, die in deinem Namen handeln darf, wenn du es selbst nicht mehr kannst — z. B. bei Behörden, Banken oder Verträgen. Form, Umfang und Wirksamkeit hängen vom deutschen Recht ab. Mein Wille hilft, deine Wünsche zu dokumentieren — ersetzt keine Rechtsberatung. Bitte Anwalt, Notar oder Bundesjustizministerium (Orientierung) konsultieren.",
     sourceLabel: "Bundesjustizministerium — Orientierung",
     sourceUrl: "https://www.bmjv.de/DE/themen/familie_und_partnerschaft/vorsorgevollmacht/vorsorgevollmacht_node.html",
     reviewedStatus: "reviewed",
@@ -72,7 +72,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Eine Patientenverfügung dokumentiert medizinische Wünsche für den Fall, dass du nicht mehr entscheiden kannst.",
     content:
-      "Eine Patientenverfügung legt fest, welche medizinischen Maßnahmen du wünschen oder ablehnen möchtest, wenn du nicht mehr entscheidungsfähig bist. Sie dient der Orientierung für Ärzte und Angehörige. Der AmanahOrdner hilft, Wünsche vorzubereiten — keine medizinische Beratung. Individuelle Entscheidungen bitte mit Arzt/Fachperson besprechen. Allgemeine Informationen: Bundesgesundheitsministerium.",
+      "Eine Patientenverfügung legt fest, welche medizinischen Maßnahmen du wünschen oder ablehnen möchtest, wenn du nicht mehr entscheidungsfähig bist. Sie dient der Orientierung für Ärzte und Angehörige. Mein Wille hilft, Wünsche vorzubereiten — keine medizinische Beratung. Individuelle Entscheidungen bitte mit Arzt/Fachperson besprechen. Allgemeine Informationen: Bundesgesundheitsministerium.",
     sourceLabel: "Bundesgesundheitsministerium — Orientierung",
     sourceUrl: "https://www.bundesgesundheitsministerium.de/themen/pflege/patientenverfuegung.html",
     reviewedStatus: "reviewed",
@@ -88,8 +88,8 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Bestattungswünsche helfen Angehörigen, deine Vorstellungen zu verstehen — ohne rechtliche Garantien.",
     content:
-      "Bestattungswünsche können Form der Beisetzung, gewünschten Bestatter, islamische Grundsätze, Kostenrahmen und Hinweise für die Familie umfassen. In Deutschland gelten zusätzlich rechtliche und organisatorische Regeln. Dokumentiere Wünsche im AmanahOrdner zur Orientierung — fachliche Prüfung mit Bestatter, Imam/Gelehrten und ggf. Anwalt empfohlen.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Bestattungswünsche können Form der Beisetzung, gewünschten Bestatter, islamische Grundsätze, Kostenrahmen und Hinweise für die Familie umfassen. In Deutschland gelten zusätzlich rechtliche und organisatorische Regeln. Dokumentiere Wünsche in Mein Wille zur Orientierung — fachliche Prüfung mit Bestatter, Imam/Gelehrten und ggf. Anwalt empfohlen.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Bestattung", "Janazah", "Wünsche", "Bestatter"],
@@ -103,7 +103,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Janazah bezeichnet die islamische Bestattungszeremonie — Ghusl, Kafan, Gebet und Beisetzung.",
     content:
-      "Janazah umfasst die Begleitung eines verstorbenen Muslims: rituelle Waschung (Ghusl), Leichentücher (Kafan), Janazah-Gebet (Salāt al-Janāzah) und Beisetzung. Details können je nach Meinung variieren. Der AmanahOrdner erklärt Begriffe nur allgemein — bei Detailfragen Imam/Gelehrte konsultieren, keine Fatwa.",
+      "Janazah umfasst die Begleitung eines verstorbenen Muslims: rituelle Waschung (Ghusl), Leichentücher (Kafan), Janazah-Gebet (Salāt al-Janāzah) und Beisetzung. Details können je nach Meinung variieren. Mein Wille erklärt Begriffe nur allgemein — bei Detailfragen Imam/Gelehrte konsultieren, keine Fatwa.",
     sourceLabel: "Klassische Fiqh-Literatur — allgemeine Orientierung",
     reviewedStatus: "reviewed",
     riskLevel: "low",
@@ -133,7 +133,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Sadaqa Jariya bezeichnet fortlaufende Wohltätigkeit, deren Nutzen auch nach dem Tod weiterwirkt — allgemeine Orientierung.",
     content:
-      "Sadaqa Jariya (beständige Wohltätigkeit) kann z. B. Brunnen, Bildung, Moschee-Unterstützung oder andere Projekte umfassen, deren Nutzen anhält. Muslime planen manchmal Sadaqa Jariya als Teil ihrer Vorsorge. Der AmanahOrdner hilft, Wünsche zu dokumentieren — keine Fatwa und keine Garantie religiöser Bewertung. Detailfragen mit Imam/Gelehrten besprechen.",
+      "Sadaqa Jariya (beständige Wohltätigkeit) kann z. B. Brunnen, Bildung, Moschee-Unterstützung oder andere Projekte umfassen, deren Nutzen anhält. Muslime planen manchmal Sadaqa Jariya als Teil ihrer Vorsorge. Mein Wille hilft, Wünsche zu dokumentieren — keine Fatwa und keine Garantie religiöser Bewertung. Detailfragen mit Imam/Gelehrten besprechen.",
     sourceLabel: "Hadith-Literatur — allgemeine Orientierung",
     reviewedStatus: "reviewed",
     riskLevel: "low",
@@ -148,8 +148,8 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Digitaler Nachlass umfasst Hinweise zu Online-Konten und Geräten — ohne Passwörter in der App zu speichern.",
     content:
-      "Digitaler Nachlass betrifft E-Mail, Social Media, Cloud, Abos und Geräte. Im AmanahOrdner werden nur Hinweise dokumentiert — keine Passwörter. Angehörige brauchen Orientierung, welche Konten existieren und was damit geschehen soll. Rechtliche Zugänge regeln gesonderte Vollmachten — Anwalt/Notar konsultieren.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Digitaler Nachlass betrifft E-Mail, Social Media, Cloud, Abos und Geräte. In Mein Wille werden nur Hinweise dokumentiert — keine Passwörter. Angehörige brauchen Orientierung, welche Konten existieren und was damit geschehen soll. Rechtliche Zugänge regeln gesonderte Vollmachten — Anwalt/Notar konsultieren.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Digitaler Nachlass", "Online", "Konten", "Hinweise"],
@@ -163,8 +163,8 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Ein Familienbrief oder eine Nachricht an Vertrauenspersonen erklärt deine wichtigsten Wünsche verständlich.",
     content:
-      "Eine Familiennachricht oder ein Familienbrief kann Angehörige im schweren Moment orientieren: wer zuerst informiert werden soll, wichtige Wünsche zu Krankheit, Bestattung und Spiritualität. Der AmanahOrdner hilft beim Formulieren — Entwurf immer selbst prüfen lassen. Kein automatischer Versand, keine Rechtsberatung.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+      "Eine Familiennachricht oder ein Familienbrief kann Angehörige im schweren Moment orientieren: wer zuerst informiert werden soll, wichtige Wünsche zu Krankheit, Bestattung und Spiritualität. Mein Wille hilft beim Formulieren — Entwurf immer selbst prüfen lassen. Kein automatischer Versand, keine Rechtsberatung.",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Familienbrief", "Vertrauensperson", "Nachricht", "Familie"],
@@ -176,10 +176,10 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     category: "app-grenzen",
     language: "de",
     summary:
-      "AmanahOrdner dient der Orientierung und Vorbereitung — keine Rechts-, Medizin- oder Fatwa-Beratung.",
+      "Mein Wille dient der Orientierung und Vorbereitung — keine Rechts-, Medizin- oder Fatwa-Beratung.",
     content:
-      "Der AmanahOrdner und Amanah-Assistent helfen beim Ordnen, Formulieren und Erkennen offener Punkte. Sie ersetzen keinen Imam/Gelehrten, Arzt, Anwalt oder Notar. Keine Garantie auf Vollständigkeit oder rechtliche Wirksamkeit. Bei individuellen Fragen: Recht — Anwalt/Notar; Medizin — Arzt/Fachperson; Religion — Imam/Gelehrte.",
-    sourceLabel: "AmanahOrdner — Sicherheitshinweis",
+      "Mein Wille und Vorsorge-Assistent helfen beim Ordnen, Formulieren und Erkennen offener Punkte. Sie ersetzen keinen Imam/Gelehrten, Arzt, Anwalt oder Notar. Keine Garantie auf Vollständigkeit oder rechtliche Wirksamkeit. Bei individuellen Fragen: Recht — Anwalt/Notar; Medizin — Arzt/Fachperson; Religion — Imam/Gelehrte.",
+    sourceLabel: "Mein Wille — Sicherheitshinweis",
     reviewedStatus: "reviewed",
     riskLevel: "low",
     tags: ["Disclaimer", "Grenzen", "Fachliche Prüfung", "Sicherheit"],
@@ -193,7 +193,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary: "Kurze Checkliste: Kontakte, medizinische Hinweise, Bestattung, Schulden, digitaler Nachlass.",
     content:
       "Checkliste zur Vorbereitung: (1) Notfallkontakte, (2) medizinische Hinweise/Patientenverfügung, (3) Vorsorgevollmacht-Hinweis, (4) Bestattungswünsche, (5) Schulden & Amanah, (6) digitaler Nachlass, (7) Familienbrief. Schrittweise ergänzen — fachliche Prüfung empfohlen.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "draft",
     riskLevel: "low",
     tags: ["Checkliste", "Notfallmappe", "Vorbereitung"],
@@ -207,7 +207,7 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary: "Beisetzung in Deutschland oder Überführung — beides braucht Vorbereitung.",
     content:
       "In Deutschland können Muslime hier beerdigt oder ins Ausland überführt werden. Beides hat rechtliche Fristen, Kosten und familiäre Aspekte. Dokumentiere Wünsche frühzeitig. Moschee, Bestatter und Imam/Gelehrte können orientieren — keine verbindliche Rechts- oder Fatwa-Aussage.",
-    sourceLabel: "AmanahOrdner — Orientierungshilfe",
+    sourceLabel: "Mein Wille — Orientierungshilfe",
     reviewedStatus: "needs_review",
     riskLevel: "medium",
     tags: ["Janazah", "Deutschland", "Überführung", "Bestattung"],

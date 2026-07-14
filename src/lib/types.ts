@@ -43,6 +43,14 @@ export type IslamicSourceType =
   | "medical"
   | "official";
 
+/** Content audit category for source governance */
+export type SourceAuditCategory =
+  | "QURAN_PRIMARY"
+  | "SAHIH_PRIMARY"
+  | "LEGAL_GERMANY"
+  | "GENERAL_GUIDANCE"
+  | "FIQH_REVIEW_REQUIRED";
+
 export interface IslamicSource {
   id: string;
   type: IslamicSourceType;
@@ -53,6 +61,20 @@ export interface IslamicSource {
   translationDe?: string;
   translationEn?: string;
   note?: string;
+  /** Audit category for display grouping */
+  auditCategory?: SourceAuditCategory;
+  /** Groups duplicate narrations (e.g. Bukhari 1315 + Muslim 944c) */
+  sourceGroup?: string;
+  /** QuranEnc browse URL — canonical verse reference */
+  quranEncUrl?: string;
+  /** Licensed translation attribution */
+  translator?: string;
+  translationVersion?: string;
+  /** true when German text is paraphrase, not licensed translation */
+  isParaphrase?: boolean;
+  /** Hadith collection for Sahih sources */
+  collection?: "bukhari" | "muslim";
+  hadithNumber?: string;
 }
 
 export type WissenFilter =
@@ -76,12 +98,18 @@ export interface RichKnowledgeDetails {
   whyImportant: string;
   ifMissing: string;
   prepareItems: string[];
+  /** Concrete actions for today — shown in section C */
+  todayActions?: string[];
   documents: string[];
+  /** German legal notes — section E */
+  legalNotes?: string[];
   safeStorage: string;
   tellFamily: string;
   commonMistakes: string[];
   nextStepLabel: string;
   nextStepHref: string;
+  /** Optional Janazah checklist items */
+  janazahChecklist?: string[];
 }
 
 export interface KnowledgeArticle {

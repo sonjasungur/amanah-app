@@ -1,22 +1,30 @@
 {
-  "name": "AmanahOrdner",
-  "short_name": "AmanahOrdner",
-  "description": "Islamisch vorbereitet — Vorsorge für Muslime in Deutschland",
+  "name": "Mein Wille – Islamische Vorsorge",
+  "short_name": "Mein Wille",
+  "description": "Islamische Vorsorge für Notfall, Janazah und Akhira. Halte heute fest, was deiner Familie später wichtig sein soll.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f8fb",
-  "theme_color": "#070f1c",
+  "background_color": "#F4F7F6",
+  "theme_color": "#071A16",
   "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

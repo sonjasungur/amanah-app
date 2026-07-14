@@ -20,7 +20,7 @@ export const dashboardNavGroups: NavGroup[] = [
     id: "prep",
     label: "Vorbereitung",
     items: [
-      { href: "/check", label: "Amanah-Check", icon: "✓" },
+      { href: "/check", label: "Vorsorge-Check", icon: "✓" },
       { href: "/wissen", label: "Wissen", icon: "📚" },
       { href: "/dashboard/ausfuellen", label: "Geführt ausfüllen", icon: "🧭" },
     ],

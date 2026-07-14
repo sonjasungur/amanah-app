@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
 
 export const metadata = {
-  title: "Sicherheit — AmanahOrdner",
-  description: "Sicherheitshinweise für AmanahOrdner — Speicherung, Export, KI und Beta-Status.",
+  title: "Sicherheit — Mein Wille",
+  description: "Sicherheitshinweise für Mein Wille — Speicherung, Export, KI und Beta-Status.",
 };
 
 export default function SicherheitPage() {
@@ -17,7 +17,7 @@ export default function SicherheitPage() {
           <h2 className="text-xl font-semibold text-primary mb-3">Beta-Hinweis</h2>
           <div className="rounded-xl bg-sand border border-accent/20 p-5">
             <p className="leading-relaxed">
-              AmanahOrdner befindet sich in aktiver Entwicklung. Funktionen werden schrittweise gehärtet.
+              Mein Wille befindet sich in aktiver Entwicklung. Funktionen werden schrittweise gehärtet.
               Für verbindliche Entscheidungen ist eine <strong className="text-foreground">fachliche Prüfung</strong>{" "}
               durch Anwalt, Notar, Arzt oder qualifizierte Gelehrte empfohlen.
             </p>

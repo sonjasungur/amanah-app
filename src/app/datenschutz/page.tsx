@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
 
 export const metadata = {
-  title: "Datenschutz — AmanahOrdner",
-  description: "Datenschutzerklärung für AmanahOrdner — lokale und serverseitige Speicherung, KI, Export und Löschung.",
+  title: "Datenschutz — Mein Wille",
+  description: "Datenschutzerklärung für Mein Wille — lokale und serverseitige Speicherung, KI, Export und Löschung.",
 };
 
 export default function DatenschutzPage() {
@@ -16,7 +16,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">1. Verantwortlicher</h2>
           <p className="leading-relaxed">
-            Verantwortlich für die Datenverarbeitung im Rahmen von AmanahOrdner ist der Betreiber der Plattform.
+            Verantwortlich für die Datenverarbeitung im Rahmen von Mein Wille ist der Betreiber der Plattform.
             Kontakt:{" "}
             <a href="mailto:datenschutz@amanahordner.de" className="text-primary-light underline">
               datenschutz@amanahordner.de
@@ -67,7 +67,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">5. Keine Passwort-Speicherung für private Konten</h2>
           <p className="leading-relaxed">
-            AmanahOrdner speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
+            Mein Wille speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
             persönlichen Konten (E-Mail, Banking, Social Media). Im Modul „Digitaler Nachlass“ dokumentierst du
             nur Hinweise, wo Zugangsdaten sicher aufbewahrt werden — nicht die Passwörter selbst.
           </p>
@@ -103,7 +103,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">9. Cookies & Analytics</h2>
           <p className="leading-relaxed">
-            AmanahOrdner verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
+            Mein Wille verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
             Technisch notwendige Speicherung im Browser (Local Storage) ist für die Funktion erforderlich.
           </p>
         </section>

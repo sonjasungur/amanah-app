@@ -32,15 +32,15 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl bg-gradient-to-br from-primary/10 via-card to-accent/5 border border-primary/10 p-6 md:p-8">
+      <header className="rounded-2xl bg-gradient-to-br from-accent-soft via-card to-emerald/5 border-2 border-emerald/20 p-6 md:p-8 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
           <div>
-            <p className="text-accent font-medium text-sm mb-1">Assalamu alaikum</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">Willkommen, {greeting}</h1>
+            <p className="text-emerald font-semibold text-sm mb-1">Assalamu alaikum</p>
+            <h1 className="text-page-title font-bold text-foreground">Willkommen, {greeting}</h1>
           </div>
           <SaveStatusIndicator className="shrink-0" />
         </div>
-        <p className="text-muted text-sm mb-4 max-w-xl">
+        <p className="text-body text-muted mb-5 max-w-xl leading-relaxed">
           {overallPercent >= 70
             ? "Gute Basis — halte deinen Ordner aktuell."
             : "Schritt für Schritt vorbereiten — zur Orientierung, ohne Garantie auf Vollständigkeit."}
@@ -49,21 +49,21 @@ export default function DashboardPage() {
       </header>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <Card className="border-primary/20 bg-primary/5 p-6">
-          <CardTitle className="text-base mb-2">{t("dashboard.next")}</CardTitle>
-          <p className="text-sm text-muted mb-4">{nextStep.title}</p>
+        <Card className="border-2 border-emerald/30 bg-accent-soft p-6 md:p-7 shadow-sm">
+          <CardTitle className="text-card-title mb-2 text-primary">{t("dashboard.next")}</CardTitle>
+          <p className="text-body text-muted mb-5">{nextStep.title}</p>
           <Link href={nextStep.path}>
-            <Button type="button">
+            <Button type="button" size="lg">
               Weiter <ArrowRight size={16} className="ml-2" />
             </Button>
           </Link>
         </Card>
 
-        <Card className="p-6">
-          <CardTitle className="text-base mb-2">Amanah-Check</CardTitle>
-          <p className="text-sm text-muted mb-4">15 Fragen — wo stehst du wirklich?</p>
+        <Card className="p-6 md:p-7 border border-border shadow-sm">
+          <CardTitle className="text-card-title mb-2">Vorsorge-Check</CardTitle>
+          <p className="text-body text-muted mb-5">15 Fragen — wo stehst du wirklich?</p>
           <Link href="/check">
-            <Button variant="secondary" type="button">Check starten</Button>
+            <Button variant="secondary" type="button">Vorsorge-Check starten</Button>
           </Link>
         </Card>
       </div>
@@ -106,9 +106,9 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <Card className="p-4 flex items-start gap-3 bg-sand/50 border-primary/10">
-        <Shield size={18} className="text-primary shrink-0 mt-0.5" aria-hidden />
-        <p className="text-xs text-muted">
+      <Card className="p-4 flex items-start gap-3 bg-accent-soft/80 border border-border">
+        <Shield size={20} className="text-primary shrink-0 mt-0.5" aria-hidden />
+        <p className="text-sm text-muted leading-relaxed">
           Daten werden lokal auf deinem Gerät gespeichert. Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
         </p>
       </Card>

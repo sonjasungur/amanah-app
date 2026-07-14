@@ -1,20 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3efe6;
-  --foreground: #070f1c;
-  --primary: #070f1c;
-  --primary-light: #0f2540;
-  --accent: #c45c26;
-  --accent-light: #e07a3a;
-  --accent-secondary: #b87333;
-  --sand: #e8e2d6;
-  --card: #fffdf9;
-  --muted: #4a5568;
-  --danger: #b83232;
-  --warning: #c47f17;
-  --success: #1a7a4a;
-  --navy: #070f1c;
+  --background: #F4F7F6;
+  --foreground: #101828;
+  --primary: #087A4E;
+  --primary-light: #10A865;
+  --primary-dark: #075E3B;
+  --primary-hover: #06663F;
+  --accent: #10A865;
+  --accent-light: #10A865;
+  --accent-soft: #E8F7F0;
+  --sand: #E8F7F0;
+  --card: #FFFFFF;
+  --muted: #475467;
+  --border: #D9E2DF;
+  --danger: #C4314B;
+  --warning: #B7791F;
+  --success: #10A865;
+  --navy: #071A16;
+  --emerald: #10A865;
+  --mint: #E8F7F0;
+  --cat-notfall: #2563EB;
+  --cat-janazah: #6D28D9;
+  --cat-vermoegen: #0F6470;
+  --cat-akhira: #087A4E;
 }
 
 @theme inline {
@@ -22,16 +31,25 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-hover: var(--primary-hover);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
-  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-soft: var(--accent-soft);
   --color-sand: var(--sand);
   --color-card: var(--card);
   --color-muted: var(--muted);
+  --color-border: var(--border);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-navy: var(--navy);
+  --color-emerald: var(--emerald);
+  --color-mint: var(--mint);
+  --color-cat-notfall: var(--cat-notfall);
+  --color-cat-janazah: var(--cat-janazah);
+  --color-cat-vermoegen: var(--cat-vermoegen);
+  --color-cat-akhira: var(--cat-akhira);
   --font-sans: var(--font-geist-sans);
 }
 
@@ -39,6 +57,50 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Typography scale */
+.text-display {
+  font-size: clamp(1.75rem, 5vw + 0.5rem, 3.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.text-page-title {
+  font-size: clamp(1.75rem, 3vw, 2.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+.text-section-title {
+  font-size: clamp(1.625rem, 2.5vw, 2rem);
+  line-height: 1.25;
+}
+
+.text-card-title {
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  line-height: 1.35;
+}
+
+.text-body-lg {
+  font-size: clamp(1.0625rem, 1.2vw, 1.3125rem);
+  line-height: 1.65;
+}
+
+.text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+  }
 }
 
 @media print {

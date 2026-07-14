@@ -21,7 +21,9 @@ export const WISSEN_META: Record<string, WissenMeta> = {
   "w-testament": { filters: ["islam", "recht", "finanzen"], urgency: "hoch", audience: ["Vermögende", "Eltern"], shortAnswer: "Islamisches Erbe + deutsches Recht — fachlich abstimmen." },
   "w-schulden": { filters: ["islam", "finanzen"], urgency: "hoch", audience: ["Alle Muslime"], shortAnswer: "Schulden und Amanah listen — vor Erbe tilgen." },
   "w-digital": { filters: ["digital", "erste-schritte"], urgency: "mittel", audience: ["Alle"], shortAnswer: "Konten und Zugänge dokumentieren — keine Passwörter im Klartext." },
-  "w-sadaqa": { filters: ["islam"], urgency: "spaeter", audience: ["Alle Muslime"], shortAnswer: "Sadaqa Jariya bewusst planen statt teurer Trauerfeiern." },
+  "w-sadaqa": { filters: ["islam"], urgency: "spaeter", audience: ["Alle Muslime"], shortAnswer: "Sadaqa Jariya bewusst planen — Muslim 1631, ohne Garantieversprechen." },
+  "w-barzakh": { filters: ["islam"], urgency: "spaeter", audience: ["Alle Muslime"], shortAnswer: "Barzakh im Qur'an — keine Spekulation über das Verborgene." },
+  "w-akhira": { filters: ["islam"], urgency: "spaeter", audience: ["Alle Muslime"], shortAnswer: "Heute Gutes vorausschicken — ohne Garantien über das Jenseits." },
   "w-familie": { filters: ["familie", "konvertierte", "erste-schritte"], urgency: "hoch", audience: ["Alle", "Konvertierte"], shortAnswer: "Vor dem Notfall sprechen — Brief ergänzt Dokumente." },
   "w-notfall": { filters: ["erste-schritte"], urgency: "hoch", audience: ["Alle"], shortAnswer: "Notfallkarte mit Kontakt und Hinweisen — sofort griffbereit." },
 };

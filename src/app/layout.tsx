@@ -5,6 +5,7 @@ import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AmanahAssistantFloat } from "@/components/ai/amanah-assistant-float";
+import { BRAND } from "@/lib/brand";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -12,15 +13,26 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "AmanahOrdner — Islamisch vorbereitet",
-  description:
-    "Der islamische Vorsorge-, Janazah-, Testament-, Barzakh- und Sadaqa-Jariya-Kompass für Muslime in Deutschland.",
+  title: BRAND.metadataTitle,
+  description: BRAND.metadataDescription,
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "AmanahOrdner" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: BRAND.shortName },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    title: BRAND.metadataTitle,
+    description: BRAND.metadataDescription,
+    siteName: BRAND.name,
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070f1c",
+  themeColor: BRAND.themeColor,
   width: "device-width",
   initialScale: 1,
 };

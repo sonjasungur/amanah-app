@@ -49,7 +49,7 @@ export function FullPrintView() {
   return (
     <div className="print-view max-w-3xl mx-auto p-8 bg-white">
       <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">AmanahOrdner — Komplett</h1>
+        <h1 className="text-2xl font-bold text-primary">Mein Wille — Komplett</h1>
         <p className="text-sm text-muted">Erstellt am {new Date().toLocaleDateString("de-DE")}</p>
       </div>
 
@@ -135,7 +135,7 @@ export function FullPrintView() {
       <PrintSection title="15. Disclaimer">
         <p className="text-xs text-muted">
           Diese Plattform ersetzt keinen Imam, Gelehrten, Arzt, Anwalt oder Notar. Allah entscheidet.
-          AmanahOrdner hilft nur bei bewusster Vorbereitung. Keine Garantie für Richtigkeit oder Vollständigkeit.
+          Mein Wille hilft nur bei bewusster Vorbereitung. Keine Garantie für Richtigkeit oder Vollständigkeit.
         </p>
       </PrintSection>
     </div>

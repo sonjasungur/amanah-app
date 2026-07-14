@@ -13,7 +13,7 @@ function NotfallkartePrintView() {
     <div className="print-view max-w-md mx-auto p-6 bg-white">
       <div className="text-center mb-6 border-b-2 border-primary pb-4">
         <h1 className="text-xl font-bold text-primary">Notfallkarte</h1>
-        <p className="text-xs text-muted">AmanahOrdner — {new Date().toLocaleDateString("de-DE")}</p>
+        <p className="text-xs text-muted">Mein Wille — {new Date().toLocaleDateString("de-DE")}</p>
       </div>
       <PrintSection title="Persönliche Daten">
         <PrintField label="Name" value={d.emergencyCard.name} />

@@ -34,7 +34,7 @@ export function buildGroundedKnowledgeAnswer(
       usedEntryIds: [],
       safetyLevel,
       blocked: true,
-      suggestedNextStep: "Nutze den AmanahOrdner zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
+      suggestedNextStep: "Nutze den Mein Wille zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
       noSource: false,
       disclaimer,
     };
@@ -52,7 +52,7 @@ export function buildGroundedKnowledgeAnswer(
       usedEntryIds: [],
       safetyLevel: "general_allowed",
       blocked: false,
-      suggestedNextStep: "Ergänze deinen AmanahOrdner im passenden Modul oder konsultiere eine Fachperson.",
+      suggestedNextStep: "Ergänze deinen Mein Wille im passenden Modul oder konsultiere eine Fachperson.",
       noSource: true,
       disclaimer,
     };
@@ -67,7 +67,7 @@ export function buildGroundedKnowledgeAnswer(
     usedEntryIds: entries.map((e) => e.id),
     safetyLevel: "general_allowed",
     blocked: false,
-    suggestedNextStep: "Dokumentiere passende Angaben im AmanahOrdner und lasse sie fachlich prüfen.",
+    suggestedNextStep: "Dokumentiere passende Angaben in Mein Wille und lasse sie fachlich prüfen.",
     noSource: false,
     disclaimer: `${disclaimer} Keine Fatwa, keine Rechtsberatung.`,
   };

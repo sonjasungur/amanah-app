@@ -25,6 +25,8 @@ const routes = [
   "/dashboard/familiengespraech",
   "/dashboard/familie",
   "/dashboard/ausfuellen",
+  "/preise",
+  "/brand-review",
   "/konvertierte",
 ];
 
@@ -48,21 +50,37 @@ async function main() {
 
   const home = results.find((r) => r.path === "/");
   const checks = {
-    heroHeadline: home?.snippet?.includes("Familie nicht raten") ?? false,
+    brandName: false,
+    heroHeadline: false,
     heroCta: false,
     checkPage: false,
+    preiseFree: false,
+    wissenSearch: false,
   };
 
   if (home?.ok) {
     const full = await (await fetch(`${BASE}/`)).text();
-    checks.heroHeadline = full.includes("Familie nicht raten müssen");
-    checks.heroCta = full.includes("Kostenlosen Amanah-Check starten") && full.includes('href="/check"');
+    checks.brandName = full.includes("Mein Wille");
+    checks.heroHeadline = full.includes("Damit meine Familie weiß, was mir wichtig ist");
+    checks.heroCta = full.includes("Kostenlos prüfen, was noch fehlt") && full.includes('href="/check"');
   }
 
   const checkHtml = results.find((r) => r.path === "/check");
   if (checkHtml?.ok) {
     const full = await (await fetch(`${BASE}/check`)).text();
-    checks.checkPage = full.includes("Amanah-Check");
+    checks.checkPage = full.includes("Dein islamischer Vorsorge-Check");
+  }
+
+  const preiseHtml = results.find((r) => r.path === "/preise");
+  if (preiseHtml?.ok) {
+    const full = await (await fetch(`${BASE}/preise`)).text();
+    checks.preiseFree = full.includes("Vorsorge-Check") && full.includes("0 €");
+  }
+
+  const wissenHtml = results.find((r) => r.path === "/wissen");
+  if (wissenHtml?.ok) {
+    const full = await (await fetch(`${BASE}/wissen`)).text();
+    checks.wissenSearch = full.includes("Worüber möchtest du mehr wissen?");
   }
 
   const failed = results.filter((r) => !r.ok || r.hasError);
