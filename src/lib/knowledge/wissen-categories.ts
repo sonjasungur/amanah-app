@@ -39,7 +39,7 @@ export const WISSEN_CATEGORY_CONFIG: Record<WissenCategoryId, WissenCategoryConf
     id: "akhira",
     label: "Akhira und Weiterwirken",
     accent: "#087A4E",
-    topicIds: ["w-sadaqa"],
+    topicIds: ["w-sadaqa", "w-barzakh", "w-akhira"],
   },
 };
 

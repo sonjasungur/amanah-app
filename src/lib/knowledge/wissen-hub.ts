@@ -43,6 +43,8 @@ export const WISSEN_READ_MINUTES: Record<string, number> = {
   "w-schulden": 6,
   "w-digital": 5,
   "w-sadaqa": 5,
+  "w-barzakh": 5,
+  "w-akhira": 5,
 };
 
 export function getUrgentTopicIds(): string[] {

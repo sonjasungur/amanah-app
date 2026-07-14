@@ -1,15 +1,16 @@
 "use client";
 
-import { useReducer, useCallback, useEffect, useRef } from "react";
+import { useReducer, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { CHECK_QUESTIONS, CHECK_TOTAL } from "@/lib/check/questions";
 import { computeCheckResult, getRuleBasedNextSteps } from "@/lib/check/results";
 import {
   checkReducer,
-  INITIAL_CHECK_STATE,
+  createInitialCheckState,
   loadCheckState,
   persistCheckState,
   clearCheckState,
+  CHECK_HYDRATE_TIMEOUT_MS,
   type CheckState,
 } from "@/lib/check/state-machine";
 import { CHECK_LABELS } from "@/lib/design-tokens";
@@ -18,11 +19,11 @@ import { Card } from "@/components/ui/card";
 import { AlertTriangle, ArrowLeft, CheckCircle2, ChevronRight, Loader2, RotateCcw } from "lucide-react";
 
 export function AmanahCheck() {
-  const [state, dispatch] = useReducer(checkReducer, INITIAL_CHECK_STATE);
+  const [state, dispatch] = useReducer(checkReducer, undefined, createInitialCheckState);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    dispatch({ type: "HYDRATE_START" });
+  useLayoutEffect(() => {
     const loaded = loadCheckState();
     if (loaded.ok) {
       dispatch({
@@ -30,13 +31,23 @@ export function AmanahCheck() {
         state: {
           index: loaded.data.index,
           answers: loaded.data.answers,
-          phase: loaded.data.phase === "result" ? "result" : loaded.data.index > 0 ? "question" : "intro",
+          phase: loaded.data.phase,
         },
       });
     } else {
       dispatch({ type: "HYDRATE_FAIL", error: loaded.error });
     }
   }, []);
+
+  useEffect(() => {
+    if (state.hydrated) return;
+    hydrateTimer.current = setTimeout(() => {
+      dispatch({ type: "HYDRATE_TIMEOUT" });
+    }, CHECK_HYDRATE_TIMEOUT_MS);
+    return () => {
+      if (hydrateTimer.current) clearTimeout(hydrateTimer.current);
+    };
+  }, [state.hydrated]);
 
   useEffect(() => {
     if (!state.hydrated || state.phase === "loading") return;

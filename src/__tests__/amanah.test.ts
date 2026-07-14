@@ -17,7 +17,7 @@ describe("Islamic Sources", () => {
     expect(islamicSources["quran-nisa-4-11"]).toBeDefined();
     expect(islamicSources["hadith-sadaqa-jariya"]).toBeDefined();
     expect(islamicSources["hadith-janazah-hasten"]).toBeDefined();
-    expect(islamicSources["quran-barzakh"]).toBeDefined();
+    expect(islamicSources["quran-al-muminun-23-99"]).toBeDefined();
   });
 
   it("retrieves sources by ids", () => {

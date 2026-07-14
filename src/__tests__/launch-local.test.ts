@@ -22,7 +22,7 @@ describe("Family letter template", () => {
 
 describe("Wissen topics", () => {
   it("has 12 rich topics with required sections", () => {
-    expect(wissenTopics.length).toBe(12);
+    expect(wissenTopics.length).toBe(14);
     for (const topic of wissenTopics) {
       expect(topic.details?.whyImportant).toBeTruthy();
       expect(topic.details?.prepareItems.length).toBeGreaterThan(2);

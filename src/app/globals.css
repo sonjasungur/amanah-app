@@ -59,13 +59,16 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* Typography scale */
 .text-display {
-  font-size: clamp(2.25rem, 4.5vw, 3.75rem);
-  line-height: 1.12;
+  font-size: clamp(1.75rem, 5vw + 0.5rem, 3.75rem);
+  line-height: 1.15;
   letter-spacing: -0.02em;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .text-page-title {

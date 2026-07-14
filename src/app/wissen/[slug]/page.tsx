@@ -24,10 +24,12 @@ export default async function WissenDetailPage({ params }: { params: Promise<{ s
       : article.details?.nextStepLabel ?? "In meinem Ordner festhalten";
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 pb-20">
-      <Link href="/wissen" className="text-sm text-primary hover:underline flex items-center gap-1 mb-6 min-h-[44px]">
-        <ArrowLeft size={16} aria-hidden /> Alle Themen
-      </Link>
+    <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
+      <nav className="sticky top-[57px] z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur border-b border-border mb-6 md:static md:bg-transparent md:border-0 md:p-0 md:mb-6">
+        <Link href="/wissen" className="text-sm font-semibold text-primary hover:underline flex items-center gap-1 min-h-[44px]">
+          <ArrowLeft size={16} aria-hidden /> Zurück zu allen Themen
+        </Link>
+      </nav>
 
       <RichArticleCard article={{ ...article, wissenMeta: meta }} />
 

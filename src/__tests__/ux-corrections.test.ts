@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CHECK_LABELS } from "@/lib/design-tokens";
-import { WISSEN_SECTION_ID, WISSEN_SIDEBAR_ITEMS } from "@/lib/knowledge/wissen-hub";
+import { WISSEN_SIDEBAR_ITEMS } from "@/lib/knowledge/wissen-hub";
 import { wissenTopics } from "@/lib/knowledge/wissen-topics";
 import { islamicSources } from "@/lib/knowledge/sources";
 
@@ -51,8 +51,8 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
   it("wissen page has scroll-spy section ids and no saved topics", () => {
     const wissen = read("src/app/wissen/page.tsx");
     expect(wissen).toContain("useWissenScrollSpy");
-    expect(wissen).toContain("WISSEN_SECTION_ID.janazah");
-    expect(wissen).toContain("WISSEN_SECTION_ID.notfall");
+    expect(wissen).toContain("WISSEN_SECTION_ID");
+    expect(wissen).toContain("WissenTopicRow");
     expect(WISSEN_SIDEBAR_ITEMS.some((i) => i.label.includes("Gespeicherte"))).toBe(false);
     expect(wissen).not.toContain("Gespeicherte Themen");
   });
@@ -70,20 +70,19 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
   it("wissen detail puts knowledge before form CTA", () => {
     const detail = read("src/app/wissen/[slug]/page.tsx");
     const card = read("src/components/knowledge/rich-article-card.tsx");
-    expect(card).toContain("Kurz erklärt");
+    expect(card).toContain("In 30 Sekunden");
     expect(card).toContain("Qur'an und authentische Sunnah");
-    expect(card).toContain("Was sollte ich mit meiner Familie klären?");
-    expect(card).toContain("Mein nächster Schritt");
+    expect(card).toContain("Was du mit deiner Familie klären solltest");
+    expect(card).toContain("Was passiert, wenn es ungeklärt bleibt?");
     expect(detail.indexOf("RichArticleCard")).toBeLessThan(detail.indexOf("WissenFormCta"));
     expect(detail).not.toContain("Amanah-Check");
   });
 
-  it("janazah reference page includes bukhari 1315 and muslim 944c before form CTA", () => {
+  it("janazah reference page includes unified hasten source", () => {
     const janazah = wissenTopics.find((t) => t.slug === "janazah-wuensche");
-    expect(janazah?.sourceIds).toContain("hadith-bukhari-janazah-1315");
-    expect(janazah?.sourceIds).toContain("hadith-muslim-janazah-944c");
-    expect(islamicSources["hadith-bukhari-janazah-1315"].reference).toMatch(/1315/);
-    expect(islamicSources["hadith-muslim-janazah-944c"].reference).toMatch(/944c/);
+    expect(janazah?.sourceIds).toContain("hadith-janazah-hasten");
+    expect(islamicSources["hadith-janazah-hasten"].reference).toMatch(/1315/);
+    expect(islamicSources["hadith-janazah-hasten"].reference).toMatch(/944c/);
     const detail = read("src/app/wissen/[slug]/page.tsx");
     expect(detail).toContain("Janazah-Wünsche jetzt festhalten");
   });

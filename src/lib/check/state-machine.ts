@@ -15,6 +15,7 @@ export type CheckAction =
   | { type: "HYDRATE_START" }
   | { type: "HYDRATE_DONE"; state: Partial<CheckState> }
   | { type: "HYDRATE_FAIL"; error: string }
+  | { type: "HYDRATE_TIMEOUT" }
   | { type: "START" }
   | { type: "ANSWER"; value: boolean }
   | { type: "BACK" }
@@ -24,6 +25,7 @@ export type CheckAction =
   | { type: "SET_ERROR"; error: string };
 
 export const CHECK_STORAGE_KEY = "amanah-check-progress-v3";
+export const CHECK_HYDRATE_TIMEOUT_MS = 5000;
 
 export const INITIAL_CHECK_STATE: CheckState = {
   phase: "loading",
@@ -33,24 +35,32 @@ export const INITIAL_CHECK_STATE: CheckState = {
   hydrated: false,
 };
 
+function hasSavedProgress(index: number, answers: CheckAnswers): boolean {
+  return index > 0 || Object.keys(answers).length > 0;
+}
+
+function phaseAfterHydrate(
+  savedPhase: CheckPhase | undefined,
+  index: number,
+  answers: CheckAnswers
+): CheckPhase {
+  if (savedPhase === "result") return "result";
+  if (hasSavedProgress(index, answers)) return "question";
+  return "intro";
+}
+
 export function checkReducer(state: CheckState, action: CheckAction): CheckState {
   switch (action.type) {
     case "HYDRATE_START":
       return { ...state, phase: "loading", error: null };
     case "HYDRATE_DONE": {
-      const hasProgress =
-        (action.state.answers && Object.keys(action.state.answers).length > 0) ||
-        (typeof action.state.index === "number" && action.state.index > 0);
-      const phase =
-        action.state.phase === "result"
-          ? "result"
-          : hasProgress
-            ? "intro"
-            : "intro";
+      const index = action.state.index ?? 0;
+      const answers = action.state.answers ?? {};
+      const phase = phaseAfterHydrate(action.state.phase, index, answers);
       return {
         ...state,
-        index: action.state.index ?? 0,
-        answers: action.state.answers ?? {},
+        index,
+        answers,
         phase,
         hydrated: true,
         error: null,
@@ -58,8 +68,18 @@ export function checkReducer(state: CheckState, action: CheckAction): CheckState
     }
     case "HYDRATE_FAIL":
       return { ...INITIAL_CHECK_STATE, phase: "error", hydrated: true, error: action.error };
-    case "START":
-      return { ...state, phase: "question", index: 0, error: null };
+    case "HYDRATE_TIMEOUT":
+      if (state.hydrated) return state;
+      return {
+        ...INITIAL_CHECK_STATE,
+        phase: "error",
+        hydrated: true,
+        error: "Der Check konnte nicht geladen werden. Bitte erneut versuchen.",
+      };
+    case "START": {
+      const resumeIndex = hasSavedProgress(state.index, state.answers) ? state.index : 0;
+      return { ...state, phase: "question", index: resumeIndex, error: null };
+    }
     case "ANSWER": {
       const q = CHECK_QUESTIONS[state.index];
       if (!q) return { ...state, phase: "error", error: "Frage nicht gefunden. Bitte neu starten." };
@@ -82,8 +102,21 @@ export function checkReducer(state: CheckState, action: CheckAction): CheckState
     }
     case "RESET":
       return { ...INITIAL_CHECK_STATE, phase: "intro", hydrated: true };
-    case "RETRY":
-      return { ...state, phase: state.index > 0 || Object.keys(state.answers).length > 0 ? "question" : "intro", error: null };
+    case "RETRY": {
+      const loaded = loadCheckState();
+      if (loaded.ok) {
+        const { index, answers, phase } = loaded.data;
+        return {
+          ...state,
+          index,
+          answers,
+          phase: phaseAfterHydrate(phase, index, answers),
+          hydrated: true,
+          error: null,
+        };
+      }
+      return { ...state, phase: "intro", error: null, hydrated: true };
+    }
     case "SET_ERROR":
       return { ...state, phase: "error", error: action.error };
     default:
@@ -91,7 +124,9 @@ export function checkReducer(state: CheckState, action: CheckAction): CheckState
   }
 }
 
-export function loadCheckState(): { ok: true; data: Pick<CheckState, "index" | "answers" | "phase"> } | { ok: false; error: string } {
+export function loadCheckState():
+  | { ok: true; data: Pick<CheckState, "index" | "answers" | "phase"> }
+  | { ok: false; error: string } {
   if (typeof window === "undefined") return { ok: false, error: "Nur im Browser verfügbar." };
   try {
     const raw = sessionStorage.getItem(CHECK_STORAGE_KEY);
@@ -100,11 +135,23 @@ export function loadCheckState(): { ok: true; data: Pick<CheckState, "index" | "
     const index = typeof parsed.index === "number" ? parsed.index : 0;
     const answers = parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {};
     if (index < 0 || index > CHECK_TOTAL) return { ok: false, error: "Gespeicherter Fortschritt ist ungültig." };
-    const phase = parsed.phase === "result" ? "result" : index > 0 ? "question" : "intro";
+    const phase: CheckPhase =
+      parsed.phase === "result" ? "result" : hasSavedProgress(index, answers) ? "question" : "intro";
     return { ok: true, data: { index, answers, phase } };
   } catch {
     return { ok: false, error: "Gespeicherter Fortschritt konnte nicht gelesen werden." };
   }
+}
+
+export const SSR_SAFE_CHECK_STATE: CheckState = {
+  ...INITIAL_CHECK_STATE,
+  phase: "loading",
+  hydrated: false,
+};
+
+/** Same output on server and client first paint — avoids hydration mismatch */
+export function createInitialCheckState(): CheckState {
+  return SSR_SAFE_CHECK_STATE;
 }
 
 export function persistCheckState(state: CheckState): void {

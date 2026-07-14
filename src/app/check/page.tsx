@@ -1,23 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { AmanahCheck } from "@/components/check/amanah-check";
 import { StorageModeBanner } from "@/components/auth/storage-mode-banner";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { MobileStickyCta } from "@/components/layout/mobile-sticky-cta";
 import { CHECK_LABELS } from "@/lib/design-tokens";
 import { CHECK_TOTAL } from "@/lib/check/questions";
-
-const AmanahCheck = dynamic(
-  () => import("@/components/check/amanah-check").then((m) => ({ default: m.AmanahCheck })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="max-w-lg mx-auto p-8 text-center text-muted rounded-2xl bg-card border border-border">
-        Check wird geladen…
-      </div>
-    ),
-  }
-);
 
 export default function CheckPage() {
   return (

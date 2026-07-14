@@ -15,6 +15,7 @@ import { Button, linkButtonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import {
   Activity,
+  ArrowRight,
   ClipboardCheck,
   Compass,
   FileSignature,
@@ -76,13 +77,13 @@ const STEPS = [
 ];
 
 const AREAS = [
-  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche.", accent: COLORS.catNotfall },
-  { icon: FileSignature, title: "Vollmachten", text: "Wer darf im Ernstfall für dich entscheiden?", accent: COLORS.catNotfall },
-  { icon: Activity, title: "Janazah und Bestattung", text: "Islamische Grundsätze verständlich festhalten.", accent: COLORS.catJanazah },
-  { icon: Scale, title: "Testament, Erbe, Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen.", accent: COLORS.catVermogen },
-  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext.", accent: COLORS.catVermogen },
-  { icon: Users, title: "Familie und Akhira", text: "Briefe, Sadaqa Jariya und Herzensprojekte.", accent: COLORS.catAkhira },
-];
+  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche.", accent: COLORS.catNotfall, href: "/wissen/notfallkarte" },
+  { icon: FileSignature, title: "Vollmachten", text: "Wer darf im Ernstfall für dich entscheiden?", accent: COLORS.catNotfall, href: "/wissen/vorsorgevollmacht" },
+  { icon: Activity, title: "Janazah und Bestattung", text: "Islamische Grundsätze verständlich festhalten.", accent: COLORS.catJanazah, href: "/wissen/janazah-wuensche" },
+  { icon: Scale, title: "Testament, Erbe, Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen.", accent: COLORS.catVermogen, href: "/wissen/testament-erbe" },
+  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext.", accent: COLORS.catVermogen, href: "/wissen/digitaler-nachlass" },
+  { icon: Users, title: "Familie und Akhira", text: "Briefe, Sadaqa Jariya und Herzensprojekte.", accent: COLORS.catAkhira, href: "/wissen/sadaqa-jariya" },
+] as const;
 
 const PRICING_TEASER = [
   { name: "Basic", price: "29 €", note: "Wichtigste Dokumente", highlighted: false },
@@ -214,10 +215,12 @@ export default function HomePage() {
             accent={COLORS.catJanazah}
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {AREAS.map(({ icon: Icon, title, text, accent }) => (
-              <div
+            {AREAS.map(({ icon: Icon, title, text, accent, href }) => (
+              <Link
                 key={title}
-                className="group rounded-2xl border border-border bg-background p-5 md:p-6 min-h-[44px] hover:shadow-md hover:border-primary/25 transition-all"
+                href={href}
+                data-testid={`home-area-${href.split("/").pop()}`}
+                className="group rounded-2xl border-2 border-border bg-background p-5 md:p-6 min-h-[44px] hover:shadow-lg hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald/40 active:scale-[0.99] transition-all flex flex-col"
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 [&_svg]:text-[var(--area-accent)]"
@@ -225,9 +228,12 @@ export default function HomePage() {
                 >
                   <Icon size={24} aria-hidden />
                 </div>
-                <h3 className="text-card-title font-bold text-foreground group-hover:text-primary transition-colors">{title}</h3>
-                <p className="text-body text-muted mt-2 leading-relaxed">{text}</p>
-              </div>
+                <h3 className="text-card-title font-bold text-primary-dark group-hover:text-primary transition-colors">{title}</h3>
+                <p className="text-body text-muted mt-2 leading-relaxed flex-1">{text}</p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary mt-4 group-hover:gap-2.5 transition-all">
+                  Thema öffnen <ArrowRight size={16} aria-hidden />
+                </span>
+              </Link>
             ))}
           </div>
         </div>

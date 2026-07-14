@@ -31,7 +31,7 @@ export function WissenTopicRow({
     <Link
       href={href}
       className={cn(
-        "group block rounded-xl border border-border bg-card overflow-hidden shadow-sm",
+        "group block rounded-xl border-2 border-border bg-card overflow-hidden shadow-sm",
         "hover:shadow-md hover:border-primary/25 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald focus-visible:ring-offset-2"
       )}
       aria-label={`${article.title} — Thema öffnen`}

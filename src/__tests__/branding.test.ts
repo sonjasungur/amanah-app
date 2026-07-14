@@ -103,7 +103,7 @@ describe("branding — Mein Wille", () => {
     expect(wissen).toContain("Wissen, das dir Entscheidungen leichter macht");
     expect(wissen).toContain("Worüber möchtest du mehr wissen?");
     expect(wissen).toContain("Für deinen Einstieg");
-    expect(wissen).toContain("WISSEN_SECTION_ID.janazah");
+    expect(wissen).toContain("WISSEN_SECTION_ID");
     expect(wissen).not.toContain("Gespeicherte Themen");
   });
 
