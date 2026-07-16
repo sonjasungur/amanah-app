@@ -225,6 +225,7 @@ i18n-Struktur unter `src/lib/i18n/`:
 
 ```bash
 npm run test        # Vitest Unit Tests
+npm run test:e2e    # Playwright: Desktop- und Mobile-Chromium
 npm run lint        # ESLint
 npm run build       # Production Build
 npm run check       # Alle Checks
