@@ -26,16 +26,17 @@ test.describe("Homepage tiles to modules", () => {
     });
   }
 
-  test("janazah tile opens structured form", async ({ page }) => {
+  test("janazah tile opens structured form with module navigation", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId("home-area-janazah").click();
     await expect(page.getByTestId("janazah-form")).toBeVisible();
     await expect(page.getByTestId("janazah-legal-notice")).toBeVisible();
+    await expect(page.getByTestId("janazah-module-nav")).toBeVisible();
   });
 });
 
 test.describe("Janazah wishes persistence", () => {
-  test("fill, save, reload and verify stored data", async ({ page }) => {
+  test("fill, save, reload and verify stored data with local storage hint", async ({ page }) => {
     await page.goto("/dashboard/janazah");
     await expect(page.getByTestId("janazah-form")).toBeVisible();
 
@@ -47,11 +48,20 @@ test.describe("Janazah wishes persistence", () => {
 
     await page.getByTestId("janazah-save-button").click();
     await expect(page.getByTestId("janazah-save-success")).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId("janazah-save-success")).toContainText("auf diesem Gerät gespeichert");
+    await expect(page.getByTestId("save-status-location")).toContainText("Nur auf diesem Gerät gespeichert");
 
     await page.reload();
     await expect(page.getByTestId("janazah-fullName").locator("input")).toHaveValue(JANAZAH_SAMPLE.fullName);
     await expect(page.getByTestId("janazah-locationRegion").locator("input")).toHaveValue(JANAZAH_SAMPLE.locationRegion);
     await expect(page.getByTestId("janazah-messageToFamily").locator("textarea")).toHaveValue(JANAZAH_SAMPLE.messageToFamily);
+  });
+
+  test("navigates between janazah sections", async ({ page }) => {
+    await page.goto("/dashboard/janazah");
+    await page.getByTestId("janazah-module-nav").getByRole("link", { name: /Ghusl/i }).click();
+    await expect(page).toHaveURL(/\/dashboard\/ghusl-kafan$/);
+    await expect(page.getByTestId("janazah-module-nav")).toBeVisible();
   });
 });
 
@@ -85,5 +95,15 @@ test.describe("Mobile UX and CTAs", () => {
     await page.goto("/dashboard");
     await expect(page.getByTestId("dashboard-module-tiles")).toBeVisible();
     await expect(page.getByTestId("dashboard-tile-janazah")).toBeVisible();
+  });
+});
+
+test.describe("Auth return URL in local mode", () => {
+  test("login page preserves dashboard return URL in register link", async ({ page }) => {
+    await page.goto("/login?returnUrl=%2Fdashboard%2Fjanazah");
+    await expect(page.getByRole("link", { name: /Registrieren/i })).toHaveAttribute(
+      "href",
+      "/register?returnUrl=%2Fdashboard%2Fjanazah"
+    );
   });
 });
