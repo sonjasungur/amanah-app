@@ -3,7 +3,6 @@ import { MobileStickyCta } from "@/components/layout/mobile-sticky-cta";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
 import {
   FreeVsPaidSummary,
-  OutcomeCard,
   PricingCard,
   SectionHeader,
   StepCard,
@@ -34,24 +33,28 @@ const OUTCOMES = [
     title: "Klarheit für meine Familie",
     description: "Vertrauenspersonen, Kontakte und Wünsche an einem Ort — ohne Rätselraten im Ernstfall.",
     accent: COLORS.catNotfall,
+    href: "/dashboard/notfallkarte",
   },
   {
     icon: ListChecks,
     title: "Meine Wünsche festhalten",
     description: "Persönliche und islamische Entscheidungen dokumentieren, bevor es Zeitdruck gibt.",
     accent: COLORS.catJanazah,
+    href: "/dashboard/janazah",
   },
   {
     icon: Compass,
     title: "Islamische Orientierung",
     description: "Quellenbasiertes Wissen — zwischen deutschem Recht und islamischen Grundsätzen.",
     accent: COLORS.catAkhira,
+    href: "/wissen",
   },
   {
     icon: Target,
     title: "Schritt für Schritt vorbereiten",
     description: "Check, Prioritäten und geführtes Ausfüllen — ohne alles auf einmal erledigen zu müssen.",
     accent: COLORS.catVermogen,
+    href: "/check",
   },
 ];
 
@@ -77,12 +80,12 @@ const STEPS = [
 ];
 
 const AREAS = [
-  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche.", accent: COLORS.catNotfall, href: "/wissen/notfallkarte" },
-  { icon: FileSignature, title: "Vollmachten", text: "Wer darf im Ernstfall für dich entscheiden?", accent: COLORS.catNotfall, href: "/wissen/vorsorgevollmacht" },
-  { icon: Activity, title: "Janazah und Bestattung", text: "Islamische Grundsätze verständlich festhalten.", accent: COLORS.catJanazah, href: "/wissen/janazah-wuensche" },
-  { icon: Scale, title: "Testament, Erbe, Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen.", accent: COLORS.catVermogen, href: "/wissen/testament-erbe" },
-  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext.", accent: COLORS.catVermogen, href: "/wissen/digitaler-nachlass" },
-  { icon: Users, title: "Familie und Akhira", text: "Briefe, Sadaqa Jariya und Herzensprojekte.", accent: COLORS.catAkhira, href: "/wissen/sadaqa-jariya" },
+  { icon: HeartPulse, title: "Notfall und Gesundheit", text: "Kontakte, Patientenverfügung, medizinische Wünsche.", accent: COLORS.catNotfall, href: "/dashboard/notfallkarte" },
+  { icon: FileSignature, title: "Vollmachten", text: "Wer darf im Ernstfall für dich entscheiden?", accent: COLORS.catNotfall, href: "/dashboard/vollmacht" },
+  { icon: Activity, title: "Janazah und Bestattung", text: "Islamische Grundsätze verständlich festhalten.", accent: COLORS.catJanazah, href: "/dashboard/janazah" },
+  { icon: Scale, title: "Testament, Erbe, Schulden", text: "Orientierung — fachlich mit Anwalt/Imam prüfen.", accent: COLORS.catVermogen, href: "/dashboard/testament" },
+  { icon: Smartphone, title: "Digitaler Nachlass", text: "Konten und Zugänge ohne Passwörter im Klartext.", accent: COLORS.catVermogen, href: "/dashboard/digitaler-nachlass" },
+  { icon: Users, title: "Familie und Akhira", text: "Briefe, Sadaqa Jariya und Herzensprojekte.", accent: COLORS.catAkhira, href: "/dashboard/familie" },
 ] as const;
 
 const PRICING_TEASER = [
@@ -127,29 +130,41 @@ export default function HomePage() {
     <div className="pb-28 md:pb-0">
       {/* Hero */}
       <section
-        className="relative text-white py-12 md:py-16 overflow-hidden"
+        className="relative text-white py-10 md:py-16 overflow-hidden"
         style={{
           background: `radial-gradient(ellipse 80% 60% at 70% 0%, ${COLORS.primary}35 0%, transparent 55%), linear-gradient(165deg, ${COLORS.navy} 0%, ${COLORS.brandDark} 100%)`,
         }}
       >
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid lg:grid-cols-[1fr_320px] gap-10 items-start">
+          <div className="grid lg:grid-cols-[1fr_320px] gap-8 lg:gap-10 items-start">
             <div className="max-w-xl">
-              <p className="text-sm md:text-base font-bold uppercase tracking-[0.2em] text-emerald mb-4">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-emerald mb-3 md:mb-4">
                 {BRAND.heroEyebrow}
               </p>
-              <h1 className="text-display font-bold mb-4">{BRAND.heroTitle}</h1>
-              <p className="text-body-lg text-white/90 leading-relaxed mb-7 max-w-lg">{BRAND.heroDescription}</p>
+              <h1 className="text-display font-bold mb-3 md:mb-4">{BRAND.heroTitle}</h1>
+              <p className="text-body-lg text-white/90 leading-relaxed mb-6 md:mb-7 max-w-lg hidden sm:block">{BRAND.heroDescription}</p>
+              <p className="text-base text-white/90 leading-relaxed mb-6 max-w-lg sm:hidden">{BRAND.heroDescriptionMobile}</p>
               <div className="flex flex-col gap-3 max-w-md">
                 <Link
                   href="/check"
-                  className={linkButtonClassName({ size: "lg", className: "w-full font-bold min-h-[52px] text-lg shadow-lg shadow-emerald/25" })}
+                  className={linkButtonClassName({ size: "lg", className: "w-full font-bold min-h-[52px] text-lg shadow-lg shadow-emerald/30 ring-2 ring-emerald/20" })}
                 >
                   <ClipboardCheck size={20} className="mr-2" aria-hidden /> {BRAND.ctaPrimary}
+                </Link>
+                <Link
+                  href="/register"
+                  className={linkButtonClassName({ variant: "secondary", size: "lg", className: "w-full font-bold min-h-[48px]" })}
+                >
+                  {BRAND.ctaRegister}
                 </Link>
                 <Link href="/dashboard/ausfuellen" className="text-center sm:text-left">
                   <span className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] text-base text-white/90 underline-offset-4 hover:text-emerald hover:underline font-medium">
                     {BRAND.ctaSecondary}
+                  </span>
+                </Link>
+                <Link href="/login" className="text-center sm:text-left">
+                  <span className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] text-sm text-white/75 hover:text-white font-medium">
+                    Bereits ein Konto? {BRAND.ctaLogin}
                   </span>
                 </Link>
               </div>
@@ -159,7 +174,7 @@ export default function HomePage() {
               <div className="mt-6">
                 <TrustStrip items={[...BRAND_TRUST_ITEMS]} />
               </div>
-              <p className="text-base text-white/75 mt-5 italic max-w-lg">{BRAND.claim}</p>
+              <p className="text-sm md:text-base text-white/75 mt-4 md:mt-5 italic max-w-lg hidden sm:block">{BRAND.claim}</p>
             </div>
             <HeroCheckInfoCard className="hidden lg:block" />
           </div>
@@ -167,16 +182,31 @@ export default function HomePage() {
       </section>
 
       {/* Ergebnis-Karten */}
-      <section className="py-14 md:py-18 bg-background">
+      <section className="py-10 md:py-18 bg-background">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
             title="Was du damit erreichst"
             description="Vier klare Ergebnisse — statt langer Listen."
             accent={COLORS.emerald}
           />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {OUTCOMES.map((o) => (
-              <OutcomeCard key={o.title} {...o} />
+              <Link
+                key={o.title}
+                href={o.href}
+                data-testid={`home-outcome-${o.href.split("/").pop()}`}
+                aria-label={`${o.title} — Bereich öffnen`}
+                className="group rounded-2xl bg-card border-2 border-border p-5 md:p-7 shadow-sm hover:shadow-md hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald/40 transition-all flex flex-col min-h-[44px]"
+              >
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 [&_svg]:text-[var(--outcome-accent)]"
+                  style={{ backgroundColor: `${o.accent}18`, ["--outcome-accent" as string]: o.accent }}
+                >
+                  <o.icon size={24} aria-hidden />
+                </div>
+                <h3 className="text-card-title font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{o.title}</h3>
+                <p className="text-body text-muted leading-relaxed flex-1">{o.description}</p>
+              </Link>
             ))}
           </div>
           <p className="text-body text-muted mt-8 max-w-3xl leading-relaxed">
@@ -231,7 +261,7 @@ export default function HomePage() {
                 <h3 className="text-card-title font-bold text-primary-dark group-hover:text-primary transition-colors">{title}</h3>
                 <p className="text-body text-muted mt-2 leading-relaxed flex-1">{text}</p>
                 <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary mt-4 group-hover:gap-2.5 transition-all">
-                  Thema öffnen <ArrowRight size={16} aria-hidden />
+                  Modul öffnen <ArrowRight size={16} aria-hidden />
                 </span>
               </Link>
             ))}
@@ -277,8 +307,13 @@ export default function HomePage() {
             ))}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/register">
+              <Button size="lg" className="w-full sm:w-auto font-bold">
+                {BRAND.ctaRegister}
+              </Button>
+            </Link>
             <Link href="/check">
-              <Button size="lg" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                 {BRAND.ctaPrimary}
               </Button>
             </Link>
