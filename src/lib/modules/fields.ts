@@ -54,22 +54,7 @@ export const careDirectiveFields: FieldConfig[] = [
   { key: "languageFamilyNotes", label: "Sprach- / Familienhinweise", type: "textarea" },
 ];
 
-export const janazahFields: FieldConfig[] = [
-  { key: "islamicBurialDesired", label: "Islamische Bestattung gewünscht?", type: "boolean" },
-  { key: "noUnnecessaryDelay", label: "Keine unnötige Verzögerung?", type: "boolean" },
-  { key: "ghusl", label: "Ghusl-Wünsche", type: "textarea" },
-  { key: "kafan", label: "Kafan-Wünsche", type: "textarea" },
-  { key: "janazahPrayer", label: "Janazah-Gebet", type: "textarea" },
-  { key: "burialGermany", label: "Beisetzung in Deutschland?", type: "boolean" },
-  { key: "repatriation", label: "Überführung", type: "select", options: [
-    { value: "yes", label: "Ja" }, { value: "no", label: "Nein" }, { value: "unsure", label: "Unsicher" },
-  ]},
-  { key: "preferredCemetery", label: "Gewünschter Friedhof", type: "text" },
-  { key: "preferredMosque", label: "Gewünschte Moschee", type: "text" },
-  { key: "preferredFuneralDirector", label: "Gewünschter Bestatter", type: "text" },
-  { key: "culturalExclusions", label: "Kulturelle Dinge, die ich NICHT möchte", type: "textarea" },
-  { key: "messageToFamily", label: "Nachricht an Familie", type: "textarea" },
-];
+export { janazahFields } from "@/lib/modules/janazah-sections";
 
 export const ghuslKafanFields: FieldConfig[] = [
   { key: "whoMayBePresent", label: "Wer darf anwesend sein?", type: "textarea" },

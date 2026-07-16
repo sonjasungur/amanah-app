@@ -1,6 +1,6 @@
 import type { AmanahOrdnerData } from "./types";
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export interface AmanahExportBundle {
   schemaVersion: number;
