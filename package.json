@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:e2e": "NEXT_PUBLIC_AUTH_MODE=local NEXT_PUBLIC_STORAGE_MODE=local next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",

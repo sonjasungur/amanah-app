@@ -44,6 +44,9 @@ jobs:
         run: npm test -- --run
 
       - name: Production build
+        env:
+          NEXT_PUBLIC_AUTH_MODE: local
+          NEXT_PUBLIC_STORAGE_MODE: local
         run: npm run build
 
   e2e:
@@ -68,6 +71,9 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Production build
+        env:
+          NEXT_PUBLIC_AUTH_MODE: local
+          NEXT_PUBLIC_STORAGE_MODE: local
         run: npm run build
 
       - name: Playwright E2E
