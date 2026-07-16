@@ -10,23 +10,22 @@ function read(rel: string): string {
 }
 
 const HOME_AREAS = [
-  { slug: "notfallkarte", href: "/wissen/notfallkarte" },
-  { slug: "vorsorgevollmacht", href: "/wissen/vorsorgevollmacht" },
-  { slug: "janazah-wuensche", href: "/wissen/janazah-wuensche" },
-  { slug: "testament-erbe", href: "/wissen/testament-erbe" },
-  { slug: "digitaler-nachlass", href: "/wissen/digitaler-nachlass" },
-  { slug: "sadaqa-jariya", href: "/wissen/sadaqa-jariya" },
+  { slug: "notfallkarte", href: "/dashboard/notfallkarte" },
+  { slug: "vorsorgevollmacht", href: "/dashboard/vollmacht" },
+  { slug: "janazah", href: "/dashboard/janazah" },
+  { slug: "testament-erbe", href: "/dashboard/testament" },
+  { slug: "digitaler-nachlass", href: "/dashboard/digitaler-nachlass" },
+  { slug: "familie", href: "/dashboard/familie" },
 ];
 
 describe("content sources, tiles, and article structure", () => {
-  it("homepage area tiles link to wissen routes", () => {
+  it("homepage area tiles link to dashboard module routes", () => {
     const home = read("src/app/page.tsx");
-    for (const { slug, href } of HOME_AREAS) {
+    for (const { href } of HOME_AREAS) {
       expect(home).toContain(`href: "${href}"`);
       expect(home).toContain('data-testid={`home-area-${href.split("/").pop()}`}');
-      expect(wissenTopics.some((t) => t.slug === slug)).toBe(true);
     }
-    expect(home).toContain("Thema öffnen");
+    expect(home).toContain("Modul öffnen");
   });
 
   it("article card uses unified sections A–H", () => {

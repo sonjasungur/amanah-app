@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 const HOME_TILES = [
-  { testId: "home-area-notfallkarte", path: "/wissen/notfallkarte" },
-  { testId: "home-area-vorsorgevollmacht", path: "/wissen/vorsorgevollmacht" },
-  { testId: "home-area-janazah-wuensche", path: "/wissen/janazah-wuensche" },
-  { testId: "home-area-testament-erbe", path: "/wissen/testament-erbe" },
-  { testId: "home-area-digitaler-nachlass", path: "/wissen/digitaler-nachlass" },
-  { testId: "home-area-sadaqa-jariya", path: "/wissen/sadaqa-jariya" },
+  { testId: "home-area-notfallkarte", path: "/dashboard/notfallkarte" },
+  { testId: "home-area-vollmacht", path: "/dashboard/vollmacht" },
+  { testId: "home-area-janazah", path: "/dashboard/janazah" },
+  { testId: "home-area-testament", path: "/dashboard/testament" },
+  { testId: "home-area-digitaler-nachlass", path: "/dashboard/digitaler-nachlass" },
+  { testId: "home-area-familie", path: "/dashboard/familie" },
 ];
 
 const WISSEN_SLUGS = [
