@@ -11,15 +11,6 @@ function read(rel: string): string {
   return readFileSync(join(ROOT, rel), "utf8");
 }
 
-const DASHBOARD_MODULE_ROUTES = [
-  "/dashboard/notfallkarte",
-  "/dashboard/janazah",
-  "/dashboard/vollmacht",
-  "/dashboard/testament",
-  "/dashboard/digitaler-nachlass",
-  "/dashboard/familie",
-];
-
 describe("product tiles and navigation", () => {
   it("homepage area tiles link to dashboard module routes", () => {
     const home = read("src/app/page.tsx");
