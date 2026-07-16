@@ -66,10 +66,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" variant={mode === "register" ? "primary" : "primary"} disabled={loading}>
             {loading ? "…" : mode === "login" ? t("auth.login") : t("auth.register")}
           </Button>
         </form>
+
+        {mode === "register" && (
+          <p className="text-xs text-muted mt-4 text-center">
+            Kostenloser Einstieg — kostenpflichtige Pakete sind klar gekennzeichnet unter{" "}
+            <Link href="/preise" className="text-primary font-semibold hover:underline">Preise</Link>.
+          </p>
+        )}
 
         <p className="text-sm text-muted mt-6 text-center">
           {mode === "login" ? (

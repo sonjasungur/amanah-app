@@ -55,8 +55,8 @@ export function Header() {
                 className={cn(
                   "px-3.5 py-2 rounded-lg text-[15px] font-semibold transition-colors min-h-[44px] flex items-center",
                   active
-                    ? "text-primary bg-accent-soft"
-                    : "text-muted hover:text-primary hover:bg-accent-soft/60"
+                    ? "text-primary-dark bg-accent-soft ring-2 ring-primary/25 font-bold"
+                    : "text-muted hover:text-primary-dark hover:bg-accent-soft/60"
                 )}
                 aria-current={active ? "page" : undefined}
               >
@@ -93,9 +93,14 @@ export function Header() {
                 </button>
               </div>
             ) : (
-              <Link href="/login" className={linkButtonClassName({ size: "sm", className: "ml-1 min-w-[7.5rem]" })}>
-                Anmelden
-              </Link>
+              <div className="flex items-center gap-2 ml-1">
+                <Link href="/register" className={linkButtonClassName({ size: "sm", variant: "outline", className: "min-w-[7.5rem]" })}>
+                  Registrieren
+                </Link>
+                <Link href="/login" className={linkButtonClassName({ size: "sm", className: "min-w-[7.5rem]" })}>
+                  Anmelden
+                </Link>
+              </div>
             ))}
         </nav>
 
@@ -119,7 +124,7 @@ export function Header() {
                 href={link.href}
                 className={cn(
                   "block text-base font-semibold py-3 px-3 rounded-lg min-h-[44px]",
-                  active ? "text-primary bg-accent-soft" : "text-muted"
+                  active ? "text-primary-dark bg-accent-soft font-bold" : "text-muted"
                 )}
                 onClick={() => setMobileOpen(false)}
               >
@@ -156,13 +161,22 @@ export function Header() {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                className={linkButtonClassName({ className: "w-full mt-2" })}
-                onClick={() => setMobileOpen(false)}
-              >
-                Anmelden
-              </Link>
+              <>
+                <Link
+                  href="/register"
+                  className={linkButtonClassName({ variant: "outline", className: "w-full mt-2" })}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Registrieren
+                </Link>
+                <Link
+                  href="/login"
+                  className={linkButtonClassName({ className: "w-full mt-2" })}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Anmelden
+                </Link>
+              </>
             ))}
         </nav>
       )}

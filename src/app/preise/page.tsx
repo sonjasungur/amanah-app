@@ -173,6 +173,23 @@ export default function PreisePage() {
       </section>
 
       <Disclaimer />
+      <section className="mt-12 rounded-2xl border-2 border-emerald/30 bg-accent-soft p-6 md:p-8">
+        <h2 className="text-section-title font-bold text-foreground mb-3">Bereit für deine Vorsorge?</h2>
+        <p className="text-body text-muted mb-6 max-w-2xl">
+          Starte kostenlos mit dem Vorsorge-Check oder erstelle ein Konto, um deine Wünsche dauerhaft zu dokumentieren.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link href="/register" className={linkButtonClassName({ size: "lg", className: "w-full sm:w-auto font-bold" })}>
+            Konto erstellen — Vorsorge beginnen
+          </Link>
+          <Link href="/login" className={linkButtonClassName({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}>
+            Anmelden
+          </Link>
+          <Link href="/check" className={linkButtonClassName({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}>
+            Kostenlosen Check starten
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
