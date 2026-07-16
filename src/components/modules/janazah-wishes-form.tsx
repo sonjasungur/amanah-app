@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ModuleForm } from "@/components/modules/module-form";
 import { JanazahLegalNotice } from "@/components/modules/janazah-legal-notice";
+import { JanazahModuleNav } from "@/components/modules/janazah-module-nav";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { janazahSections } from "@/lib/modules/janazah-sections";
+import { buildAuthHref } from "@/lib/auth/return-url";
+import { flushPendingSave, getStorageLocationLabel } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { CheckCircle2 } from "lucide-react";
 
@@ -27,23 +31,26 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: unkno
   };
 }
 
+function getSavedConfirmationMessage(): string {
+  return getStorageLocationLabel() === "api"
+    ? "Deine Janazah-Wünsche wurden in deinem Konto gespeichert."
+    : "Deine Änderungen wurden auf diesem Gerät gespeichert.";
+}
+
 export function JanazahWishesForm() {
   const store = useAmanahStore();
+  const pathname = usePathname();
   const values = store.janazahWishes as unknown as Record<string, unknown>;
   const profileBirthDate = store.userProfile.birthDate?.trim();
   const [showSavedBanner, setShowSavedBanner] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const visibleSections = useMemo(
-    () =>
-      janazahSections.map((section) => ({
-        ...section,
-        fields: section.fields.filter(
-          (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
-        ),
-      })),
-    [profileBirthDate]
-  );
+  const visibleSections = janazahSections.map((section) => ({
+    ...section,
+    fields: section.fields.filter(
+      (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
+    ),
+  }));
 
   const flatValues: Record<string, unknown> = {};
   for (const section of visibleSections) {
@@ -55,28 +62,24 @@ export function JanazahWishesForm() {
   const handleChange = (field: string, value: unknown) => {
     const updated = setNestedValue(values, field, value);
     store.updateField("janazahWishes", updated as never);
-    setValidationError(null);
+    setShowSavedBanner(false);
   };
 
-  useEffect(() => {
-    if (store.saveStatus !== "saved" || !store.lastSaved) return;
-    const timer = setTimeout(() => setShowSavedBanner(true), 450);
-    return () => clearTimeout(timer);
-  }, [store.saveStatus, store.lastSaved]);
-
-  const handleExplicitSave = () => {
-    if (store.saveStatus === "error") {
-      setValidationError("Speichern fehlgeschlagen. Bitte erneut versuchen.");
-      return;
-    }
-    setValidationError(null);
-    if (store.saveStatus === "saved") {
+  const handleExplicitSave = async () => {
+    setIsSaving(true);
+    setShowSavedBanner(false);
+    await flushPendingSave();
+    setIsSaving(false);
+    const status = useAmanahStore.getState().saveStatus;
+    if (status === "saved") {
       setShowSavedBanner(true);
     }
   };
 
   return (
     <div data-testid="janazah-form">
+      <JanazahModuleNav />
+
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-page-title font-bold text-foreground mb-2">Janazah-Wünsche</h1>
@@ -96,14 +99,8 @@ export function JanazahWishesForm() {
           role="status"
         >
           <CheckCircle2 size={18} className="text-success shrink-0 mt-0.5" aria-hidden />
-          <p>Deine Janazah-Wünsche wurden gespeichert. Du kannst sie jederzeit ergänzen oder ändern.</p>
+          <p>{getSavedConfirmationMessage()}</p>
         </div>
-      )}
-
-      {validationError && (
-        <p className="mb-4 text-sm text-danger" data-testid="janazah-validation-error" role="alert">
-          {validationError}
-        </p>
       )}
 
       <div className="space-y-6">
@@ -117,12 +114,24 @@ export function JanazahWishesForm() {
       </div>
 
       <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <Button type="button" size="lg" className="w-full sm:w-auto" onClick={handleExplicitSave} data-testid="janazah-save-button">
-          Wünsche speichern
+        <Button
+          type="button"
+          size="lg"
+          className="w-full sm:w-auto"
+          onClick={() => void handleExplicitSave()}
+          disabled={isSaving || store.saveStatus === "saving"}
+          data-testid="janazah-save-button"
+        >
+          {isSaving || store.saveStatus === "saving" ? "Speichern …" : "Wünsche speichern"}
         </Button>
-        <Link href="/register" className="w-full sm:w-auto">
+        <Link href={buildAuthHref("/register", pathname)} className="w-full sm:w-auto">
           <Button type="button" variant="outline" size="lg" className="w-full">
-            Konto erstellen — dauerhaft sichern
+            Konto erstellen — geräteübergreifend sichern
+          </Button>
+        </Link>
+        <Link href="/dashboard/pdf" className="w-full sm:w-auto">
+          <Button type="button" variant="ghost" size="lg" className="w-full">
+            Export & Backup
           </Button>
         </Link>
       </div>

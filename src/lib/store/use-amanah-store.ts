@@ -8,6 +8,7 @@ import { migrateRawData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
 import { STORAGE_KEY, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
+import { persistStoreChanges } from "@/lib/storage/store-sync";
 import { pickDataFields } from "@/lib/store/store-utils";
 
 const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
@@ -104,18 +105,7 @@ useAmanahStore.subscribe((state, prevState) => {
 
   if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
   saveDebounceTimer = setTimeout(() => {
-    try {
-      useAmanahStore.setState({
-        saveStatus: "saved",
-        saveError: null,
-        lastSaved: new Date().toISOString(),
-      });
-    } catch (err) {
-      useAmanahStore.setState({
-        saveStatus: "error",
-        saveError: err instanceof Error ? err.message : "Fehler beim Speichern",
-      });
-    }
+    void persistStoreChanges();
   }, 400);
 });
 

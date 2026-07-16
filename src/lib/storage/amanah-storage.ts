@@ -22,16 +22,16 @@ export function getStorageProvider(): StorageProvider {
 }
 
 export async function loadAmanahData(): Promise<AmanahOrdnerData> {
-  const data = await provider.load();
+  const data = await getStorageProvider().load();
   return data ?? normalizeData({});
 }
 
 export async function saveAmanahData(data: AmanahOrdnerData): Promise<void> {
-  await provider.save(data);
+  await getStorageProvider().save(data);
 }
 
 export async function clearAmanahData(): Promise<void> {
-  await provider.clear();
+  await getStorageProvider().clear();
 }
 
 export function exportToJson(data: AmanahOrdnerData): void {
