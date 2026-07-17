@@ -73,18 +73,37 @@ export interface CareDirective {
 }
 
 export interface JanazahWishes {
+  fullName: string;
+  birthDate: string;
+  locationRegion: string;
+  trustedContact: string;
+  peopleToNotify: string;
+  mosqueCommunity: string;
+  additionalContacts: string;
   islamicBurialDesired: boolean | null;
   noUnnecessaryDelay: boolean | null;
   ghusl: string;
+  preferredGhuslPersons: string;
+  genderSpecificWishes: string;
   kafan: string;
   janazahPrayer: string;
   burialGermany: boolean | null;
   repatriation: "yes" | "no" | "unsure" | "";
   preferredCemetery: string;
+  muslimGraveyard: boolean | null;
+  familyGrave: string;
+  burialCountryNotes: string;
+  repatriationNotes: string;
+  documentNotes: string;
   preferredMosque: string;
   preferredFuneralDirector: string;
   culturalExclusions: string;
+  peopleToInclude: string;
   messageToFamily: string;
+  obligationsNotes: string;
+  debtsAmanahNotes: string;
+  donationWishes: string;
+  additionalWishes: string;
 }
 
 export interface GhuslKafanWishes {

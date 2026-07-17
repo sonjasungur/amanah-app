@@ -8,6 +8,9 @@ export interface FieldConfig {
   type: "text" | "textarea" | "select" | "boolean" | "number";
   options?: { value: string; label: string }[];
   placeholder?: string;
+  testId?: string;
+  showWhenProfileBirthDateEmpty?: boolean;
+  helpText?: string;
 }
 
 interface ModuleFormProps {
@@ -21,8 +24,9 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
   return (
     <div className="space-y-5">
       {fields.map((field) => (
-        <div key={field.key}>
+        <div key={field.key} data-testid={field.testId}>
           <Label>{field.label}</Label>
+          {field.helpText && <p className="text-xs text-muted mb-1.5">{field.helpText}</p>}
           {field.type === "textarea" && (
             <Textarea
               value={(values[field.key] as string) || ""}

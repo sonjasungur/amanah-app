@@ -1,5 +1,5 @@
-import { AuthForm } from "@/components/auth/auth-form";
+import { AuthFormShell } from "@/components/auth/auth-form-shell";
 
 export default function RegisterPage() {
-  return <AuthForm mode="register" />;
+  return <AuthFormShell mode="register" />;
 }

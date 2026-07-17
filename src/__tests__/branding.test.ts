@@ -62,12 +62,13 @@ describe("branding — Mein Wille", () => {
     expect(home).toContain("BRAND.ctaPrimary");
     expect(home).not.toContain('<Logo variant="hero"');
     expect(home).toContain("AkhiraSection");
-    expect(home).toContain("OutcomeCard");
+    expect(home).toContain("home-outcome-");
   });
 
   it("uses Vorsorge-Check label in navigation while keeping /check route", () => {
     expect(read("src/lib/i18n/translations.ts")).toContain('"nav.check": "Vorsorge-Check"');
     expect(read("src/components/layout/header.tsx")).toContain('href: "/check"');
+    expect(read("src/components/layout/header.tsx")).toContain("Registrieren");
     expect(read("src/components/layout/header.tsx")).toContain("Anmelden");
     expect(read("src/app/check/page.tsx")).toContain("CHECK_LABELS.pageTitle");
     expect(CHECK_LABELS.pageTitle).toBe("Dein islamischer Vorsorge-Check");

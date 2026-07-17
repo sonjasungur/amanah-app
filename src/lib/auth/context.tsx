@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { getAuthMode } from "./config";
 import { localAuthProvider } from "./local-auth-provider";
 import { apiAuthProvider } from "./api-auth-provider";
+import { syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import type { AuthProvider, AuthSession, LoginInput, RegisterInput } from "./types";
 
 interface AuthContextValue {
@@ -28,9 +29,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const provider = useMemo(() => getProvider(), []);
 
   useEffect(() => {
-    provider.getSession().then((s) => {
+    provider.getSession().then(async (s) => {
       setSession(s);
       setIsLoading(false);
+      if (s) {
+        await syncStoreWithRemoteAfterAuth();
+      }
     });
   }, [provider]);
 
@@ -39,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await provider.login(input);
       if (result.success && result.session) {
         setSession(result.session);
+        await syncStoreWithRemoteAfterAuth();
         return { success: true };
       }
       return { success: false, error: result.error };
@@ -51,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await provider.register(input);
       if (result.success && result.session) {
         setSession(result.session);
+        await syncStoreWithRemoteAfterAuth();
         return { success: true };
       }
       return { success: false, error: result.error };

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { useI18n } from "@/lib/i18n/context";
+import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const { login, register, authMode } = useAuth();
   const { t } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = sanitizeReturnUrl(searchParams.get("returnUrl"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -36,11 +39,13 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     setLoading(false);
     if (result.success) {
-      router.push("/dashboard");
+      router.push(returnUrl);
     } else {
       setError(result.error ?? t("auth.error.generic"));
     }
   };
+
+  const alternateHref = buildAuthHref(mode === "login" ? "/register" : "/login", returnUrl);
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
@@ -71,16 +76,23 @@ export function AuthForm({ mode }: AuthFormProps) {
           </Button>
         </form>
 
+        {mode === "register" && (
+          <p className="text-xs text-muted mt-4 text-center">
+            Kostenloser Einstieg — kostenpflichtige Pakete sind klar gekennzeichnet unter{" "}
+            <Link href="/preise" className="text-primary font-semibold hover:underline">Preise</Link>.
+          </p>
+        )}
+
         <p className="text-sm text-muted mt-6 text-center">
           {mode === "login" ? (
             <>
               {t("auth.noAccount")}{" "}
-              <Link href="/register" className="text-primary hover:underline">{t("auth.register")}</Link>
+              <Link href={alternateHref} className="text-primary hover:underline">{t("auth.register")}</Link>
             </>
           ) : (
             <>
               {t("auth.hasAccount")}{" "}
-              <Link href="/login" className="text-primary hover:underline">{t("auth.login")}</Link>
+              <Link href={alternateHref} className="text-primary hover:underline">{t("auth.login")}</Link>
             </>
           )}
         </p>

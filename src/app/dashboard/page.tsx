@@ -6,6 +6,7 @@ import { pickDataFields } from "@/lib/store/store-utils";
 import { moduleConfigs } from "@/lib/modules/config";
 import { getAllModuleProgress, getCriticalMissing, getRecommendedNextStep } from "@/lib/utils/progress";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
+import { ModuleTiles } from "@/components/dashboard/module-tiles";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,8 @@ export default function DashboardPage() {
         </p>
         <ProgressBar />
       </header>
+
+      <ModuleTiles />
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="border-2 border-emerald/30 bg-accent-soft p-6 md:p-7 shadow-sm">
