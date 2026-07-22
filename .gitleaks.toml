@@ -1,0 +1,37 @@
+title = "MSC Engineering gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow only documented example templates by path; values must remain placeholders"
+paths = [
+  '''re:\.env(\..*)?\.example$''',
+  '''re:.*\.example$''',
+]
+
+# Filename-only rules with regex=(?s). are forbidden: they match every byte and flood baselines.
+# Keep path scoping + narrow credential-oriented content patterns instead.
+
+[[rules]]
+id = "msc-env-backup-secret-assignment"
+description = "Secret-like assignments inside environment backup files"
+path = '''(?i).*\.env\.backup.*'''
+regex = '''(?i)(?:^|[\n\r])\s*[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PASSWD|API[_-]?KEY|ACCESS[_-]?KEY|PRIVATE[_-]?KEY|SMTP[_-]?(?:USER|PASS)|DATABASE_URL|REDIS_URL)[A-Z0-9_]*\s*=\s*[^\s#]{8,}'''
+
+[[rules]]
+id = "msc-credentials-csv-secret-row"
+description = "Credential-like columns or values in credentials CSV exports"
+path = '''(?i).*credentials.*\.csv$'''
+regex = '''(?i)(?:password|secret|api[_-]?key|access[_-]?key|smtp[_-]?password|token)\s*[,:=]'''
+
+[[rules]]
+id = "msc-private-key-pem"
+description = "Private key material"
+regex = '''-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----'''
+
+[[rules]]
+id = "msc-service-account-private-key"
+description = "Cloud service account private key material in JSON"
+path = '''(?i).*service[-_]?account.*\.json$'''
+regex = '''"private_key"\s*:\s*"-----BEGIN'''

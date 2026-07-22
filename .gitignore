@@ -54,3 +54,42 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# === MSC security hardening (managed) ===
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.env.local
+
+# Keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+*.credentials.csv
+*credentials*.csv
+*credential*.json
+*service-account*.json
+*secrets*.json
+*secret*.txt
+
+# Database dumps / local backups
+*.sql.gz
+*.dump
+*.bak
+*.backup
+*.backup.*
+.env.backup
+.env.backup.*
+
+# Local security scan reports
+.gitleaks-report*
+security-scan-report*
+secret-scan-report*
+
