@@ -244,3 +244,39 @@ describe("AI API routes", () => {
     expect(body.requiresConsent).toBe(true);
   });
 });
+
+import { isKnowledgeResult } from "@/lib/ai/structured";
+
+describe("isKnowledgeResult evidence guard", () => {
+  it("isKnowledgeResult requires citations arrays", () => {
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        citations: [{ entryId: "1", title: "t", sourceLabel: "s" }],
+        usedEntryIds: ["1"],
+        safetyLevel: "low",
+        disclaimer: "d",
+      })
+    ).toBe(true);
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        citations: [],
+        usedEntryIds: [],
+        noSource: true,
+        safetyLevel: "low",
+        disclaimer: "d",
+      })
+    ).toBe(true);
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        safetyLevel: "low",
+        disclaimer: "d",
+      })
+    ).toBe(false);
+  });
+});

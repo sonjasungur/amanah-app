@@ -28,5 +28,11 @@ export function isFamilyMessageResult(v: unknown): v is FamilyMessageResult {
 
 export function isKnowledgeResult(v: unknown): v is KnowledgeResult {
   const o = v as KnowledgeResult;
-  return typeof o?.answer === "string" && typeof o?.blocked === "boolean";
+  if (typeof o?.answer !== "string" || typeof o?.blocked !== "boolean") return false;
+  // Grounded answers must expose citation arrays; missing evidence uses empty arrays + noSource.
+  if (!Array.isArray(o.citations) || !Array.isArray(o.usedEntryIds)) return false;
+  if (o.noSource === true) return true;
+  if (o.blocked === true) return true;
+  // When evidence is expected, require at least one citation or explicit empty with noSource.
+  return o.citations.length > 0 || o.noSource === true;
 }
