@@ -245,37 +245,121 @@ describe("AI API routes", () => {
   });
 });
 
-import { isKnowledgeResult } from "@/lib/ai/structured";
-
 describe("isKnowledgeResult evidence guard", () => {
-  it("isKnowledgeResult requires citations arrays", () => {
+  const validCitation = {
+    entryId: "entry-1",
+    title: "Documented source",
+    sourceLabel: "Amanah knowledge base",
+  };
+
+  it("accepts a valid grounded answer with citations", () => {
     expect(
       isKnowledgeResult({
-        answer: "x",
+        answer: "Grounded answer",
         blocked: false,
-        citations: [{ entryId: "1", title: "t", sourceLabel: "s" }],
-        usedEntryIds: ["1"],
-        safetyLevel: "low",
-        disclaimer: "d",
+        citations: [validCitation],
+        usedEntryIds: ["entry-1"],
+        disclaimer: "Not legal advice",
+        extraUnknownField: "ignored",
       })
     ).toBe(true);
+  });
+
+  it("accepts explicit missing evidence via noSource", () => {
     expect(
       isKnowledgeResult({
-        answer: "x",
+        answer: "No matching source found",
         blocked: false,
         citations: [],
         usedEntryIds: [],
         noSource: true,
-        safetyLevel: "low",
-        disclaimer: "d",
+        disclaimer: "Not legal advice",
       })
     ).toBe(true);
+  });
+
+  it("rejects missing citation arrays", () => {
     expect(
       isKnowledgeResult({
         answer: "x",
         blocked: false,
-        safetyLevel: "low",
         disclaimer: "d",
+      })
+    ).toBe(false);
+  });
+
+  it("rejects fabricated or incomplete citation objects", () => {
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        citations: [{ entryId: "", title: "t", sourceLabel: "s" }],
+        usedEntryIds: ["x"],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        citations: [{ entryId: "1", title: "t" }],
+        usedEntryIds: ["1"],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: false,
+        citations: ["not-an-object"],
+        usedEntryIds: ["1"],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+  });
+
+  it("rejects empty answers and wrong datatypes", () => {
+    expect(
+      isKnowledgeResult({
+        answer: "   ",
+        blocked: false,
+        citations: [validCitation],
+        usedEntryIds: ["entry-1"],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+    expect(
+      isKnowledgeResult({
+        answer: "x",
+        blocked: "no",
+        citations: [validCitation],
+        usedEntryIds: ["entry-1"],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+    expect(isKnowledgeResult(null)).toBe(false);
+    expect(isKnowledgeResult(undefined)).toBe(false);
+  });
+
+  it("rejects empty citation list without noSource/blocked", () => {
+    expect(
+      isKnowledgeResult({
+        answer: "Invented answer without evidence",
+        blocked: false,
+        citations: [],
+        usedEntryIds: [],
+        disclaimer: "d",
+      })
+    ).toBe(false);
+  });
+
+  it("documents that provider timeouts must not become silent success", () => {
+    // Model timeout/errors are handled by providers/API routes; a timeout must not
+    // synthesize a KnowledgeResult. An error-shaped payload is therefore invalid.
+    expect(
+      isKnowledgeResult({
+        error: "timeout",
+        message: "model unavailable",
       })
     ).toBe(false);
   });
