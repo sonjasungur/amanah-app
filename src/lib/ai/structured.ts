@@ -26,7 +26,30 @@ export function isFamilyMessageResult(v: unknown): v is FamilyMessageResult {
   return typeof o?.message === "string" && typeof o?.tone === "string";
 }
 
+function isKnowledgeCitation(v: unknown): boolean {
+  if (!v || typeof v !== "object") return false;
+  const c = v as Record<string, unknown>;
+  return (
+    typeof c.entryId === "string" &&
+    c.entryId.length > 0 &&
+    typeof c.title === "string" &&
+    c.title.length > 0 &&
+    typeof c.sourceLabel === "string" &&
+    c.sourceLabel.length > 0
+  );
+}
+
 export function isKnowledgeResult(v: unknown): v is KnowledgeResult {
+  if (!v || typeof v !== "object") return false;
   const o = v as KnowledgeResult;
-  return typeof o?.answer === "string" && typeof o?.blocked === "boolean";
+  if (typeof o.answer !== "string" || o.answer.trim().length === 0) return false;
+  if (typeof o.blocked !== "boolean") return false;
+  if (typeof o.disclaimer !== "string") return false;
+  // Grounded answers must expose citation arrays; missing evidence uses empty arrays + noSource.
+  if (!Array.isArray(o.citations) || !Array.isArray(o.usedEntryIds)) return false;
+  if (!o.citations.every(isKnowledgeCitation)) return false;
+  if (!o.usedEntryIds.every((id) => typeof id === "string" && id.length > 0)) return false;
+  if (o.blocked === true || o.noSource === true) return true;
+  // When evidence is expected, require at least one structurally valid citation.
+  return o.citations.length > 0;
 }
