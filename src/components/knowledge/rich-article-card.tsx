@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { KnowledgeArticle } from "@/lib/types";
 import { SourcesSection } from "@/components/knowledge/sources-section";
+import { ReviewStatusBadge } from "@/components/knowledge/review-status-badge";
 import { PrimarySourcesList } from "@/components/ui/primary-source-card";
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, BookOpen, FileText, Scale, Target, Users } from "lucide-react";
@@ -65,8 +66,9 @@ export function RichArticleCard({ article }: { article: KnowledgeArticle }) {
 
   return (
     <Card className="space-y-8 border-2 border-border shadow-sm">
-      <div>
+      <div className="flex flex-wrap items-center gap-3">
         <CardTitle className="text-page-title text-primary-dark">{article.title}</CardTitle>
+        <ReviewStatusBadge status={article.reviewStatus} />
       </div>
 
       <Section icon={BookOpen} title="In 30 Sekunden">

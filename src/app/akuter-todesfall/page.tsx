@@ -35,7 +35,7 @@ export default function AkuterTodesfallPage() {
 
       <div className="mt-8 rounded-2xl bg-sand p-6 text-center">
         <p className="text-sm text-muted mb-4">Dieser Bereich ist kostenlos und ohne Verkaufsdruck.</p>
-        <Link href="/bestatter"><Button variant="outline">Bestatter-Verzeichnis</Button></Link>
+        <Link href="/wissen"><Button variant="outline">Wissen zu Janazah</Button></Link>
       </div>
 
       <div className="mt-8"><Disclaimer type="islamic" /></div>

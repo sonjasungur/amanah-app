@@ -233,9 +233,19 @@ export interface FamilyMessage {
   keyWishesSummary: string;
 }
 
+/** Versioned Amanah-Check progress stored in the same folder state. */
+export interface CheckProgress {
+  schemaVersion: number;
+  index: number;
+  answers: Record<string, boolean>;
+  phase: "intro" | "questions" | "result";
+  completedAt?: string;
+}
+
 export interface AmanahOrdnerData {
   schemaVersion: number;
   userProfile: UserProfile;
+  checkProgress: CheckProgress;
   familyMembers: FamilyMember[];
   emergencyCard: EmergencyCard;
   medicalWishes: MedicalWishes;

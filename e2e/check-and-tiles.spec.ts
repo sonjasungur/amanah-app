@@ -1,14 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-const HOME_TILES = [
-  { testId: "home-area-notfallkarte", path: "/dashboard/notfallkarte" },
-  { testId: "home-area-vollmacht", path: "/dashboard/vollmacht" },
-  { testId: "home-area-janazah", path: "/dashboard/janazah" },
-  { testId: "home-area-testament", path: "/dashboard/testament" },
-  { testId: "home-area-digitaler-nachlass", path: "/dashboard/digitaler-nachlass" },
-  { testId: "home-area-familie", path: "/dashboard/familie" },
-];
-
 const WISSEN_SLUGS = [
   "notfallkarte",
   "patientenverfuegung",
@@ -20,14 +11,18 @@ const WISSEN_SLUGS = [
   "akhira-vorsorge",
 ];
 
-test.describe("Homepage tiles", () => {
-  for (const { testId, path } of HOME_TILES) {
-    test(`tile ${testId} navigates to ${path}`, async ({ page }) => {
-      await page.goto("/");
-      await page.getByTestId(testId).click();
-      await expect(page).toHaveURL(new RegExp(`${path.replace("/", "\\/")}$`));
-    });
-  }
+test.describe("Homepage guided path", () => {
+  test("primary CTA starts the Amanah-Check", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: /Kostenlosen Amanah-Check starten/i }).first().click();
+    await expect(page).toHaveURL(/\/check$/);
+  });
+
+  test("homepage has no anonymous dashboard module jumps", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("home-area-janazah")).toHaveCount(0);
+    await expect(page.getByTestId("document-logo-mark")).toBeVisible();
+  });
 });
 
 test.describe("Vorsorge-Check", () => {
@@ -79,5 +74,11 @@ test.describe("Mobile layout smoke", () => {
   test("wissen page loads on mobile", async ({ page }) => {
     await page.goto("/wissen");
     await expect(page.getByPlaceholder("Worüber möchtest du mehr wissen?")).toBeVisible();
+  });
+
+  test("only one mobile main navigation toggle is present", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page.getByTestId("site-mobile-nav-toggle")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Navigation öffnen/i })).toHaveCount(0);
   });
 });

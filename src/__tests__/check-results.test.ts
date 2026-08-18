@@ -12,7 +12,8 @@ describe("computeCheckResult", () => {
       "family-knows-islam": false,
     });
     expect(r.personalizedHints.some((h) => h.toLowerCase().includes("nicht-muslimisch"))).toBe(true);
-    expect(r.nextSteps.some((s) => s.href === "/dashboard/familie")).toBe(true);
+    expect(r.nextSteps).toHaveLength(1);
+    expect(r.primaryRecommendation.id).toBe("vollmacht");
   });
 
   it("scores prep questions separately from profile", () => {

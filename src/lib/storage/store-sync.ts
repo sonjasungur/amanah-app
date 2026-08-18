@@ -27,6 +27,9 @@ export function hasMeaningfulLocalData(data: AmanahOrdnerData): boolean {
   if (data.debtsAmanah.length > 0) return true;
   if (data.digitalLegacy.length > 0) return true;
   if (data.familyMessage.familyLetter?.trim()) return true;
+  if (data.checkProgress?.phase === "result") return true;
+  if ((data.checkProgress?.index ?? 0) > 0) return true;
+  if (Object.keys(data.checkProgress?.answers ?? {}).length > 0) return true;
   return JSON.stringify(data) !== JSON.stringify(defaultAmanahData);
 }
 
@@ -73,7 +76,20 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
     const localHasData = hasMeaningfulLocalData(localData);
 
     if (remoteHasData) {
-      useAmanahStore.getState().importData(remoteData);
+      const remoteCheckEmpty =
+        !remoteData.checkProgress ||
+        (remoteData.checkProgress.phase !== "result" &&
+          remoteData.checkProgress.index === 0 &&
+          Object.keys(remoteData.checkProgress.answers ?? {}).length === 0);
+      const localCheck = localData.checkProgress;
+      const localCheckHasData =
+        localCheck &&
+        (localCheck.phase === "result" || localCheck.index > 0 || Object.keys(localCheck.answers ?? {}).length > 0);
+      if (remoteCheckEmpty && localCheckHasData) {
+        useAmanahStore.getState().importData({ ...remoteData, checkProgress: localCheck });
+      } else {
+        useAmanahStore.getState().importData(remoteData);
+      }
       return;
     }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/server/auth-utils";
 import { getAmanahAIProvider } from "./ai-provider";
-import { isAiEnabled, requiresExternalAiConsent } from "./config";
+import { isAiEnabled } from "./config";
 import { minimalDataFromStore } from "./context";
 import { checkRateLimit, logAiEvent } from "./rate-limit";
 import { enforceAiSafety } from "./safety";
@@ -35,15 +35,16 @@ export async function handleAiRoute(
   }
 
   const body = preParsedBody ?? (await request.json().catch(() => ({})));
-  const rawData = (body.data ?? body.amanahData) as Partial<AmanahOrdnerData> | undefined;
-  const data = rawData ? normalizeData(rawData) : normalizeData({});
-
-  if (requiresExternalAiConsent() && body.consentGranted !== true) {
+  const hasPersonalData = body.data != null || body.amanahData != null;
+  if (hasPersonalData && body.consentGranted !== true) {
     return NextResponse.json(
-      { error: "Externe KI erfordert deine Einwilligung.", requiresConsent: true },
+      { error: "Ohne ausdrückliche Einwilligung werden keine Ordnerdaten an KI-Routen gesendet.", requiresConsent: true },
       { status: 403 }
     );
   }
+
+  const rawData = hasPersonalData ? ((body.data ?? body.amanahData) as Partial<AmanahOrdnerData>) : undefined;
+  const data = rawData ? normalizeData(rawData) : normalizeData({});
 
   const textForSafety = [body.question, body.freeText, body.text, body.prompt].filter(Boolean).join(" ");
   if (textForSafety) {

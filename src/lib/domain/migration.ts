@@ -1,6 +1,7 @@
 import { defaultAmanahData } from "./defaults";
 import { SCHEMA_VERSION } from "./schema";
 import type { AmanahOrdnerData } from "./types";
+import { normalizeCheckProgress } from "@/lib/check/progress";
 
 type LegacyRawData = Record<string, unknown>;
 
@@ -43,6 +44,7 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
     debtsAmanah: merged.debtsAmanah ?? [],
     digitalLegacy: merged.digitalLegacy ?? [],
     reviewStatus: merged.reviewStatus ?? "draft",
+    checkProgress: normalizeCheckProgress(merged.checkProgress ?? defaultAmanahData.checkProgress),
   };
 }
 

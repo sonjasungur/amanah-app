@@ -12,24 +12,18 @@ function read(rel: string): string {
 }
 
 describe("product tiles and navigation", () => {
-  it("homepage area tiles link to dashboard module routes", () => {
+  it("homepage does not jump anonymously into dashboard modules", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('href: "/dashboard/notfallkarte"');
-    expect(home).toContain('href: "/dashboard/janazah"');
-    expect(home).toContain('href: "/dashboard/vollmacht"');
-    expect(home).toContain('href: "/dashboard/testament"');
-    expect(home).toContain('href: "/dashboard/digitaler-nachlass"');
-    expect(home).toContain('href: "/dashboard/familie"');
-    expect(home).toContain("Modul öffnen");
+    expect(home).not.toContain("home-area-");
+    expect(home).not.toContain("Modul öffnen");
+    expect(home).toContain("BRAND.ctaPrimary");
   });
 
-  it("dashboard module tiles reference valid routes", () => {
+  it("dashboard module tiles reference valid routes under Alle Vorsorgebereiche", () => {
     const tiles = read("src/components/dashboard/module-tiles.tsx");
     expect(tiles).toContain("moduleConfigs");
-    expect(tiles).toContain('href={mod!.path}');
-    for (const route of ["/check", "/preise", "/register"]) {
-      expect(tiles).toContain(`href: "${route}"`);
-    }
+    expect(tiles).toContain("Alle Vorsorgebereiche");
+    expect(tiles).toContain("dashboard-tile-${mod.id}");
     const paths = moduleConfigs.map((m) => m.path);
     for (const route of ["/dashboard/notfallkarte", "/dashboard/janazah", "/dashboard/vollmacht", "/dashboard/testament", "/dashboard/digitaler-nachlass", "/dashboard/familie"]) {
       expect(paths).toContain(route);

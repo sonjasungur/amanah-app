@@ -3,12 +3,37 @@ import { CHECK_QUESTIONS, type CheckQuestion } from "./questions";
 export type CheckAnswers = Record<string, boolean>;
 
 export interface CheckGap {
+  id: string;
   label: string;
   modulePath?: string;
   urgent: boolean;
 }
 
-const PREP_QUESTIONS = CHECK_QUESTIONS.filter((q) => q.category !== "profil");
+export interface CheckPrimaryRecommendation {
+  id: string;
+  label: string;
+  href: string;
+  reason: string;
+}
+
+const CONTEXT_QUESTION_IDS = new Set(["convert", "family-muslim", "married"]);
+
+const TASK_PRIORITY: Record<string, number> = {
+  "notfall-contact": 1,
+  "trust-muslim": 2,
+  vollmacht: 3,
+  janazah: 4,
+  patientenverfuegung: 5,
+  burial: 6,
+  bestatter: 7,
+  "family-knows-islam": 8,
+  schulden: 9,
+  testament: 10,
+  digital: 11,
+  sadaqa: 12,
+};
+
+const PREP_QUESTIONS = CHECK_QUESTIONS.filter((q) => !CONTEXT_QUESTION_IDS.has(q.id));
 
 export interface CheckResult {
   yesCount: number;
@@ -18,8 +43,11 @@ export interface CheckResult {
   status: "green" | "yellow" | "red";
   statusLabel: string;
   missing: CheckGap[];
+  visibleTasks: CheckGap[];
+  furtherTasks: CheckGap[];
   prepared: string[];
   personalizedHints: string[];
+  primaryRecommendation: CheckPrimaryRecommendation;
   nextSteps: { label: string; href: string; priority: number }[];
   profile: {
     isConvert: boolean;
@@ -30,10 +58,55 @@ export interface CheckResult {
   };
 }
 
+export function isContextProfileQuestion(question: CheckQuestion | Pick<CheckQuestion, "id">): boolean {
+  return CONTEXT_QUESTION_IDS.has(question.id);
+}
+
 function isGap(q: CheckQuestion, answer: boolean | undefined): boolean {
   if (answer === undefined) return false;
+  if (isContextProfileQuestion(q)) return false;
   if (q.yesIsGood === true) return !answer;
   return !answer;
+}
+
+function sortGaps(gaps: CheckGap[]): CheckGap[] {
+  return [...gaps].sort((a, b) => {
+    if (a.urgent !== b.urgent) return a.urgent ? -1 : 1;
+    return (TASK_PRIORITY[a.id] ?? 99) - (TASK_PRIORITY[b.id] ?? 99);
+  });
+}
+
+export function pickPrimaryRecommendation(answers: CheckAnswers): CheckPrimaryRecommendation {
+  if (answers["notfall-contact"] === false) {
+    return {
+      id: "notfallkarte",
+      label: "Notfallkarte",
+      href: "/dashboard/notfallkarte",
+      reason: "Es fehlen Notfallkontakte bzw. eine klare Entscheidungsbefugnis.",
+    };
+  }
+  if (answers["trust-muslim"] === false || answers.vollmacht === false) {
+    return {
+      id: "vollmacht",
+      label: "Vorsorgevollmacht",
+      href: "/dashboard/vollmacht",
+      reason: "Es ist noch nicht geklärt, wer als Vertrauensperson für dich handeln darf.",
+    };
+  }
+  if (answers.janazah === false) {
+    return {
+      id: "janazah",
+      label: "Janazah-Wünsche",
+      href: "/dashboard/janazah",
+      reason: "Janazah-Wünsche sind noch nicht dokumentiert.",
+    };
+  }
+  return {
+    id: "plan",
+    label: "Persönlicher Vorsorgeplan",
+    href: "/dashboard",
+    reason: "Kein akuter kritischer Punkt — im persönlichen Vorsorgeplan fortfahren.",
+  };
 }
 
 export function computeCheckResult(answers: CheckAnswers): CheckResult {
@@ -45,10 +118,10 @@ export function computeCheckResult(answers: CheckAnswers): CheckResult {
   for (const q of CHECK_QUESTIONS) {
     const a = answers[q.id];
     if (a === true) yesCount++;
-    if (q.category !== "profil" && a === true) prepYesCount++;
+    if (!isContextProfileQuestion(q) && a === true) prepYesCount++;
     if (isGap(q, a)) {
-      missing.push({ label: q.label, modulePath: q.modulePath, urgent: q.urgent });
-    } else if (a === true) {
+      missing.push({ id: q.id, label: q.label, modulePath: q.modulePath, urgent: q.urgent });
+    } else if (a === true && !isContextProfileQuestion(q)) {
       prepared.push(q.label);
     }
   }
@@ -70,12 +143,8 @@ export function computeCheckResult(answers: CheckAnswers): CheckResult {
     personalizedHints.push(
       "Erkläre Ghusl, Kafan und Janazah-Gebet so, dass Nicht-Muslime handeln können, ohne gegen deine Wünsche zu verstoßen."
     );
-  }
-
-  if (!profile.married && !profile.hasTrustPerson) {
-    personalizedHints.push(
-      "Du solltest dringend einen muslimischen Notfallkontakt und eine Vertrauensperson hinterlegen."
-    );
+  } else if (profile.isConvert) {
+    personalizedHints.push("Als Konvertit·in kann eine kurze schriftliche Erklärung deiner Wünsche die Familie entlasten.");
   }
 
   if (!profile.hasTrustPerson) {
@@ -94,17 +163,12 @@ export function computeCheckResult(answers: CheckAnswers): CheckResult {
   const prepPercent = prepTotal > 0 ? Math.round((prepYesCount / prepTotal) * 100) : 0;
   const status = prepPercent >= 70 ? "green" : prepPercent >= 40 ? "yellow" : "red";
   const statusLabel =
-    status === "green" ? "Solide Grundlage" : status === "yellow" ? "Teilweise vorbereitet" : "Dringend ordnen";
+    status === "green" ? "Solide Grundlage" : status === "yellow" ? "Teilweise vorbereitet" : "Noch wenig vorbereitet";
 
-  const nextSteps: CheckResult["nextSteps"] = [];
-  if (missing.some((m) => m.label.includes("Notfall"))) {
-    nextSteps.push({ label: "Notfallkarte zuerst erstellen", href: "/dashboard/notfallkarte", priority: 1 });
-  }
-  if (profile.isConvert && !profile.familyMuslim) {
-    nextSteps.push({ label: "Brief für nicht-muslimische Familie", href: "/dashboard/familie", priority: 2 });
-  }
-  nextSteps.push({ label: "Geführt meinen Ordner ausfüllen", href: "/dashboard/ausfuellen", priority: 3 });
-  nextSteps.push({ label: "Konvertierten-Checkliste ansehen", href: "/konvertierte", priority: 4 });
+  const sortedMissing = sortGaps(missing);
+  const visibleTasks = sortedMissing.slice(0, 3);
+  const furtherTasks = sortedMissing.slice(3);
+  const primaryRecommendation = pickPrimaryRecommendation(answers);
 
   return {
     yesCount,
@@ -113,23 +177,30 @@ export function computeCheckResult(answers: CheckAnswers): CheckResult {
     prepTotal,
     status,
     statusLabel,
-    missing,
+    missing: sortedMissing,
+    visibleTasks,
+    furtherTasks,
     prepared,
     personalizedHints,
-    nextSteps: nextSteps.sort((a, b) => a.priority - b.priority),
+    primaryRecommendation,
+    nextSteps: [
+      {
+        label: "Diesen Schritt jetzt erledigen",
+        href: primaryRecommendation.href,
+        priority: 1,
+      },
+    ],
     profile,
   };
 }
 
 /** Rule-based next steps (works without AI) */
 export function getRuleBasedNextSteps(result: CheckResult): string[] {
-  const steps: string[] = [];
-  if (result.missing[0]) {
-    steps.push(`Als Erstes: ${result.missing[0].label} — im Ordner ergänzen.`);
+  const steps = result.visibleTasks.map((task) =>
+    task.urgent ? `${task.label} — zuerst klären.` : `${task.label} — im Vorsorgeplan ergänzen.`
+  );
+  if (steps.length === 0) {
+    steps.push("Im persönlichen Vorsorgeplan fortfahren und Angaben aktuell halten.");
   }
-  if (result.personalizedHints[0]) {
-    steps.push(result.personalizedHints[0]);
-  }
-  steps.push("Export/PDF sichern und Vertrauensperson informieren, wo der Ordner liegt.");
   return steps.slice(0, 3);
 }

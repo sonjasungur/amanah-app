@@ -59,7 +59,9 @@ cp .env.production.example .env.production
 
 | Variable | Recommended |
 |----------|-------------|
-| `AMANAH_AI_ENABLED` | `true` |
+| `AMANAH_AI_ENABLED` | `false` |
+| `NEXT_PUBLIC_AMANAH_AI_ENABLED` | `false` |
+| `AMANAH_PUBLIC_REGISTRATION_ENABLED` | `false` |
 | `AMANAH_AI_PROVIDER` | `rules` (no external API cost) |
 | `OPENAI_API_KEY` | Empty unless OpenAI is explicitly enabled |
 | `AMANAH_KNOWLEDGE_RETRIEVAL` | `keyword` |

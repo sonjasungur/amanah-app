@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/input";
 import { MessageCircle, X, Send } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { useI18n } from "@/lib/i18n/context";
+import { isAiUiEnabled } from "@/lib/ai/config";
 
+/** Kept for a later optional AI add-on. Not mounted in public layouts. */
 export function AmanahAssistantFloat() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -23,7 +25,7 @@ export function AmanahAssistantFloat() {
   }, [messages]);
 
   const send = async () => {
-    if (!input.trim() || loading) return;
+    if (!isAiUiEnabled() || !input.trim() || loading) return;
     const userMsg = input.trim();
     setInput("");
     setMessages((m) => [...m, { role: "user", content: userMsg }]);
@@ -36,6 +38,7 @@ export function AmanahAssistantFloat() {
         body: JSON.stringify({
           messages: [...messages, { role: "user", content: userMsg }],
           context: { amanahData: store },
+          consentGranted: true,
         }),
       });
       const data = await res.json();
@@ -46,7 +49,7 @@ export function AmanahAssistantFloat() {
     setLoading(false);
   };
 
-  if (pathname.includes("/print") || pathname === "/check") return null;
+  if (!isAiUiEnabled() || pathname.includes("/print") || pathname === "/check") return null;
 
   return (
     <div className="no-print">

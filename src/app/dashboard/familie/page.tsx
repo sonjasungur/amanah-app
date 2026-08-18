@@ -8,6 +8,7 @@ import { ModulePage } from "@/components/modules/module-page";
 import { familyFields } from "@/lib/modules/fields";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { isAiUiEnabled } from "@/lib/ai/config";
 import { FileText, Mail, Sparkles } from "lucide-react";
 import type { FamilyMessageTone } from "@/lib/ai/types";
 
@@ -32,6 +33,7 @@ export default function FamiliePage() {
   };
 
   const generateWithAi = async () => {
+    if (!isAiUiEnabled()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/ai/family-message", {
@@ -40,6 +42,7 @@ export default function FamiliePage() {
         body: JSON.stringify({
           data: pickDataFields(store),
           tone,
+          consentGranted: true,
         }),
       });
       const data = await res.json();
@@ -63,8 +66,8 @@ export default function FamiliePage() {
 
   return (
     <ModulePage
-      title="Familiengespräch"
-      description="Bereite Brief, WhatsApp-Nachricht und Gesprächsleitfaden vor — damit deine Familie informiert ist."
+      title="Familienbrief"
+      description="Bereite Brief, WhatsApp-Nachricht und Gesprächsleitfaden vor — getrennt vom Gespräch mit Angehörigen."
       section="familyMessage"
       fields={familyFields}
     >
@@ -81,6 +84,7 @@ export default function FamiliePage() {
           <Button onClick={generateTemplateLetter} variant="primary">
             <FileText size={16} className="mr-2" /> Template-Brief erstellen
           </Button>
+          {isAiUiEnabled() && (
           <div className="flex items-center gap-2">
             <select
               value={tone}
@@ -96,6 +100,7 @@ export default function FamiliePage() {
               {loading ? "Wird erstellt…" : "Mit Assistent verfeinern"}
             </Button>
           </div>
+          )}
         </div>
         {store.familyMessage.familyLetter && (
           <Button variant="outline" size="sm" onClick={copyLetter}>

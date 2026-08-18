@@ -15,7 +15,7 @@ export const translations: Record<Locale, Record<string, string>> = {
   de: {
     "nav.home": "Startseite",
     "nav.check": "Vorsorge-Check",
-    "nav.dashboard": "Mein Ordner",
+    "nav.dashboard": "Mein Vorsorgeplan",
     "nav.prices": "Preise",
     "nav.knowledge": "Wissen",
     "hero.title": "Damit meine Familie weiß, was mir wichtig ist.",
@@ -55,7 +55,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "assistant.placeholder": "Stelle eine Frage oder bitte um Hilfe...",
     "dashboard.progress": "Fortschritt",
     "dashboard.critical": "Kritische offene Punkte",
-    "dashboard.next": "Empfohlener nächster Schritt",
+    "dashboard.next": "Dein nächster Schritt",
     "sources.title": "Quellen & Hinweise",
     "review.badge": "In fachlicher Prüfung",
     "auth.login": "Anmelden",
@@ -184,7 +184,7 @@ export const translations: Record<Locale, Record<string, string>> = {
   en: {
     "nav.home": "Home",
     "nav.check": "Amanah Check",
-    "nav.dashboard": "My Folder",
+    "nav.dashboard": "My plan",
     "nav.prices": "Pricing",
     "nav.knowledge": "Knowledge",
     "hero.title": "So my family knows what matters to me.",

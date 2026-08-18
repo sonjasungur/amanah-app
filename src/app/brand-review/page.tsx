@@ -1,10 +1,17 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import {
   LOGO_VARIANT_META,
   LogoCandidateMark,
   type LogoVariantId,
 } from "@/components/layout/logo-candidates";
 import { BRAND } from "@/lib/brand";
+import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
+
+export const metadata = {
+  title: "Logo-Vergleich — intern",
+  robots: { index: false, follow: false },
+};
 
 const SIZES = [16, 24, 32, 48, 64, 128] as const;
 const VARIANTS: LogoVariantId[] = ["A", "B", "C"];
@@ -23,6 +30,8 @@ function cnWordmark(light?: boolean) {
 }
 
 export default function BrandReviewPage() {
+  if (!isInternalToolsEnabled()) notFound();
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 pb-20">
       <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-2">Intern — nur lokal</p>

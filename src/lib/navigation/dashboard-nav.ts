@@ -14,7 +14,7 @@ export const dashboardNavGroups: NavGroup[] = [
   {
     id: "overview",
     label: "Übersicht",
-    items: [{ href: "/dashboard", label: "Dashboard", icon: "🏠" }],
+    items: [{ href: "/dashboard", label: "Mein Vorsorgeplan", icon: "🏠" }],
   },
   {
     id: "prep",
@@ -26,26 +26,25 @@ export const dashboardNavGroups: NavGroup[] = [
     ],
   },
   {
-    id: "kennenlernen",
-    label: "Kennenlernen",
+    id: "family",
+    label: "Familie",
     items: [
-      { href: "/dashboard/familiengespraech", label: "Familiengespräch", icon: "💬" },
-      { href: "/dashboard/familie", label: "Brief für Familie", icon: "✉️" },
+      { href: "/dashboard/familiengespraech", label: "Gespräch mit Angehörigen", icon: "💬" },
+      { href: "/dashboard/familie", label: "Familienbrief", icon: "✉️" },
     ],
   },
   {
     id: "personal",
-    label: "Persönlicher Bereich",
+    label: "Gespeicherte Angaben",
     items: [
       { href: "/dashboard/notfallkarte", label: "Notfallkarte", icon: "🆘" },
       { href: "/dashboard/pdf", label: "PDF & Export", icon: "📄" },
-      { href: "/dashboard/assistent", label: "Assistent", icon: "🤖" },
     ],
   },
   {
     id: "modules",
-    label: "Module",
-    items: [], // filled from moduleConfigs in layout
+    label: "Alle Vorsorgebereiche",
+    items: [],
   },
 ];
 

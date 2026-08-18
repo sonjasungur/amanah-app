@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/input";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { useI18n } from "@/lib/i18n/context";
+import { isAiUiEnabled } from "@/lib/ai/config";
 import { Bot, Send, BookOpen, Mail, ListChecks, Languages, AlertCircle, Compass } from "lucide-react";
 
 const quickActions = [
@@ -58,6 +59,21 @@ export default function AssistentPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (!isAiUiEnabled()) {
+    return (
+      <Card className="p-6 space-y-3">
+        <CardTitle>Assistent derzeit nicht aktiv</CardTitle>
+        <p className="text-sm text-muted leading-relaxed">
+          Check, Vorsorgeplan, Fortschritt und Familienbrief-Template funktionieren vollständig ohne KI.
+          Der Assistent ist ein optionales Zusatzprodukt und standardmäßig deaktiviert.
+        </p>
+        <Link href="/dashboard">
+          <Button>Zum Vorsorgeplan</Button>
+        </Link>
+      </Card>
+    );
+  }
 
   const send = async (text?: string) => {
     const userMsg = (text || input).trim();

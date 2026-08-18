@@ -251,7 +251,7 @@ export const wissenTopics: KnowledgeArticle[] = [
     },
     ["hadith-sadaqa-jariya", "quran-al-muminun-23-99", "partner-gemeinsam1-sadaqa"]
   ),
-  topic("w-familie", "familiengespraech", "Familiengespräch", "Der schwerste Moment ist leichter, wenn ihr vorher gesprochen habt.", "familie", {
+  topic("w-familie", "familiengespraech", "Gespräch mit Angehörigen", "Der schwerste Moment ist leichter, wenn ihr vorher gesprochen habt.", "familie", {
     whyImportant: "Dokumente allein reichen nicht. Ein ruhiges Gespräch entlastet die Familie im Ernstfall.",
     ifMissing: "Missverständnisse, Schuldgefühle, teure Fehlentscheidungen.",
     prepareItems: ["Termin für ruhiges Gespräch", "Kernpunkte: Notfall, Janazah, Erbe", "Brief als Ergänzung"],

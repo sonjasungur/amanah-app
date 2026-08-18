@@ -101,7 +101,7 @@ export const moduleConfigs: ModuleConfig[] = [
   },
   {
     id: "familie",
-    title: "Familiengespräch",
+    title: "Familienbrief",
     description: "Brief, WhatsApp und Gesprächsleitfaden.",
     icon: "👨‍👩‍👧‍👦",
     path: "/dashboard/familie",

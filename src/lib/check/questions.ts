@@ -46,8 +46,8 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     id: "trust-muslim",
     text: "Gibt es eine muslimische Vertrauensperson für Notfall und Janazah?",
     label: "Muslimische Vertrauensperson",
-    category: "profil",
-    modulePath: "/dashboard/notfallkarte",
+    category: "vorsorge",
+    modulePath: "/dashboard/vollmacht",
     urgent: true,
     yesIsGood: true,
   },
@@ -55,9 +55,9 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     id: "family-knows-islam",
     text: "Weiß deine Familie, was im Todesfall islamisch wichtig ist?",
     label: "Islamisches Wissen in der Familie",
-    category: "profil",
-    modulePath: "/dashboard/familie",
-    urgent: true,
+    category: "vorsorge",
+    modulePath: "/dashboard/familiengespraech",
+    urgent: false,
     yesIsGood: true,
   },
   {
@@ -66,7 +66,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Patientenverfügung",
     category: "vorsorge",
     modulePath: "/dashboard/krankheit",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "vollmacht",
@@ -98,7 +98,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Bestattung / Überführung",
     category: "janazah",
     modulePath: "/dashboard/bestattung",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "bestatter",
@@ -106,7 +106,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Bestatter-Kontakt",
     category: "janazah",
     modulePath: "/dashboard/janazah",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "schulden",
@@ -114,7 +114,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Schulden & Amanah",
     category: "erbe",
     modulePath: "/dashboard/schulden-amanah",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "testament",
@@ -122,7 +122,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Testament & Erbe",
     category: "erbe",
     modulePath: "/dashboard/testament",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "digital",
@@ -130,7 +130,7 @@ export const CHECK_QUESTIONS: CheckQuestion[] = [
     label: "Digitaler Nachlass",
     category: "digital",
     modulePath: "/dashboard/digitaler-nachlass",
-    urgent: true,
+    urgent: false,
   },
   {
     id: "sadaqa",

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
 import { CHECK_LABELS } from "@/lib/design-tokens";
+import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { PageHeader, PricingCard } from "@/components/marketing/marketing-ui";
-import { Button, linkButtonClassName } from "@/components/ui/button";
+import { linkButtonClassName } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { ChevronDown } from "lucide-react";
@@ -27,7 +28,7 @@ const MAIN_PACKAGES = [
     price: "79 €",
     description: "Für Menschen, die alle Bereiche strukturiert vorbereiten möchten.",
     features: [
-      "Alle Vorsorgemodule",
+      "Alle Vorsorgebereiche",
       "Vollständiger PDF-Ordner",
       "JSON-Export",
       "Erb- und Vollständigkeitscheck",
@@ -39,9 +40,9 @@ const MAIN_PACKAGES = [
     id: "familie",
     name: "Familie",
     price: "99 €",
-    description: "Für Ehepaare oder zwei verbundene Profile.",
+    description: "Maximal zwei Erwachsenenprofile. Kein unbegrenzter Support, kein 24/7-Zugang, keine unbegrenzte KI.",
     features: [
-      "Zwei Profile",
+      "Zwei Erwachsenenprofile",
       "Gemeinsame Notfallübersicht",
       "Familienbrief",
       "Gemeinsame Vertrauenspersonen",
@@ -51,16 +52,11 @@ const MAIN_PACKAGES = [
   },
 ];
 
-const TOPIC_PACKAGES = [
-  { name: "Testament-Vorbereitungsreport", price: "49 €", features: ["Ampelcheck", "Fragen für Imam/Notar", "Waṣiyya-Übersicht"] },
-  { name: "Barzakh- & Sadaqa-Jariya-Plan", price: "29 €", features: ["Barzakh-Plan", "Sadaqa Jariya", "Projektverknüpfung (geplant)"] },
-];
-
 const COMPARE_ROWS = [
   { label: "Notfallkarte", basic: true, komplett: true, familie: true },
-  { label: "Alle Module", basic: false, komplett: true, familie: true },
+  { label: "Alle Vorsorgebereiche", basic: false, komplett: true, familie: true },
   { label: "PDF-Ordner", basic: "Basis", komplett: "Vollständig", familie: "Vollständig" },
-  { label: "Zwei Profile", basic: false, komplett: false, familie: true },
+  { label: "Zwei Erwachsenenprofile", basic: false, komplett: false, familie: true },
   { label: "JSON-Export", basic: false, komplett: true, familie: true },
 ];
 
@@ -71,16 +67,18 @@ function CompareCell({ value }: { value: boolean | string }) {
 }
 
 export default function PreisePage() {
+  const showRegister = isPublicRegistrationEnabled();
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 md:py-14 pb-16">
       <PageHeader
         eyebrow="Transparent & fair"
         title="Preise"
-        description="Einmalzahlung geplant — kein Abo. Der kostenlose Vorsorge-Check ist bereits verfügbar."
+        description="Einmalzahlung geplant — kein Abo. Der kostenlose Check braucht kein Konto."
       />
 
       <div className="rounded-xl border border-border bg-accent-soft p-5 mb-12 text-body text-muted">
-        Die kostenpflichtigen Pakete befinden sich in Vorbereitung. Der kostenlose {CHECK_LABELS.nav} ist bereits verfügbar.
+        Bezahlte Pakete sind in Vorbereitung. Kauf ist noch nicht möglich. Der kostenlose {CHECK_LABELS.nav} ist bereits verfügbar — ohne KI und ohne Serverkonto.
       </div>
 
       <section className="mb-16">
@@ -93,11 +91,11 @@ export default function PreisePage() {
           <ul className="mt-6 space-y-3 text-body text-muted">
             <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Persönlicher Vorsorge-Check</li>
             <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Überblick über offene Bereiche</li>
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Wissensartikel</li>
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Empfehlung für den nächsten Schritt</li>
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Wissensartikel mit sichtbarem Prüfstatus</li>
+            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Genau eine Empfehlung für den nächsten Schritt</li>
           </ul>
           <Link href="/check" className={linkButtonClassName({ size: "lg", className: "inline-block mt-8" })}>
-            Kostenlosen Check starten
+            {BRAND.ctaPrimary}
           </Link>
         </Card>
       </section>
@@ -106,7 +104,7 @@ export default function PreisePage() {
         <h2 className="text-section-title font-bold text-foreground mb-8">Deine vollständige Vorsorge</h2>
         <div className="grid lg:grid-cols-3 gap-6">
           {MAIN_PACKAGES.map((pkg) => (
-            <PricingCard key={pkg.id} {...pkg} disabled />
+            <PricingCard key={pkg.id} {...pkg} statusNote="In Vorbereitung" />
           ))}
         </div>
 
@@ -145,48 +143,29 @@ export default function PreisePage() {
                   <li key={f}>✓ {f}</li>
                 ))}
               </ul>
+              <p className="text-sm font-semibold text-muted mt-4">In Vorbereitung</p>
             </details>
           ))}
         </div>
-      </section>
-
-      <section className="mb-12">
-        <details className="rounded-2xl border border-border bg-card p-5">
-          <summary className="font-bold text-foreground cursor-pointer min-h-[44px] text-lg">Weitere Einzelpakete</summary>
-          <div className="grid sm:grid-cols-2 gap-5 mt-5">
-            {TOPIC_PACKAGES.map((pkg) => (
-              <div key={pkg.name} className="rounded-xl border border-border p-5">
-                <h4 className="font-bold text-foreground text-lg">{pkg.name}</h4>
-                <p className="text-2xl font-bold text-primary my-2">{pkg.price}</p>
-                <ul className="text-body text-muted space-y-1.5">
-                  {pkg.features.map((f) => (
-                    <li key={f}>✓ {f}</li>
-                  ))}
-                </ul>
-                <Button className="w-full mt-5" disabled>
-                  Noch nicht verfügbar
-                </Button>
-              </div>
-            ))}
-          </div>
-        </details>
       </section>
 
       <Disclaimer />
       <section className="mt-12 rounded-2xl border-2 border-emerald/30 bg-accent-soft p-6 md:p-8">
         <h2 className="text-section-title font-bold text-foreground mb-3">Bereit für deine Vorsorge?</h2>
         <p className="text-body text-muted mb-6 max-w-2xl">
-          Starte kostenlos mit dem Vorsorge-Check oder erstelle ein Konto, um deine Wünsche dauerhaft zu dokumentieren.
+          Starte kostenlos mit dem Amanah-Check. Ein Konto ist dafür nicht nötig.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="/register" className={linkButtonClassName({ size: "lg", className: "w-full sm:w-auto font-bold" })}>
-            Konto erstellen — Vorsorge beginnen
+          <Link href="/check" className={linkButtonClassName({ size: "lg", className: "w-full sm:w-auto font-bold" })}>
+            {BRAND.ctaPrimary}
           </Link>
+          {showRegister && (
+            <Link href="/register" className={linkButtonClassName({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}>
+              Konto erstellen — Vorsorge beginnen
+            </Link>
+          )}
           <Link href="/login" className={linkButtonClassName({ variant: "outline", size: "lg", className: "w-full sm:w-auto" })}>
             Anmelden
-          </Link>
-          <Link href="/check" className={linkButtonClassName({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}>
-            Kostenlosen Check starten
           </Link>
         </div>
       </section>

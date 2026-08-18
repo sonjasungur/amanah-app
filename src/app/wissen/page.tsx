@@ -62,7 +62,7 @@ export default function WissenPage() {
         <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
           <PageHeader
             title="Wissen, das dir Entscheidungen leichter macht"
-            description="Quellenbasierte Orientierung für islamische Vorsorge — von Notfall bis Akhira."
+            description="Orientierung für islamische Vorsorge — von Notfall bis Akhira. Der fachliche Prüfstatus ist bei jedem Thema sichtbar."
           />
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={22} aria-hidden />

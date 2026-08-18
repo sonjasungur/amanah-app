@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
+import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
 
 export async function POST(request: Request) {
   try {
+    if (!isPublicRegistrationEnabled()) {
+      return NextResponse.json(
+        { error: "Öffentliche Registrierung ist derzeit nicht geöffnet." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { email, password, name } = body as { email?: string; password?: string; name?: string };
 

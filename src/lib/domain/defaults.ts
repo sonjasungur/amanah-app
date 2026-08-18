@@ -4,6 +4,12 @@ import type { AmanahOrdnerData } from "./types";
 export const defaultAmanahData: AmanahOrdnerData = {
   schemaVersion: SCHEMA_VERSION,
   userProfile: { name: "", birthDate: "", language: "de" },
+  checkProgress: {
+    schemaVersion: 1,
+    index: 0,
+    answers: {},
+    phase: "intro",
+  },
   familyMembers: [],
   emergencyCard: {
     name: "",

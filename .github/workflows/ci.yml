@@ -13,7 +13,7 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
   AMANAH_AI_PROVIDER: rules
   AI_PROVIDER: rules
-  AMANAH_AI_ENABLED: "true"
+  AMANAH_AI_ENABLED: "false"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}

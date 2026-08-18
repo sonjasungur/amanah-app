@@ -133,6 +133,7 @@ describe("Knowledge API routes", () => {
 describe("Knowledge AI integration", () => {
   beforeEach(() => {
     resetAmanahAIProvider();
+    process.env.AMANAH_AI_ENABLED = "true";
     process.env.AMANAH_AI_PROVIDER = "rules";
     delete process.env.OPENAI_API_KEY;
   });
