@@ -1,4 +1,11 @@
+import { STORAGE_KEY } from "@/lib/storage/types";
 import { CHECK_QUESTIONS, CHECK_TOTAL } from "./questions";
+import {
+  fromPersistedCheckPhase,
+  hasCheckProgress,
+  normalizeCheckProgress,
+  toPersistedCheckPhase,
+} from "./progress";
 import type { CheckAnswers } from "./results";
 
 export type CheckPhase = "loading" | "intro" | "question" | "saving" | "result" | "error";
@@ -124,20 +131,48 @@ export function checkReducer(state: CheckState, action: CheckAction): CheckState
   }
 }
 
+function parseSessionCheck(raw: string): Pick<CheckState, "index" | "answers" | "phase"> | { error: string } {
+  const parsed = JSON.parse(raw) as { index?: number; answers?: CheckAnswers; phase?: string };
+  const index = typeof parsed.index === "number" ? parsed.index : 0;
+  const answers = parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {};
+  if (index < 0 || index > CHECK_TOTAL) return { error: "Gespeicherter Fortschritt ist ungültig." };
+  const phase: CheckPhase =
+    parsed.phase === "result" ? "result" : hasSavedProgress(index, answers) ? "question" : "intro";
+  return { index, answers, phase };
+}
+
+function loadFromFolderStorage(): Pick<CheckState, "index" | "answers" | "phase"> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: { checkProgress?: unknown }; checkProgress?: unknown };
+    const progress = normalizeCheckProgress(parsed.state?.checkProgress ?? parsed.checkProgress);
+    if (!hasCheckProgress(progress)) return null;
+    if (progress.index < 0 || progress.index > CHECK_TOTAL) return null;
+    return {
+      index: progress.index,
+      answers: progress.answers,
+      phase: fromPersistedCheckPhase(progress.phase),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function loadCheckState():
   | { ok: true; data: Pick<CheckState, "index" | "answers" | "phase"> }
   | { ok: false; error: string } {
   if (typeof window === "undefined") return { ok: false, error: "Nur im Browser verfügbar." };
   try {
+    const fromFolder = loadFromFolderStorage();
+    if (fromFolder) return { ok: true, data: fromFolder };
+
     const raw = sessionStorage.getItem(CHECK_STORAGE_KEY);
     if (!raw) return { ok: true, data: { index: 0, answers: {}, phase: "intro" as const } };
-    const parsed = JSON.parse(raw) as { index?: number; answers?: CheckAnswers; phase?: string };
-    const index = typeof parsed.index === "number" ? parsed.index : 0;
-    const answers = parsed.answers && typeof parsed.answers === "object" ? parsed.answers : {};
-    if (index < 0 || index > CHECK_TOTAL) return { ok: false, error: "Gespeicherter Fortschritt ist ungültig." };
-    const phase: CheckPhase =
-      parsed.phase === "result" ? "result" : hasSavedProgress(index, answers) ? "question" : "intro";
-    return { ok: true, data: { index, answers, phase } };
+    const parsed = parseSessionCheck(raw);
+    if ("error" in parsed) return { ok: false, error: parsed.error };
+    return { ok: true, data: parsed };
   } catch {
     return { ok: false, error: "Gespeicherter Fortschritt konnte nicht gelesen werden." };
   }
@@ -162,7 +197,7 @@ export function persistCheckState(state: CheckState): void {
       JSON.stringify({
         index: state.index,
         answers: state.answers,
-        phase: state.phase === "result" ? "result" : "questions",
+        phase: toPersistedCheckPhase(state.phase),
       })
     );
   } catch {

@@ -4,7 +4,6 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { AmanahAssistantFloat } from "@/components/ai/amanah-assistant-float";
 import { BRAND } from "@/lib/brand";
 
 const geist = Geist({
@@ -45,7 +44,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
-          <AmanahAssistantFloat />
         </Providers>
       </body>
     </html>

@@ -133,7 +133,7 @@ describe("AI context builder", () => {
 describe("AI API routes", () => {
   beforeEach(() => {
     resetAmanahAIProvider();
-    delete process.env.AMANAH_AI_ENABLED;
+    process.env.AMANAH_AI_ENABLED = "true";
     process.env.AMANAH_AI_PROVIDER = "rules";
     delete process.env.OPENAI_API_KEY;
   });
@@ -151,7 +151,7 @@ describe("AI API routes", () => {
       new Request("http://localhost/api/ai/next-question", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: defaultAmanahData }),
+        body: JSON.stringify({ data: defaultAmanahData, consentGranted: true }),
       })
     );
     expect(res.status).toBe(200);
@@ -165,7 +165,7 @@ describe("AI API routes", () => {
       new Request("http://localhost/api/ai/completion-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: defaultAmanahData }),
+        body: JSON.stringify({ data: defaultAmanahData, consentGranted: true }),
       })
     );
     expect(res.status).toBe(200);
@@ -178,7 +178,7 @@ describe("AI API routes", () => {
       new Request("http://localhost/api/ai/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: defaultAmanahData }),
+        body: JSON.stringify({ data: defaultAmanahData, consentGranted: true }),
       })
     );
     expect(res.status).toBe(400);
@@ -191,6 +191,7 @@ describe("AI API routes", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           data: defaultAmanahData,
+          consentGranted: true,
           freeText: "Meine Schwester Fatima soll zuerst kontaktiert werden",
         }),
       })
@@ -205,7 +206,7 @@ describe("AI API routes", () => {
       new Request("http://localhost/api/ai/family-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: demoAmanahData, tone: "kurz" }),
+        body: JSON.stringify({ data: demoAmanahData, tone: "kurz", consentGranted: true }),
       })
     );
     expect(res.status).toBe(200);

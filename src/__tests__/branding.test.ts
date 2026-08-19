@@ -44,7 +44,7 @@ describe("branding — Mein Wille", () => {
     expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
     expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
-    expect(BRAND.ctaPrimary).toBe("Kostenlos prüfen, was noch fehlt");
+    expect(BRAND.ctaPrimary).toBe("Kostenlosen Amanah-Check starten");
     expect(BRAND.metadataTitle).toBe("Mein Wille – Islamische Vorsorge");
     expect(BRAND.themeColor).toBe("#071A16");
   });
@@ -74,11 +74,13 @@ describe("branding — Mein Wille", () => {
     expect(CHECK_LABELS.pageTitle).toBe("Dein islamischer Vorsorge-Check");
   });
 
-  it("wordmark in header has no logo symbol", () => {
+  it("wordmark in header uses document logo mark", () => {
     const logo = read("src/components/layout/logo.tsx");
-    expect(logo).not.toContain("LogoMark");
+    expect(logo).toContain("DocumentLogoMark");
     expect(logo).toContain("Mein ");
     expect(logo).toContain("Wille");
+    expect(logo).not.toContain("MW");
+    expect(logo).not.toContain("Mihrab");
   });
 
   it("uses strengthened green palette without orange brand color", () => {
@@ -89,12 +91,15 @@ describe("branding — Mein Wille", () => {
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("preise page shows free check and three main packages unchanged", () => {
-    const preise = read("src/app/preise/page.tsx");
-    expect(preise).toContain("CHECK_LABELS.freeCard");
-    expect(preise).toContain("Komplett");
-    expect(preise).toContain("79 €");
-    expect(preise).toContain("Noch nicht verfügbar");
+  it("homepage teaser shows all four public prices and no paid purchase button", () => {
+    const home = read("src/app/page.tsx");
+    expect(home).toContain('name: "Amanah-Check"');
+    expect(home).toContain('name: "Basic"');
+    expect(home).toContain('name: "Komplett"');
+    expect(home).toContain('name: "Familie"');
+    expect(home).toContain('price: "29 €"');
+    expect(home).toContain("In Vorbereitung");
+    expect(home).not.toContain("Details");
   });
 
   it("wissen hub has categories, entry topics, search and scroll sections", () => {

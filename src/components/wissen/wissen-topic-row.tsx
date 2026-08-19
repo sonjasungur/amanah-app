@@ -9,6 +9,7 @@ import {
 } from "@/lib/knowledge/wissen-categories";
 import { getReadMinutes, getSourceLabel } from "@/lib/knowledge/wissen-hub";
 import { CategoryBadge } from "@/components/marketing/marketing-ui";
+import { ReviewStatusBadge } from "@/components/knowledge/review-status-badge";
 import { cn } from "@/lib/utils/cn";
 import { ChevronRight } from "lucide-react";
 
@@ -52,6 +53,7 @@ export function WissenTopicRow({
             <span className="text-xs font-bold text-muted px-2 py-0.5 rounded bg-background border border-border">
               {priority}
             </span>
+            <ReviewStatusBadge status={article.reviewStatus} />
             {!compact && <span className="text-xs text-muted">{minutes} Min. Lesezeit</span>}
           </div>
           <h3 className="text-card-title font-bold text-foreground group-hover:text-primary transition-colors">

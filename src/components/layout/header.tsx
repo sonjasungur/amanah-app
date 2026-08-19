@@ -10,6 +10,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { linkButtonClassName } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 
 const navLinks = [
   { href: "/", labelKey: "nav.home" as const },
@@ -31,6 +32,7 @@ export function Header() {
   const { locale, setLocale, t, isRtl } = useI18n();
   const { session, logout, isLoading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const showRegister = isPublicRegistrationEnabled();
 
   const handleLogout = async () => {
     await logout();
@@ -94,9 +96,11 @@ export function Header() {
               </div>
             ) : (
               <div className="flex items-center gap-2 ml-1">
-                <Link href="/register" className={linkButtonClassName({ size: "sm", variant: "outline", className: "min-w-[7.5rem]" })}>
-                  Registrieren
-                </Link>
+                {showRegister && (
+                  <Link href="/register" className={linkButtonClassName({ size: "sm", variant: "outline", className: "min-w-[7.5rem]" })}>
+                    Registrieren
+                  </Link>
+                )}
                 <Link href="/login" className={linkButtonClassName({ size: "sm", className: "min-w-[7.5rem]" })}>
                   Anmelden
                 </Link>
@@ -109,13 +113,14 @@ export function Header() {
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Menü"
           aria-expanded={mobileOpen}
+          data-testid="site-mobile-nav-toggle"
         >
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {mobileOpen && (
-        <nav className="md:hidden border-t border-border px-4 py-4 space-y-1 bg-card">
+        <nav className="md:hidden border-t border-border px-4 py-4 space-y-1 bg-card" data-testid="site-mobile-nav">
           {navLinks.map((link) => {
             const active = isNavActive(pathname, link.href);
             return (
@@ -162,13 +167,15 @@ export function Header() {
               </>
             ) : (
               <>
-                <Link
-                  href="/register"
-                  className={linkButtonClassName({ variant: "outline", className: "w-full mt-2" })}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Registrieren
-                </Link>
+                {showRegister && (
+                  <Link
+                    href="/register"
+                    className={linkButtonClassName({ variant: "outline", className: "w-full mt-2" })}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Registrieren
+                  </Link>
+                )}
                 <Link
                   href="/login"
                   className={linkButtonClassName({ className: "w-full mt-2" })}

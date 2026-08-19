@@ -3,30 +3,28 @@
 import Link from "next/link";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
-import { moduleConfigs } from "@/lib/modules/config";
-import { getAllModuleProgress, getCriticalMissing, getRecommendedNextStep } from "@/lib/utils/progress";
+import { getAllModuleProgress } from "@/lib/utils/progress";
+import { getDashboardGreeting } from "@/lib/plan/greeting";
+import { getPlanNextStep, getPrioritizedPlanItems } from "@/lib/plan/next-step";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
 import { ModuleTiles } from "@/components/dashboard/module-tiles";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
-import { AlertTriangle, ArrowRight, CheckCircle2, Compass, Shield } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Shield } from "lucide-react";
+import { getCriticalMissing } from "@/lib/utils/progress";
 
 export default function DashboardPage() {
   const store = useAmanahStore();
   const data = pickDataFields(store);
   const { t } = useI18n();
   const critical = getCriticalMissing(data);
-  const nextStep = getRecommendedNextStep(data);
+  const nextStep = getPlanNextStep(data);
+  const planItems = getPrioritizedPlanItems(data, 3);
   const moduleProgress = getAllModuleProgress(data);
-  const greeting = store.emergencyCard.name || store.userProfile.name || "dort";
+  const greeting = getDashboardGreeting(store.emergencyCard.name || store.userProfile.name);
 
-  const openTasks = moduleProgress
-    .filter((m) => m.percent < 80)
-    .sort((a, b) => a.percent - b.percent)
-    .slice(0, 3);
-  const modById = Object.fromEntries(moduleConfigs.map((m) => [m.id, m]));
   const overallPercent = moduleProgress.length
     ? Math.round(moduleProgress.reduce((s, m) => s + m.percent, 0) / moduleProgress.length)
     : 0;
@@ -37,61 +35,52 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
           <div>
             <p className="text-emerald font-semibold text-sm mb-1">Assalamu alaikum</p>
-            <h1 className="text-page-title font-bold text-foreground">Willkommen, {greeting}</h1>
+            <h1 className="text-page-title font-bold text-foreground" data-testid="dashboard-greeting">
+              {greeting}
+            </h1>
+            <p className="text-sm text-muted mt-2">Mein Vorsorgeplan</p>
           </div>
           <SaveStatusIndicator className="shrink-0" />
         </div>
         <p className="text-body text-muted mb-5 max-w-xl leading-relaxed">
           {overallPercent >= 70
-            ? "Gute Basis — halte deinen Ordner aktuell."
+            ? "Gute Basis — halte deine gespeicherten Angaben aktuell."
             : "Schritt für Schritt vorbereiten — zur Orientierung, ohne Garantie auf Vollständigkeit."}
         </p>
         <ProgressBar />
       </header>
 
-      <ModuleTiles />
+      <Card className="border-2 border-emerald/30 bg-accent-soft p-6 md:p-7 shadow-sm" data-testid="dashboard-next-step">
+        <CardTitle className="text-card-title mb-2 text-primary">{t("dashboard.next")}</CardTitle>
+        <p className="text-lg font-semibold text-foreground mb-2">{nextStep.title}</p>
+        <p className="text-body text-muted mb-5">{nextStep.reason}</p>
+        <Link href={nextStep.path}>
+          <Button type="button" size="lg" data-testid="dashboard-next-step-cta">
+            Diesen Schritt jetzt erledigen <ArrowRight size={16} className="ml-2" />
+          </Button>
+        </Link>
+      </Card>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card className="border-2 border-emerald/30 bg-accent-soft p-6 md:p-7 shadow-sm">
-          <CardTitle className="text-card-title mb-2 text-primary">{t("dashboard.next")}</CardTitle>
-          <p className="text-body text-muted mb-5">{nextStep.title}</p>
-          <Link href={nextStep.path}>
-            <Button type="button" size="lg">
-              Weiter <ArrowRight size={16} className="ml-2" />
-            </Button>
-          </Link>
-        </Card>
-
-        <Card className="p-6 md:p-7 border border-border shadow-sm">
-          <CardTitle className="text-card-title mb-2">Vorsorge-Check</CardTitle>
-          <p className="text-body text-muted mb-5">15 Fragen — wo stehst du wirklich?</p>
-          <Link href="/check">
-            <Button variant="secondary" type="button">Vorsorge-Check starten</Button>
-          </Link>
-        </Card>
-      </div>
-
-      {openTasks.length > 0 && (
+      {planItems.length > 0 && (
         <Card className="p-6">
-          <CardTitle className="text-base mb-3">Offene Aufgaben (max. 3)</CardTitle>
+          <CardTitle className="text-base mb-3">Deine nächsten Planpunkte</CardTitle>
           <ul className="space-y-2">
-            {openTasks.map((m) => (
-              <li key={m.moduleId}>
+            {planItems.map((item) => (
+              <li key={item.id}>
                 <Link
-                  href={modById[m.moduleId]?.path ?? "/dashboard"}
+                  href={item.path}
                   className="flex items-center justify-between gap-3 text-sm py-2 min-h-[44px] hover:text-accent"
                 >
-                  <span>{modById[m.moduleId]?.title ?? m.moduleId}</span>
-                  <span className="text-muted font-medium">{m.percent}%</span>
+                  <span>{item.title}</span>
+                  <span className="text-muted font-medium">{item.percent}%</span>
                 </Link>
               </li>
             ))}
           </ul>
-          <Link href="/dashboard/ausfuellen" className="inline-block mt-3 text-sm text-accent hover:underline">
-            <Compass size={14} className="inline mr-1" /> Geführt ausfüllen
-          </Link>
         </Card>
       )}
+
+      <ModuleTiles />
 
       {critical.length > 0 && (
         <Card className="border-warning/40 bg-warning/5 p-6">
@@ -112,13 +101,13 @@ export default function DashboardPage() {
       <Card className="p-4 flex items-start gap-3 bg-accent-soft/80 border border-border">
         <Shield size={20} className="text-primary shrink-0 mt-0.5" aria-hidden />
         <p className="text-sm text-muted leading-relaxed">
-          Daten werden lokal auf deinem Gerät gespeichert. Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
+          Angaben in deinem Ordner werden lokal auf diesem Gerät gespeichert. Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
         </p>
       </Card>
 
       {overallPercent >= 100 && (
         <p className="text-sm text-success flex items-center gap-2">
-          <CheckCircle2 size={16} /> Alle Module bearbeitet — regelmäßig aktualisieren.
+          <CheckCircle2 size={16} /> Alle Bereiche bearbeitet — regelmäßig aktualisieren.
         </p>
       )}
     </div>

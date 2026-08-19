@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
 import { CHECK_LABELS } from "@/lib/design-tokens";
 
 export function PageHeader({
@@ -138,7 +137,7 @@ export function PricingCard({
   features,
   highlighted,
   cta,
-  disabled,
+  statusNote,
 }: {
   name: string;
   price: string;
@@ -147,6 +146,7 @@ export function PricingCard({
   highlighted?: boolean;
   cta?: ReactNode;
   disabled?: boolean;
+  statusNote?: string;
 }) {
   return (
     <article
@@ -172,7 +172,12 @@ export function PricingCard({
           ))}
         </ul>
         {features.length === 0 && <div className="flex-1 mb-2" />}
-        {cta ?? (disabled ? <Button className="w-full" disabled>Noch nicht verfügbar</Button> : null)}
+        {cta ??
+          (statusNote ? (
+            <p className="text-sm font-semibold text-muted text-center border border-border rounded-xl py-3 bg-background">
+              {statusNote}
+            </p>
+          ) : null)}
       </div>
     </article>
   );

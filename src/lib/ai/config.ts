@@ -2,8 +2,13 @@ import type { AiProviderName } from "./types";
 
 export function isAiEnabled(): boolean {
   const v = process.env.AMANAH_AI_ENABLED ?? process.env.AI_ENABLED;
-  if (v === "false" || v === "0") return false;
-  return true;
+  return v === "true" || v === "1";
+}
+
+/** Client-visible AI UI. Independent of server flag; both default off. */
+export function isAiUiEnabled(): boolean {
+  const v = process.env.NEXT_PUBLIC_AMANAH_AI_ENABLED;
+  return v === "true" || v === "1";
 }
 
 export function getAiProviderName(): AiProviderName {

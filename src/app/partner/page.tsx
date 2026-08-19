@@ -13,13 +13,13 @@ const sections = [
     icon: "🕌",
     title: "Bestatter",
     description:
-      "Islamische Bestattungsdienste können sich im Verzeichnis listen lassen — mit Verifizierung, 24/7-Anzeige und regionaler Priorität für Familien im Notfall.",
+      "Islamische Bestattungsdienste können später gelistet werden — erst nach echter Prüfung, ohne erfundene Einträge.",
     features: [
       "Kostenloser Basiseintrag mit regionalem Profil",
       "Verifiziertes Partner-Badge und 24/7-Sichtbarkeit",
       "Direkte Verknüpfung mit Mein Wille-Nutzerwünschen",
     ],
-    cta: { label: "Bestatter-Verzeichnis ansehen", href: "/bestatter" },
+    cta: { label: "Hinweis zum Verzeichnis", href: "/bestatter" },
     buttonLabel: "Interesse anmelden",
   },
   {

@@ -48,14 +48,14 @@ describe("Knowledge Base", () => {
 });
 
 describe("Funeral Partners", () => {
-  it("has at least 6 partners", () => {
-    expect(funeralPartners.length).toBeGreaterThanOrEqual(6);
+  it("has no mock partners until real entries exist", () => {
+    expect(funeralPartners).toEqual([]);
+    expect(funeralPartners.some((p) => p.verified)).toBe(false);
   });
 
-  it("searches by city", () => {
+  it("search stays empty without invented providers", () => {
     const results = searchFuneralPartners("Berlin");
-    expect(results.length).toBeGreaterThan(0);
-    expect(results[0].city).toBe("Berlin");
+    expect(results).toEqual([]);
   });
 });
 

@@ -10,6 +10,8 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { Logo } from "@/components/layout/logo";
+import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -46,9 +48,28 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   const alternateHref = buildAuthHref(mode === "login" ? "/register" : "/login", returnUrl);
+  const showRegister = isPublicRegistrationEnabled();
+
+  if (mode === "register" && !showRegister) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-12">
+        <Logo className="mb-8 justify-center w-full" />
+        <Card>
+          <CardTitle>Registrierung derzeit nicht geöffnet</CardTitle>
+          <p className="text-sm text-muted mt-3 mb-6">
+            Der kostenlose Amanah-Check benötigt kein Konto. Öffentliche Serverkonten sind derzeit nicht freigeschaltet.
+          </p>
+          <Link href="/check" className="text-primary font-semibold hover:underline">
+            Kostenlosen Check starten
+          </Link>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
+      <Logo className="mb-8 justify-center w-full" />
       <Card>
         <CardTitle>{mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</CardTitle>
         <p className="text-sm text-muted mt-2 mb-6">
@@ -85,10 +106,14 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <p className="text-sm text-muted mt-6 text-center">
           {mode === "login" ? (
+            showRegister ? (
             <>
               {t("auth.noAccount")}{" "}
               <Link href={alternateHref} className="text-primary hover:underline">{t("auth.register")}</Link>
             </>
+            ) : (
+              <>Kein Konto nötig — starte mit dem kostenlosen Check.</>
+            )
           ) : (
             <>
               {t("auth.hasAccount")}{" "}

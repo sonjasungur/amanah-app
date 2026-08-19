@@ -16,7 +16,10 @@ import {
 import { CHECK_LABELS } from "@/lib/design-tokens";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, ArrowLeft, CheckCircle2, ChevronRight, Loader2, RotateCcw } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { checkStateToProgress, defaultCheckProgress } from "@/lib/check/progress";
+import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { AlertTriangle, ArrowLeft, CheckCircle2, ChevronDown, Loader2, RotateCcw } from "lucide-react";
 
 export function AmanahCheck() {
   const [state, dispatch] = useReducer(checkReducer, undefined, createInitialCheckState);
@@ -52,6 +55,14 @@ export function AmanahCheck() {
   useEffect(() => {
     if (!state.hydrated || state.phase === "loading") return;
     persistCheckState(state);
+    const writeToFolder = () => {
+      useAmanahStore.getState().updateField("checkProgress", checkStateToProgress(state));
+    };
+    if (useAmanahStore.persist.hasHydrated()) {
+      writeToFolder();
+      return;
+    }
+    return useAmanahStore.persist.onFinishHydration(writeToFolder);
   }, [state]);
 
   useEffect(() => {
@@ -70,6 +81,7 @@ export function AmanahCheck() {
   const back = useCallback(() => dispatch({ type: "BACK" }), []);
   const reset = useCallback(() => {
     clearCheckState();
+    useAmanahStore.getState().updateField("checkProgress", defaultCheckProgress);
     dispatch({ type: "RESET" });
   }, []);
   const retry = useCallback(() => dispatch({ type: "RETRY" }), []);
@@ -165,16 +177,7 @@ export function AmanahCheck() {
           <span data-testid="check-progress-label">Frage {state.index + 1} von {CHECK_TOTAL}</span>
           <span className="font-semibold text-accent">{progressPercent}%</span>
         </div>
-        <div
-          className="h-3 bg-sand rounded-full mb-6 overflow-hidden"
-          role="progressbar"
-          aria-valuenow={progressPercent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Fortschritt: ${progressPercent} Prozent`}
-        >
-          <div className="h-full bg-emerald transition-all duration-300 rounded-full" style={{ width: `${progressPercent}%` }} />
-        </div>
+        <Progress value={progressPercent} className="mb-6" />
         <p className="text-xs uppercase tracking-wide text-accent font-semibold mb-2">
           {q.category === "profil" ? "Deine Situation" : "Vorbereitung"}
         </p>
@@ -240,15 +243,26 @@ function CheckResults({ state, onReset }: { state: CheckState; onReset: () => vo
           {result.prepYesCount} von {result.prepTotal} Vorbereitungsbereichen mit Ja beantwortet
         </p>
         <p className="text-sm text-muted">
-          {result.status === "red" && "Deine Amanah ist noch nicht geordnet. Jetzt handeln — Schritt für Schritt."}
-          {result.status === "yellow" && "Du hast begonnen. Die Lücken unten solltest du als Nächstes schließen."}
-          {result.status === "green" && "Gute Basis. Halte den Ordner aktuell und teile ihn mit Vertrauenspersonen."}
+          {result.status === "red" && "Deine Vorsorge ist noch wenig geordnet. Ein Schritt nach dem anderen reicht."}
+          {result.status === "yellow" && "Du hast begonnen. Die nächsten Punkte unten solltest du als Nächstes schließen."}
+          {result.status === "green" && "Gute Basis. Halte den Vorsorgeplan aktuell und teile ihn mit Vertrauenspersonen."}
         </p>
+      </Card>
+
+      <Card className="p-6 space-y-4 border-2 border-emerald/30 bg-accent-soft" data-testid="check-primary-recommendation">
+        <h3 className="font-semibold text-primary">Deine Hauptempfehlung</h3>
+        <p className="text-lg font-bold text-foreground">{result.primaryRecommendation.label}</p>
+        <p className="text-sm text-muted">{result.primaryRecommendation.reason}</p>
+        <Link href={result.primaryRecommendation.href}>
+          <Button size="lg" className="w-full sm:w-auto" data-testid="check-primary-cta">
+            {result.nextSteps[0]?.label ?? "Diesen Schritt jetzt erledigen"}
+          </Button>
+        </Link>
       </Card>
 
       {result.personalizedHints.length > 0 && (
         <Card className="p-6 space-y-3 border-accent/30 bg-accent/5" data-testid="check-personalized-hints">
-          <h3 className="font-semibold text-primary">Persönliche Hinweise für deine Situation</h3>
+          <h3 className="font-semibold text-primary">Hinweise zu deiner Situation</h3>
           <ul className="text-sm text-muted space-y-2 list-disc pl-4">
             {result.personalizedHints.map((h) => (
               <li key={h}>{h}</li>
@@ -257,39 +271,41 @@ function CheckResults({ state, onReset }: { state: CheckState; onReset: () => vo
         </Card>
       )}
 
-      {result.missing.length > 0 && (
+      {result.visibleTasks.length > 0 && (
         <Card className="p-6 space-y-4">
           <h3 className="font-semibold text-primary flex items-center gap-2">
             <AlertTriangle size={18} className="text-accent" />
-            Dir fehlen wahrscheinlich noch:
+            Wichtige Aufgaben
           </h3>
-          <ul className="space-y-2">
-            {result.missing.map((g) => (
-              <li key={g.label} className="flex items-center justify-between gap-3 text-sm border-b border-primary/5 pb-2 last:border-0">
+          <ul className="space-y-2" data-testid="check-visible-tasks">
+            {result.visibleTasks.map((g) => (
+              <li key={g.id} className="flex items-center justify-between gap-3 text-sm border-b border-primary/5 pb-2 last:border-0">
                 <span>
                   {g.label}
-                  {g.urgent && <span className="ml-2 text-xs text-accent font-semibold uppercase">dringend</span>}
+                  {g.urgent && <span className="ml-2 text-xs text-danger font-semibold uppercase">dringend</span>}
                 </span>
-                {g.modulePath && (
-                  <Link href={g.modulePath} className="text-accent hover:underline shrink-0 flex items-center gap-1 font-medium">
-                    Ergänzen <ChevronRight size={14} />
-                  </Link>
-                )}
               </li>
             ))}
           </ul>
+          <p className="text-xs text-muted">{ruleSteps.join(" ")}</p>
         </Card>
       )}
 
-      <Card className="p-6 space-y-3 bg-primary/5">
-        <h3 className="font-semibold text-primary">Deine nächsten 3 Schritte</h3>
-        <ol className="text-sm text-muted space-y-2 list-decimal pl-4">
-          {ruleSteps.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ol>
-        <p className="text-xs text-muted pt-2">Regelbasierte Empfehlung — keine Rechtsberatung, keine Fatwa. Mit Imam/Anwalt/Arzt fachlich prüfen.</p>
-      </Card>
+      {result.furtherTasks.length > 0 && (
+        <details className="rounded-2xl border border-border bg-card p-6" data-testid="check-further-tasks">
+          <summary className="font-semibold text-primary cursor-pointer min-h-[44px] flex items-center justify-between">
+            Weitere Schritte
+            <ChevronDown size={18} className="text-muted" />
+          </summary>
+          <ul className="space-y-2 mt-4">
+            {result.furtherTasks.map((g) => (
+              <li key={g.id} className="text-sm text-muted border-b border-primary/5 pb-2 last:border-0">
+                {g.label}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       {result.prepared.length > 0 && (
         <Card className="p-6 space-y-3 bg-success/5 border-success/20">
@@ -305,21 +321,9 @@ function CheckResults({ state, onReset }: { state: CheckState; onReset: () => vo
         </Card>
       )}
 
-      <Card className="p-6 space-y-4">
-        <h3 className="font-semibold text-primary">Jetzt handeln</h3>
-        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-          {result.nextSteps.map((s) => (
-            <Link key={s.href} href={s.href}>
-              <Button size="lg" variant={s.priority === 1 ? "primary" : s.priority === 2 ? "secondary" : "outline"} className="w-full sm:w-auto">
-                {s.label}
-              </Button>
-            </Link>
-          ))}
-        </div>
-        <Button variant="ghost" size="sm" type="button" onClick={onReset} data-testid="check-reset">
-          <RotateCcw size={14} className="mr-1" /> Check wiederholen
-        </Button>
-      </Card>
+      <Button variant="ghost" size="sm" type="button" onClick={onReset} data-testid="check-reset">
+        <RotateCcw size={14} className="mr-1" /> Check wiederholen
+      </Button>
     </div>
   );
 }

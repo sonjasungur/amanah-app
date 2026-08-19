@@ -15,9 +15,10 @@ export default function FamilienGespraechPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-primary mb-2">Familiengespräch</h1>
+        <h1 className="text-2xl font-bold text-primary mb-2">Gespräch mit Angehörigen</h1>
         <p className="text-muted text-sm max-w-2xl">
-          Orientierung für Gespräche beim Kennenlernen — keine individuelle Beratung. Hake Themen ab, markiere wichtige Fragen und notiere Gedanken lokal auf deinem Gerät.
+          Orientierung für ein ruhiges Vorsorgegespräch. Kein Kennenlernen, keine Ehethemen.
+          Der Familienbrief bleibt ein eigener Bereich.
         </p>
       </header>
 

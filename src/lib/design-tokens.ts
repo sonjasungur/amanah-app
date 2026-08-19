@@ -9,14 +9,15 @@ export const COLORS = {
   page: "#F4F7F6",
   card: "#FFFFFF",
   text: "#101828",
-  muted: "#475467",
-  border: "#D9E2DF",
+  muted: "#3D4F5F",
+  border: "#C5D4CF",
   catNotfall: "#2563EB",
   catJanazah: "#6D28D9",
   catVermogen: "#0F6470",
   catAkhira: "#087A4E",
   warning: "#B7791F",
   danger: "#C4314B",
+  destructive: "#C4314B",
 } as const;
 
 export const CHECK_LABELS = {

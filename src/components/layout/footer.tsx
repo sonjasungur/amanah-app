@@ -51,7 +51,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/dashboard" className="text-white/75 hover:text-emerald transition-colors">
-                  Mein Ordner
+                  Mein Vorsorgeplan
                 </Link>
               </li>
             </ul>

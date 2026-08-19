@@ -1,3 +1,5 @@
+import { IMPRINT } from "@/lib/legal/imprint";
+
 export const metadata = {
   title: "Impressum — Mein Wille",
   description: "Impressum und Anbieterkennzeichnung für Mein Wille.",
@@ -7,17 +9,25 @@ export default function ImpressumPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-primary mb-3">Impressum</h1>
-      <p className="text-muted mb-10">Angaben gemäß § 5 TMG</p>
+      <p className="text-muted mb-6">Angaben gemäß § 5 TMG</p>
+
+      <div className="rounded-xl border border-warning/40 bg-warning/5 p-4 mb-10 text-sm text-muted" data-testid="imprint-launch-blocker">
+        {IMPRINT.launchBlocker}
+      </div>
 
       <div className="space-y-8 text-muted">
         <section className="rounded-2xl bg-card border border-primary/10 p-6">
           <h2 className="text-lg font-semibold text-primary mb-4">Anbieter</h2>
           <p className="leading-relaxed">
-            Mein Wille<br />
-            [Firmenname / Projektname — Platzhalter]<br />
-            [Straße und Hausnummer]<br />
-            [PLZ Ort]<br />
-            Deutschland
+            {IMPRINT.productName}
+            <br />
+            {IMPRINT.legalFormPlaceholder}
+            <br />
+            {IMPRINT.streetPlaceholder}
+            <br />
+            {IMPRINT.cityPlaceholder}
+            <br />
+            {IMPRINT.country}
           </p>
         </section>
 
@@ -25,32 +35,34 @@ export default function ImpressumPage() {
           <h2 className="text-lg font-semibold text-primary mb-3">Kontakt</h2>
           <p className="leading-relaxed">
             E-Mail:{" "}
-            <a href="mailto:kontakt@amanahordner.de" className="text-primary-light underline">
-              kontakt@amanahordner.de
+            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
+              {IMPRINT.email}
             </a>
             <br />
-            Telefon: [Platzhalter]
+            Telefon: {IMPRINT.phonePlaceholder}
           </p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Vertretungsberechtigt</h2>
-          <p className="leading-relaxed">[Name des Vertretungsberechtigten — Platzhalter]</p>
+          <p className="leading-relaxed">{IMPRINT.representativePlaceholder}</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Umsatzsteuer-ID</h2>
           <p className="leading-relaxed">
-            Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br />
-            [DE XXX XXX XXX — Platzhalter, falls vorhanden]
+            Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:
+            <br />
+            {IMPRINT.vatIdPlaceholder}
           </p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)</h2>
           <p className="leading-relaxed">
-            [Name]<br />
-            [Adresse]
+            {IMPRINT.contentResponsibleNamePlaceholder}
+            <br />
+            {IMPRINT.contentResponsibleAddressPlaceholder}
           </p>
         </section>
 

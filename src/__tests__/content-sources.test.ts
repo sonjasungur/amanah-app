@@ -9,23 +9,13 @@ function read(rel: string): string {
   return readFileSync(join(ROOT, rel), "utf8");
 }
 
-const HOME_AREAS = [
-  { slug: "notfallkarte", href: "/dashboard/notfallkarte" },
-  { slug: "vorsorgevollmacht", href: "/dashboard/vollmacht" },
-  { slug: "janazah", href: "/dashboard/janazah" },
-  { slug: "testament-erbe", href: "/dashboard/testament" },
-  { slug: "digitaler-nachlass", href: "/dashboard/digitaler-nachlass" },
-  { slug: "familie", href: "/dashboard/familie" },
-];
-
 describe("content sources, tiles, and article structure", () => {
-  it("homepage area tiles link to dashboard module routes", () => {
+  it("homepage does not use area tiles as anonymous dashboard jumps", () => {
     const home = read("src/app/page.tsx");
-    for (const { href } of HOME_AREAS) {
-      expect(home).toContain(`href: "${href}"`);
-      expect(home).toContain('data-testid={`home-area-${href.split("/").pop()}`}');
-    }
-    expect(home).toContain("Modul öffnen");
+    expect(home).not.toContain("home-area-");
+    expect(home).not.toContain("Modul öffnen");
+    expect(home).toContain("BRAND.ctaPrimary");
+    expect(home).toContain('href="/check"');
   });
 
   it("article card uses unified sections A–H", () => {

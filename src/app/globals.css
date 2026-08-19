@@ -41,6 +41,7 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-danger: var(--danger);
+  --color-destructive: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-navy: var(--navy);

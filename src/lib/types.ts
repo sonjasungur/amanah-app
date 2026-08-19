@@ -26,6 +26,7 @@ export type {
   BarzakhPlan,
   SadaqaJariyaPlan,
   FamilyMessage,
+  CheckProgress,
   AmanahOrdnerData,
   ModuleId,
   ModuleConfig,
