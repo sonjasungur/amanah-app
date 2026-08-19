@@ -35,7 +35,7 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
   if (!statusLabel && saveStatus === "idle") return null;
 
   return (
-    <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator">
+    <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator" aria-live="polite">
       {statusLabel && (
         <div
           className={cn(

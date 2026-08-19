@@ -93,3 +93,50 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  e2e-failure-paths:
+    name: Playwright E2E – phase2 failure paths (mocked API)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Production build (API mode – no real credentials needed)
+        env:
+          NEXT_PUBLIC_AUTH_MODE: api
+          NEXT_PUBLIC_STORAGE_MODE: api
+          NEXT_PUBLIC_AMANAH_AI_ENABLED: "true"
+        run: npm run build
+
+      - name: Playwright failure paths (all endpoints mocked)
+        env:
+          CI: "true"
+          PLAYWRIGHT_PORT: "3099"
+          NEXT_PUBLIC_STORAGE_MODE: api
+          PHASE2_API_TESTS: "true"
+        run: npx playwright test e2e/phase2-failure-paths.spec.ts --project=chromium-desktop
+
+      - name: Upload failure artifacts
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-paths-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
