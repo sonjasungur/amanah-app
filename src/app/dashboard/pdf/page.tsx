@@ -189,6 +189,7 @@ export default function PdfPage() {
         <span className="text-accent mr-1">💡</span>
         <strong>Hinweis:</strong> Wähle im Druckdialog deines Browsers &ldquo;Als PDF speichern&rdquo; als Ziel.
         Auf dem Handy: Teilen → Als PDF speichern.
+        <span className="block mt-1 text-xs">Das Dokument wird nur lokal gespeichert — es wird nichts automatisch an Dritte gesendet.</span>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">

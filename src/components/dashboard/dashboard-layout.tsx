@@ -8,7 +8,7 @@ import { dashboardNavGroups, moreNavItems } from "@/lib/navigation/dashboard-nav
 import { StorageControls } from "@/components/storage/storage-controls";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { cn } from "@/lib/utils/cn";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Settings } from "lucide-react";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
@@ -100,6 +100,22 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             ))}
           </div>
         )}
+      </div>
+      <div className="pt-2 border-t border-border/40">
+        <Link
+          href="/dashboard/einstellungen"
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-lg text-sm min-h-[44px]",
+            isActive(pathname, "/dashboard/einstellungen")
+              ? "bg-accent-soft text-primary font-medium"
+              : "text-muted hover:bg-sand hover:text-foreground"
+          )}
+          aria-current={isActive(pathname, "/dashboard/einstellungen") ? "page" : undefined}
+          data-testid="nav-settings-link"
+        >
+          <Settings size={15} aria-hidden />
+          Einstellungen
+        </Link>
       </div>
     </>
   );

@@ -136,7 +136,7 @@ export default function JanazahVorschauPage() {
           data-testid="janazah-preview-download"
         >
           <Download size={16} className="mr-1.5" aria-hidden />
-          Vorsorgeübersicht als PDF herunterladen
+          PDF-Vorschau öffnen
         </Button>
         <Link href="/dashboard/familiengespraech">
           <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto">

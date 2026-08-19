@@ -99,6 +99,13 @@ export const useAmanahStore = create<AmanahStore>()(
 
 let saveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+export function cancelPendingSave(): void {
+  if (saveDebounceTimer) {
+    clearTimeout(saveDebounceTimer);
+    saveDebounceTimer = null;
+  }
+}
+
 useAmanahStore.subscribe((state, prevState) => {
   const dataChanged = DATA_KEYS.some((key) => state[key] !== prevState[key]);
   if (!dataChanged || state.saveStatus !== "saving") return;
@@ -110,6 +117,7 @@ useAmanahStore.subscribe((state, prevState) => {
 });
 
 export async function resetAmanahStore(): Promise<void> {
+  cancelPendingSave();
   await clearAmanahData();
   useAmanahStore.setState({ ...defaultAmanahData, saveStatus: "saved", saveError: null, lastSaved: null });
 }
