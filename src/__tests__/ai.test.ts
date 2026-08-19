@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { classifyUserIntent, enforceAiSafety, safeResponseTemplate } from "@/lib/ai/safety";
 import { ruleBasedAIProvider } from "@/lib/ai/rule-based-ai-provider";
 import { mockAIProvider } from "@/lib/ai/mock-ai-provider";
+import { handleAiRoute } from "@/lib/ai/api-handler";
 import {
   buildExtractContext,
   buildFamilyMessageContext,
@@ -214,6 +215,31 @@ describe("AI API routes", () => {
     expect(body.message).toBeTruthy();
   });
 
+  it("POST /api/ai/family-message returns 503 when AI is globally disabled", async () => {
+    process.env.AMANAH_AI_ENABLED = "false";
+    const res = await familyMessagePOST(
+      new Request("http://localhost/api/ai/family-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: demoAmanahData, tone: "kurz", consentGranted: true }),
+      })
+    );
+    expect(res.status).toBe(503);
+  });
+
+  it("POST /api/ai/family-message rejects missing consent", async () => {
+    const res = await familyMessagePOST(
+      new Request("http://localhost/api/ai/family-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: demoAmanahData, tone: "kurz" }),
+      })
+    );
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.requiresConsent).toBe(true);
+  });
+
   it("POST /api/ai/knowledge blocks legal questions", async () => {
     const res = await knowledgePOST(
       new Request("http://localhost/api/ai/knowledge", {
@@ -243,6 +269,24 @@ describe("AI API routes", () => {
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.requiresConsent).toBe(true);
+  });
+
+  it("does not process handler payload when consent is missing", async () => {
+    let called = false;
+    const res = await handleAiRoute(
+      new Request("http://localhost/api/ai/family-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: defaultAmanahData, tone: "kurz" }),
+      }),
+      "family-message",
+      async () => {
+        called = true;
+        return { ok: true };
+      }
+    );
+    expect(res.status).toBe(403);
+    expect(called).toBe(false);
   });
 });
 
