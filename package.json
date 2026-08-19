@@ -14,6 +14,7 @@
     "test:e2e:screenshots": "node scripts/e2e-screenshots.mjs",
     "check": "npm run lint && npm run test && npm run build",
     "release:check": "node scripts/release-check.mjs",
+    "validate:release": "node scripts/validate-release.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",

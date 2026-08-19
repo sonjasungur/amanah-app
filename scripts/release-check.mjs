@@ -77,6 +77,7 @@ const requiredFiles = [
   "deploy/Caddyfile.example",
   "deploy/Caddyfile",
   "scripts/deploy-preflight.sh",
+  "scripts/verify-deploy-remote.sh",
   "scripts/backup-postgres.sh",
   "scripts/prod-smoke-test.sh",
   "docker-compose.prod.nocaddy.yml",

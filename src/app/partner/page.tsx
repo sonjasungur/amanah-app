@@ -16,7 +16,7 @@ const sections = [
       "Islamische Bestattungsdienste können später gelistet werden — erst nach echter Prüfung, ohne erfundene Einträge.",
     features: [
       "Kostenloser Basiseintrag mit regionalem Profil",
-      "Verifiziertes Partner-Badge und 24/7-Sichtbarkeit",
+      "Partner-Badge erst nach realer Prüfung und Freigabe",
       "Direkte Verknüpfung mit Mein Wille-Nutzerwünschen",
     ],
     cta: { label: "Hinweis zum Verzeichnis", href: "/bestatter" },

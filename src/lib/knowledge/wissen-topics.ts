@@ -322,3 +322,7 @@ export const wissenTopics: KnowledgeArticle[] = [
 export function getWissenTopicBySlug(slug: string): KnowledgeArticle | undefined {
   return wissenTopics.find((t) => t.slug === slug);
 }
+
+export function getPublicWissenTopics(): KnowledgeArticle[] {
+  return wissenTopics.filter((topic) => topic.reviewStatus === "reviewed");
+}

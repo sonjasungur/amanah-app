@@ -127,7 +127,9 @@ Backups are stored in `backups/` (gitignored).
 
 ```bash
 cd /opt/amanah-app
-git pull origin main
+./scripts/verify-deploy-remote.sh
+DEPLOY_REMOTE=$(git remote -v | awk '$3=="(fetch)" && $2 ~ /github\\.com[:/]sonjasungur\\/amanah-app(\\.git)?$/ {print $1; exit}')
+git pull --ff-only "$DEPLOY_REMOTE" main
 ./scripts/deploy-preflight.sh
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 ./scripts/prod-smoke-test.sh
@@ -146,7 +148,9 @@ If another app already uses ports 80/443 (e.g. on `gemeinsam1-prod`):
 
 ```bash
 cd /opt/amanah-app
-git pull origin main
+./scripts/verify-deploy-remote.sh
+DEPLOY_REMOTE=$(git remote -v | awk '$3=="(fetch)" && $2 ~ /github\\.com[:/]sonjasungur\\/amanah-app(\\.git)?$/ {print $1; exit}')
+git pull --ff-only "$DEPLOY_REMOTE" main
 ./scripts/init-production-env.sh          # once — generates .env.production
 ./scripts/deploy-shared-server.sh         # app + postgres on localhost:3001
 ./scripts/backup-postgres.sh              # test backup

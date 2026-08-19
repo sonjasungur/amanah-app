@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { wissenTopics } from "@/lib/knowledge/wissen-topics";
+import { getPublicWissenTopics } from "@/lib/knowledge/wissen-topics";
 import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
 import {
   WISSEN_CATEGORIES,
@@ -23,7 +23,7 @@ import { Search } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 
 function enriched(): KnowledgeArticle[] {
-  return wissenTopics.map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }));
+  return getPublicWissenTopics().map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }));
 }
 
 export default function WissenPage() {
@@ -108,6 +108,13 @@ export default function WissenPage() {
                     Kein Thema gefunden — Suche anpassen.
                   </p>
                 )}
+              </section>
+            ) : topics.length === 0 ? (
+              <section className="rounded-2xl border border-border bg-card p-8 text-center">
+                <h2 className="text-section-title font-bold text-foreground mb-2">Wissensbereich in Vorbereitung</h2>
+                <p className="text-muted">
+                  Aktuell sind noch keine fachlich freigegebenen Wissensinhalte öffentlich verfügbar.
+                </p>
               </section>
             ) : (
               <>

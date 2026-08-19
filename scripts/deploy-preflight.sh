@@ -19,6 +19,12 @@ FAILED=0
 echo "Amanah deploy preflight"
 echo "======================="
 
+if [[ -x ./scripts/verify-deploy-remote.sh ]]; then
+  ./scripts/verify-deploy-remote.sh
+else
+  fail "scripts/verify-deploy-remote.sh missing or not executable"
+fi
+
 if [[ ! -f "$ENV_FILE" ]]; then
   fail "$ENV_FILE missing — copy from .env.production.example"
 else

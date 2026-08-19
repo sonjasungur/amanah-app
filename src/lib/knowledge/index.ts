@@ -62,7 +62,7 @@ export function listPublicEntries(language: KnowledgeLanguage = "de") {
 
 export function getPublicEntry(id: string) {
   const entry = getEntryById(id);
-  if (!entry) return null;
+  if (!entry || entry.reviewedStatus !== "reviewed") return null;
   return toPublicEntryDetail(entry);
 }
 
