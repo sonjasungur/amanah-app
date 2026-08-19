@@ -87,9 +87,10 @@ const AREAS = [
 ] as const;
 
 const PRICING_TEASER = [
-  { name: "Check", price: "0 €", note: "Kostenlos, ohne Konto", highlighted: false },
-  { name: "Komplett", price: "79 €", note: "Alle Module — empfohlen", highlighted: true },
-  { name: "Familie", price: "99 €", note: "Maximal zwei Erwachsenenprofile", highlighted: false },
+  { name: "Amanah-Check", price: "0 €", note: "Einmalig kostenlos, ohne Konto", highlighted: false },
+  { name: "Basic", price: "29 €", note: "Einmalig — wichtigste Wünsche dokumentieren", highlighted: false },
+  { name: "Komplett", price: "79 €", note: "Einmalig — alle Bereiche, empfohlen", highlighted: true },
+  { name: "Familie", price: "99 €", note: "Einmalig — maximal zwei Erwachsenenprofile", highlighted: false },
 ];
 
 function HeroCheckInfoCard({ className }: { className?: string }) {
@@ -258,7 +259,7 @@ export default function HomePage() {
             description="Starte kostenlos. Vollständige Dokumentation ist als Einmalpaket geplant — kein Abo."
             accent={COLORS.emerald}
           />
-          <div className="grid sm:grid-cols-3 gap-5 mb-8">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
             {PRICING_TEASER.map((p) => (
               <PricingCard
                 key={p.name}
@@ -267,21 +268,15 @@ export default function HomePage() {
                 description={p.note}
                 features={[]}
                 highlighted={p.highlighted}
-                statusNote={p.name === "Check" ? undefined : "In Vorbereitung"}
+                statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}
                 cta={
-                  p.name === "Check" ? (
+                  p.name === "Amanah-Check" ? (
                     <Link href="/check">
                       <Button className="w-full" variant="primary">
                         {BRAND.ctaPrimary}
                       </Button>
                     </Link>
-                  ) : (
-                    <Link href="/preise">
-                      <Button className="w-full" variant="outline">
-                        Details
-                      </Button>
-                    </Link>
-                  )
+                  ) : undefined
                 }
               />
             ))}

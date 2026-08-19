@@ -91,12 +91,15 @@ describe("branding — Mein Wille", () => {
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("preise page shows free check and three main packages unchanged", () => {
-    const preise = read("src/app/preise/page.tsx");
-    expect(preise).toContain("CHECK_LABELS.freeCard");
-    expect(preise).toContain("Komplett");
-    expect(preise).toContain("79 €");
-    expect(preise).toContain("In Vorbereitung");
+  it("homepage teaser shows all four public prices and no paid purchase button", () => {
+    const home = read("src/app/page.tsx");
+    expect(home).toContain('name: "Amanah-Check"');
+    expect(home).toContain('name: "Basic"');
+    expect(home).toContain('name: "Komplett"');
+    expect(home).toContain('name: "Familie"');
+    expect(home).toContain('price: "29 €"');
+    expect(home).toContain("In Vorbereitung");
+    expect(home).not.toContain("Details");
   });
 
   it("wissen hub has categories, entry topics, search and scroll sections", () => {

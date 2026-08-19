@@ -19,27 +19,7 @@ export const dashboardNavGroups: NavGroup[] = [
   {
     id: "prep",
     label: "Vorbereitung",
-    items: [
-      { href: "/check", label: "Vorsorge-Check", icon: "✓" },
-      { href: "/wissen", label: "Wissen", icon: "📚" },
-      { href: "/dashboard/ausfuellen", label: "Geführt ausfüllen", icon: "🧭" },
-    ],
-  },
-  {
-    id: "family",
-    label: "Familie",
-    items: [
-      { href: "/dashboard/familiengespraech", label: "Gespräch mit Angehörigen", icon: "💬" },
-      { href: "/dashboard/familie", label: "Familienbrief", icon: "✉️" },
-    ],
-  },
-  {
-    id: "personal",
-    label: "Gespeicherte Angaben",
-    items: [
-      { href: "/dashboard/notfallkarte", label: "Notfallkarte", icon: "🆘" },
-      { href: "/dashboard/pdf", label: "PDF & Export", icon: "📄" },
-    ],
+    items: [{ href: "/check", label: "Vorsorge-Check", icon: "✓" }],
   },
   {
     id: "modules",

@@ -191,6 +191,13 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
     expect(res.status).toBe(403);
   });
 
+  it("keeps local/demo registration enabled for development", () => {
+    process.env.NEXT_PUBLIC_AUTH_MODE = "local";
+    delete process.env.AMANAH_PUBLIC_REGISTRATION_ENABLED;
+    delete process.env.NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED;
+    expect(isPublicRegistrationEnabled()).toBe(true);
+  });
+
   it("has no verified mock funeral directors", () => {
     expect(funeralPartners).toEqual([]);
     expect(funeralPartners.some((p) => p.verified)).toBe(false);
@@ -209,5 +216,62 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
     expect(header).toContain("site-mobile-nav-toggle");
     expect(dash).not.toContain("Navigation öffnen");
     expect(dash).toContain("hidden lg:block");
+  });
+
+  it("hides registration CTA in header when registration is disabled", () => {
+    const header = read("src/components/layout/header.tsx");
+    expect(header).toContain("const showRegister = isPublicRegistrationEnabled()");
+    expect(header).toContain("{showRegister && (");
+    expect(header).toContain('href="/register"');
+  });
+});
+
+describe("professional core phase 1 — pricing teaser and checkout safety", () => {
+  it("shows all four public prices on homepage teaser", () => {
+    const home = read("src/app/page.tsx");
+    expect(home).toContain('name: "Amanah-Check"');
+    expect(home).toContain('price: "0 €"');
+    expect(home).toContain('name: "Basic"');
+    expect(home).toContain('price: "29 €"');
+    expect(home).toContain('name: "Komplett"');
+    expect(home).toContain('price: "79 €"');
+    expect(home).toContain('name: "Familie"');
+    expect(home).toContain('price: "99 €"');
+  });
+
+  it("keeps paid teaser cards in preparation without active buy CTA", () => {
+    const home = read("src/app/page.tsx");
+    expect(home).toContain('statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}');
+    expect(home).not.toContain("Details");
+    expect(home).not.toContain("Kaufen");
+    expect(home).not.toContain("Checkout");
+  });
+
+  it("does not offer register CTA on /preise when registration is disabled", () => {
+    const preise = read("src/app/preise/page.tsx");
+    expect(preise).toContain("const showRegister = isPublicRegistrationEnabled()");
+    expect(preise).toContain("{showRegister && (");
+    expect(preise).toContain("Konto erstellen — Vorsorge beginnen");
+  });
+});
+
+describe("professional core phase 1 — dashboard focus navigation", () => {
+  it("reduces primary sidebar links and keeps modules in collapsible area", () => {
+    const nav = read("src/lib/navigation/dashboard-nav.ts");
+    const layout = read("src/components/dashboard/dashboard-layout.tsx");
+    expect(nav).toContain('id: "overview"');
+    expect(nav).toContain('label: "Mein Vorsorgeplan"');
+    expect(nav).toContain('label: "Vorsorge-Check"');
+    expect(nav).not.toContain("/dashboard/notfallkarte");
+    expect(nav).not.toContain("/dashboard/familie");
+    expect(nav).not.toContain("/dashboard/pdf");
+    expect(layout).toContain("Alle Vorsorgebereiche");
+    expect(layout).toContain("moduleConfigs.map");
+  });
+
+  it("uses updated neutral auth disclaimer wording", () => {
+    const i18n = read("src/lib/i18n/translations.ts");
+    expect(i18n).toContain("Keine Rechtsberatung – bei rechtlichen Fragen empfehlen wir fachliche Beratung.");
+    expect(i18n).not.toContain("Keine Rechtsberatung — fachliche Prüfung empfohlen.");
   });
 });
