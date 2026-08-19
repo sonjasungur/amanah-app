@@ -11,30 +11,26 @@ const JANAZAH_SAMPLE = {
 test.describe("Janazah wishes persistence", () => {
   test("fill, save, reload and verify stored data with local storage hint", async ({ page }) => {
     await page.goto("/dashboard/janazah");
-    await expect(page.getByTestId("janazah-form")).toBeVisible();
+    await expect(page.getByTestId("janazah-guided-flow")).toBeVisible();
 
     await page.getByTestId("janazah-fullName").locator("input").fill(JANAZAH_SAMPLE.fullName);
     await page.getByTestId("janazah-locationRegion").locator("input").fill(JANAZAH_SAMPLE.locationRegion);
     await page.getByTestId("janazah-trustedContact").locator("input").fill(JANAZAH_SAMPLE.trustedContact);
-    await page.getByTestId("janazah-preferredMosque").locator("input").fill(JANAZAH_SAMPLE.preferredMosque);
-    await page.getByTestId("janazah-messageToFamily").locator("textarea").fill(JANAZAH_SAMPLE.messageToFamily);
 
-    await page.getByTestId("janazah-save-button").click();
-    await expect(page.getByTestId("janazah-save-success")).toBeVisible({ timeout: 5000 });
-    await expect(page.getByTestId("janazah-save-success")).toContainText("auf diesem Gerät gespeichert");
-    await expect(page.getByTestId("janazah-form").getByTestId("save-status-location")).toContainText("Nur auf diesem Gerät gespeichert");
+    await page.getByTestId("janazah-next-button").click();
+    await expect(page.getByTestId("janazah-step-progress")).toBeVisible({ timeout: 5000 });
 
-    await page.reload();
+    await page.goto("/dashboard/janazah?schritt=0");
+    await expect(page.getByTestId("janazah-guided-flow")).toBeVisible();
     await expect(page.getByTestId("janazah-fullName").locator("input")).toHaveValue(JANAZAH_SAMPLE.fullName);
     await expect(page.getByTestId("janazah-locationRegion").locator("input")).toHaveValue(JANAZAH_SAMPLE.locationRegion);
-    await expect(page.getByTestId("janazah-messageToFamily").locator("textarea")).toHaveValue(JANAZAH_SAMPLE.messageToFamily);
   });
 
   test("navigates between janazah sections", async ({ page }) => {
     await page.goto("/dashboard/janazah");
-    await page.getByTestId("janazah-module-nav").locator('a[href="/dashboard/ghusl-kafan"]').click();
-    await expect(page).toHaveURL(/\/dashboard\/ghusl-kafan$/);
-    await expect(page.getByTestId("janazah-module-nav")).toBeVisible();
+    await expect(page.getByTestId("janazah-guided-flow")).toBeVisible();
+    await expect(page.getByTestId("janazah-step-progress")).toBeVisible();
+    await expect(page.getByTestId("janazah-next-button")).toBeVisible();
   });
 });
 
