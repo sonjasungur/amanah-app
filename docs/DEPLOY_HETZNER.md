@@ -50,6 +50,29 @@ Set in `.env.production`:
 - `DATABASE_URL` — match Postgres user/password/db (compose sets host `postgres`)
 - Keep `AMANAH_AI_PROVIDER=rules` unless OpenAI is intentionally enabled
 
+### Private review baseline (recommended)
+
+For a controlled private review (no public onboarding, no checkout, no external AI), keep:
+
+- `NEXT_PUBLIC_AUTH_MODE=api`
+- `NEXT_PUBLIC_STORAGE_MODE=api`
+- `AMANAH_SERVER_STORAGE=postgres`
+- `AMANAH_PUBLIC_REGISTRATION_ENABLED=false`
+- `NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED=false`
+- `AMANAH_AI_ENABLED=false`
+- `NEXT_PUBLIC_AMANAH_AI_ENABLED=false`
+- no `OPENAI_API_KEY` required
+
+Operational notes:
+
+- GitHub repository is the deployment source of truth: `https://github.com/sonjasungur/amanah-app.git`
+- always run `./scripts/verify-deploy-remote.sh` before update/deploy
+- run DB migrations before app start (`prisma migrate deploy` is executed on app startup)
+- create a backup before every production update (`./scripts/backup-postgres.sh`)
+- run health/smoke checks after startup (`/api/health`, `./scripts/prod-smoke-test.sh`)
+- rollback via previous commit checkout and rebuild; restore DB via `./scripts/restore-postgres.sh` if needed
+- create review user access outside git (never commit passwords, tokens, or `.env` values)
+
 Set in `deploy/Caddyfile`:
 
 - Replace `amanah.example.com` with your real domain

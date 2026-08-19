@@ -111,13 +111,31 @@ describe("release validator modes", () => {
     expect(res.status).toBe(0);
   });
 
-  it("public-pilot mode fails while legal placeholders remain", () => {
+  it("public-pilot mode passes with complete legal operator details", () => {
     const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-pilot"], {
       cwd: ROOT,
       env: baseEnv,
       encoding: "utf8",
     });
-    expect(res.status).not.toBe(0);
-    expect(`${res.stdout}\n${res.stderr}`).toContain("Impressum placeholders");
+    expect(res.status).toBe(0);
+  });
+});
+
+describe("legal contact consistency", () => {
+  it("imprint source contains final operator details", () => {
+    const imprint = read("src/lib/legal/imprint.ts");
+    expect(imprint).toContain("MSC Engineering GmbH");
+    expect(imprint).toContain("Karlstraße 14");
+    expect(imprint).toContain("74336 Brackenheim");
+    expect(imprint).toContain("contact@mscisystems.com");
+    expect(imprint).toContain("HRB 738249");
+    expect(imprint).not.toContain("launchBlocker");
+  });
+
+  it("privacy page uses central imprint contact", () => {
+    const privacy = read("src/app/datenschutz/page.tsx");
+    expect(privacy).toContain("IMPRINT.operatorLegalName");
+    expect(privacy).toContain("mailto:${IMPRINT.email}");
+    expect(privacy).not.toContain("datenschutz@amanahordner.de");
   });
 });
