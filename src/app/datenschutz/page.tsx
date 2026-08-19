@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
   title: "Datenschutz — Mein Wille",
@@ -16,10 +17,11 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">1. Verantwortlicher</h2>
           <p className="leading-relaxed">
-            Verantwortlich für die Datenverarbeitung im Rahmen von Mein Wille ist der Betreiber der Plattform.
-            Kontakt:{" "}
-            <a href="mailto:datenschutz@amanahordner.de" className="text-primary-light underline">
-              datenschutz@amanahordner.de
+            Verantwortlich für die Datenverarbeitung im Rahmen von {IMPRINT.productName} ist die{" "}
+            {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}, vertreten durch{" "}
+            {IMPRINT.representedBy}. Kontakt:{" "}
+            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
+              {IMPRINT.email}
             </a>
           </p>
         </section>
@@ -76,8 +78,9 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">6. KI-Assistent</h2>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
+            <li><strong className="text-foreground">Standard:</strong> KI ist in der Produktionskonfiguration deaktiviert.</li>
             <li><strong className="text-foreground">rules / mock:</strong> Keine externen KI-Dienste — Verarbeitung lokal bzw. regelbasiert auf dem Server.</li>
-            <li><strong className="text-foreground">openai:</strong> Externe KI nur nach ausdrücklicher Zustimmung, mit Datenminimierung.</li>
+            <li><strong className="text-foreground">openai (optional):</strong> Externe KI nur bei aktivierter Funktion und nach ausdrücklicher Zustimmung, mit Datenminimierung.</li>
             <li>Sende keine vollständigen persönlichen oder medizinischen Daten in Freitextfragen.</li>
             <li>Der Assistent ersetzt keine Beratung durch Imam, Arzt oder Anwalt.</li>
           </ul>
@@ -117,8 +120,8 @@ export default function DatenschutzPage() {
               Sicherheit
             </Link>
             . Bei Fragen:{" "}
-            <a href="mailto:datenschutz@amanahordner.de" className="text-primary-light underline">
-              datenschutz@amanahordner.de
+            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
+              {IMPRINT.email}
             </a>.
           </p>
         </section>

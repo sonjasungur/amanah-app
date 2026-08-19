@@ -219,9 +219,7 @@ export function getAllEntries(): KnowledgeEntry[] {
 }
 
 export function getProductionEntries(): KnowledgeEntry[] {
-  return getAllEntries().filter(
-    (e) => e.reviewedStatus === "reviewed" || (e.reviewedStatus === "draft" && e.riskLevel === "low")
-  );
+  return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");
 }
 
 export function getReviewedEntries(): KnowledgeEntry[] {

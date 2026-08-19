@@ -54,10 +54,10 @@ test.describe("Vorsorge-Check", () => {
 
 test.describe("Internal wissen links", () => {
   for (const slug of WISSEN_SLUGS) {
-    test(`/wissen/${slug} returns 200`, async ({ page }) => {
+    test(`/wissen/${slug} is blocked until reviewed`, async ({ page }) => {
       const response = await page.goto(`/wissen/${slug}`);
-      expect(response?.status()).toBe(200);
-      await expect(page.getByText("In 30 Sekunden")).toBeVisible();
+      expect(response?.status()).toBe(404);
+      await expect(page.getByText(/Seite nicht gefunden|Page not found/i)).toBeVisible();
     });
   }
 });

@@ -9,25 +9,22 @@ export default function ImpressumPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-primary mb-3">Impressum</h1>
-      <p className="text-muted mb-6">Angaben gemäß § 5 TMG</p>
-
-      <div className="rounded-xl border border-warning/40 bg-warning/5 p-4 mb-10 text-sm text-muted" data-testid="imprint-launch-blocker">
-        {IMPRINT.launchBlocker}
-      </div>
+      <p className="text-muted mb-8">Anbieterangaben nach dem Digitale-Dienste-Gesetz (DDG).</p>
 
       <div className="space-y-8 text-muted">
         <section className="rounded-2xl bg-card border border-primary/10 p-6">
           <h2 className="text-lg font-semibold text-primary mb-4">Anbieter</h2>
           <p className="leading-relaxed">
-            {IMPRINT.productName}
+            {IMPRINT.operatorLegalName}
             <br />
-            {IMPRINT.legalFormPlaceholder}
+            {IMPRINT.street}
             <br />
-            {IMPRINT.streetPlaceholder}
-            <br />
-            {IMPRINT.cityPlaceholder}
+            {IMPRINT.city}
             <br />
             {IMPRINT.country}
+          </p>
+          <p className="leading-relaxed mt-4">
+            Für das Produkt {IMPRINT.productName} ist die {IMPRINT.operatorLegalName} rechtlich verantwortlich.
           </p>
         </section>
 
@@ -38,31 +35,28 @@ export default function ImpressumPage() {
             <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
               {IMPRINT.email}
             </a>
-            <br />
-            Telefon: {IMPRINT.phonePlaceholder}
           </p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Vertretungsberechtigt</h2>
-          <p className="leading-relaxed">{IMPRINT.representativePlaceholder}</p>
+          <p className="leading-relaxed">{IMPRINT.representedBy}</p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-primary mb-3">Umsatzsteuer-ID</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">Registereintrag</h2>
           <p className="leading-relaxed">
-            Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:
+            Registergericht: {IMPRINT.registerCourt}
             <br />
-            {IMPRINT.vatIdPlaceholder}
+            Handelsregisternummer: {IMPRINT.commercialRegisterNumber}
           </p>
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-primary mb-3">Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">Inhaltlich verantwortlich (§ 18 Abs. 2 MStV)</h2>
           <p className="leading-relaxed">
-            {IMPRINT.contentResponsibleNamePlaceholder}
-            <br />
-            {IMPRINT.contentResponsibleAddressPlaceholder}
+            {IMPRINT.contentResponsibleName}
+            <br />{IMPRINT.contentResponsibleAddress}
           </p>
         </section>
 

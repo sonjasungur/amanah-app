@@ -1,20 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { wissenTopics } from "@/lib/knowledge/wissen-topics";
+import { getPublicWissenTopics } from "@/lib/knowledge/wissen-topics";
 import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
 import { RichArticleCard, WissenFormCta } from "@/components/knowledge/rich-article-card";
 import { CHECK_LABELS } from "@/lib/design-tokens";
 import { ArrowLeft } from "lucide-react";
 
 export function generateStaticParams() {
-  return wissenTopics.map((t) => ({ slug: t.slug }));
+  return getPublicWissenTopics().map((t) => ({ slug: t.slug }));
 }
 
 const JANAZAH_CTA = "Janazah-Wünsche jetzt festhalten";
 
 export default async function WissenDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = wissenTopics.find((t) => t.slug === slug);
+  const article = getPublicWissenTopics().find((t) => t.slug === slug);
   if (!article) notFound();
 
   const meta = WISSEN_META[article.id];

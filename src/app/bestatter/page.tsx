@@ -9,7 +9,7 @@ export default function BestatterPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
       <div className="mb-10">
-        <p className="text-accent font-medium mb-2">Hinweis</p>
+        <p className="text-accent font-medium mb-2">In Vorbereitung</p>
         <h1 className="text-3xl font-bold text-primary mb-3">Islamische Bestatter</h1>
         <p className="text-muted leading-relaxed">
           Ein öffentliches Verzeichnis erscheint hier erst, wenn echte, geprüfte Partner vorliegen.

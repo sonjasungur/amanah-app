@@ -116,11 +116,14 @@ test.describe("API save error and retry", () => {
     const fullNameInput = page.getByTestId("janazah-fullName").locator("input");
     await fullNameInput.fill("Updated Name for Error Test");
 
-    // Trigger save + advance — PUT → 500
-    await page.getByTestId("janazah-next-button").click();
-
-    // 1. Error alert visible
-    await expect(page.locator('[role="alert"]').first()).toBeVisible({ timeout: 15000 });
+    // Wait for first failing save (autosave on change).
+    await page.waitForFunction(() => {
+      const byTestId = document.querySelector('[data-testid="save-status-error"]');
+      const hasErrorText =
+        document.body.innerText.includes("Speichern auf dem Server fehlgeschlagen") ||
+        document.body.innerText.includes("could not be saved");
+      return Boolean(byTestId) || hasErrorText;
+    }, { timeout: 15000 });
 
     // 2. Input value preserved
     await expect(fullNameInput).toHaveValue("Updated Name for Error Test");
@@ -130,7 +133,7 @@ test.describe("API save error and retry", () => {
 
     await screenshot(page, "api-save-error-desktop");
 
-    // 4. Retry: click next again — second PUT → 200
+    // 4. Retry: click next — second PUT → 200
     await page.getByTestId("janazah-next-button").click();
 
     // 5. Step advances
@@ -160,7 +163,13 @@ test.describe("API save error and retry", () => {
     await page.getByTestId("janazah-fullName").locator("input").fill("No Save User");
     await page.getByTestId("janazah-next-button").click();
 
-    await expect(page.locator('[role="alert"]').first()).toBeVisible({ timeout: 15000 });
+    await page.waitForFunction(() => {
+      const byTestId = document.querySelector('[data-testid="save-status-error"]');
+      const hasErrorText =
+        document.body.innerText.includes("Speichern auf dem Server fehlgeschlagen") ||
+        document.body.innerText.includes("could not be saved");
+      return Boolean(byTestId) || hasErrorText;
+    }, { timeout: 15000 });
     await expect(page.getByTestId("janazah-fullName").locator("input")).toHaveValue("No Save User");
     await expect(page.getByTestId("janazah-step-0")).toBeVisible();
   });
@@ -437,8 +446,7 @@ for (const vp of VIEWPORTS) {
       await page.goto("/dashboard/janazah?schritt=0");
       await page.waitForSelector('[data-testid="janazah-guided-flow"]', { timeout: 20000 });
       await page.getByTestId("janazah-fullName").locator("input").fill("Error viewport test");
-      await page.getByTestId("janazah-next-button").click();
-      // Wait for error state: either role=alert or error text
+      // Wait for error state from failing autosave.
       await page.waitForFunction(
         () =>
           document.querySelector('[role="alert"]') !== null ||
@@ -470,8 +478,14 @@ for (const vp of VIEWPORTS) {
       await page.goto("/dashboard/janazah?schritt=0");
       await page.waitForSelector('[data-testid="janazah-guided-flow"]', { timeout: 20000 });
       await page.getByTestId("janazah-fullName").locator("input").fill("Retry viewport");
-      await page.getByTestId("janazah-next-button").click();
-      await expect(page.locator('[role="alert"]').first()).toBeVisible({ timeout: 15000 });
+      // First PUT fails on autosave.
+      await page.waitForFunction(() => {
+        const byTestId = document.querySelector('[data-testid="save-status-error"]');
+        const hasErrorText =
+          document.body.innerText.includes("Speichern auf dem Server fehlgeschlagen") ||
+          document.body.innerText.includes("could not be saved");
+        return Boolean(byTestId) || hasErrorText;
+      }, { timeout: 15000 });
       await page.getByTestId("janazah-next-button").click();
       await expect(page.getByTestId("janazah-step-1")).toBeVisible({ timeout: 10000 });
 

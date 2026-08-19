@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { buildFamilyLetterTemplate } from "@/lib/export/family-letter-template";
+import { getAiConsent } from "@/lib/ai/consent-client";
 import { ModulePage } from "@/components/modules/module-page";
 import { familyFields } from "@/lib/modules/fields";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export default function FamiliePage() {
   const store = useAmanahStore();
   const [loading, setLoading] = useState(false);
   const [tone, setTone] = useState<FamilyMessageTone>("liebevoll");
+  const [consentMissing, setConsentMissing] = useState(false);
 
   const generateTemplateLetter = () => {
     const letter = buildFamilyLetterTemplate(pickDataFields(store));
@@ -34,6 +36,12 @@ export default function FamiliePage() {
 
   const generateWithAi = async () => {
     if (!isAiUiEnabled()) return;
+    const consentGranted = getAiConsent() === "granted";
+    if (!consentGranted) {
+      setConsentMissing(true);
+      return;
+    }
+    setConsentMissing(false);
     setLoading(true);
     try {
       const res = await fetch("/api/ai/family-message", {
@@ -42,7 +50,7 @@ export default function FamiliePage() {
         body: JSON.stringify({
           data: pickDataFields(store),
           tone,
-          consentGranted: true,
+          consentGranted,
         }),
       });
       const data = await res.json();
@@ -51,6 +59,8 @@ export default function FamiliePage() {
           ...store.familyMessage,
           familyLetter: data.message,
         });
+      } else if (res.status === 403 || data?.requiresConsent) {
+        setConsentMissing(true);
       }
     } catch {
       generateTemplateLetter();
@@ -80,6 +90,15 @@ export default function FamiliePage() {
           Ohne KI funktioniert ein vollständiger Template-Brief aus deinen Ordner-Daten.
           Mit KI kann der Text später schöner formuliert werden — immer als Entwurf, keine Rechtsberatung.
         </p>
+        {consentMissing && (
+          <div
+            className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-foreground"
+            data-testid="family-ai-consent-required"
+            role="alert"
+          >
+            Für die KI-Verfeinerung ist zuerst eine ausdrückliche Einwilligung nötig.
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           <Button onClick={generateTemplateLetter} variant="primary">
             <FileText size={16} className="mr-2" /> Template-Brief erstellen
