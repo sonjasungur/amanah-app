@@ -8,9 +8,10 @@ import { JanazahLegalNotice } from "@/components/modules/janazah-legal-notice";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
-import { janazahSections } from "@/lib/modules/janazah-sections";
+import { getJanazahSections, janazahSections } from "@/lib/modules/janazah-sections";
 import { flushPendingSave } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { useI18n } from "@/lib/i18n/context";
 import { AlertCircle, ArrowLeft, ArrowRight, Eye } from "lucide-react";
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
@@ -69,8 +70,11 @@ interface JanazahGuidedFlowProps {
 export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
   const store = useAmanahStore();
   const router = useRouter();
+  const { locale, t } = useI18n();
   const values = store.janazahWishes as unknown as Record<string, unknown>;
   const profileBirthDate = store.userProfile.birthDate?.trim();
+
+  const sections = getJanazahSections(locale);
 
   const [currentStep, setCurrentStep] = useState<number>(() => {
     if (initialStep !== undefined) return Math.min(Math.max(0, initialStep), janazahSections.length - 1);
@@ -79,7 +83,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
 
-  const visibleSections = janazahSections.map((section) => ({
+  const visibleSections = sections.map((section) => ({
     ...section,
     fields: section.fields.filter(
       (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
@@ -112,7 +116,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
     const status = useAmanahStore.getState().saveStatus;
     setIsSaving(false);
     if (status === "error") {
-      setSaveErrorMsg("Speichern nicht möglich — bitte erneut versuchen.");
+      setSaveErrorMsg(t("storage.status.error"));
       return;
     }
     setCurrentStep((s) => Math.min(s + 1, totalSteps - 1));
@@ -130,7 +134,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
     const status = useAmanahStore.getState().saveStatus;
     setIsSaving(false);
     if (status === "error") {
-      setSaveErrorMsg("Speichern nicht möglich — bitte erneut versuchen.");
+      setSaveErrorMsg(t("storage.status.error"));
       return;
     }
     router.push("/dashboard/janazah/vorschau");
@@ -143,9 +147,9 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
     <div data-testid="janazah-guided-flow">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-page-title font-bold text-foreground mb-2">Janazah-Wünsche</h1>
+          <h1 className="text-page-title font-bold text-foreground mb-2">{t("janazah.title")}</h1>
           <p className="text-body text-muted max-w-2xl leading-relaxed">
-            Halte deine islamischen Bestattungswünsche fest — damit deine Familie im schwersten Moment weiß, was zu tun ist.
+            {t("janazah.subtitle")}
           </p>
         </div>
         <SaveStatusIndicator className="shrink-0" />
@@ -158,11 +162,11 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
         aria-valuenow={currentStep + 1}
         aria-valuemin={1}
         aria-valuemax={totalSteps}
-        aria-label={`Schritt ${currentStep + 1} von ${totalSteps}`}
+        aria-label={`${t("common.step")} ${currentStep + 1} ${t("common.of")} ${totalSteps}`}
       >
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-foreground">
-            Schritt {currentStep + 1} von {totalSteps}
+            {t("common.step")} {currentStep + 1} {t("common.of")} {totalSteps}
           </span>
           <span className="text-sm text-muted">{section.title}</span>
         </div>
@@ -213,7 +217,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
         <Link href="/dashboard" className="order-last sm:order-first">
           <Button type="button" variant="ghost" size="sm">
             <ArrowLeft size={14} className="mr-1.5" aria-hidden />
-            Zurück zum Vorsorgeplan
+            {t("nav.backToPlan")}
           </Button>
         </Link>
 
@@ -227,7 +231,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
               data-testid="janazah-back-button"
             >
               <ArrowLeft size={16} className="mr-1.5" aria-hidden />
-              Zurück
+              {t("common.back")}
             </Button>
           )}
 
@@ -240,7 +244,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
               data-testid="janazah-preview-button"
             >
               <Eye size={16} className="mr-1.5" aria-hidden />
-              {isSaving ? "Speichern …" : "Vorschau prüfen"}
+              {isSaving ? t("storage.status.saving") : t("janazah.guided.previewCheck")}
             </Button>
           ) : (
             <Button
@@ -250,7 +254,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
               disabled={isSaving}
               data-testid="janazah-next-button"
             >
-              {isSaving ? "Speichern …" : "Speichern und weiter"}
+              {isSaving ? t("storage.status.saving") : t("janazah.guided.saveAndNext")}
               {!isSaving && <ArrowRight size={16} className="ml-1.5" aria-hidden />}
             </Button>
           )}

@@ -187,9 +187,7 @@ export default function PdfPage() {
 
       <div className="rounded-xl bg-sand border border-accent/30 px-4 py-3 text-sm text-muted">
         <span className="text-accent mr-1">💡</span>
-        <strong>Hinweis:</strong> Wähle im Druckdialog deines Browsers &ldquo;Als PDF speichern&rdquo; als Ziel.
-        Auf dem Handy: Teilen → Als PDF speichern.
-        <span className="block mt-1 text-xs">Das Dokument wird nur lokal gespeichert — es wird nichts automatisch an Dritte gesendet.</span>
+        Es wird nichts automatisch übertragen. Du kannst das Dokument über den Browser als PDF speichern oder drucken.
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -201,9 +199,8 @@ export default function PdfPage() {
                 <CardTitle className="text-base">{opt.title}</CardTitle>
                 <p className="text-sm text-muted mb-4">{opt.description}</p>
                 <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
-                  <Printer size={16} className="mr-2" /> Als PDF speichern
+                  <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
                 </Button>
-                <p className="text-xs text-muted mt-2">Wähle im Druckdialog &ldquo;Als PDF speichern&rdquo;.</p>
               </div>
             </div>
           </Card>

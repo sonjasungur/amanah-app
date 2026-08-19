@@ -79,7 +79,7 @@ describe("janazah-guided-flow: file structure", () => {
   });
 
   it("includes Zurück zum Vorsorgeplan link", () => {
-    expect(flow).toContain("Zurück zum Vorsorgeplan");
+    expect(flow).toContain("nav.backToPlan");
     expect(flow).toContain("/dashboard");
   });
 
@@ -113,7 +113,7 @@ describe("janazah-vorschau: file structure", () => {
   });
 
   it("has disclaimer text", () => {
-    expect(preview).toContain("keine rechtliche oder religiöse Verbindlichkeit");
+    expect(preview).toContain("janazah.preview.disclaimer");
   });
 
   it("links to PDF page", () => {
@@ -125,7 +125,7 @@ describe("janazah-vorschau: file structure", () => {
   });
 
   it("has Noch offen marker for critical fields", () => {
-    expect(preview).toContain("Noch offen");
+    expect(preview).toContain("common.notYetProvided");
   });
 });
 

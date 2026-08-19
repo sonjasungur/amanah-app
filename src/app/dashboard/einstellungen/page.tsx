@@ -57,7 +57,7 @@ export default function EinstellungenPage() {
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-page-title font-bold text-foreground mb-2">Einstellungen</h1>
+        <h1 className="text-page-title font-bold text-foreground mb-2">{t("settings.title")}</h1>
         <p className="text-body text-muted">Speicher, Datenschutz und KI-Einstellungen für dein Vorsorgedossier.</p>
       </div>
 
@@ -72,7 +72,7 @@ export default function EinstellungenPage() {
       </Card>
 
       <Card className="border-2 border-border/80 shadow-sm">
-        <CardTitle className="text-card-title text-primary-dark mb-3">Daten & Export</CardTitle>
+        <CardTitle className="text-card-title text-primary-dark mb-3">{t("settings.dataExport.title")}</CardTitle>
         <StorageControls />
       </Card>
 
@@ -107,8 +107,8 @@ export default function EinstellungenPage() {
             <Trash2 size={14} className="mr-1.5" aria-hidden />
             {confirmDelete
               ? isDeleting
-                ? "Wird gelöscht …"
-                : "Ja, alle Vorsorgedaten löschen"
+                ? t("settings.deleteData.deleting")
+                : t("settings.deleteData.confirmButton")
               : t("settings.deleteData.button")}
           </Button>
           {confirmDelete && !isDeleting && (
@@ -118,7 +118,7 @@ export default function EinstellungenPage() {
               size="sm"
               onClick={() => setConfirmDelete(false)}
             >
-              Abbrechen
+              {t("common.cancel")}
             </Button>
           )}
         </div>

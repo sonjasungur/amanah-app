@@ -1,6 +1,7 @@
 "use client";
 
 import { Input, Textarea, Label, Select } from "@/components/ui/input";
+import { useI18n } from "@/lib/i18n/context";
 
 export interface FieldConfig {
   key: string;
@@ -21,6 +22,7 @@ interface ModuleFormProps {
 }
 
 export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
+  const { t } = useI18n();
   return (
     <div className="space-y-5">
       {fields.map((field) => (
@@ -51,7 +53,7 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
           )}
           {field.type === "select" && (
             <Select value={(values[field.key] as string) || ""} onChange={(e) => onChange(field.key, e.target.value)}>
-              <option value="">— Bitte wählen —</option>
+              <option value="">{t("common.pleaseSelect")}</option>
               {field.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -62,9 +64,9 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
               value={values[field.key] === null ? "" : values[field.key] ? "yes" : "no"}
               onChange={(e) => onChange(field.key, e.target.value === "" ? null : e.target.value === "yes")}
             >
-              <option value="">— Bitte wählen —</option>
-              <option value="yes">Ja</option>
-              <option value="no">Nein</option>
+              <option value="">{t("common.pleaseSelect")}</option>
+              <option value="yes">{t("common.yes")}</option>
+              <option value="no">{t("common.no")}</option>
             </Select>
           )}
         </div>

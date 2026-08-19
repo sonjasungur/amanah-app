@@ -147,8 +147,8 @@ describe("vorschau page: PDF button updated label", () => {
     expect(vorschauFile).toContain('data-testid="janazah-preview-download"');
   });
 
-  it("button label is 'PDF-Vorschau öffnen' (not old download label)", () => {
-    expect(vorschauFile).toContain("PDF-Vorschau öffnen");
+  it("button label uses janazah.preview.openPdf translation key", () => {
+    expect(vorschauFile).toContain("janazah.preview.openPdf");
     expect(vorschauFile).not.toContain("Vorsorgeübersicht als PDF herunterladen");
   });
 
