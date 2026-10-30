@@ -1,11 +1,16 @@
+import verbatim from "./data/quran-verbatim.json";
+
 /**
- * Canonical Qur'an verse metadata — Bubenheim/Elyas via QuranEnc.
- * German text is the licensed Bubenheim/Elyas translation; do not paraphrase.
+ * Canonical Qur'an verses. Arabic and German texts come verbatim from
+ * data/quran-verbatim.json (Tanzil Uthmani 1.1 / QuranEnc german_bubenheim) and must
+ * never be edited, shortened or paraphrased here. Titles and notes are editorial and
+ * kept separate from the verse text. Previous texts: islamic-knowledge/archive/.
  */
-export const QURAN_TRANSLATOR = "Bubenheim & Elyas";
-export const QURAN_TRANSLATION_VERSION = "QuranEnc german_bubenheim";
+export const QURAN_TRANSLATOR = verbatim.germanTranslation.translators;
+export const QURAN_TRANSLATION_VERSION = `QuranEnc ${verbatim.germanTranslation.key} ${verbatim.germanTranslation.version}`;
 export const QURAN_ATTRIBUTION =
-  "Übersetzung: Bubenheim & Elyas (QuranEnc). Keine inhaltliche Umformulierung.";
+  `Übersetzung: ${verbatim.germanTranslation.translators}. Quelle: QuranEnc.com, Version ${verbatim.germanTranslation.version}. ` +
+  "Arabischer Text: Tanzil Project (tanzil.net), CC BY 3.0. Unveränderte Wiedergabe.";
 
 export function quranEncUrl(surah: number, verse: number): string {
   return `https://quranenc.com/en/browse/german_bubenheim/${surah}/${verse}`;
@@ -18,82 +23,91 @@ export interface QuranVerseDef {
   verseEnd?: number;
   title: string;
   reference: string;
-  /** Bubenheim/Elyas German — from QuranEnc german_bubenheim */
+  /** Verbatim QuranEnc german_bubenheim text of all verses in the range. */
   translationDe: string;
+  /** Verbatim Tanzil Uthmani text of all verses in the range. */
+  arabicText: string;
   note?: string;
 }
 
-/** Verses actually used in the app — verified against QuranEnc german_bubenheim */
-export const QURAN_VERSES: Record<string, QuranVerseDef> = {
-  "quran-nisa-4-11": {
+type VerseMeta = Omit<QuranVerseDef, "translationDe" | "arabicText">;
+
+function verse(surah: number, ayah: number) {
+  const found = verbatim.verses.find((v) => v.surah === surah && v.ayah === ayah);
+  if (!found) throw new Error(`Qur'an ${surah}:${ayah} missing in quran-verbatim.json`);
+  return found;
+}
+
+function withText(meta: VerseMeta): QuranVerseDef {
+  const end = meta.verseEnd ?? meta.verseStart;
+  const ayat = Array.from({ length: end - meta.verseStart + 1 }, (_, i) => verse(meta.surah, meta.verseStart + i));
+  return {
+    ...meta,
+    translationDe: ayat.map((a) => a.german).join(" "),
+    arabicText: ayat.map((a) => a.arabic).join(" "),
+  };
+}
+
+const VERSE_META: VerseMeta[] = [
+  {
     id: "quran-nisa-4-11",
     surah: 4,
     verseStart: 11,
-    title: "Erbanteile — Söhne und Töchter",
+    title: "Erbanteile — Kinder und Eltern",
     reference: "Qur'an, Sura an-Nisāʾ 4:11",
-    translationDe:
-      "Allah hat euch bezüglich eurer Kinder vorgeschrieben: Dem männlichen Geschlecht das Gleiche wie dem weiblichen Geschlecht von dem, was die Eltern und nächsten Verwandten hinterlassen. Wenn es Töchter sind und mehr als zwei, so bekommen sie zwei Drittel von dem, was er hinterlassen hat. Wenn es (nur) eine Tochter ist, so bekommt sie die Hälfte. Und für seine Eltern bekommt jeder von beiden ein Sechstel von dem, was er hinterlassen hat, wenn er Kinder hat. Wenn er keine Kinder hat und seine Eltern ihn beerben, so bekommt seine Mutter ein Drittel. Wenn er Brüder hat, so bekommt seine Mutter ein Sechstel — nach (Erfüllung) eines Vermächtnisses, das er gemacht hat, oder einer Schuld. Eure Väter und eure Söhne — ihr wisst nicht, wer von ihnen euch an Nutzen näher ist. (Das ist) eine Verpflichtung von Allah. Gewiss, Allah ist Allwissend, Allweise.",
     note: "Erbanteile werden nach Vermächtnissen und Schulden angewendet — keine individuelle Erbberatung.",
   },
-  "quran-nisa-4-12": {
+  {
     id: "quran-nisa-4-12",
     surah: 4,
     verseStart: 12,
-    title: "Erbanteile — Ehepartner",
+    title: "Erbanteile — Ehepartner und Geschwister mütterlicherseits",
     reference: "Qur'an, Sura an-Nisāʾ 4:12",
-    translationDe:
-      "Euch ist vorgeschrieben: Eure Frauen erhalten ein Viertel von dem, was ihr hinterlasst, wenn ihr keine Kinder habt. Wenn ihr Kinder habt, so erhalten sie ein Achtel von dem, was ihr hinterlasst — nach (Erfüllung) eines Vermächtnisses, das ihr gemacht habt, oder einer Schuld. Und euch ist vorgeschrieben: Ihr erhaltet die Hälfte von dem, was eure Frauen hinterlassen, wenn sie keine Kinder haben. Wenn sie Kinder haben, so erhaltet ihr ein Viertel von dem, was sie hinterlassen — nach (Erfüllung) eines Vermächtnisses, das sie gemacht haben, oder einer Schuld.",
     note: "Erbregeln setzen Vermächtnisse und Schulden voraus — Einzelheiten fachlich prüfen.",
   },
-  "quran-nisa-4-176": {
+  {
     id: "quran-nisa-4-176",
     surah: 4,
     verseStart: 176,
-    title: "Erbanteile — Geschwister und Kalala",
+    title: "Erbanteile — seitliche Verwandtschaft (Kalāla)",
     reference: "Qur'an, Sura an-Nisāʾ 4:176",
-    translationDe:
-      "Sie fragen dich um Belehrung. Sag: Allah belehrt euch über den Kalala (den, der keine direkten Erben hat). Wenn jemand stirbt und keine Kinder hat, aber eine Schwester (hinterlässt), so bekommt sie die Hälfte von dem, was er hinterlassen hat. Er beerbt sie, wenn sie keine Kinder hat. Wenn es zwei Schwestern sind, so bekommen sie zwei Drittel von dem, was er hinterlassen hat.",
-    note: "Komplexe Erbkonstellationen — Imam/Gelehrte und Anwalt konsultieren.",
+    note: "Kalāla bezeichnet die Erbfolge ohne Kinder und Vater. Komplexe Konstellationen — Gelehrte und Anwalt konsultieren.",
   },
-  "quran-al-imran-3-185": {
+  {
     id: "quran-al-imran-3-185",
     surah: 3,
     verseStart: 185,
-    title: "Jeder Seele der Tod",
+    title: "Jede Seele wird den Tod kosten",
     reference: "Qur'an, Sura Āl ʿImrān 3:185",
-    translationDe:
-      "Jede Seele wird den Tod kosten. Und am Tag der Auferstehung wird euch euer Lohn vollständig ausgezahlt. Wer dann vom Feuer ferngehalten und ins Paradies eingelassen wird, der ist erfolgreich. Das irdische Leben ist nur genießbarer Täuschung.",
     note: "Erinnert an die Endlichkeit des Lebens — keine Spekulation über individuelles Schicksal.",
   },
-  "quran-al-muminun-23-99": {
+  {
     id: "quran-al-muminun-23-99",
     surah: 23,
     verseStart: 99,
     verseEnd: 100,
     title: "Barzakh — Zwischenzustand",
-    reference: "Qur'an, Sura al-Mu'minūn 23:99–100",
-    translationDe:
-      "Wenn der Tod an einen von ihnen herantritt, sagt er: Mein Herr, sende mich zurück, damit ich Gutes tue in dem, was ich zurückgelassen habe. Nein! Das ist nur ein Wort, das er spricht. Hinter ihnen liegt eine Barriere bis zu dem Tag, an dem sie auferweckt werden.",
+    reference: "Qur'an, Sura al-Muʾminūn 23:99–100",
     note: "Barzakh als Zwischenzustand bis zur Auferstehung — keine Details über das Verborgene.",
   },
-  "quran-ash-shura-42-38": {
+  {
     id: "quran-ash-shura-42-38",
     surah: 42,
     verseStart: 38,
     title: "Beratung unter Gläubigen",
     reference: "Qur'an, Sura ash-Shūrā 42:38",
-    translationDe:
-      "Und diejenigen, die auf ihren Herrn hören, das Gebet verrichten, ihre Angelegenheiten durch Beratung untereinander regeln und von dem ausgeben, womit Wir sie versorgt haben.",
     note: "Allgemeines Prinzip für familiäre Beratung — nicht als spezifische Vorsorgeregel.",
   },
-  "quran-al-hashr-59-18": {
+  {
     id: "quran-al-hashr-59-18",
     surah: 59,
     verseStart: 18,
     title: "An morgen denken",
-    reference: "Qur'an, Sura al-Hashr 59:18",
-    translationDe:
-      "O ihr Gläubigen, fürchtet Allah. Und jeder soll sehen, was er für morgen vorausschickt. Und fürchtet Allah. Gewiss, Allah ist dessen, was ihr tut, Kundig.",
+    reference: "Qur'an, Sura al-Ḥashr 59:18",
     note: "Motivation für Vorsorge — keine Garantie über individuelles Schicksal.",
   },
-};
+];
+
+export const QURAN_VERSES: Record<string, QuranVerseDef> = Object.fromEntries(
+  VERSE_META.map((meta) => [meta.id, withText(meta)])
+);

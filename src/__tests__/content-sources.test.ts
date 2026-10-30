@@ -46,7 +46,7 @@ describe("content sources, tiles, and article structure", () => {
   it("primary source cards use aria-expanded disclosure", () => {
     const psc = read("src/components/ui/primary-source-card.tsx");
     expect(psc).toContain("aria-expanded");
-    expect(read("src/lib/knowledge/quran-verses.ts")).toContain("Bubenheim");
+    expect(read("src/lib/knowledge/data/quran-verbatim.json")).toContain("Bubenheim");
   });
 
   it("akhira section tiles and source disclosure are functional", () => {

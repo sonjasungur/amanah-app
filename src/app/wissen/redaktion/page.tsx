@@ -54,6 +54,12 @@ export default function KnowledgeEditorialPage() {
                         ))}
                       </ul>
                     )}
+                    {article.editorialNotes?.map((n) => (
+                      <p key={n} className="text-warning">Offen: {n}</p>
+                    ))}
+                    {article.corrections?.map((c) => (
+                      <p key={c.reason} className="text-muted">Korrigiert {c.date} (Version {article.version}): {c.reason}</p>
+                    ))}
                     {article.legacy && <p className="text-muted">Herkunft: {article.legacy.file} ({article.legacy.recordId})</p>}
                   </div>
                 </details>

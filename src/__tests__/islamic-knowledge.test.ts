@@ -68,6 +68,20 @@ describe("knowledge catalog (migrated legacy content)", () => {
     expect(getAreaCoverage().every((c) => c.published === 0)).toBe(true);
   });
 
+  it("keeps the original text and sources of corrected legacy records", () => {
+    const barzakh = KNOWLEDGE_CATALOG.find((a) => a.id === "ik-barzakh-what")!;
+    expect(barzakh.body).toContain("برزخ");
+    expect(barzakh.body).not.toContain("بارزخ");
+    expect(barzakh.legacy?.originalBody).toContain("بارزخ");
+    expect(barzakh.version).toBe(2);
+    expect(barzakh.sourceIds).toContain("hadith-sadaqa-jariya");
+
+    const kultur = KNOWLEDGE_CATALOG.find((a) => a.id === "ik-kultur-traueressen")!;
+    expect(kultur.sourceIds).toEqual([]);
+    expect(kultur.status).toBe("DRAFT");
+    expect(kultur.legacy?.originalSourceIds).toEqual(["hadith-sadaqa-jariya"]);
+  });
+
   it("puts areas touching German law under legal review", () => {
     for (const a of KNOWLEDGE_CATALOG.filter((x) => x.area === "islam-und-recht")) {
       expect(a.requiresLegalReview).toBe(true);
@@ -93,8 +107,8 @@ describe("publication gate", () => {
   });
 
   it("blocks sources with an open finding or no check at all", () => {
-    expect(blockingSources(["quran-nisa-4-11"])).toEqual(["quran-nisa-4-11"]);
-    expect(isPublishable({ ...published, sourceIds: ["quran-nisa-4-11"] })).toBe(false);
+    expect(blockingSources(["fiqh-ghusl-kafan"])).toEqual(["fiqh-ghusl-kafan"]);
+    expect(isPublishable({ ...published, sourceIds: ["fiqh-ghusl-kafan"] })).toBe(false);
     expect(isPublishable({ ...published, sourceIds: ["unbekannte-quelle"] })).toBe(false);
     expect(isPublishable({ ...published, sourceIds: [] })).toBe(false);
   });
@@ -119,7 +133,7 @@ describe("publication gate", () => {
   it("checks sources cited inside school positions", () => {
     const nested = {
       ...published,
-      schoolDifferences: [{ question: "Frage", kind: "difference" as const, positions: [{ schools: ["shafii" as const], position: "x", sourceIds: ["quran-nisa-4-11"] }] }],
+      schoolDifferences: [{ question: "Frage", kind: "difference" as const, positions: [{ schools: ["shafii" as const], position: "x", sourceIds: ["fiqh-ghusl-kafan"] }] }],
     };
     expect(isPublishable(nested)).toBe(false);
   });
@@ -129,7 +143,7 @@ describe("publication gate", () => {
     expect(canTransition(draft, "PUBLISHED").allowed).toBe(false);
     expect(canTransition(sourceReview, "SCHOLAR_REVIEW").allowed).toBe(false);
     expect(canTransition({ ...sourceReview, reviews: [reviewed("source")] }, "SCHOLAR_REVIEW").allowed).toBe(true);
-    expect(canTransition({ ...published, status: "SCHOLAR_REVIEW", sourceIds: ["quran-nisa-4-11"] }, "APPROVED").allowed).toBe(false);
+    expect(canTransition({ ...published, status: "SCHOLAR_REVIEW", sourceIds: ["fiqh-ghusl-kafan"] }, "APPROVED").allowed).toBe(false);
     expect(canTransition(published, "DRAFT").allowed).toBe(true);
   });
 

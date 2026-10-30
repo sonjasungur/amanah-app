@@ -7,7 +7,7 @@ import { resolveSourceId } from "@/lib/knowledge/sources";
 import { testamentArticles } from "@/lib/knowledge/testament-erbe";
 import type { CultureFilterCard, KnowledgeArticle } from "@/lib/types";
 import { getKnowledgeArea } from "./structure";
-import type { KnowledgeAreaId, KnowledgeArticleRecord } from "./types";
+import type { CatalogCorrection, KnowledgeAreaId, KnowledgeArticleRecord } from "./types";
 
 /**
  * Existing content taken over into the review process (2026-10-30).
@@ -161,8 +161,85 @@ function withRelated(records: KnowledgeArticleRecord[]): KnowledgeArticleRecord[
   }));
 }
 
-export const KNOWLEDGE_CATALOG: KnowledgeArticleRecord[] = withRelated([
-  ...LEGACY_ARTICLE_FILES.flatMap(([file, articles]) => articles.map((a) => fromArticle(file, a))),
-  ...cultureFilterCards.map(fromCultureCard),
-  ...PAGE_TEXT_DRAFTS,
-]);
+const CORRECTED = "2026-10-30";
+
+/**
+ * Corrections from the source check of 2026-10-30 (docs/strategy/09-quellenkorrektur.md).
+ * Only unambiguous fixes; everything needing a scholarly decision is an editorial note.
+ */
+const CORRECTIONS: Record<string, CatalogCorrection> = {
+  "ik-barzakh-what": {
+    date: CORRECTED,
+    reason: "Arabische Schreibung korrigiert; die Aussage zu fortwirkenden Taten stammt aus Muslim 1631, nicht aus 23:99–100.",
+    bodyReplacements: [["بارزخ", "برزخ"]],
+    sourceIds: ["quran-al-muminun-23-99", "hadith-sadaqa-jariya"],
+  },
+  "ik-erbe-deutschland": {
+    date: CORRECTED,
+    reason: "Quelle zur Vorsorgevollmacht belegt kein Erbrecht; Rechtsquellen fehlen noch.",
+    sourceIds: [],
+  },
+  "ik-kultur-7-40-52": {
+    date: CORRECTED,
+    reason: "Hadith zur Beschleunigung der Bestattung belegt keine Aussage zu Gedenktagen.",
+    sourceIds: [],
+  },
+  "ik-kultur-traueressen": {
+    date: CORRECTED,
+    reason: "Muslim 1631 hat keinen Bezug zu Traueressen oder Taʿziya.",
+    sourceIds: [],
+  },
+  "ik-kultur-quran-geld": {
+    date: CORRECTED,
+    reason: "Muslim 1631 hat keinen Bezug zu bezahlten Qurʾān-Lesungen.",
+    sourceIds: [],
+  },
+  "ik-kultur-familie-belasten": {
+    date: CORRECTED,
+    reason: "Hadith zur Beschleunigung ersetzt durch Bukhari 2289 (Schulden); Beleg zu isrāf fehlt weiterhin.",
+    sourceIds: ["hadith-debts-deceased"],
+  },
+};
+
+const EDITORIAL_NOTES: Record<string, string[]> = {
+  "ik-janazah-hasten": ["Aussage zu 7./40./52. Tag wird vom Hadith zur Beschleunigung nicht getragen — belegen oder entfernen."],
+  "ik-erbe-faraid": ["„Stiefkinder und Pflegekinder nicht automatisch Pflicht-Erben“ ist ein Fiqh-Schluss ohne zitierten Beleg."],
+  "ik-erbe-wasiyyah": [
+    "„für Nicht-Pflicht-Erben“ und „mehr als ein Drittel nur mit Zustimmung der Erben“ stehen nicht in Bukhari 2742/Muslim 1628a.",
+    "Beleg für das Vermächtnisverbot an Erben (z. B. Abū Dāwūd 2870 / at-Tirmidhī 2120) mit Gradierung ergänzen; Schulpositionen erfassen.",
+  ],
+  "ik-erbe-deutschland": ["Rechtsaussagen (Form, Pflichtteil) brauchen Normzitate und juristische Prüfung."],
+  "ik-kultur-lautes-klagen": ["Prophetenaussage ohne Hadithreferenz — konkrete, verifizierte Fundstelle ergänzen oder Aussage umformulieren."],
+  "ik-kultur-ueberfuehrung": ["„keine religiöse Pflicht“ ist Fiqh — Schulpositionen mit Werkangabe ergänzen."],
+  "ik-barzakh-sadaqa": ["Beispiele (Brunnen, Schulen …) stehen nicht im Hadith — als Erläuterung kennzeichnen."],
+  "ik-sj-what": ["Beispiele stehen nicht in Muslim 1631 — als Erläuterung kennzeichnen."],
+  "ik-sj-examples": ["Beispiele stehen nicht in Muslim 1631 — als Erläuterung kennzeichnen."],
+  "ik-sj-foerderkreis": ["Partnerbezug (Gemeinsam1) gehört nicht in religiöse Lehrinhalte — Trennung prüfen."],
+};
+
+function applyCorrections(record: KnowledgeArticleRecord): KnowledgeArticleRecord {
+  const correction = CORRECTIONS[record.id];
+  const notes = EDITORIAL_NOTES[record.id];
+  if (!correction) return notes ? { ...record, editorialNotes: notes } : record;
+
+  const body = (correction.bodyReplacements ?? []).reduce((text, [from, to]) => text.split(from).join(to), record.body);
+  const sourceIds = correction.sourceIds ?? record.sourceIds;
+  return {
+    ...record,
+    body,
+    sourceIds,
+    status: sourceIds.length > 0 ? record.status : "DRAFT",
+    version: record.version + 1,
+    corrections: [correction],
+    editorialNotes: notes,
+    legacy: record.legacy && { ...record.legacy, originalBody: record.body, originalSourceIds: record.sourceIds },
+  };
+}
+
+export const KNOWLEDGE_CATALOG: KnowledgeArticleRecord[] = withRelated(
+  [
+    ...LEGACY_ARTICLE_FILES.flatMap(([file, articles]) => articles.map((a) => fromArticle(file, a))),
+    ...cultureFilterCards.map(fromCultureCard),
+    ...PAGE_TEXT_DRAFTS,
+  ].map(applyCorrections)
+);

@@ -53,6 +53,11 @@ export function PrimarySourceCard({
       </button>
       {open && (
         <div id={`source-panel-${source.id}`} role="region" aria-labelledby={`source-toggle-${source.id}`} className="px-4 pb-4 pt-0 space-y-3 border-t border-primary/10 bg-sand/30">
+          {source.arabicText && (
+            <p lang="ar" dir="rtl" className="text-lg leading-loose text-foreground font-medium">
+              {source.arabicText}
+            </p>
+          )}
           {source.translationDe && (
             <blockquote className="text-sm text-foreground/90 border-l-4 border-primary pl-3 leading-relaxed">
               {source.translationDe}
@@ -64,6 +69,18 @@ export function PrimarySourceCard({
               Übersetzer: {source.translator}
               {source.translationVersion ? ` · ${source.translationVersion}` : ""}
             </p>
+          )}
+          {source.gradings && source.gradings.length > 0 && (
+            <div className="text-xs text-muted" data-testid="hadith-gradings">
+              <p className="font-semibold text-foreground">Authentizitätseinstufung</p>
+              <ul className="mt-1 space-y-0.5">
+                {source.gradings.map((g) => (
+                  <li key={`${g.grader}-${g.grade}`}>
+                    {g.grader}: {g.grade} <span className="opacity-75">({g.source})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
           {source.url && (
             <a

@@ -48,6 +48,7 @@ export type IslamicSourceType =
 export type SourceAuditCategory =
   | "QURAN_PRIMARY"
   | "SAHIH_PRIMARY"
+  | "HADITH_GRADED"
   | "LEGAL_GERMANY"
   | "GENERAL_GUIDANCE"
   | "FIQH_REVIEW_REQUIRED";

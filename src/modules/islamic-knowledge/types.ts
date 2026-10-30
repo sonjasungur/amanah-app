@@ -27,6 +27,17 @@ export interface LegacyOrigin {
   recordId: string;
   /** Status the legacy record claimed. Not trusted: no reviewer or date was recorded. */
   claimedStatus?: string;
+  /** Set when the catalog corrected the legacy record; originals stay verbatim here. */
+  originalBody?: string;
+  originalSourceIds?: string[];
+}
+
+/** Editorial correction applied on top of a legacy record (catalog.ts). */
+export interface CatalogCorrection {
+  date: string;
+  reason: string;
+  sourceIds?: string[];
+  bodyReplacements?: [from: string, to: string][];
 }
 
 export type SunniSchool = "hanafi" | "maliki" | "shafii" | "hanbali";
@@ -80,6 +91,9 @@ export interface KnowledgeArticleRecord {
   reviews: ReviewRecord[];
   relatedSlugs: string[];
   legacy?: LegacyOrigin;
+  /** Open questions for reviewers — shown only in the editorial preview. */
+  editorialNotes?: string[];
+  corrections?: CatalogCorrection[];
 }
 
 export interface KnowledgeSubtopic {

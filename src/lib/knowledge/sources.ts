@@ -18,6 +18,7 @@ function quranSource(verseId: keyof typeof QURAN_VERSES): IslamicSource {
     title: v.title,
     reference: v.reference,
     translationDe: v.translationDe,
+    arabicText: v.arabicText,
     note: v.note,
     auditCategory: "QURAN_PRIMARY",
     quranEncUrl: quranEncUrl(v.surah, v.verseStart),
@@ -59,29 +60,62 @@ export const islamicSources: Record<string, IslamicSource> = {
     url: "https://sunnah.com/bukhari:1315",
   }),
 
-  "hadith-bukhari-janazah-1254": hadithSource("hadith-bukhari-janazah-1254", {
-    title: "Belohnung für Janazah-Gebet",
+  /** Corrected 2026-10-30 (was wrongly cited as Bukhari 1254). Archive: modules/islamic-knowledge/archive. */
+  "hadith-janazah-qirat": hadithSource("hadith-janazah-qirat", {
+    title: "Belohnung für Janāza-Gebet und Beerdigung",
+    reference: "Sahih al-Bukhari, Hadith 1325 (Buch 23, Hadith 81)",
+    translationDe:
+      "Wer bei der Janāza anwesend ist, bis das Gebet über sie verrichtet wurde, erhält ein Qīrāṭ; wer anwesend ist, bis sie begraben wurde, erhält zwei Qīrāṭ. Auf die Frage, was zwei Qīrāṭ seien, sagte er: wie zwei gewaltige Berge.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Parallele bei Muslim (945) nicht gegengeprüft.",
+    isParaphrase: true,
+    collection: "bukhari",
+    hadithNumber: "1325",
+    url: "https://sunnah.com/bukhari:1325",
+  }),
+
+  "hadith-ghusl-umm-atiyya": hadithSource("hadith-ghusl-umm-atiyya", {
+    title: "Waschung der verstorbenen Tochter des Propheten",
     reference: "Sahih al-Bukhari, Hadith 1254",
     translationDe:
-      "Wer einer Leichenbegleitung folgt und das Janazah-Gebet verrichtet, erhält eine Belohnung wie ein Qirat — und wer wartet, bis begraben ist, erhält zwei Qirat.",
-    note: "Sinngemäße deutsche Wiedergabe — Größe der Belohnung ist bei Allah.",
+      "Umm ʿAṭiyya berichtet, dass der Prophet bei der Waschung seiner verstorbenen Tochter anwies, sie mit Wasser und Sidr zu waschen und zuletzt Kampfer zu verwenden.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Einzelheiten (Anzahl der Waschungen u. a.) fachlich ergänzen.",
     isParaphrase: true,
     collection: "bukhari",
     hadithNumber: "1254",
     url: "https://sunnah.com/bukhari:1254",
   }),
 
-  "hadith-bukhari-janazah-1273": hadithSource("hadith-bukhari-janazah-1273", {
-    title: "Besuch von Gräbern",
+  "hadith-kafan-three-white": hadithSource("hadith-kafan-three-white", {
+    title: "Drei weiße Tücher",
     reference: "Sahih al-Bukhari, Hadith 1273",
-    translationDe:
-      "Ich hatte euch verboten, Gräber zu besuchen; nun besucht sie, denn sie erinnern an das Jenseits.",
-    note: "Sinngemäße deutsche Wiedergabe — anderer Kontext als Janazah-Beschleunigung.",
+    translationDe: "ʿĀʾischa berichtet, dass der Prophet in drei weiße Tücher gehüllt wurde.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft.",
     isParaphrase: true,
     collection: "bukhari",
     hadithNumber: "1273",
     url: "https://sunnah.com/bukhari:1273",
   }),
+
+  /** Corrected 2026-10-30 (was wrongly cited as Bukhari 1273). Graded, not Bukhari/Muslim. */
+  "hadith-graves-visit": hadithSource("hadith-graves-visit", {
+    title: "Besuch von Gräbern",
+    reference: "Jāmiʿ at-Tirmidhī, Hadith 1054 (Buch 10, Hadith 90) · vgl. Sahih Muslim 977a",
+    translationDe:
+      "Ich hatte euch den Besuch der Gräber verboten. Muhammad wurde erlaubt, das Grab seiner Mutter zu besuchen. So besucht sie, denn sie erinnern an das Jenseits.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Muslim 977a erlaubt den Besuch ebenfalls, jedoch ohne den Zusatz zum Jenseits.",
+    isParaphrase: true,
+    auditCategory: "HADITH_GRADED",
+    collection: "tirmidhi",
+    hadithNumber: "1054",
+    url: "https://sunnah.com/tirmidhi:1054",
+    gradings: [
+      { grade: "ḥasan ṣaḥīḥ", grader: "at-Tirmidhī", source: "Jāmiʿ at-Tirmidhī 1054, arabischer Text (hadith-api/ihadis.com, abgerufen 2026-10-30)" },
+      { grade: "ṣaḥīḥ", grader: "al-Albānī", source: "hadith-api eng-tirmidhi/1054, abgerufen 2026-10-30; Herkunft der Angabe nicht verifiziert" },
+      { grade: "ṣaḥīḥ", grader: "Aḥmad Muḥammad Shākir", source: "hadith-api eng-tirmidhi/1054, abgerufen 2026-10-30; Herkunft der Angabe nicht verifiziert" },
+      { grade: "ḥasan ṣaḥīḥ", grader: "Bashshār ʿAwwād Maʿrūf", source: "hadith-api eng-tirmidhi/1054, abgerufen 2026-10-30; Herkunft der Angabe nicht verifiziert" },
+    ],
+  }),
+
 
   "hadith-sadaqa-jariya": hadithSource("hadith-sadaqa-jariya", {
     title: "Drei fortlaufende Taten nach dem Tod",
@@ -106,24 +140,38 @@ export const islamicSources: Record<string, IslamicSource> = {
     url: "https://sunnah.com/bukhari:2742",
   }),
 
+  /** Corrected 2026-10-30 (was Bukhari 2738). */
   "hadith-wasiyyah-saad": hadithSource("hadith-wasiyyah-saad", {
     title: "Saʿd ibn Abī Waqqāṣ — Vermächtnis",
-    reference: "Sahih al-Bukhari, Hadith 2738",
+    reference: "Sahih al-Bukhari, Hadith 2744 (Buch 55, Hadith 7)",
     translationDe:
-      "Saʿd wollte fast sein gesamtes Vermögen spenden. Der Prophet (Friede sei auf ihm) sagte: Ein Drittel, und ein Drittel ist viel.",
-    note: "Sinngemäße deutsche Wiedergabe — Kontext zur Wasiyyah-Grenze.",
+      "Saʿd wollte die Hälfte seines Vermögens vermachen. Der Prophet erlaubte ein Drittel und sagte: Ein Drittel, und ein Drittel ist viel. Danach vermachten die Leute ein Drittel, und das wurde ihnen gestattet.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Parallelen: Bukhari 2742 (Saʿd bietet alles an), 1295 (zwei Drittel).",
+    isParaphrase: true,
+    collection: "bukhari",
+    hadithNumber: "2744",
+    url: "https://sunnah.com/bukhari:2744",
+  }),
+
+  "hadith-wasiyya-written": hadithSource("hadith-wasiyya-written", {
+    title: "Das Testament schriftlich bereithalten",
+    reference: "Sahih al-Bukhari, Hadith 2738 (Buch 55, Hadith 1)",
+    translationDe:
+      "Ein Muslim, der etwas zu vermachen hat, soll keine zwei Nächte verbringen, ohne dass sein Testament schriftlich bei ihm liegt.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Zur Form eines wirksamen Testaments nach deutschem Recht siehe getrennten Rechtshinweis.",
     isParaphrase: true,
     collection: "bukhari",
     hadithNumber: "2738",
     url: "https://sunnah.com/bukhari:2738",
   }),
 
+  /** Wording corrected 2026-10-30. */
   "hadith-debts-deceased": hadithSource("hadith-debts-deceased", {
     title: "Ernsthaftigkeit von Schulden",
-    reference: "Sahih al-Bukhari, Hadith 2289",
+    reference: "Sahih al-Bukhari, Hadith 2289 (Buch 38, Hadith 3)",
     translationDe:
-      "Ein Mann starb und hinterließ Schulden. Der Gesandte Allahs (Friede sei auf ihm) fragte, wer die Schulden für ihn übernehmen würde. Abu Qatada sagte, er übernehme sie. Daraufhin verrichtete er das Totengebet für ihn.",
-    note: "Verdeutlicht die Ernsthaftigkeit offener Schulden — ersetzt keine individuelle Beurteilung.",
+      "Ein Verstorbener ohne Nachlass, aber mit drei Dinar Schulden, wurde gebracht. Der Prophet verrichtete das Totengebet zunächst nicht selbst und sagte: Betet für euren Gefährten. Erst als Abu Qatada die Schuld übernahm, betete er für ihn.",
+    note: "Eigene sinngemäße Wiedergabe (Stand 2026-10-30), noch nicht fachlich geprüft. Verdeutlicht die Ernsthaftigkeit offener Schulden — ersetzt keine individuelle Beurteilung.",
     isParaphrase: true,
     collection: "bukhari",
     hadithNumber: "2289",
@@ -204,6 +252,9 @@ export const LEGACY_SOURCE_ALIASES: Record<string, string> = {
   "hadith-muslim-janazah-944c": "hadith-janazah-hasten",
   "official-patientenverfuegung": "official-patientenverfuegung-bmj",
   "quran-barzakh": "quran-al-muminun-23-99",
+  // Corrected 2026-10-30: old IDs carried wrong hadith numbers; citations keep their meaning.
+  "hadith-bukhari-janazah-1254": "hadith-janazah-qirat",
+  "hadith-bukhari-janazah-1273": "hadith-graves-visit",
 };
 
 export function resolveSourceId(id: string): string {

@@ -1,7 +1,7 @@
 /**
- * Result of the source check of 2026-10-30 (automated cross-check against QuranEnc
+ * Result of the source check and corrections of 2026-10-30 (automated cross-check against QuranEnc
  * german_bubenheim, hadith-api/ihadis mirrors of sunnah.com numbering, and URL fetches).
- * Report: docs/strategy/04-wissenszentrum.md, Anhang Quellenprüfung.
+ * Reports: docs/strategy/05-quellenpruefung.md, docs/strategy/09-quellenkorrektur.md.
  *
  * This register only blocks. "checked_ok" is not a replacement for the human source
  * review recorded on each article; unknown IDs count as unchecked.
@@ -16,6 +16,9 @@ export interface SourceCheck {
 
 const CHECKED_AT = "2026-10-30";
 
+const VERBATIM =
+  "Wörtlich: Deutsch QuranEnc german_bubenheim 1.1.4, Arabisch Tanzil Uthmani 1.1 (data/quran-verbatim.json, gegen beide Quellen abgeglichen). Lizenzbestätigung der Rechteinhaber offen.";
+
 function ok(finding: string): SourceCheck {
   return { status: "checked_ok", checkedAt: CHECKED_AT, finding };
 }
@@ -25,20 +28,23 @@ function fix(finding: string): SourceCheck {
 }
 
 export const SOURCE_CHECKS: Record<string, SourceCheck> = {
-  "quran-nisa-4-11": fix("Kritisch: Text besagt gleiche Anteile für Söhne und Töchter; Bubenheim/Elyas: dem Männlichen so viel wie zwei Weiblichen. Kein wörtliches Zitat, obwohl als Übersetzung ausgewiesen."),
-  "quran-nisa-4-12": fix("Gekürzt und umgestellt ohne Kennzeichnung; kein wörtliches Bubenheim/Elyas-Zitat."),
-  "quran-nisa-4-176": fix("Gekürzt, Glosse im Verstext; kein wörtliches Zitat."),
-  "quran-al-imran-3-185": fix("„erst“ fehlt (theologisch relevant), Satzende fehlerhaft."),
-  "quran-al-muminun-23-99": fix("Sinn stimmt, Wortlaut weicht ab — wörtlich übernehmen oder als Paraphrase kennzeichnen."),
-  "quran-ash-shura-42-38": fix("Sinn stimmt, Wortlaut weicht leicht ab."),
-  "quran-al-hashr-59-18": fix("Sinn stimmt, Wortlaut weicht leicht ab."),
+  "quran-nisa-4-11": ok(VERBATIM),
+  "quran-nisa-4-12": ok(VERBATIM),
+  "quran-nisa-4-176": ok(VERBATIM),
+  "quran-al-imran-3-185": ok(VERBATIM),
+  "quran-al-muminun-23-99": ok(VERBATIM),
+  "quran-ash-shura-42-38": ok(VERBATIM),
+  "quran-al-hashr-59-18": ok(VERBATIM),
   "hadith-janazah-hasten": ok("Bukhari 1315 / Muslim 944c passen; Wiedergabe als Paraphrase gekennzeichnet."),
   "hadith-sadaqa-jariya": ok("Muslim 1631 passt."),
   "hadith-wasiyyah-third": ok("Bukhari 2742 / Muslim 1628a passen."),
-  "hadith-bukhari-janazah-1254": fix("Bukhari 1254 ist die Waschung der Tochter des Propheten; der zitierte Qirat-Hadith ist Bukhari 1325."),
-  "hadith-bukhari-janazah-1273": fix("Bukhari 1273 sind die drei weißen Tücher; Gräberbesuch-Hadith steht in Muslim 977a (ohne Jenseits-Zusatz) bzw. Tirmidhi 1054 (Gradierung nötig)."),
-  "hadith-wasiyyah-saad": fix("Bukhari 2738 betrifft das schriftliche Testament; Saʿd-Erzählung in 2742/2744/1295."),
-  "hadith-debts-deceased": fix("Bukhari 2289 ungenau wiedergegeben (Totengebet zunächst verweigert, bis Abu Qatada die Schuld übernahm)."),
+  "hadith-janazah-qirat": ok("Bukhari 1325 passt zur Wiedergabe (vorher fälschlich 1254)."),
+  "hadith-ghusl-umm-atiyya": ok("Bukhari 1254: Waschung der Tochter des Propheten (Umm ʿAṭiyya)."),
+  "hadith-kafan-three-white": ok("Bukhari 1273: drei weiße Tücher."),
+  "hadith-graves-visit": ok("Tirmidhi 1054 mit Gradierungen; Muslim 977a ohne Jenseits-Zusatz."),
+  "hadith-wasiyyah-saad": ok("Bukhari 2744 (Saʿd bietet die Hälfte an)."),
+  "hadith-wasiyya-written": ok("Bukhari 2738: Testament schriftlich bereithalten."),
+  "hadith-debts-deceased": ok("Bukhari 2289, Wiedergabe korrigiert (Gebet zunächst verweigert)."),
   "fiqh-ghusl-kafan": fix("Kein konkretes Werk, Band oder Kapitel."),
   "fiqh-janazah-basics": fix("Kein konkretes Werk, Band oder Kapitel."),
   "official-patientenverfuegung-bmj": fix("URL liefert 404."),
