@@ -72,6 +72,8 @@ next-env.d.ts
 *.keystore
 id_rsa
 id_ed25519
+id_ecdsa
+*.kdbx
 *.credentials.csv
 *credentials*.csv
 *credential*.json

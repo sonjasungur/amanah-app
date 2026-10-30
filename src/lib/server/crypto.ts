@@ -27,7 +27,15 @@ export function generateSessionToken(): string {
   return randomBytes(32).toString("base64url");
 }
 
+function getSessionSecret(): string {
+  const secret = process.env.SESSION_SECRET || process.env.AUTH_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET (or AUTH_SECRET) must be set in production.");
+  }
+  return "dev-only-change-me";
+}
+
 export function hashSessionToken(token: string): string {
-  const secret = process.env.SESSION_SECRET || process.env.AUTH_SECRET || "dev-only-change-me";
-  return createHash("sha256").update(`${secret}:${token}`).digest("hex");
+  return createHash("sha256").update(`${getSessionSecret()}:${token}`).digest("hex");
 }

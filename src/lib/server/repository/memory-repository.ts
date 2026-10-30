@@ -1,3 +1,4 @@
+import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { normalizeData } from "@/lib/domain/migration";
 import { hashPasswordSync } from "@/lib/auth/hash";
@@ -15,8 +16,8 @@ export class MemoryRepository implements ServerRepository {
   async registerUser(email: string, password: string, name: string): Promise<RepositoryUser | { error: string }> {
     const store = getMemoryStore();
     const normalizedEmail = normalizeEmail(email);
-    if (!normalizedEmail || password.length < 6) {
-      return { error: "E-Mail und Passwort (min. 6 Zeichen) erforderlich." };
+    if (!normalizedEmail || password.length < MIN_PASSWORD_LENGTH) {
+      return { error: PASSWORD_REQUIREMENT_ERROR };
     }
     if (store.usersByEmail.has(normalizedEmail)) {
       return { error: "Diese E-Mail ist bereits registriert." };

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
+import { checkRateLimit } from "@/lib/ai/rate-limit";
+
+const REGISTRATIONS_PER_MINUTE = 5;
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +12,11 @@ export async function POST(request: Request) {
         { error: "Öffentliche Registrierung ist derzeit nicht geöffnet." },
         { status: 403 }
       );
+    }
+
+    const ip = request.headers.get("x-forwarded-for") || "local";
+    if (!checkRateLimit(`auth-register:${ip}`, REGISTRATIONS_PER_MINUTE).allowed) {
+      return NextResponse.json({ error: "Zu viele Anfragen. Bitte kurz warten." }, { status: 429 });
     }
 
     const body = await request.json();

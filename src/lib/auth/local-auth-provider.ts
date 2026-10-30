@@ -1,3 +1,4 @@
+import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import { hashPassword, verifyPassword } from "./hash";
 import type { AuthProvider, AuthResult, AuthSession, LoginInput, RegisterInput } from "./types";
 
@@ -59,8 +60,8 @@ function createToken(): string {
 export class LocalAuthProvider implements AuthProvider {
   async register(input: RegisterInput): Promise<AuthResult> {
     const email = input.email.trim().toLowerCase();
-    if (!email || !input.password || input.password.length < 6) {
-      return { success: false, error: "E-Mail und Passwort (min. 6 Zeichen) erforderlich." };
+    if (!email || !input.password || input.password.length < MIN_PASSWORD_LENGTH) {
+      return { success: false, error: PASSWORD_REQUIREMENT_ERROR };
     }
 
     const users = readUsers();

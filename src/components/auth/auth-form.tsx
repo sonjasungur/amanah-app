@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Logo } from "@/components/layout/logo";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/config";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -89,7 +90,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
           <div>
             <label className="text-sm font-medium block mb-1">{t("auth.password")}</label>
-            <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+            <Input type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>

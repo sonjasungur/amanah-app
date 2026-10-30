@@ -4,14 +4,14 @@ const hits = new Map<string, { count: number; resetAt: number }>();
 const MAX = 30;
 const WINDOW_MS = 60_000;
 
-export function checkRateLimit(key: string): { allowed: boolean; retryAfterMs?: number } {
+export function checkRateLimit(key: string, max = MAX): { allowed: boolean; retryAfterMs?: number } {
   const now = Date.now();
   const entry = hits.get(key);
   if (!entry || now > entry.resetAt) {
     hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return { allowed: true };
   }
-  if (entry.count >= MAX) {
+  if (entry.count >= max) {
     return { allowed: false, retryAfterMs: entry.resetAt - now };
   }
   entry.count++;

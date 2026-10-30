@@ -1,3 +1,4 @@
+import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { normalizeData } from "@/lib/domain/migration";
@@ -16,8 +17,8 @@ const SESSION_DAYS = 30;
 export class PostgresRepository implements ServerRepository {
   async registerUser(email: string, password: string, name: string): Promise<RepositoryUser | { error: string }> {
     const normalizedEmail = normalizeEmail(email);
-    if (!normalizedEmail || password.length < 6) {
-      return { error: "E-Mail und Passwort (min. 6 Zeichen) erforderlich." };
+    if (!normalizedEmail || password.length < MIN_PASSWORD_LENGTH) {
+      return { error: PASSWORD_REQUIREMENT_ERROR };
     }
 
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });

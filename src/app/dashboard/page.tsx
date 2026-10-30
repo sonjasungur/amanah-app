@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
 import { AlertTriangle, ArrowRight, CheckCircle2, Shield } from "lucide-react";
 import { getCriticalMissing } from "@/lib/utils/progress";
+import { isApiStorageEnabled } from "@/lib/auth/config";
 
 export default function DashboardPage() {
   const store = useAmanahStore();
@@ -101,7 +102,10 @@ export default function DashboardPage() {
       <Card className="p-4 flex items-start gap-3 bg-accent-soft/80 border border-border">
         <Shield size={20} className="text-primary shrink-0 mt-0.5" aria-hidden />
         <p className="text-sm text-muted leading-relaxed">
-          Angaben in deinem Ordner werden lokal auf diesem Gerät gespeichert. Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
+          {isApiStorageEnabled()
+            ? "Angaben in deinem Ordner werden in deinem Konto auf unserem Server gespeichert."
+            : "Angaben in deinem Ordner werden lokal auf diesem Gerät gespeichert."}{" "}
+          Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
         </p>
       </Card>
 
