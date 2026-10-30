@@ -43,6 +43,24 @@ export function validateProductionEnv(env = process.env) {
     errors.push("SESSION_SECRET still contains a placeholder value");
   }
 
+  // Data encryption at rest (see src/lib/server/data-encryption.ts)
+  const dataKeys = env.AMANAH_DATA_KEYS?.trim();
+  if (!dataKeys) {
+    errors.push("AMANAH_DATA_KEYS is required in production (data encryption at rest)");
+  } else {
+    const entries = dataKeys.split(",").map((e) => e.trim().split(":"));
+    if (entries.some(([kid, b64]) => !kid || !b64 || Buffer.from(b64, "base64").length !== 32)) {
+      errors.push("AMANAH_DATA_KEYS must be kid:base64 entries with 32-byte keys");
+    }
+    const active = env.AMANAH_DATA_KEY_ACTIVE?.trim();
+    if (active && !entries.some(([kid]) => kid === active)) {
+      errors.push("AMANAH_DATA_KEY_ACTIVE is not in AMANAH_DATA_KEYS");
+    }
+  }
+  if (env.AMANAH_DATA_ENCRYPTION === "optional") {
+    errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
+  }
+
   if (env.POSTGRES_PASSWORD && isPlaceholderValue(env.POSTGRES_PASSWORD)) {
     errors.push("POSTGRES_PASSWORD still contains a placeholder value");
   }
@@ -93,6 +111,7 @@ export function sanitizeEnvForLogs(env = process.env) {
   }
   if (env.DATABASE_URL) out.DATABASE_URL = "[set]";
   if (env.SESSION_SECRET) out.SESSION_SECRET = "[set]";
+  if (env.AMANAH_DATA_KEYS) out.AMANAH_DATA_KEYS = "[set]";
   if (env.OPENAI_API_KEY) out.OPENAI_API_KEY = "[set]";
   return out;
 }

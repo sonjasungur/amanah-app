@@ -3,6 +3,7 @@ import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { normalizeData } from "@/lib/domain/migration";
 import { prisma } from "../prisma";
+import { openFromStorage, sealForStorage } from "../data-encryption";
 import {
   generateSessionToken,
   hashPasswordServer,
@@ -88,23 +89,24 @@ export class PostgresRepository implements ServerRepository {
   async getAmanahData(userId: string): Promise<AmanahOrdnerData | null> {
     const row = await prisma.amanahData.findUnique({ where: { userId } });
     if (!row) return null;
-    return normalizeData(row.data as Partial<AmanahOrdnerData>);
+    return normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(row.data, userId));
   }
 
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const payload = { ...normalized, lastSaved: new Date().toISOString() };
+    const stored = sealForStorage(payload, userId) as object;
 
     await prisma.amanahData.upsert({
       where: { userId },
       create: {
         userId,
         schemaVersion: SCHEMA_VERSION,
-        data: payload as object,
+        data: stored,
       },
       update: {
         schemaVersion: SCHEMA_VERSION,
-        data: payload as object,
+        data: stored,
       },
     });
 

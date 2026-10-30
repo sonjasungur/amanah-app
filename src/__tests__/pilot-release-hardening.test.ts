@@ -100,7 +100,19 @@ describe("release validator modes", () => {
     DATABASE_URL: "postgresql://amanah:supersecretlongpass@postgres:5432/amanah?schema=public",
     SESSION_SECRET: "x".repeat(40),
     POSTGRES_PASSWORD: "supersecretlongpass",
+    // Test-only data key (32 bytes of 0x02), never a real key.
+    AMANAH_DATA_KEYS: `t1:${Buffer.alloc(32, 2).toString("base64")}`,
+    AMANAH_DATA_KEY_ACTIVE: "t1",
   };
+
+  it("fails without data encryption keys", () => {
+    const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=private-review"], {
+      cwd: ROOT,
+      env: { ...baseEnv, AMANAH_DATA_KEYS: "" },
+      encoding: "utf8",
+    });
+    expect(res.status).not.toBe(0);
+  });
 
   it("private-review mode passes with safe technical env values", () => {
     const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=private-review"], {

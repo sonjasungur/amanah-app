@@ -22,6 +22,9 @@ describe("Production config validation", () => {
     AMANAH_SERVER_STORAGE: "postgres",
     AMANAH_AI_PROVIDER: "rules",
     NEXT_PUBLIC_SITE_URL: "https://amanah.de",
+    // Test-only key (32 bytes of 0x01), never a real key.
+    AMANAH_DATA_KEYS: `t1:${Buffer.alloc(32, 1).toString("base64")}`,
+    AMANAH_DATA_KEY_ACTIVE: "t1",
   };
 
   it("accepts valid production env", () => {
@@ -51,6 +54,15 @@ describe("Production config validation", () => {
       OPENAI_API_KEY: "",
     });
     expect(r.valid).toBe(false);
+  });
+
+  it("requires valid data encryption keys", () => {
+    const missing = validateProductionEnv({ ...validEnv, AMANAH_DATA_KEYS: "" });
+    expect(missing.errors.some((e) => e.includes("AMANAH_DATA_KEYS"))).toBe(true);
+    const short = validateProductionEnv({ ...validEnv, AMANAH_DATA_KEYS: "t1:c2hvcnQ=" });
+    expect(short.valid).toBe(false);
+    const optional = validateProductionEnv({ ...validEnv, AMANAH_DATA_ENCRYPTION: "optional" });
+    expect(optional.valid).toBe(false);
   });
 
   it("detects placeholder values", () => {

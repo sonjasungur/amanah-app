@@ -9,7 +9,7 @@ CONTAINER="${POSTGRES_CONTAINER:-amanah-postgres}"
 BACKUP_FILE="${1:-}"
 
 if [[ -z "$BACKUP_FILE" ]]; then
-  echo "Usage: $0 <backup.sql.gz>" >&2
+  echo "Usage: $0 <backup.sql.gz | backup.sql.gz.age>  (age: BACKUP_AGE_IDENTITY=/path/to/identity)" >&2
   exit 1
 fi
 
@@ -44,5 +44,10 @@ if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
 fi
 
 echo "Restoring from $BACKUP_FILE ..."
-gunzip -c "$BACKUP_FILE" | docker exec -i "$CONTAINER" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
+if [[ "$BACKUP_FILE" == *.age ]]; then
+  : "${BACKUP_AGE_IDENTITY:?BACKUP_AGE_IDENTITY must point to the age identity file}"
+  "${AGE_BIN:-age}" -d -i "$BACKUP_AGE_IDENTITY" < "$BACKUP_FILE" | gunzip -c | docker exec -i "$CONTAINER" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
+else
+  gunzip -c "$BACKUP_FILE" | docker exec -i "$CONTAINER" psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
+fi
 echo "Restore complete."

@@ -1,3 +1,5 @@
+import { DataEncryptionError, parseKeyring } from "./data-encryption";
+
 export type ProductionEnvValidation = {
   valid: boolean;
   errors: string[];
@@ -49,6 +51,15 @@ export function validateProductionEnv(
 
   if (env.POSTGRES_PASSWORD && isPlaceholderValue(env.POSTGRES_PASSWORD)) {
     errors.push("POSTGRES_PASSWORD still contains a placeholder value");
+  }
+
+  try {
+    if (!parseKeyring(env)) errors.push("AMANAH_DATA_KEYS is required in production (data encryption at rest)");
+  } catch (e) {
+    errors.push(e instanceof DataEncryptionError ? e.message : "AMANAH_DATA_KEYS is invalid");
+  }
+  if (env.AMANAH_DATA_ENCRYPTION === "optional") {
+    errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
   }
 
   if (env.NEXT_PUBLIC_AUTH_MODE !== "api") {
@@ -105,6 +116,7 @@ export function sanitizeEnvForLogs(env: NodeJS.ProcessEnv = process.env): Record
   }
   if (env.DATABASE_URL) out.DATABASE_URL = "[set]";
   if (env.SESSION_SECRET) out.SESSION_SECRET = "[set]";
+  if (env.AMANAH_DATA_KEYS) out.AMANAH_DATA_KEYS = "[set]";
   if (env.OPENAI_API_KEY) out.OPENAI_API_KEY = "[set]";
   return out;
 }

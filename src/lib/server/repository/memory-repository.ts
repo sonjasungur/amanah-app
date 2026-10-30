@@ -7,6 +7,7 @@ import {
   createSessionToken,
 } from "../memory-store";
 import { hashPasswordServer, verifyPasswordServer } from "../crypto";
+import { openFromStorage, sealForStorage } from "../data-encryption";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -75,13 +76,15 @@ export class MemoryRepository implements ServerRepository {
   }
 
   async getAmanahData(userId: string): Promise<AmanahOrdnerData | null> {
-    return getMemoryStore().amanahData.get(userId) ?? null;
+    const stored = getMemoryStore().amanahData.get(userId);
+    return stored ? normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(stored, userId)) : null;
   }
 
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const saved = { ...normalized, lastSaved: new Date().toISOString() };
-    getMemoryStore().amanahData.set(userId, saved);
+    // Same storage boundary as Postgres: sealed when keys are configured.
+    getMemoryStore().amanahData.set(userId, sealForStorage(saved, userId) as AmanahOrdnerData);
     return saved;
   }
 
