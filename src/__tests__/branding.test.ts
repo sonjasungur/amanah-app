@@ -65,9 +65,13 @@ describe("branding — Mein Wille", () => {
     expect(home).toContain("home-outcome-");
   });
 
-  it("uses Vorsorge-Check label in navigation while keeping /check route", () => {
+  it("keeps the Vorsorge-Check reachable (footer, homepage) while the header shows the five main areas", () => {
     expect(read("src/lib/i18n/translations.ts")).toContain('"nav.check": "Vorsorge-Check"');
-    expect(read("src/components/layout/header.tsx")).toContain('href: "/check"');
+    expect(read("src/components/layout/footer.tsx")).toContain('href="/check"');
+    expect(read("src/components/marketing/home-entry-points.tsx")).toContain('href: "/check"');
+    for (const href of ["/wissen", "/dashboard", "/dashboard/testament", "/dashboard/janazah", "/dashboard/einstellungen"]) {
+      expect(read("src/components/layout/header.tsx")).toContain(`href: "${href}"`);
+    }
     expect(read("src/components/layout/header.tsx")).toContain("Registrieren");
     expect(read("src/components/layout/header.tsx")).toContain("Anmelden");
     expect(read("src/app/check/page.tsx")).toContain("CHECK_LABELS.pageTitle");
