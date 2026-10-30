@@ -14,11 +14,11 @@ Kein Deployment, keine Produktions-DB, keine echten Zahlungen/Mails/Kontakte, ke
 | A1 | A | Verschlüsselung Ordnerdaten (AES-256-GCM, Envelope) | – | TESTED | Commit 572526e, Doku 15 |
 | A2 | A | Schlüsselverwaltung, Rotation, Altbestände | A1 | TESTED | `scripts/reencrypt-amanah-data.mjs`, Postgres-Test |
 | A3 | A | Backup-/Restore-Verschlüsselung (age) | – | TESTED | manueller Lauf gegen Temp-DB, Doku 15 |
-| A4 | A | Einwilligung Art. 9 (zweckgebunden, versioniert, widerrufbar) | Schema | IN_PROGRESS | – |
-| A5 | A | E-Mail-Verifizierung, Passwort-Reset, Enumeration-Schutz | Schema | TODO | – |
-| A6 | A | Docker-Build und Konfigurationsprüfung | – | TODO | – |
+| A4 | A | Einwilligung Art. 9 (zweckgebunden, versioniert, widerrufbar) | Schema | TESTED | 37bd9bf, Doku 16 |
+| A5 | A | E-Mail-Verifizierung, Passwort-Reset, Enumeration-Schutz | Schema | TESTED | 37bd9bf, Doku 16 (echter Mailversand: REQUIRES_OWNER) |
+| A6 | A | Docker-Build und Konfigurationsprüfung | – | TESTED | 939afab (Prisma 6, Node 24; Container gegen Temp-DB) |
 | A7 | A | Rechtstexte Datenschutz/Einwilligung | A4 | REQUIRES_LEGAL_REVIEW | – |
-| B1 | B | Prisma 7 auf eigenem Branch/Worktree | A4/A5-Schema | TODO | – |
+| B1 | B | Prisma 7 auf eigenem Branch/Worktree | A4/A5-Schema | IMPLEMENTED | `chore/prisma-7` 3c002f7; Docker-Runner NOT_RUN (Plattenplatz) → nicht gemergt |
 | C1 | C | Zehn Startartikel als prüfbare Entwürfe | – | TODO | – |
 | C2 | C | Redaktionssystem (Admin, Versionen, Lesezeichen, SEO) | C1 | TODO | – |
 | C3 | C | Fachliche Prüfung der Artikel | C1 | REQUIRES_SCHOLAR_REVIEW | – |
@@ -38,6 +38,14 @@ Kein Deployment, keine Produktions-DB, keine echten Zahlungen/Mails/Kontakte, ke
 | 2026-10-30 | age statt GPG für Backups | einfache Empfängerschlüssel, kein Keyring auf dem Server |
 | 2026-10-30 | Restore liest `.age` über stdin | funktioniert identisch mit lokalem Binary und Container-Wrapper |
 | 2026-10-30 | `age`-Binary aus GitHub nicht ausgeführt (kein prüfbarer Digest); Test über Alpine-Paket im Wegwerf-Container | Supply-Chain-Risiko vermeiden |
+| 2026-10-30 | Registrierung ohne Sofort-Login, identische Antworten | Schutz gegen Account-Enumeration |
+| 2026-10-30 | Bestandskonten bei Migration als bestätigt markiert | keine Aussperrung; REQUIRES_OWNER zur Bestätigung |
+| 2026-10-30 | Einstellungsseite vom Einwilligungsschritt ausgenommen | Export, Widerruf, Löschung immer erreichbar |
+| 2026-10-30 | Prisma 7 nicht gemergt | Docker-Runner-Build nicht verifizierbar (Host-Platte 99 % voll, Bereinigung eigener Images) |
+
+## Vorfälle
+
+- 2026-10-30 ~14:30: Host-Datenträger lief durch eigene Docker-Builds auf 99 % voll; der eigene Temp-Postgres-Container wurde beendet (nur synthetische Daten). Bereinigt: nur eigene Images/Layer und Scratch-Dateien; fremde Container liefen weiter. Danach 5 GB frei. **Owner: Speicherplatz des Hosts prüfen.**
 
 ## Offene Fragen / Freigabepunkte
 
