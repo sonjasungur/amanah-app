@@ -52,9 +52,17 @@ export function allSourceIds(article: KnowledgeArticleRecord): string[] {
 }
 
 /** Content rules that hold regardless of review state. */
+/** Placeholders in drafts; any of them blocks publication. */
+export const EDITORIAL_MARKERS = ["[Redaktion", "[Juristische Prüfung"];
+
 export function structuralIssues(article: KnowledgeArticleRecord): string[] {
   const issues: string[] = [];
+  const texts = [article.body, article.summary, article.germanLawNote ?? "", article.differingOpinions ?? ""];
+  if (texts.some((t) => EDITORIAL_MARKERS.some((m) => t.includes(m)))) {
+    issues.push("Text enthält noch offene Redaktions- oder Prüfvermerke.");
+  }
   for (const d of article.schoolDifferences ?? []) {
+    if (d.positions.length === 0) issues.push(`„${d.question}“: Positionen der Rechtsschulen fehlen noch.`);
     const covered = new Set(d.positions.flatMap((p) => p.schools));
     if (d.kind === "agreement" && !ALL_SCHOOLS.every((s) => covered.has(s))) {
       issues.push(`„${d.question}“: Übereinstimmung nur mit Beleg für alle vier Schulen.`);

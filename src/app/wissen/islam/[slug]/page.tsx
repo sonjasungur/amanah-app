@@ -53,7 +53,7 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
       <p className="text-sm text-accent font-medium mb-2">Bereich {area.letter} · {area.title}</p>
       <h1 className="text-3xl font-bold text-primary mb-3">{article.title}</h1>
       <p className="text-lg text-muted mb-6">{article.summary}</p>
-      <ArticleActions title={article.title} />
+      <ArticleActions title={article.title} slug={article.slug} />
 
       <div className="mt-8 space-y-4 text-foreground leading-relaxed">
         {article.body.split(/\n\s*\n/).map((p, i) => (

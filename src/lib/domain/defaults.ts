@@ -159,6 +159,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
     keyWishesSummary: "",
   },
   selectedPath: "complete",
+  knowledgeBookmarks: [],
   lastSaved: null,
   reviewStatus: "draft",
 };

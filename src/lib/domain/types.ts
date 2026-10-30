@@ -265,6 +265,8 @@ export interface AmanahOrdnerData {
   sadaqaJariya: SadaqaJariyaPlan;
   familyMessage: FamilyMessage;
   selectedPath: string;
+  /** Slugs of saved knowledge articles (free knowledge centre). */
+  knowledgeBookmarks: string[];
   lastSaved: string | null;
   reviewStatus: ReviewStatus;
 }

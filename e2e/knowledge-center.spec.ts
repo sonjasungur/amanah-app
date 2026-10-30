@@ -31,7 +31,13 @@ test.describe("Islamic knowledge centre", () => {
   }
 
   test("unpublished article URLs and the editorial preview return 404", async ({ page }) => {
-    for (const path of ["/wissen/islam/fara-id", "/wissen/islam/wasiyyah", "/wissen/redaktion"]) {
+    for (const path of [
+      "/wissen/islam/fara-id",
+      "/wissen/islam/wasiyyah",
+      "/wissen/islam/islamisches-erbrecht-grundlagen",
+      "/wissen/redaktion",
+      "/wissen/redaktion/paket/ik-start-01-faraid-grundlagen",
+    ]) {
       const res = await page.goto(path);
       expect(res?.status(), path).toBe(404);
     }
@@ -47,6 +53,17 @@ test.describe("Islamic knowledge centre", () => {
     await page.goto("/");
     if (isMobile) await page.getByRole("button", { name: "Menü" }).click();
     await expect(page.getByRole("link", { name: "Islamisches Wissen" }).first()).toBeVisible();
+  });
+});
+
+test.describe("SEO", () => {
+  test("sitemap contains no draft articles; robots blocks private areas", async ({ request }) => {
+    const sitemapXml = await (await request.get("/sitemap.xml")).text();
+    expect(sitemapXml).toContain("/wissen");
+    expect(sitemapXml).not.toContain("/wissen/islam/");
+    const robotsTxt = await (await request.get("/robots.txt")).text();
+    expect(robotsTxt).toContain("Disallow: /dashboard");
+    expect(robotsTxt).toContain("Disallow: /wissen/redaktion");
   });
 });
 

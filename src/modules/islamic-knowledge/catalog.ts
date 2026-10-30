@@ -6,6 +6,7 @@ import { sadaqaJariyaArticles } from "@/lib/knowledge/sadaqa-jariya";
 import { resolveSourceId } from "@/lib/knowledge/sources";
 import { testamentArticles } from "@/lib/knowledge/testament-erbe";
 import type { CultureFilterCard, KnowledgeArticle } from "@/lib/types";
+import { START_ARTICLE_DRAFTS } from "./drafts/start-articles";
 import { getKnowledgeArea } from "./structure";
 import type { CatalogCorrection, KnowledgeAreaId, KnowledgeArticleRecord } from "./types";
 
@@ -241,5 +242,5 @@ export const KNOWLEDGE_CATALOG: KnowledgeArticleRecord[] = withRelated(
     ...LEGACY_ARTICLE_FILES.flatMap(([file, articles]) => articles.map((a) => fromArticle(file, a))),
     ...cultureFilterCards.map(fromCultureCard),
     ...PAGE_TEXT_DRAFTS,
-  ].map(applyCorrections)
+  ].map(applyCorrections).concat(START_ARTICLE_DRAFTS)
 );

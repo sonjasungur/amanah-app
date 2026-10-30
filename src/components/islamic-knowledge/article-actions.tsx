@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Link2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BookmarkButton } from "./bookmark-button";
 
 /** Share a direct link with family and print — no tracking, no account needed. */
-export function ArticleActions({ title }: { title: string }) {
+export function ArticleActions({ title, slug }: { title: string; slug: string }) {
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
@@ -28,6 +29,7 @@ export function ArticleActions({ title }: { title: string }) {
 
   return (
     <div className="no-print flex flex-wrap gap-2">
+      <BookmarkButton slug={slug} />
       <Button type="button" variant="outline" size="sm" onClick={share} data-testid="article-share">
         <Link2 size={16} className="mr-2" aria-hidden /> {copied ? "Link kopiert" : "Link teilen"}
       </Button>

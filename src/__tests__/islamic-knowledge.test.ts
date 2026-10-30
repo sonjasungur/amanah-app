@@ -82,6 +82,22 @@ describe("knowledge catalog (migrated legacy content)", () => {
     expect(kultur.legacy?.originalSourceIds).toEqual(["hadith-sadaqa-jariya"]);
   });
 
+  it("contains the ten starter drafts — reviewable, never publishable as they are", async () => {
+    const { START_ARTICLE_DRAFTS } = await import("@/modules/islamic-knowledge/drafts/start-articles");
+    expect(START_ARTICLE_DRAFTS).toHaveLength(10);
+    for (const draft of START_ARTICLE_DRAFTS) {
+      expect(KNOWLEDGE_CATALOG.some((a) => a.id === draft.id)).toBe(true);
+      expect(draft.status).toBe("DRAFT");
+      expect(draft.reviews).toEqual([]);
+      expect(draft.sourceIds.length).toBeGreaterThan(0);
+      expect(draft.sourceIds.every((id) => islamicSources[id])).toBe(true);
+      // Even with complete (fictitious) reviews, open markers keep a draft unpublished.
+      const forced = { ...draft, status: "PUBLISHED" as const, reviews: [reviewed("source"), reviewed("scholar"), reviewed("legal")] };
+      expect(isPublishable(forced), draft.id).toBe(false);
+      if (draft.requiresLegalReview) expect(draft.germanLawNote).toBeTruthy();
+    }
+  });
+
   it("puts areas touching German law under legal review", () => {
     for (const a of KNOWLEDGE_CATALOG.filter((x) => x.area === "islam-und-recht")) {
       expect(a.requiresLegalReview).toBe(true);

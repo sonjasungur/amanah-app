@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
 import { getSourcesByIds } from "@/lib/knowledge/sources";
@@ -61,6 +62,7 @@ export default function KnowledgeEditorialPage() {
                       <p key={c.reason} className="text-muted">Korrigiert {c.date} (Version {article.version}): {c.reason}</p>
                     ))}
                     {article.legacy && <p className="text-muted">Herkunft: {article.legacy.file} ({article.legacy.recordId})</p>}
+                    <Link href={`/wissen/redaktion/paket/${article.id}`} className="text-primary underline">Prüfpaket öffnen (druckbar)</Link>
                   </div>
                 </details>
               ))}

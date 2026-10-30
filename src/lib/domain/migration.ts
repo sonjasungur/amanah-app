@@ -43,6 +43,9 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
     importantInstructions: merged.importantInstructions ?? [],
     debtsAmanah: merged.debtsAmanah ?? [],
     digitalLegacy: merged.digitalLegacy ?? [],
+    knowledgeBookmarks: Array.isArray(merged.knowledgeBookmarks)
+      ? merged.knowledgeBookmarks.filter((s): s is string => typeof s === "string").slice(0, 200)
+      : [],
     reviewStatus: merged.reviewStatus ?? "draft",
     checkProgress: normalizeCheckProgress(merged.checkProgress ?? defaultAmanahData.checkProgress),
   };
