@@ -1,6 +1,6 @@
 # Autopilot-Masterplan
 
-Stand: wird fortlaufend aktualisiert · Branch `feat/vorsorge-testament-foundation` (Integrationsstand), Prisma 7 auf eigenem Branch
+Stand: 2026-10-30, Abschluss der Autopilot-Sitzung (siehe Dokument 14) · Branch `feat/vorsorge-testament-foundation` (Integrationsstand), Prisma 7 auf eigenem Branch
 Status: TODO · IN_PROGRESS · IMPLEMENTED · TESTED · BLOCKED · REQUIRES_OWNER · REQUIRES_LEGAL_REVIEW · REQUIRES_SCHOLAR_REVIEW
 
 ## Grenzen (unverändert)
@@ -19,16 +19,17 @@ Kein Deployment, keine Produktions-DB, keine echten Zahlungen/Mails/Kontakte, ke
 | A6 | A | Docker-Build und Konfigurationsprüfung | – | TESTED | 939afab (Prisma 6, Node 24; Container gegen Temp-DB) |
 | A7 | A | Rechtstexte Datenschutz/Einwilligung | A4 | REQUIRES_LEGAL_REVIEW | – |
 | B1 | B | Prisma 7 auf eigenem Branch/Worktree | A4/A5-Schema | IMPLEMENTED | `chore/prisma-7` 3c002f7; Docker-Runner NOT_RUN (Plattenplatz) → nicht gemergt |
-| C1 | C | Zehn Startartikel als prüfbare Entwürfe | – | TODO | – |
-| C2 | C | Redaktionssystem (Admin, Versionen, Lesezeichen, SEO) | C1 | TODO | – |
+| C1 | C | Zehn Startartikel als prüfbare Entwürfe | – | TESTED | 0f71db9 (Entwürfe, Tor blockiert sie) |
+| C2 | C | Redaktionssystem (Admin, Versionen, Lesezeichen, SEO) | C1 | IMPLEMENTED | Redaktionsansicht, Prüfpakete, Lesezeichen, Sitemap/robots (0f71db9); DB-gestütztes CMS: TODO |
 | C3 | C | Fachliche Prüfung der Artikel | C1 | REQUIRES_SCHOLAR_REVIEW | – |
-| D1 | D | Vorsorge Plus: Produktlogik, Entitlements, Funktionsübersicht | – | TODO | – |
-| E1 | E | Zahlungs-Sandbox (Webhook-Signatur, Idempotenz, Erstattung) | D1 | TODO | – |
-| F1 | F | Testamentsfragebogen (gesperrt, rechtlich getrennt) | – | TODO | – |
-| F2 | F | Erbquoten-Engine erweitern (gesperrt) | – | TODO | – |
-| F3 | F | Juristischer Prüfworkflow (Sandbox) | F1 | TODO | – |
-| G1 | G | Navigation „Islamisches Wissen / Vorsorge / Testament / Janazah / Konto“ | – | TODO | – |
-| H1 | H | Gesamttests (Unit, Postgres, E2E Desktop/Mobil, Docker) | alle | TODO | – |
+| D1 | D | Vorsorge Plus: Produktlogik, Entitlements, Funktionsübersicht | – | TESTED | f5529d8, 6e31a62 (Dokumente, Personen); Abgrenzung Basis/Plus: REQUIRES_OWNER |
+| E1 | E | Zahlungs-Sandbox (Webhook-Signatur, Idempotenz, Erstattung) | D1 | TESTED | f5529d8, Doku 17; Live-Anbieter: REQUIRES_OWNER |
+| F1 | F | Testamentsfragebogen (gesperrt, rechtlich getrennt) | – | TESTED | e23c90a; Freischaltung: REQUIRES_LEGAL_REVIEW |
+| F2 | F | Erbquoten-Engine erweitern (gesperrt) | – | TESTED | e23c90a (27 Tests); Regeln: REQUIRES_SCHOLAR_REVIEW |
+| F3 | F | Juristischer Prüfworkflow (Sandbox) | F1 | TESTED | f03018e (Domänenmodul + interne Demo); Persistenz/Kanzleikonten: REQUIRES_OWNER |
+| G1 | G | Navigation „Islamisches Wissen / Vorsorge / Testament / Janazah / Konto“ | – | TESTED | 31e8e29, E2E Navigation |
+| H1 | H | Gesamttests (Unit, Postgres, E2E Desktop/Mobil, Docker) | alle | TESTED | 464 Unit, 18 Postgres, 239 E2E lokal, 59 E2E API+Postgres; Docker zuletzt bei 939afab |
+| H2 | A | Content Security Policy | – | TESTED | ffa42bd, `csp.spec.ts` |
 
 ## Technische Entscheidungen
 
@@ -41,6 +42,9 @@ Kein Deployment, keine Produktions-DB, keine echten Zahlungen/Mails/Kontakte, ke
 | 2026-10-30 | Registrierung ohne Sofort-Login, identische Antworten | Schutz gegen Account-Enumeration |
 | 2026-10-30 | Bestandskonten bei Migration als bestätigt markiert | keine Aussperrung; REQUIRES_OWNER zur Bestätigung |
 | 2026-10-30 | Einstellungsseite vom Einwilligungsschritt ausgenommen | Export, Widerruf, Löschung immer erreichbar |
+| 2026-10-30 | CSP ohne Nonces | Seiten bleiben statisch; externe Skripte/Verbindungen dennoch blockiert |
+| 2026-10-30 | Wissensartikel bleiben Code-Daten (Git-versioniert) statt DB-CMS | Nachvollziehbarkeit über Commits; DB-CMS erst mit Redaktionsteam |
+| 2026-10-30 | Testament- und Prüfworkflow als gesperrte/Sandbox-Module | fachlich kritisch, keine Freigabe vorhanden |
 | 2026-10-30 | Prisma 7 nicht gemergt | Docker-Runner-Build nicht verifizierbar (Host-Platte 99 % voll, Bereinigung eigener Images) |
 
 ## Vorfälle

@@ -11,6 +11,7 @@ Zugehörige Dokumente:
 - [04 – Islamisches Wissenszentrum](04-wissenszentrum.md) (P0-Ergänzung: Bestandsaufnahme, Struktur A–E, Freigabeprozess, Umsetzung)
 - [05 – Quellenprüfung](05-quellenpruefung.md) (Qur'an-/Hadith-/Behördenquellen, Prüfagent, 30.10.)
 - [06 – Sicherheit und Tests](06-sicherheit-und-tests.md) · [07 – Prisma 7](07-prisma7-analyse.md) · [08 – Vorsorge Plus](08-vorsorge-plus.md)
+- [12 – Autopilot-Masterplan](12-autopilot-masterplan.md) · [13 – Launch-Readiness](13-launch-readiness.md) · [14 – Autopilot-Abschluss](14-autopilot-abschluss.md) · [15 – Verschlüsselung/Backup](15-verschluesselung-und-backup.md) · [16 – Einwilligung/Konto](16-einwilligung-und-konto.md) · [17 – Vorsorge Plus/Zahlung](17-vorsorge-plus-und-zahlung.md) · [18 – Testament/Prüfworkflow](18-testament-und-pruefworkflow.md)
 - [09 – Quellenkorrektur](09-quellenkorrektur.md) ([09a Lizenzrecherche](09a-lizenz-und-texte-recherche.md)) · [10 – Redaktionsplan](10-redaktionsplan.md) · [11 – Offene Punkte Produktion](11-offene-punkte-produktion.md)
 - Vorheriges Audit: `docs/qa/professional-product-audit.md` (18.08.2026, untracked) – teilweise überholt, siehe 1.9
 
