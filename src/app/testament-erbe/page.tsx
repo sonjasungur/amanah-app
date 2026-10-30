@@ -11,7 +11,7 @@ export default function TestamentErbePage() {
     <GatedAreaPage
       eyebrow={"Wissen & Orientierung"}
       title={"Testament & Erbe"}
-      intro={"Islamisches Erbrecht und deutsches Recht — getrennt erklärt, mit geprüften Quellen."}
+      intro={"Islamisches Erbrecht und deutsches Recht — getrennt erklärt, veröffentlicht erst nach fachlicher und juristischer Prüfung."}
       areaIds={["faraid", "islam-und-recht"]}
     />
   );

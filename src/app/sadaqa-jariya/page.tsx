@@ -11,7 +11,7 @@ export default function SadaqaJariyaPage() {
     <GatedAreaPage
       eyebrow={"Islamische Vorsorge"}
       title={"Sadaqa Jariya"}
-      intro={"Islamisches Wissen zu fortwirkender Wohltätigkeit und wohltätigen Vermächtnissen — mit geprüften Quellen."}
+      intro={"Islamisches Wissen zu fortwirkender Wohltätigkeit und wohltätigen Vermächtnissen — veröffentlicht erst nach fachlicher Prüfung."}
       areaIds={["vorsorge"]}
       cta={{ href: "/dashboard/sadaqa-jariya", label: "Eigene Sadaqa-Jariya-Wünsche im Ordner festhalten" }}
     />

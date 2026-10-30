@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
+import { HomeEntryPoints } from "@/components/marketing/home-entry-points";
 import {
   FreeVsPaidSummary,
   PricingCard,
@@ -168,6 +169,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <HomeEntryPoints />
 
       <section className="py-10 md:py-18 bg-background">
         <div className="max-w-6xl mx-auto px-4">

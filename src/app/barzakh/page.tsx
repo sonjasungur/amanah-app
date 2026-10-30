@@ -11,7 +11,7 @@ export default function BarzakhPage() {
     <GatedAreaPage
       eyebrow={"Wissen & Orientierung"}
       title={"Barzakh"}
-      intro={"Islamisches Wissen zur Zeit nach dem Tod — mit geprüften Quellen."}
+      intro={"Islamisches Wissen zur Zeit nach dem Tod — veröffentlicht erst nach fachlicher Prüfung."}
       areaIds={["tod-sterben", "vorsorge"]}
     />
   );

@@ -11,7 +11,7 @@ export default function JanazahKompassPage() {
     <GatedAreaPage
       eyebrow={"Wissen & Orientierung"}
       title={"Janazah-Kompass"}
-      intro={"Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung — mit geprüften Quellen."}
+      intro={"Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung — veröffentlicht erst nach fachlicher Prüfung."}
       areaIds={["janazah", "tod-sterben"]}
       cta={{ href: "/dashboard/janazah", label: "Eigene Janazah-Wünsche im Ordner festhalten" }}
     />
