@@ -123,7 +123,28 @@ Weitere Quellen: Config-Referenz https://www.prisma.io/docs/orm/reference/prisma
 2. **Mittelfristig (empfohlen, in einem separaten Branch, nicht in `feat/vorsorge-testament-foundation`):** Auf **Prisma 7.10.1 (exakt gepinnt, nicht `latest` = 8.0 RC)** migrieren und gleichzeitig das Docker-Base-Image von Node 20 (EOL) auf 22 oder 24 LTS heben. Aufwand ca. 8–12 h. Das Datenrisiko ist gering, weil keine neue Migration und kein Formatwechsel nötig ist. Der Hauptaufwand liegt in Dockerfile/Standalone und Tests. Nebeneffekt: Das native Engine-Binary fällt weg, die Images werden einfacher.
 3. Commits, Merge und Deployment nur nach ausdrücklicher Owner-Freigabe (`AI_HANDOFF.md` §8).
 
-## 7. Stand 2026-10-31: bereit zur Integration (Vorschlag, nicht gemergt)
+---
+
+## 7. Umsetzung und Testbericht (Branch `chore/prisma-7`, 2026-10-30)
+
+Umgesetzt: `prisma`/`@prisma/client`/`@prisma/adapter-pg` 7.10.1 exakt, `pg` 8.23.1; Generator `prisma-client` → `src/generated/prisma` (gitignored, ESLint-ignored); `prisma.config.ts` (URL tolerant für `generate`, optional `SHADOW_DATABASE_URL`); `src/lib/server/prisma.ts` mit `PrismaPg` (Connect-Timeout 5 s); `scripts/reencrypt-amanah-data.mjs` nutzt `pg` direkt (unabhängig vom generierten Client); Dockerfile ohne `.prisma`-Kopien, `prisma.config.ts` in `deps`; `db:migrate`/`db:push` + `generate`.
+
+| Prüfung | Ergebnis |
+|---|---|
+| `npm audit --omit=dev` | **0 Schwachstellen** (vorher 3 high) |
+| `tsc`, ESLint | ok |
+| Vitest | 430 bestanden, 9 skipped (Postgres-Tests ohne DB-Env) |
+| Postgres-Integration (temporäre PostgreSQL 16.6, von Prisma 6 angelegt und befüllt) | 17/17 bestanden |
+| `prisma migrate status` | up to date |
+| `migrate diff` Migrationen → Schema und Live-DB → Schema | „No difference detected“ |
+| E2E API-Modus mit **Postgres** (security-session + phase2-failure-paths) | 56 bestanden, 6 skipped |
+| Standalone `node .next/standalone/server.js` gegen Postgres (Registrierung → Bestätigung → Einwilligung → Speichern → Lesen) | ok, `pg` und `@prisma/client` im Standalone-Trace |
+| Docker `migrate`-Image (Node 24) | gebaut; `migrate status`/Skript-Trockenlauf vor Plattenengpass ok |
+| Docker `runner`-Image | **NOT_RUN** – Build brach wegen vollem Datenträger ab (Host 99 %); nach Bereinigung nur 5 GB frei, weiterer Build hätte andere Dienste gefährdet |
+
+Entscheidung: Übernahme in den Integrationsbranch erst nach grünem Docker-Runner-Build (auf einem Rechner mit ausreichend Speicher oder nach Freigabe von Platz durch den Owner).
+
+## 8. Stand 2026-10-31: bereit zur Integration (Vorschlag, nicht gemergt)
 
 `chore/prisma-7` (lokal, kein Push) liegt direkt auf `feat/vorsorge-testament-foundation`; Code getestet als `c5bf156`. Zwei Commits: Migration auf Prisma 7.10.1 und Anpassung von nach dem Branch-Schnitt hinzugekommenem Code (Billing-Idempotenz nutzt den `Prisma`-Namespace des generierten Clients; die Legacy-E2E-Spec nutzt `pg`, weil der generierte ESM-Client im Spec-Runner nicht ladbar ist).
 
