@@ -17,8 +17,9 @@ export async function GET(request: Request) {
   const body = {
     exportedAt: new Date().toISOString(),
     format: "amanah-account-export@1",
-    account: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt },
+    account: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt, emailVerifiedAt: user.emailVerifiedAt ?? null },
     amanahData: await repo.getAmanahData(userId),
+    consents: await repo.listConsents(userId),
   };
 
   return new NextResponse(JSON.stringify(body, null, 2), {

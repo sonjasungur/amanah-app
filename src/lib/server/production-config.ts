@@ -62,6 +62,19 @@ export function validateProductionEnv(
     errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
   }
 
+  if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
+    errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
+  }
+  if (env.AMANAH_INTERNAL_TOOLS === "true") {
+    errors.push("AMANAH_INTERNAL_TOOLS must not be enabled in production");
+  }
+  if (!env.AMANAH_PUBLIC_BASE_URL?.trim() && !env.NEXT_PUBLIC_SITE_URL?.trim() && !env.NEXT_PUBLIC_APP_URL?.trim()) {
+    errors.push("AMANAH_PUBLIC_BASE_URL (or NEXT_PUBLIC_SITE_URL) is required for links in e-mails");
+  }
+  if ((env.AMANAH_MAIL_TRANSPORT ?? "disabled") === "disabled") {
+    warnings.push("No mail transport configured: registration, e-mail confirmation and password reset are unavailable");
+  }
+
   if (env.NEXT_PUBLIC_AUTH_MODE !== "api") {
     errors.push("NEXT_PUBLIC_AUTH_MODE must be api in production");
   }

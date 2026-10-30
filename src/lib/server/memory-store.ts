@@ -10,6 +10,23 @@ export interface StoredUser {
   name: string;
   passwordHash: string;
   createdAt: string;
+  emailVerifiedAt?: string | null;
+}
+
+export interface StoredConsent {
+  id: string;
+  userId: string;
+  purpose: string;
+  textVersion: string;
+  grantedAt: string;
+  revokedAt: string | null;
+}
+
+export interface StoredAuthToken {
+  userId: string;
+  purpose: string;
+  expiresAt: string;
+  usedAt: string | null;
 }
 
 export interface StoredSession {
@@ -23,6 +40,9 @@ interface MemoryStoreState {
   usersByEmail: Map<string, string>;
   sessions: Map<string, StoredSession>;
   amanahData: Map<string, AmanahOrdnerData>;
+  consents: StoredConsent[];
+  /** keyed by token hash */
+  authTokens: Map<string, StoredAuthToken>;
 }
 
 declare global {
@@ -35,6 +55,8 @@ function createStore(): MemoryStoreState {
     usersByEmail: new Map(),
     sessions: new Map(),
     amanahData: new Map(),
+    consents: [],
+    authTokens: new Map(),
   };
 }
 

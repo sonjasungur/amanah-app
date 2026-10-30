@@ -52,22 +52,24 @@ describe.runIf(runIntegration)("Postgres: data encryption at rest", () => {
     const { prisma } = await import("@/lib/server/prisma");
     const read = async () => (await prisma.amanahData.findUnique({ where: { userId: user.id } }))?.data;
     expect(isEncryptedEnvelope(await read())).toBe(false);
+    // Other test files share this database — touch only this user's row.
+    const only = { AMANAH_REENCRYPT_USER_IDS: user.id };
 
-    const dry = runScript([], { AMANAH_DATA_KEYS: `a:${keyA}`, AMANAH_DATA_KEY_ACTIVE: "a" });
+    const dry = runScript([], { ...only, AMANAH_DATA_KEYS: `a:${keyA}`, AMANAH_DATA_KEY_ACTIVE: "a" });
     expect(dry.status, dry.stderr).toBe(0);
     expect(dry.stdout).toContain("dry run");
     expect(isEncryptedEnvelope(await read())).toBe(false);
 
-    const refused = runScript(["--apply"], { AMANAH_DATA_KEYS: `a:${keyA}` });
+    const refused = runScript(["--apply"], { ...only, AMANAH_DATA_KEYS: `a:${keyA}` });
     expect(refused.status).toBe(2);
 
-    const applied = runScript(["--apply"], { AMANAH_DATA_KEYS: `a:${keyA}`, AMANAH_DATA_KEY_ACTIVE: "a", AMANAH_REENCRYPT_CONFIRM: "yes" });
+    const applied = runScript(["--apply"], { ...only, AMANAH_DATA_KEYS: `a:${keyA}`, AMANAH_DATA_KEY_ACTIVE: "a", AMANAH_REENCRYPT_CONFIRM: "yes" });
     expect(applied.status, applied.stderr).toBe(0);
     expect(applied.stdout + applied.stderr).not.toContain("Ahmed Demo");
     const encrypted = await read();
     expect(isEncryptedEnvelope(encrypted) && encrypted.kid).toBe("a");
 
-    const rotated = runScript(["--apply"], { AMANAH_DATA_KEYS: `a:${keyA},b:${keyB}`, AMANAH_DATA_KEY_ACTIVE: "b", AMANAH_REENCRYPT_CONFIRM: "yes" });
+    const rotated = runScript(["--apply"], { ...only, AMANAH_DATA_KEYS: `a:${keyA},b:${keyB}`, AMANAH_DATA_KEY_ACTIVE: "b", AMANAH_REENCRYPT_CONFIRM: "yes" });
     expect(rotated.status, rotated.stderr).toBe(0);
     const afterRotation = await read();
     expect(isEncryptedEnvelope(afterRotation) && afterRotation.kid).toBe("b");

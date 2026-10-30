@@ -9,7 +9,8 @@ import { DELETE as accountDELETE } from "@/app/api/account/route";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { resetServerRepository } from "@/lib/server/repository";
 import { resetRateLimits } from "@/lib/ai/rate-limit";
-import { browserRequest, sessionCookieFrom } from "./session-helpers";
+import { POST as verifyPOST } from "@/app/api/auth/verify-email/route";
+import { browserRequest, grantStorageConsent, sessionCookieFrom, tokenFromOutbox } from "./session-helpers";
 
 const BASE = "http://localhost";
 const PASSWORD = "testpass1";
@@ -18,9 +19,15 @@ function json(body: unknown): RequestInit {
   return { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
 }
 
+/** Register → confirmation mail → verify (sets the session cookie) → storage consent. */
 async function register(email = `s-${crypto.randomUUID()}@test.de`) {
-  const res = await registerPOST(browserRequest(`${BASE}/api/auth/register`, json({ email, password: PASSWORD, name: "S" })));
-  return { res, email, cookie: sessionCookieFrom(res)! };
+  const reg = await registerPOST(browserRequest(`${BASE}/api/auth/register`, json({ email, password: PASSWORD, name: "S" })));
+  expect(reg.status).toBe(202);
+  const token = await tokenFromOutbox(email, "verify_email");
+  const res = await verifyPOST(browserRequest(`${BASE}/api/auth/verify-email`, json({ token })));
+  const cookie = sessionCookieFrom(res)!;
+  await grantStorageConsent(BASE, cookie);
+  return { res, email, cookie };
 }
 
 async function saveDemo(cookie: string) {
@@ -56,6 +63,9 @@ describe("session cookie", () => {
   it("uses Secure and the __Host- prefix in production", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SESSION_SECRET", "x".repeat(40));
+    vi.stubEnv("AMANAH_MAIL_TRANSPORT", "outbox");
+    vi.stubEnv("AMANAH_PUBLIC_BASE_URL", "https://example.test");
+    vi.stubEnv("AMANAH_DATA_ENCRYPTION", "optional");
     const { res } = await register();
     const setCookie = res.headers.get("set-cookie") ?? "";
     expect(setCookie).toMatch(/^__Host-amanah_session=/);
@@ -159,7 +169,7 @@ describe("account export and deletion", () => {
     expect((await loginPOST(browserRequest(`${BASE}/api/auth/login`, json({ email, password: PASSWORD })))).status).toBe(401);
 
     const again = await register(email);
-    expect(again.res.status).toBe(201);
+    expect(again.res.status).toBe(200);
     const data = await (await amanahGET(browserRequest(`${BASE}/api/amanah`, {}, again.cookie))).json();
     expect(data.data.userProfile.name).toBe("");
   });

@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  name         String
-  passwordHash String     @map("password_hash")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  sessions     Session[]
-  amanahData   AmanahData?
+  id              String          @id @default(cuid())
+  email           String          @unique
+  name            String
+  passwordHash    String          @map("password_hash")
+  emailVerifiedAt DateTime?       @map("email_verified_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  sessions        Session[]
+  amanahData      AmanahData?
+  consents        ConsentRecord[]
+  authTokens      AuthToken[]
 
   @@map("users")
 }
@@ -42,4 +45,33 @@ model AmanahData {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("amanah_data")
+}
+
+/// Proof of consent per purpose and text version (Art. 7 Abs. 1 DSGVO). Never pre-ticked.
+model ConsentRecord {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose     String
+  textVersion String    @map("text_version")
+  grantedAt   DateTime  @default(now()) @map("granted_at")
+  revokedAt   DateTime? @map("revoked_at")
+
+  @@index([userId, purpose])
+  @@map("consent_records")
+}
+
+/// Single-use, expiring tokens for e-mail verification and password reset (hash only).
+model AuthToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   String
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, purpose])
+  @@map("auth_tokens")
 }

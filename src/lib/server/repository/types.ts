@@ -6,7 +6,19 @@ export interface RepositoryUser {
   name: string;
   passwordHash: string;
   createdAt: string;
+  /** null until the e-mail address is confirmed. */
+  emailVerifiedAt?: string | null;
 }
+
+export interface RepositoryConsent {
+  id: string;
+  purpose: string;
+  textVersion: string;
+  grantedAt: string;
+  revokedAt: string | null;
+}
+
+export type AuthTokenPurpose = "verify_email" | "reset_password";
 
 export interface RepositorySession {
   token: string;
@@ -27,5 +39,17 @@ export interface ServerRepository {
   deleteAmanahData(userId: string): Promise<void>;
   /** Removes the user, all sessions and all stored data (Art. 17 DSGVO). */
   deleteUser(userId: string): Promise<void>;
+  findUserByEmail(email: string): Promise<RepositoryUser | null>;
+  markEmailVerified(userId: string): Promise<void>;
+  /** Sets a new password and revokes every session of the user. */
+  updatePassword(userId: string, newPassword: string): Promise<void>;
+  /** Stores only the hash of the token. */
+  createAuthToken(userId: string, purpose: AuthTokenPurpose, tokenHash: string, expiresAt: Date): Promise<void>;
+  /** Atomically marks a valid, unused, unexpired token as used and returns its user. */
+  consumeAuthToken(tokenHash: string, purpose: AuthTokenPurpose): Promise<string | null>;
+  invalidateAuthTokens(userId: string, purpose: AuthTokenPurpose): Promise<void>;
+  listConsents(userId: string): Promise<RepositoryConsent[]>;
+  grantConsent(userId: string, purpose: string, textVersion: string): Promise<RepositoryConsent>;
+  revokeConsent(userId: string, purpose: string): Promise<void>;
   checkConnection?(): Promise<boolean>;
 }

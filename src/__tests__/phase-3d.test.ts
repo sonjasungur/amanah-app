@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { browserRequest, sessionCookieFrom } from "./session-helpers";
+import { browserRequest, registerVerified } from "./session-helpers";
 import { GET as healthGET } from "@/app/api/health/route";
 import { DELETE as amanahDELETE, GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
-import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import { resetServerRepository } from "@/lib/server/repository";
@@ -44,14 +43,7 @@ describe("DELETE /api/amanah", () => {
 
   it("deletes amanah data but keeps user session valid", async () => {
     const email = `del-${Date.now()}@test.de`;
-    const regRes = await registerPOST(
-      browserRequest("http://localhost/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: "testpass1", name: "Delete Test" }),
-      })
-    );
-    const cookie = sessionCookieFrom(regRes)!;
+    const cookie = await registerVerified("http://localhost", email);
 
     await amanahPUT(
       browserRequest("http://localhost/api/amanah", {

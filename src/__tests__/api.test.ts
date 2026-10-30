@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { browserRequest, sessionCookieFrom } from "./session-helpers";
+import { browserRequest, registerVerified, sessionCookieFrom } from "./session-helpers";
 import { GET as healthGET } from "@/app/api/health/route";
 import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { POST as loginPOST } from "@/app/api/auth/login/route";
@@ -47,10 +47,10 @@ describe("API auth + amanah", () => {
         body: JSON.stringify({ email, password: "testpass1", name: "API Test" }),
       })
     );
-    expect(regRes.status).toBe(201);
-    const regBody = await regRes.json();
-    const cookie = sessionCookieFrom(regRes)!;
-    expect(regBody.session.token).toBeUndefined();
+    // No session before the e-mail is confirmed.
+    expect(regRes.status).toBe(202);
+    expect(sessionCookieFrom(regRes)).toBeNull();
+    const cookie = await registerVerified("http://localhost", email);
 
     const loginRes = await loginPOST(
       browserRequest("http://localhost/api/auth/login", {

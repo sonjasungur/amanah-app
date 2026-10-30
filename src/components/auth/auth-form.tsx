@@ -29,6 +29,18 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [unverified, setUnverified] = useState(false);
+  const [resent, setResent] = useState(false);
+
+  const resendVerification = async () => {
+    await fetch("/api/auth/verify-email/resend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    }).catch(() => undefined);
+    setResent(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,12 +53,37 @@ export function AuthForm({ mode }: AuthFormProps) {
         : await register({ email, password, name });
 
     setLoading(false);
-    if (result.success) {
+    if ("pendingVerification" in result && result.pendingVerification) {
+      setPendingVerification(true);
+    } else if (result.success) {
       router.push(returnUrl);
     } else {
+      setUnverified("code" in result && result.code === "email_unverified");
       setError(result.error ?? t("auth.error.generic"));
     }
   };
+
+  if (pendingVerification) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-12">
+        <Logo className="mb-8 justify-center w-full" />
+        <Card data-testid="auth-check-email">
+          <CardTitle>Bitte prüfe dein Postfach</CardTitle>
+          <p className="text-sm text-muted mt-3">
+            Wenn die Angaben stimmen, haben wir dir eine E-Mail mit einem Bestätigungslink geschickt. Der Link ist 24 Stunden gültig.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <Button type="button" variant="outline" onClick={() => void resendVerification()} disabled={resent}>
+              {resent ? "Erneut gesendet" : "E-Mail erneut senden"}
+            </Button>
+            <Link href={buildAuthHref("/login", returnUrl)} className="text-sm text-primary text-center hover:underline">
+              Zur Anmeldung
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const alternateHref = buildAuthHref(mode === "login" ? "/register" : "/login", returnUrl);
   const showRegister = isPublicRegistrationEnabled();
@@ -92,7 +129,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             <label className="text-sm font-medium block mb-1">{t("auth.password")}</label>
             <Input type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {mode === "login" && authMode === "api" && (
+            <p className="text-sm text-right -mt-2">
+              <Link href="/passwort-vergessen" className="text-primary hover:underline">Passwort vergessen?</Link>
+            </p>
+          )}
+          {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
+          {unverified && (
+            <Button type="button" variant="outline" className="w-full" onClick={() => void resendVerification()} disabled={resent}>
+              {resent ? "Bestätigungslink erneut gesendet" : "Bestätigungslink erneut senden"}
+            </Button>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "…" : mode === "login" ? t("auth.login") : t("auth.register")}
           </Button>

@@ -27,6 +27,13 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "E-Mail oder Passwort ungültig." }, { status: 401 });
     }
+    // Only reachable with the correct password, so it does not reveal accounts to strangers.
+    if (!user.emailVerifiedAt) {
+      return NextResponse.json(
+        { error: "Bitte bestätige zuerst deine E-Mail-Adresse.", code: "email_unverified" },
+        { status: 403 }
+      );
+    }
 
     // Session fixation: never reuse a token presented before authentication.
     const previous = readSessionToken(request);

@@ -5,6 +5,7 @@
  * Default is a dry run (counts only). Writing requires BOTH:
  *   --apply   and   AMANAH_REENCRYPT_CONFIRM=yes
  * Never run against production without a backup and owner approval.
+ * Optional: AMANAH_REENCRYPT_USER_IDS="id1,id2" limits the run to these users.
  * Output contains counts and row ids only — no plaintext, no keys.
  *
  * Requires Node >= 22.18 / 24 (native TypeScript type stripping for the shared module).
@@ -28,7 +29,11 @@ if (!keyring) {
 const prisma = new PrismaClient();
 const counts = { encrypt_plaintext: 0, rewrap: 0, unchanged: 0, failed: 0 };
 try {
-  const rows = await prisma.amanahData.findMany({ select: { id: true, userId: true, data: true } });
+  const onlyUsers = process.env.AMANAH_REENCRYPT_USER_IDS?.split(",").map((s) => s.trim()).filter(Boolean);
+  const rows = await prisma.amanahData.findMany({
+    where: onlyUsers?.length ? { userId: { in: onlyUsers } } : undefined,
+    select: { id: true, userId: true, data: true },
+  });
   for (const row of rows) {
     try {
       const { action, value } = reencryptStoredValue(row.data, row.userId, keyring);

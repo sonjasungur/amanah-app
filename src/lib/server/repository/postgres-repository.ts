@@ -11,7 +11,7 @@ import {
   normalizeEmail,
   verifyPasswordServer,
 } from "../crypto";
-import type { RepositorySession, RepositoryUser, ServerRepository } from "./types";
+import type { AuthTokenPurpose, RepositoryConsent, RepositorySession, RepositoryUser, ServerRepository } from "./types";
 
 const SESSION_DAYS = 30;
 
@@ -122,10 +122,61 @@ export class PostgresRepository implements ServerRepository {
     await prisma.amanahData.deleteMany({ where: { userId } });
   }
 
+  async findUserByEmail(email: string): Promise<RepositoryUser | null> {
+    const user = await prisma.user.findUnique({ where: { email: normalizeEmail(email) } });
+    return user ? toRepositoryUser(user) : null;
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await prisma.user.updateMany({ where: { id: userId, emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } });
+  }
+
+  async updatePassword(userId: string, newPassword: string): Promise<void> {
+    const passwordHash = await hashPasswordServer(newPassword);
+    await prisma.$transaction([
+      prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      prisma.session.deleteMany({ where: { userId } }),
+    ]);
+  }
+
+  async createAuthToken(userId: string, purpose: AuthTokenPurpose, tokenHash: string, expiresAt: Date): Promise<void> {
+    await prisma.authToken.create({ data: { userId, purpose, tokenHash, expiresAt } });
+  }
+
+  async consumeAuthToken(tokenHash: string, purpose: AuthTokenPurpose): Promise<string | null> {
+    // Conditional update = atomic single use, even under concurrent requests.
+    const token = await prisma.authToken.findUnique({ where: { tokenHash } });
+    if (!token || token.purpose !== purpose) return null;
+    const { count } = await prisma.authToken.updateMany({
+      where: { id: token.id, usedAt: null, expiresAt: { gt: new Date() } },
+      data: { usedAt: new Date() },
+    });
+    return count === 1 ? token.userId : null;
+  }
+
+  async invalidateAuthTokens(userId: string, purpose: AuthTokenPurpose): Promise<void> {
+    await prisma.authToken.updateMany({ where: { userId, purpose, usedAt: null }, data: { usedAt: new Date() } });
+  }
+
+  async listConsents(userId: string): Promise<RepositoryConsent[]> {
+    const rows = await prisma.consentRecord.findMany({ where: { userId }, orderBy: { grantedAt: "asc" } });
+    return rows.map(toRepositoryConsent);
+  }
+
+  async grantConsent(userId: string, purpose: string, textVersion: string): Promise<RepositoryConsent> {
+    return toRepositoryConsent(await prisma.consentRecord.create({ data: { userId, purpose, textVersion } }));
+  }
+
+  async revokeConsent(userId: string, purpose: string): Promise<void> {
+    await prisma.consentRecord.updateMany({ where: { userId, purpose, revokedAt: null }, data: { revokedAt: new Date() } });
+  }
+
   async deleteUser(userId: string): Promise<void> {
     // Sessions and amanah_data cascade (onDelete: Cascade); explicit for clarity.
     await prisma.$transaction([
       prisma.session.deleteMany({ where: { userId } }),
+      prisma.authToken.deleteMany({ where: { userId } }),
+      prisma.consentRecord.deleteMany({ where: { userId } }),
       prisma.amanahData.deleteMany({ where: { userId } }),
       prisma.user.deleteMany({ where: { id: userId } }),
     ]);
@@ -141,13 +192,37 @@ export class PostgresRepository implements ServerRepository {
   }
 }
 
-function toRepositoryUser(user: { id: string; email: string; name: string; passwordHash: string; createdAt: Date }): RepositoryUser {
+function toRepositoryUser(user: {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  createdAt: Date;
+  emailVerifiedAt: Date | null;
+}): RepositoryUser {
   return {
     id: user.id,
     email: user.email,
     name: user.name,
     passwordHash: user.passwordHash,
     createdAt: user.createdAt.toISOString(),
+    emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
+  };
+}
+
+function toRepositoryConsent(row: {
+  id: string;
+  purpose: string;
+  textVersion: string;
+  grantedAt: Date;
+  revokedAt: Date | null;
+}): RepositoryConsent {
+  return {
+    id: row.id,
+    purpose: row.purpose,
+    textVersion: row.textVersion,
+    grantedAt: row.grantedAt.toISOString(),
+    revokedAt: row.revokedAt?.toISOString() ?? null,
   };
 }
 

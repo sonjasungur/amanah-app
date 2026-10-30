@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getAuthMode } from "./config";
 import { localAuthProvider } from "./local-auth-provider";
-import { apiAuthProvider } from "./api-auth-provider";
+import { apiAuthProvider, rememberSession } from "./api-auth-provider";
 import { syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import type { AuthProvider, AuthSession, LoginInput, RegisterInput } from "./types";
 
@@ -11,8 +11,10 @@ interface AuthContextValue {
   session: AuthSession | null;
   isLoading: boolean;
   authMode: "local" | "api";
-  login: (input: LoginInput) => Promise<{ success: boolean; error?: string }>;
-  register: (input: RegisterInput) => Promise<{ success: boolean; error?: string }>;
+  login: (input: LoginInput) => Promise<{ success: boolean; error?: string; code?: string }>;
+  register: (input: RegisterInput) => Promise<{ success: boolean; error?: string; pendingVerification?: boolean }>;
+  /** Adopts a session the server already created (e-mail confirmation). */
+  adoptSession: (session: AuthSession) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -46,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await syncStoreWithRemoteAfterAuth();
         return { success: true };
       }
-      return { success: false, error: result.error };
+      return { success: false, error: result.error, code: result.code };
     },
     [provider]
   );
@@ -54,6 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(
     async (input: RegisterInput) => {
       const result = await provider.register(input);
+      if (result.success && result.pendingVerification) {
+        return { success: true, pendingVerification: true };
+      }
       if (result.success && result.session) {
         setSession(result.session);
         await syncStoreWithRemoteAfterAuth();
@@ -64,14 +69,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [provider]
   );
 
+  const adoptSession = useCallback(async (next: AuthSession) => {
+    rememberSession(next);
+    setSession(next);
+    await syncStoreWithRemoteAfterAuth();
+  }, []);
+
   const logout = useCallback(async () => {
     await provider.logout();
     setSession(null);
   }, [provider]);
 
   const value = useMemo(
-    () => ({ session, isLoading, authMode, login, register, logout }),
-    [session, isLoading, authMode, login, register, logout]
+    () => ({ session, isLoading, authMode, login, register, logout, adoptSession }),
+    [session, isLoading, authMode, login, register, logout, adoptSession]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

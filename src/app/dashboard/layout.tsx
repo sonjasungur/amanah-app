@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { DashboardAuthGate } from "@/components/dashboard/dashboard-auth-gate";
+import { ConsentGate } from "@/components/dashboard/consent-gate";
 import { StorageModeBanner } from "@/components/auth/storage-mode-banner";
 
 export default function DashboardRootLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,7 @@ export default function DashboardRootLayout({ children }: { children: React.Reac
         <div className="mb-6">
           <StorageModeBanner />
         </div>
-        {children}
+        <ConsentGate>{children}</ConsentGate>
       </DashboardAuthGate>
     </DashboardLayout>
   );

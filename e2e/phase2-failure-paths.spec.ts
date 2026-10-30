@@ -44,13 +44,23 @@ async function prepareAuthSession(page: Page): Promise<void> {
   }, MOCK_SESSION);
 }
 
-/** Mock /api/auth/me to return the session (keeps useAuth context happy). */
+/**
+ * Mock /api/auth/me to return the session (keeps useAuth context happy) and
+ * /api/consent as granted, so the storage-consent step does not block these failure-path tests.
+ */
 async function mockAuthMe(page: Page): Promise<void> {
   await page.route("**/api/auth/me", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ session: MOCK_SESSION }),
+    });
+  });
+  await page.route("**/api/consent", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ status: { sensitive_folder_storage: { granted: true } }, history: [] }),
     });
   });
 }
@@ -392,7 +402,8 @@ test.describe("AI consent states", () => {
     await page.goto("/dashboard/einstellungen");
     await page.waitForSelector('[data-testid="settings-ai-section"]', { timeout: 15000 });
 
-    const revokeBtn = page.getByText(/Widerrufen|Revoke|Consent widerrufen/i).first();
+    // Scoped to the AI section: the settings page also has a revoke button for the storage consent.
+    const revokeBtn = page.getByTestId("settings-ai-section").getByText(/Widerrufen|Revoke|Consent widerrufen/i).first();
     if (await revokeBtn.count() > 0 && await revokeBtn.isVisible()) {
       await revokeBtn.click();
       const consent = await page.evaluate(() => localStorage.getItem("amanah-ai-consent"));

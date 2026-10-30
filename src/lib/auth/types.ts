@@ -27,6 +27,10 @@ export interface AuthResult {
   success: boolean;
   session?: AuthSession;
   error?: string;
+  /** API mode: account created or already existing — the user must confirm the e-mail first. */
+  pendingVerification?: boolean;
+  /** Machine-readable error, e.g. "email_unverified". */
+  code?: string;
 }
 
 export interface AuthProvider {

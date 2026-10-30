@@ -32,6 +32,12 @@ function writeSession(session: AuthSession | null): void {
   }
 }
 
+class ApiError extends Error {
+  constructor(message: string, readonly code?: string) {
+    super(message);
+  }
+}
+
 async function apiCall<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...options,
@@ -39,20 +45,24 @@ async function apiCall<T>(path: string, options?: RequestInit): Promise<T> {
   });
   const body = await res.json();
   if (!res.ok) {
-    throw new Error(body.error || "Anfrage fehlgeschlagen");
+    throw new ApiError(body.error || "Anfrage fehlgeschlagen", body.code);
   }
   return body as T;
+}
+
+/** Stores the non-secret session hint after a server-side sign-in (e.g. e-mail confirmation). */
+export function rememberSession(session: AuthSession): void {
+  writeSession(session);
 }
 
 export class ApiAuthProvider implements AuthProvider {
   async register(input: RegisterInput): Promise<AuthResult> {
     try {
-      const result = await apiCall<{ session: AuthSession }>("/api/auth/register", {
+      await apiCall<{ status: string }>("/api/auth/register", {
         method: "POST",
         body: JSON.stringify(input),
       });
-      writeSession(result.session);
-      return { success: true, session: result.session };
+      return { success: true, pendingVerification: true };
     } catch (err) {
       return { success: false, error: err instanceof Error ? err.message : "Registrierung fehlgeschlagen" };
     }
@@ -67,7 +77,11 @@ export class ApiAuthProvider implements AuthProvider {
       writeSession(result.session);
       return { success: true, session: result.session };
     } catch (err) {
-      return { success: false, error: err instanceof Error ? err.message : "Anmeldung fehlgeschlagen" };
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Anmeldung fehlgeschlagen",
+        code: err instanceof ApiError ? err.code : undefined,
+      };
     }
   }
 

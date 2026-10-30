@@ -65,6 +65,12 @@ describe("Production config validation", () => {
     expect(optional.valid).toBe(false);
   });
 
+  it("forbids the dev outbox and internal tools in production", () => {
+    expect(validateProductionEnv({ ...validEnv, AMANAH_MAIL_TRANSPORT: "outbox" }).valid).toBe(false);
+    expect(validateProductionEnv({ ...validEnv, AMANAH_INTERNAL_TOOLS: "true" }).valid).toBe(false);
+    expect(validateProductionEnv(validEnv).warnings.some((w) => w.includes("mail transport"))).toBe(true);
+  });
+
   it("detects placeholder values", () => {
     expect(isPlaceholderValue("change-me-local-only")).toBe(true);
     expect(isPlaceholderValue("https://amanah.de")).toBe(false);
