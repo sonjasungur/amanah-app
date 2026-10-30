@@ -37,6 +37,7 @@ test.describe("Islamic knowledge centre", () => {
       "/wissen/islam/islamisches-erbrecht-grundlagen",
       "/wissen/redaktion",
       "/wissen/redaktion/paket/ik-start-01-faraid-grundlagen",
+      "/intern/pruefworkflow",
     ]) {
       const res = await page.goto(path);
       expect(res?.status(), path).toBe(404);
