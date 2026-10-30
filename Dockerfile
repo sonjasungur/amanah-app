@@ -1,5 +1,6 @@
 # AmanahOrdner — Production Dockerfile (Next.js standalone + Prisma)
-FROM node:20-alpine AS base
+# Node 24 LTS: matches local tests; Node 20 is end-of-life; needed for scripts/*.mjs that load .ts modules
+FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
