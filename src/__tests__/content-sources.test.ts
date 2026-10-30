@@ -52,7 +52,9 @@ describe("content sources, tiles, and article structure", () => {
   it("akhira section tiles and source disclosure are functional", () => {
     const akhira = read("src/components/marketing/akhira-section.tsx");
     expect(akhira).toContain("aria-expanded");
-    expect(akhira).toContain("/wissen/sadaqa-jariya");
+    expect(akhira).toContain('href: "/sadaqa-jariya"');
+    // Topic slugs under /wissen/ are unpublished until reviewed — no dead links.
+    expect(akhira).not.toMatch(/href: "\/wissen\/[a-z]/);
   });
 
   it("audit document exists", () => {

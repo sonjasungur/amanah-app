@@ -8,6 +8,7 @@ import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE } from "@/lib/domain/v
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { RelatedKnowledge } from "@/components/islamic-knowledge/related-knowledge";
 
 const statusConfig = {
   green: {
@@ -79,6 +80,13 @@ export default function TestamentPage() {
           </div>
         )}
       </Card>
+      <RelatedKnowledge
+        topics={[
+          { area: "faraid", subtopicId: "erbanteile" },
+          { area: "faraid", subtopicId: "wasiyya-drittel" },
+          { area: "islam-und-recht", subtopicId: "erbrecht-vergleich" },
+        ]}
+      />
     </ModulePage>
   );
 }

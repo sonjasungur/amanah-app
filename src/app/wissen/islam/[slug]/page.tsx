@@ -1,0 +1,108 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { ArticleActions } from "@/components/islamic-knowledge/article-actions";
+import { SourcesSection } from "@/components/knowledge/sources-section";
+import { Disclaimer } from "@/components/ui/disclaimer";
+import {
+  getKnowledgeArea,
+  getPublishedArticleBySlug,
+  getPublishedArticles,
+  getRelatedPublished,
+  lastReviewDate,
+} from "@/modules/islamic-knowledge";
+
+export function generateStaticParams() {
+  return getPublishedArticles().map((a) => ({ slug: a.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getPublishedArticleBySlug(slug);
+  if (!article) return { title: "Nicht gefunden — Mein Wille", robots: { index: false } };
+  return {
+    title: `${article.title} — Islamisches Wissen | Mein Wille`,
+    description: article.summary,
+    alternates: { canonical: `/wissen/islam/${article.slug}` },
+    openGraph: { title: article.title, description: article.summary, type: "article" },
+  };
+}
+
+const REVIEW_KIND_LABELS = { source: "Quellenprüfung", scholar: "Fachliche Prüfung", legal: "Juristische Prüfung" } as const;
+
+export default async function IslamicKnowledgeArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const article = getPublishedArticleBySlug(slug);
+  if (!article) notFound();
+
+  const area = getKnowledgeArea(article.area);
+  const related = getRelatedPublished(article);
+  const currentReviews = article.reviews.filter((r) => r.version === article.version);
+
+  return (
+    <article className="max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
+      <nav className="no-print mb-6">
+        <Link href="/wissen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 min-h-[44px]">
+          <ArrowLeft size={16} aria-hidden /> Islamisches Wissen
+        </Link>
+      </nav>
+
+      <p className="text-sm text-accent font-medium mb-2">Bereich {area.letter} · {area.title}</p>
+      <h1 className="text-3xl font-bold text-primary mb-3">{article.title}</h1>
+      <p className="text-lg text-muted mb-6">{article.summary}</p>
+      <ArticleActions title={article.title} />
+
+      <div className="mt-8 space-y-4 text-foreground leading-relaxed">
+        {article.body.split(/\n\s*\n/).map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+
+      {article.differingOpinions && (
+        <section className="mt-8 rounded-xl border border-border bg-card p-5">
+          <h2 className="font-semibold text-primary mb-2">Unterschiedliche Auffassungen</h2>
+          <p className="text-sm text-muted leading-relaxed">{article.differingOpinions}</p>
+        </section>
+      )}
+
+      {article.germanLawNote && (
+        <section className="mt-6 rounded-xl border border-accent/30 bg-sand p-5">
+          <h2 className="font-semibold text-primary mb-2">Deutsches Recht (getrennt von der islamischen Lehre)</h2>
+          <p className="text-sm text-muted leading-relaxed">{article.germanLawNote}</p>
+        </section>
+      )}
+
+      <SourcesSection sourceIds={article.sourceIds} reviewStatus="reviewed" defaultCollapsed={false} />
+
+      <section className="mt-8 text-sm text-muted" data-testid="article-reviews">
+        <h2 className="font-semibold text-foreground mb-2">Fachliche Prüfung</h2>
+        <ul className="space-y-1">
+          {currentReviews.map((r) => (
+            <li key={`${r.kind}-${r.reviewedAt}`}>
+              {REVIEW_KIND_LABELS[r.kind]}: {r.reviewer} · {new Date(r.reviewedAt).toLocaleDateString("de-DE")}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2">Version {article.version} · zuletzt überprüft am {new Date(lastReviewDate(article) ?? "").toLocaleDateString("de-DE")}</p>
+      </section>
+
+      {related.length > 0 && (
+        <section className="no-print mt-10">
+          <h2 className="font-semibold text-primary mb-3">Verwandte Artikel</h2>
+          <ul className="space-y-1">
+            {related.map((r) => (
+              <li key={r.id}>
+                <Link href={`/wissen/islam/${r.slug}`} className="text-primary hover:underline">{r.title}</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="mt-10">
+        <Disclaimer type="islamic" />
+      </div>
+    </article>
+  );
+}

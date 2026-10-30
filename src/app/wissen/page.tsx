@@ -18,6 +18,8 @@ import { WissenMobileFilter, WissenSidebar } from "@/components/wissen/wissen-si
 import { WissenTopicRow } from "@/components/wissen/wissen-topic-row";
 import { useWissenScrollSpy } from "@/components/wissen/use-wissen-scroll-spy";
 import { Button } from "@/components/ui/button";
+import { KnowledgeAreasOverview } from "@/components/islamic-knowledge/knowledge-areas-overview";
+import { searchPublished } from "@/modules/islamic-knowledge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Search } from "lucide-react";
 import { BRAND } from "@/lib/brand";
@@ -30,6 +32,7 @@ export default function WissenPage() {
   const [query, setQuery] = useState("");
   const topics = useMemo(() => enriched(), []);
   const isSearching = query.trim().length > 0;
+  const islamicResults = useMemo(() => searchPublished(query), [query]);
   const { active, scrollToSection } = useWissenScrollSpy(!isSearching);
 
   const filtered = useMemo(() => {
@@ -61,8 +64,8 @@ export default function WissenPage() {
       <div className="bg-card border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
           <PageHeader
-            title="Wissen, das dir Entscheidungen leichter macht"
-            description="Orientierung für islamische Vorsorge — von Notfall bis Akhira. Der fachliche Prüfstatus ist bei jedem Thema sichtbar."
+            title="Islamisches Wissen"
+            description="Erbe, Tod, Janazah und Vorsorge — dauerhaft kostenlos, ohne Konto und ohne Werbung. Veröffentlicht wird nur, was Quellen- und Gelehrtenprüfung durchlaufen hat."
           />
           <div className="relative max-w-2xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={22} aria-hidden />
@@ -77,6 +80,18 @@ export default function WissenPage() {
           </div>
         </div>
       </div>
+
+      {!isSearching && (
+        <section className="max-w-6xl mx-auto px-4 pt-8 md:pt-10" aria-labelledby="islamic-knowledge-heading">
+          <h2 id="islamic-knowledge-heading" className="text-section-title font-bold text-foreground mb-2">
+            Islamisches Wissenszentrum
+          </h2>
+          <p className="text-muted mb-5 max-w-3xl">
+            Eine Sadaqa Jāriya: Alle religiösen Artikel bleiben kostenlos. Islamische Lehre und deutsches Recht werden getrennt erklärt.
+          </p>
+          <KnowledgeAreasOverview />
+        </section>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
         {!isSearching && (
@@ -96,14 +111,20 @@ export default function WissenPage() {
             {isSearching ? (
               <section>
                 <h2 className="text-section-title font-bold text-foreground mb-5">
-                  Suchergebnisse ({filtered.length})
+                  Suchergebnisse ({filtered.length + islamicResults.length})
                 </h2>
                 <div className="space-y-3">
+                  {islamicResults.map((a) => (
+                    <Link key={a.id} href={`/wissen/islam/${a.slug}`} className="block rounded-xl border border-border bg-card p-4 hover:border-primary/30">
+                      <span className="font-semibold text-primary">{a.title}</span>
+                      <span className="block text-sm text-muted">{a.summary}</span>
+                    </Link>
+                  ))}
                   {filtered.map((a) => (
                     <WissenTopicRow key={a.id} article={a} />
                   ))}
                 </div>
-                {filtered.length === 0 && (
+                {filtered.length + islamicResults.length === 0 && (
                   <p className="text-center text-muted py-12 text-body">
                     Kein Thema gefunden — Suche anpassen.
                   </p>

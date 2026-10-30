@@ -106,7 +106,8 @@ describe("branding — Mein Wille", () => {
     expect(WISSEN_CATEGORIES).toHaveLength(4);
     expect(WISSEN_ENTRY_TOPIC_IDS).toHaveLength(3);
     const wissen = read("src/app/wissen/page.tsx");
-    expect(wissen).toContain("Wissen, das dir Entscheidungen leichter macht");
+    expect(wissen).toContain("Islamisches Wissenszentrum");
+    expect(wissen).toContain("KnowledgeAreasOverview");
     expect(wissen).toContain("Worüber möchtest du mehr wissen?");
     expect(wissen).toContain("Für deinen Einstieg");
     expect(wissen).toContain("WISSEN_SECTION_ID");

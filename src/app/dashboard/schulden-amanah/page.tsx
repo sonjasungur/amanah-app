@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea, Label, Select } from "@/components/ui/input";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Plus, Trash2 } from "lucide-react";
+import { RelatedKnowledge } from "@/components/islamic-knowledge/related-knowledge";
 
 const debtTypeLabels: Record<DebtAmanahItem["type"], string> = {
   debt_owed: "Schuld, die ich schulde",
@@ -55,6 +56,12 @@ export default function SchuldenAmanahPage() {
         Ordne offene Rechte und Pflichten — Schulden, Amanah, Zakat und Versprechen, die vor dem Tod erledigt werden sollten.
       </p>
       <Disclaimer className="mb-6" />
+      <RelatedKnowledge
+        topics={[
+          { area: "faraid", subtopicId: "schulden" },
+          { area: "vorsorge", subtopicId: "schulden-dokumentieren" },
+        ]}
+      />
 
       <Card className="mb-6">
         <CardTitle>Neuen Eintrag hinzufügen</CardTitle>

@@ -8,9 +8,9 @@ import { COLORS } from "@/lib/design-tokens";
 import { ArrowRight, BookOpen, Heart, Users } from "lucide-react";
 
 const AKHIRA_ITEMS = [
-  { icon: Heart, title: "Sadaqa Jariya planen", text: "Halte fest, welche dauerhaften Spenden und Projekte du wünschst.", href: "/wissen/sadaqa-jariya" },
-  { icon: BookOpen, title: "Wissen weitergeben", text: "Dokumentiere, welches nützliche Wissen deiner Familie helfen soll.", href: "/wissen/akhira-vorsorge" },
-  { icon: Users, title: "Familie informieren", text: "Erkläre, welche Unterstützung und Bittgebete du dir vorstellst.", href: "/wissen/familiengespraech" },
+  { icon: Heart, title: "Sadaqa Jariya planen", text: "Halte fest, welche dauerhaften Spenden und Projekte du wünschst.", href: "/sadaqa-jariya" },
+  { icon: BookOpen, title: "Wissen weitergeben", text: "Dokumentiere, welches nützliche Wissen deiner Familie helfen soll.", href: "/wissen" },
+  { icon: Users, title: "Familie informieren", text: "Erkläre, welche Unterstützung und Bittgebete du dir vorstellst.", href: "/dashboard/familie" },
 ];
 
 export function AkhiraSection() {
