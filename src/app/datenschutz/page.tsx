@@ -62,6 +62,8 @@ export default function DatenschutzPage() {
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Speicherung nur für dein angemeldetes Konto.</li>
             <li>„Amanah-Daten löschen“ entfernt nur Vorsorgedaten — nicht dein Benutzerkonto.</li>
+            <li>Unter „Einstellungen → Mein Konto“ kannst du alle Kontodaten herunterladen und dein Konto mit allen Angaben vollständig löschen.</li>
+            <li>Die Anmeldung erfolgt über ein technisch notwendiges Sitzungs-Cookie (HttpOnly), das beim Abmelden gelöscht wird.</li>
             <li>Session-Token werden gehasht gespeichert, keine Klartext-Passwörter in der Datenbank.</li>
           </ul>
         </section>
