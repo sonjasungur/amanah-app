@@ -10,6 +10,8 @@ Zugehörige Dokumente:
 - [03 – Recht und Islamrecht](03-recht-und-islamrecht.md) (Phase C, Recherche-Agent, Quellenstatus [V]/[S]/[K])
 - [04 – Islamisches Wissenszentrum](04-wissenszentrum.md) (P0-Ergänzung: Bestandsaufnahme, Struktur A–E, Freigabeprozess, Umsetzung)
 - [05 – Quellenprüfung](05-quellenpruefung.md) (Qur'an-/Hadith-/Behördenquellen, Prüfagent, 30.10.)
+- [06 – Sicherheit und Tests](06-sicherheit-und-tests.md) · [07 – Prisma 7](07-prisma7-analyse.md) · [08 – Vorsorge Plus](08-vorsorge-plus.md)
+- [09 – Quellenkorrektur](09-quellenkorrektur.md) ([09a Lizenzrecherche](09a-lizenz-und-texte-recherche.md)) · [10 – Redaktionsplan](10-redaktionsplan.md) · [11 – Offene Punkte Produktion](11-offene-punkte-produktion.md)
 - Vorheriges Audit: `docs/qa/professional-product-audit.md` (18.08.2026, untracked) – teilweise überholt, siehe 1.9
 
 Legende Belege: **[geprüft]** = in dieser Sitzung selbst ausgeführt/gelesen · **[laut Bericht]** = aus vorhandenem Bericht übernommen, nicht erneut ausgeführt · `NOT_RUN` = nicht ausgeführt.
