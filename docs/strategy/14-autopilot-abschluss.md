@@ -7,7 +7,7 @@ Keine externen Freigaben wurden erteilt oder ersetzt. Keine Produktion, keine ec
 
 | Branch | Stand | Remote |
 |---|---|---|
-| `feat/vorsorge-testament-foundation` (Integration) | 28 Commits seit `main` @ `1fdb5db` | bis `5d10314` auf GitHub (P0-Freigabe); die 13 Commits danach werden nach der Abschlussprüfung auf denselben Branch gepusht |
+| `feat/vorsorge-testament-foundation` (Integration) | 30 Commits seit `main` @ `1fdb5db` | vollständig auf GitHub (P0-Freigabe für diesen Branch; Push nach Abschlussprüfung und Secret-Scan) |
 | `chore/prisma-7` | `3c002f7` (auf `939afab`) | nur lokal (keine Push-Freigabe für diesen Branch) |
 | `main` | unverändert `1fdb5db` | kein Merge |
 | GitLab `origin` | unverändert | nicht synchronisiert |
