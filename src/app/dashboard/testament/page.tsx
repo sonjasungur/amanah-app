@@ -7,6 +7,7 @@ import { checkInheritance } from "@/lib/utils/progress";
 import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE } from "@/lib/domain/validation";
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { RelatedKnowledge } from "@/components/islamic-knowledge/related-knowledge";
 
@@ -79,6 +80,15 @@ export default function TestamentPage() {
             </ul>
           </div>
         )}
+      </Card>
+      <Card className="mt-6">
+        <CardTitle className="text-base">Testament vorbereiten</CardTitle>
+        <p className="text-sm text-muted">
+          Strukturierte Vorbereitung für das Gespräch mit Anwalt oder Notar – wird nach rechtlicher Prüfung freigeschaltet.
+        </p>
+        <Link href="/dashboard/testament/vorbereitung" className="text-sm text-primary font-semibold hover:underline">
+          Zur Vorbereitung
+        </Link>
       </Card>
       <RelatedKnowledge
         topics={[

@@ -67,6 +67,14 @@ test.describe("SEO", () => {
   });
 });
 
+test.describe("Testament preparation lock", () => {
+  test("questionnaire stays locked in standard builds", async ({ page }) => {
+    await page.goto("/dashboard/testament/vorbereitung");
+    await expect(page.getByTestId("testament-preparation-locked")).toBeVisible();
+    await expect(page.getByTestId("preparation-summary")).toHaveCount(0);
+  });
+});
+
 test.describe("Testament hints", () => {
   test("module shows neutral hints, never an approval", async ({ page }) => {
     await page.goto("/dashboard/testament");

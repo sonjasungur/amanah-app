@@ -99,6 +99,45 @@ describe("calculateFaraid (unreviewed prototype)", () => {
   });
 });
 
+describe("calculateFaraid: further textbook cases (unreviewed)", () => {
+  it.each<[string, Partial<FaraidCaseInput>, Record<string, string>]>([
+    ["husband and a son", { deceasedGender: "female", husband: true, sons: 1 }, { husband: "1/4", sons: "3/4" }],
+    ["wife, a daughter and the father", { wives: 1, daughters: 1, father: true }, { wives: "1/8", daughters: "1/2", father: "3/8" }],
+    ["mother and a son", { mother: true, sons: 1 }, { mother: "1/6", sons: "5/6" }],
+    ["father only", { father: true }, { father: "1" }],
+    ["three daughters and the father", { daughters: 3, father: true }, { daughters: "2/3", father: "1/3" }],
+    ["husband, two daughters, mother (ʿawl 13)", { deceasedGender: "female", husband: true, daughters: 2, mother: true }, { husband: "3/13", mother: "2/13", daughters: "8/13" }],
+    ["two sons, one daughter", { sons: 2, daughters: 1, father: true, mother: true }, { mother: "1/6", father: "1/6", sons: "8/15", daughters: "2/15" }],
+  ])("%s", (_label, override, expected) => {
+    const r = calculateFaraid({ ...base, ...override });
+    expect(shares(r)).toEqual(expected);
+    expect(total(r)).toBe("1");
+  });
+
+  it("blocks a residue without residuary heir (husband and mother)", () => {
+    expect(calculateFaraid({ ...base, deceasedGender: "female", husband: true, mother: true }).status).toBe("blocked");
+  });
+
+  it("property: every calculated case in scope sums to exactly 1 with positive shares", () => {
+    let calculated = 0;
+    for (const deceasedGender of ["male", "female"] as const)
+      for (const spouse of [0, 1])
+        for (let sons = 0; sons <= 3; sons++)
+          for (let daughters = 0; daughters <= 4; daughters++)
+            for (const father of [false, true])
+              for (const mother of [false, true]) {
+                const input = { ...base, deceasedGender, wives: deceasedGender === "male" ? spouse : 0, husband: deceasedGender === "female" && spouse === 1, sons, daughters, father, mother };
+                const r = calculateFaraid(input);
+                if (r.status !== "calculated") continue;
+                calculated++;
+                expect(total(r), JSON.stringify(input)).toBe("1");
+                expect(r.shares.every((s) => s.groupShare.num > 0)).toBe(true);
+                expect(r.steps.length).toBeGreaterThan(0);
+              }
+    expect(calculated).toBeGreaterThan(100);
+  });
+});
+
 describe("display gate", () => {
   it("never displays an unreviewed rule set, even with the flag on", () => {
     expect(SUNNI_NUCLEAR_FAMILY_V1.reviewStatus).toBe("unreviewed_draft");
