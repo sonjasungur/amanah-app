@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { checkInheritance } from "@/lib/utils/progress";
+import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE } from "@/lib/domain/validation";
 import {
   FullPrintView,
   PrintField,
@@ -78,13 +79,16 @@ function JanazahPrintView() {
 function TestamentPrintView() {
   const d = useAmanahStore();
   const result = checkInheritance(d.inheritanceProfile);
-  const statusLabel = { green: "Grün", yellow: "Gelb", red: "Rot" };
 
   return (
     <div className="print-view max-w-2xl mx-auto p-8 bg-white">
       <div className="text-center mb-8 border-b-2 border-primary pb-4">
         <h1 className="text-2xl font-bold text-primary">Testament-Vorbereitung</h1>
-        <p className="text-sm text-muted">Ampelcheck: {statusLabel[result.status]} — {new Date().toLocaleDateString("de-DE")}</p>
+        <p className="text-sm text-muted">Erste Hinweise: {INHERITANCE_HINT_LABELS[result.status]} — {new Date().toLocaleDateString("de-DE")}</p>
+        <p className="text-xs text-muted mt-2">
+          {INHERITANCE_HINT_NOTICE} Dieses Blatt ist kein Testament: Ein eigenhändiges Testament muss vollständig
+          handschriftlich geschrieben und unterschrieben sein (§ 2247 BGB).
+        </p>
       </div>
       <PrintSection title="Erbprofil">
         <PrintField label="Verheiratet" value={d.inheritanceProfile.married} />
@@ -159,7 +163,7 @@ const exportOptions: { id: PrintTarget; title: string; description: string; icon
   { id: "full", title: "Mein Wille als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
   { id: "notfallkarte", title: "Notfallkarte", description: "Kompakte Karte für den Notfall", icon: "🆘" },
   { id: "janazah", title: "Janazah-Bericht", description: "Islamische Bestattungswünsche", icon: "🕌" },
-  { id: "testament", title: "Testament-Bericht", description: "Erbprofil mit Ampelcheck", icon: "📜" },
+  { id: "testament", title: "Testament-Vorbereitung", description: "Erbprofil mit ersten Hinweisen (kein Testament)", icon: "📜" },
   { id: "schulden", title: "Schulden & Amanah", description: "Liste offener Rechte und Pflichten", icon: "⚖️" },
   { id: "familienbrief", title: "Familienbrief", description: "Brief an deine Familie", icon: "👨‍👩‍👧‍👦" },
 ];

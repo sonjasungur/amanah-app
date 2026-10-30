@@ -4,25 +4,26 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { ModulePage } from "@/components/modules/module-page";
 import { inheritanceFields } from "@/lib/modules/fields";
 import { checkInheritance } from "@/lib/utils/progress";
+import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE } from "@/lib/domain/validation";
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const statusConfig = {
   green: {
-    label: "Grün — Grundsätzlich in Ordnung",
+    label: INHERITANCE_HINT_LABELS.green,
     bg: "bg-success/10 border-success/30",
     text: "text-success",
     icon: CheckCircle,
   },
   yellow: {
-    label: "Gelb — Bitte mit Imam & Anwalt prüfen",
+    label: INHERITANCE_HINT_LABELS.yellow,
     bg: "bg-warning/10 border-warning/30",
     text: "text-warning",
     icon: Info,
   },
   red: {
-    label: "Rot — Möglicher Widerspruch zu Farāʾiḍ",
+    label: INHERITANCE_HINT_LABELS.red,
     bg: "bg-danger/10 border-danger/30",
     text: "text-danger",
     icon: AlertTriangle,
@@ -38,7 +39,7 @@ export default function TestamentPage() {
   return (
     <ModulePage
       title="Testament & Erbe"
-      description="Erfasse dein Erbprofil und prüfe Waṣiyya-Wünsche mit dem islamischen Ampelcheck."
+      description="Erfasse dein Erbprofil und erhalte erste Hinweise zu deinen Waṣiyya-Wünschen."
       section="inheritanceProfile"
       fields={inheritanceFields}
       disclaimerType="islamic"
@@ -46,8 +47,9 @@ export default function TestamentPage() {
       <Card className={cn("mt-6 border-2", config.bg)}>
         <CardTitle className={cn("flex items-center gap-2", config.text)}>
           <StatusIcon size={22} />
-          Ampelcheck: {config.label}
+          Erste Hinweise: {config.label}
         </CardTitle>
+        <p className="mt-2 text-sm text-muted">{INHERITANCE_HINT_NOTICE}</p>
 
         {result.warnings.length > 0 && (
           <div className="mt-4">

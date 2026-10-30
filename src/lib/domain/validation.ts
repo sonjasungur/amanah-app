@@ -171,18 +171,33 @@ export interface InheritanceCheckResult {
   recommendations: string[];
 }
 
+/**
+ * The check only scans a few keywords. Labels must never read as approval:
+ * "green" means "nothing flagged", not "legally or religiously in order".
+ */
+export const INHERITANCE_HINT_LABELS: Record<InheritanceTrafficLight, string> = {
+  green: "Keine Auffälligkeiten erkannt",
+  yellow: "Klärungsbedarf",
+  red: "Möglicher Konflikt mit festen Erbanteilen",
+};
+
+export const INHERITANCE_HINT_NOTICE =
+  "Automatische Stichwort-Hinweise, keine Prüfung. Sie ersetzen weder Gelehrte noch Anwalt/Notar und sind kein Testament.";
+
 export function checkInheritance(profile: InheritanceProfile): InheritanceCheckResult {
   const warnings: string[] = [];
   const recommendations: string[] = [];
   let status: InheritanceCheckResult["status"] = "green";
 
-  if (profile.desiredWasiyyah.toLowerCase().includes("alles") || profile.desiredWasiyyah.toLowerCase().includes("100%")) {
-    warnings.push("Alles an eine Person zu vererben widerspricht den festen Erbanteilen (Farāʾiḍ).");
+  const wasiyyah = profile.desiredWasiyyah.toLowerCase();
+
+  if (/\balles\b/.test(wasiyyah) || wasiyyah.includes("100%")) {
+    warnings.push("Alles an eine Person zu geben passt nach islamischen Erbgrundsätzen nicht zu den festen Erbanteilen (Farāʾiḍ).");
     status = "red";
   }
 
-  if (profile.desiredWasiyyah.toLowerCase().includes("tochter") && profile.desiredWasiyyah.toLowerCase().includes("ausschlie")) {
-    warnings.push("Töchter haben festgelegte Erbrechte — sie können nicht vollständig ausgeschlossen werden.");
+  if (/\btöchter|\btochter/.test(wasiyyah) && wasiyyah.includes("ausschlie")) {
+    warnings.push("Nach islamischen Erbgrundsätzen haben Töchter feste Erbanteile. Nach deutschem Recht kann zudem ein Pflichtteil bestehen.");
     status = "red";
   }
 
@@ -207,7 +222,7 @@ export function checkInheritance(profile: InheritanceProfile): InheritanceCheckR
   }
 
   if (warnings.length === 0 && recommendations.length === 0) {
-    recommendations.push("Grunddaten erfasst. Bitte Imam/Gelehrte und Anwalt/Notar für verbindliche Prüfung konsultieren.");
+    recommendations.push("Grunddaten erfasst. Für eine verbindliche Einschätzung Gelehrte und Anwalt/Notar hinzuziehen.");
   }
 
   return { status, warnings, recommendations };

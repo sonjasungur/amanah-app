@@ -20,7 +20,7 @@ export const pricingPlans: PricingPlan[] = [
     id: "complete",
     name: "Mein Wille Komplett",
     price: "79 €",
-    features: ["Alle Vorsorgebereiche", "Vollständiger PDF-Ordner", "JSON-Export", "Ampelcheck Erbe"],
+    features: ["Alle Vorsorgebereiche", "Vollständiger PDF-Ordner", "JSON-Export", "Erbprofil mit ersten Hinweisen"],
     category: "one_time",
   },
   {
