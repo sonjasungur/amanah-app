@@ -29,6 +29,8 @@ export const dashboardNavGroups: NavGroup[] = [
 ];
 
 export const moreNavItems: NavItem[] = [
+  { href: "/dashboard/personen", label: "Familie & Vertrauenspersonen" },
+  { href: "/dashboard/dokumente", label: "Wichtige Dokumente" },
   { href: "/dashboard/krankheit", label: "Krankheit & Patientenverfügung" },
   { href: "/dashboard/vollmacht", label: "Vorsorgevollmacht" },
   { href: "/dashboard/janazah", label: "Janazah-Wünsche" },
