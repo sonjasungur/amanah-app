@@ -2,6 +2,10 @@ import type { AuthProvider, AuthResult, AuthSession, LoginInput, RegisterInput }
 
 const SESSION_KEY = "amanah-auth-session";
 
+/**
+ * The session token is an HttpOnly cookie set by the server. Locally we keep only a
+ * non-secret hint (user + expiry) so the UI can render before /api/auth/me answers.
+ */
 function readSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
   try {
@@ -21,7 +25,8 @@ function readSession(): AuthSession | null {
 function writeSession(session: AuthSession | null): void {
   if (typeof window === "undefined") return;
   if (session) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    const hint: AuthSession = { user: session.user, expiresAt: session.expiresAt };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(hint));
   } else {
     localStorage.removeItem(SESSION_KEY);
   }
@@ -67,16 +72,10 @@ export class ApiAuthProvider implements AuthProvider {
   }
 
   async logout(): Promise<void> {
-    const session = readSession();
-    if (session) {
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.token}` },
-        });
-      } catch {
-        // ignore network errors on logout
-      }
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // ignore network errors on logout
     }
     writeSession(null);
   }
@@ -85,9 +84,7 @@ export class ApiAuthProvider implements AuthProvider {
     const session = readSession();
     if (!session) return null;
     try {
-      const result = await apiCall<{ session: AuthSession }>("/api/auth/me", {
-        headers: { Authorization: `Bearer ${session.token}` },
-      });
+      const result = await apiCall<{ session: AuthSession }>("/api/auth/me");
       writeSession(result.session);
       return result.session;
     } catch {
@@ -99,6 +96,7 @@ export class ApiAuthProvider implements AuthProvider {
 
 export const apiAuthProvider = new ApiAuthProvider();
 
-export function getAuthToken(): string | null {
-  return readSession()?.token ?? null;
+/** True while a (local demo or API) session hint exists. The server stays authoritative. */
+export function hasAuthSession(): boolean {
+  return readSession() !== null;
 }

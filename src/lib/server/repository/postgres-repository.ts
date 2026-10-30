@@ -120,6 +120,15 @@ export class PostgresRepository implements ServerRepository {
     await prisma.amanahData.deleteMany({ where: { userId } });
   }
 
+  async deleteUser(userId: string): Promise<void> {
+    // Sessions and amanah_data cascade (onDelete: Cascade); explicit for clarity.
+    await prisma.$transaction([
+      prisma.session.deleteMany({ where: { userId } }),
+      prisma.amanahData.deleteMany({ where: { userId } }),
+      prisma.user.deleteMany({ where: { id: userId } }),
+    ]);
+  }
+
   async checkConnection(): Promise<boolean> {
     try {
       await prisma.$queryRaw`SELECT 1`;

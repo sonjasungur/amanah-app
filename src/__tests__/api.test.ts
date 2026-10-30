@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { browserRequest, sessionCookieFrom } from "./session-helpers";
 import { GET as healthGET } from "@/app/api/health/route";
 import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { POST as loginPOST } from "@/app/api/auth/login/route";
@@ -40,7 +41,7 @@ describe("API auth + amanah", () => {
     const email = `api-${Date.now()}@test.de`;
 
     const regRes = await registerPOST(
-      new Request("http://localhost/api/auth/register", {
+      browserRequest("http://localhost/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: "testpass1", name: "API Test" }),
@@ -48,10 +49,11 @@ describe("API auth + amanah", () => {
     );
     expect(regRes.status).toBe(201);
     const regBody = await regRes.json();
-    const token = regBody.session.token as string;
+    const cookie = sessionCookieFrom(regRes)!;
+    expect(regBody.session.token).toBeUndefined();
 
     const loginRes = await loginPOST(
-      new Request("http://localhost/api/auth/login", {
+      browserRequest("http://localhost/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: "testpass1" }),
@@ -60,27 +62,23 @@ describe("API auth + amanah", () => {
     expect(loginRes.status).toBe(200);
 
     const getEmpty = await amanahGET(
-      new Request("http://localhost/api/amanah", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", {}, cookie)
     );
     expect(getEmpty.status).toBe(200);
 
     const putRes = await amanahPUT(
-      new Request("http://localhost/api/amanah", {
+      browserRequest("http://localhost/api/amanah", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(demoAmanahData),
-      })
+      }, cookie)
     );
     expect(putRes.status).toBe(200);
     const putBody = await putRes.json();
     expect(putBody.data.userProfile.name).toBe("Ahmed Demo");
 
     const getRes = await amanahGET(
-      new Request("http://localhost/api/amanah", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", {}, cookie)
     );
     const getBody = await getRes.json();
     expect(getBody.data.userProfile.name).toBe("Ahmed Demo");

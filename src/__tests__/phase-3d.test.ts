@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { browserRequest, sessionCookieFrom } from "./session-helpers";
 import { GET as healthGET } from "@/app/api/health/route";
 import { DELETE as amanahDELETE, GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
 import { POST as registerPOST } from "@/app/api/auth/register/route";
@@ -44,37 +45,31 @@ describe("DELETE /api/amanah", () => {
   it("deletes amanah data but keeps user session valid", async () => {
     const email = `del-${Date.now()}@test.de`;
     const regRes = await registerPOST(
-      new Request("http://localhost/api/auth/register", {
+      browserRequest("http://localhost/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: "testpass1", name: "Delete Test" }),
       })
     );
-    const { session } = await regRes.json();
-    const token = session.token as string;
+    const cookie = sessionCookieFrom(regRes)!;
 
     await amanahPUT(
-      new Request("http://localhost/api/amanah", {
+      browserRequest("http://localhost/api/amanah", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(demoAmanahData),
-      })
+      }, cookie)
     );
 
     const delRes = await amanahDELETE(
-      new Request("http://localhost/api/amanah", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", { method: "DELETE" }, cookie)
     );
     expect(delRes.status).toBe(200);
     const delBody = await delRes.json();
     expect(delBody.success).toBe(true);
 
     const getRes = await amanahGET(
-      new Request("http://localhost/api/amanah", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", {}, cookie)
     );
     expect(getRes.status).toBe(200);
     const getBody = await getRes.json();

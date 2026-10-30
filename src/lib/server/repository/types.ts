@@ -25,5 +25,7 @@ export interface ServerRepository {
   saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData>;
   patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData>;
   deleteAmanahData(userId: string): Promise<void>;
+  /** Removes the user, all sessions and all stored data (Art. 17 DSGVO). */
+  deleteUser(userId: string): Promise<void>;
   checkConnection?(): Promise<boolean>;
 }

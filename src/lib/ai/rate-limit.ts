@@ -18,6 +18,11 @@ export function checkRateLimit(key: string, max = MAX): { allowed: boolean; retr
   return { allowed: true };
 }
 
+/** Clears all counters (tests only). */
+export function resetRateLimits(): void {
+  hits.clear();
+}
+
 const eventLog: { feature: AiFeature; provider: AiProviderName; createdAt: string; success: boolean; error?: string }[] = [];
 
 export function logAiEvent(

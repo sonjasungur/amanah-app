@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getServerRepository } from "@/lib/server/repository";
-import { getBearerToken } from "@/lib/server/auth-utils";
+import { crossOriginRejected } from "@/lib/server/auth-utils";
+import { clearSessionCookie, isSameOriginRequest, readSessionToken } from "@/lib/server/session-cookie";
 
 export async function POST(request: Request) {
-  const token = getBearerToken(request);
+  if (!isSameOriginRequest(request)) return crossOriginRejected();
+  const token = readSessionToken(request);
   if (token) {
     await getServerRepository().deleteSession(token);
   }
-  return NextResponse.json({ success: true });
+  const response = NextResponse.json({ success: true });
+  clearSessionCookie(response);
+  return response;
 }

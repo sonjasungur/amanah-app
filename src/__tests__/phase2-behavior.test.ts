@@ -103,10 +103,10 @@ describe("getActiveStorageLabel: logic via source inspection", () => {
     expect(storageConfig).toContain("return \"local\"");
   });
 
-  it("returns 'api' when storageMode is api and token exists", () => {
+  it("returns 'api' when storageMode is api and a session exists", () => {
     expect(storageConfig).toContain("return \"api\"");
     expect(storageConfig).toContain("getStorageMode() === \"api\"");
-    expect(storageConfig).toContain("getAuthToken()");
+    expect(storageConfig).toContain("hasAuthSession()");
   });
 });
 

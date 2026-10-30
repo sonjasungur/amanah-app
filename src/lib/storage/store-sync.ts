@@ -1,6 +1,6 @@
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
-import { getAuthToken } from "@/lib/auth/api-auth-provider";
+import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import { getStorageMode } from "@/lib/auth/config";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
@@ -14,7 +14,7 @@ export function getStorageLocationLabel(): StorageLocationLabel {
 }
 
 export function isRemotePersistenceActive(): boolean {
-  return getStorageMode() === "api" && Boolean(getAuthToken());
+  return getStorageMode() === "api" && hasAuthSession();
 }
 
 export function hasMeaningfulLocalData(data: AmanahOrdnerData): boolean {

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
-import { getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
+import { crossOriginRejected, getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
+import { isSameOriginRequest, readSessionToken, setSessionCookie } from "@/lib/server/session-cookie";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 
 const REGISTRATIONS_PER_MINUTE = 5;
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginRejected();
   try {
     if (!isPublicRegistrationEnabled()) {
       return NextResponse.json(
@@ -32,8 +34,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 409 });
     }
 
+    const previous = readSessionToken(request);
+    if (previous) await repo.deleteSession(previous);
+
     const session = await repo.createSession(result.id);
-    return NextResponse.json(sessionToResponse(session, result), { status: 201 });
+    const response = NextResponse.json(sessionToResponse(session, result), { status: 201 });
+    setSessionCookie(response, session.token, session.expiresAt);
+    return response;
   } catch {
     return NextResponse.json({ error: "Registrierung fehlgeschlagen." }, { status: 500 });
   }

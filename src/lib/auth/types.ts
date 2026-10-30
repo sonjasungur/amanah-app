@@ -7,7 +7,8 @@ export interface AuthUser {
 
 export interface AuthSession {
   user: AuthUser;
-  token: string;
+  /** Only the local browser demo keeps a token. API sessions live in an HttpOnly cookie. */
+  token?: string;
   expiresAt: string;
 }
 

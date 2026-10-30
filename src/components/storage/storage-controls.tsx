@@ -4,7 +4,7 @@ import { useAmanahStore, resetAmanahStore } from "@/lib/store/use-amanah-store";
 import { exportToJson, exportEmergencyFolder, importFromJson } from "@/lib/storage/amanah-storage";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { getActiveStorageLabel } from "@/lib/storage/storage-config";
-import { getAuthToken } from "@/lib/auth/api-auth-provider";
+import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import {
   openReadableEmergencyExport,
   downloadReadableEmergencyMarkdown,
@@ -30,15 +30,13 @@ export function StorageControls() {
 
   const handleDeleteServerData = async () => {
     if (!confirm(t("storage.deleteServerConfirm"))) return;
-    const token = getAuthToken();
-    if (!token) {
+        if (!hasAuthSession()) {
       alert(t("storage.deleteServerNoAuth"));
       return;
     }
     try {
       const res = await fetch("/api/amanah", {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Fehler");

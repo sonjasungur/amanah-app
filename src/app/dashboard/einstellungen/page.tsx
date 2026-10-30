@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { StorageControls } from "@/components/storage/storage-controls";
+import { AccountControls } from "@/components/storage/account-controls";
 import { AiConsentBanner } from "@/components/ai/ai-consent-banner";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { resetAmanahStore } from "@/lib/store/use-amanah-store";
 import { getActiveStorageLabel } from "@/lib/storage/storage-config";
-import { getAuthToken } from "@/lib/auth/api-auth-provider";
+import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import { isAiUiEnabled } from "@/lib/ai/config";
 import { useI18n } from "@/lib/i18n/context";
 import { HardDrive, Cloud, Trash2, Shield } from "lucide-react";
@@ -28,8 +29,7 @@ export default function EinstellungenPage() {
     setIsDeleting(true);
     try {
       if (isApi) {
-        const token = getAuthToken();
-        if (!token) {
+                if (!hasAuthSession()) {
           alert(t("storage.deleteServerNoAuth"));
           setIsDeleting(false);
           setConfirmDelete(false);
@@ -37,7 +37,6 @@ export default function EinstellungenPage() {
         }
         const res = await fetch("/api/amanah", {
           method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error || "Fehler");
@@ -123,6 +122,13 @@ export default function EinstellungenPage() {
           )}
         </div>
       </Card>
+
+      {isApi && (
+        <Card className="border-2 border-border/80 shadow-sm" data-testid="settings-account">
+          <CardTitle className="text-card-title text-primary-dark mb-3">Mein Konto</CardTitle>
+          <AccountControls />
+        </Card>
+      )}
 
       <Card className="border-2 border-border/80 shadow-sm" data-testid="settings-ai-section">
         <div className="flex items-center gap-3 mb-3">

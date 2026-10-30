@@ -11,7 +11,7 @@ vi.mock("@/lib/auth/config", () => ({
 }));
 
 vi.mock("@/lib/auth/api-auth-provider", () => ({
-  getAuthToken: vi.fn(() => null),
+  hasAuthSession: vi.fn(() => false),
 }));
 
 vi.mock("@/lib/storage/amanah-storage", () => ({
@@ -85,11 +85,11 @@ describe("store sync helpers", () => {
 
   it("does not mark saved when remote save fails", async () => {
     const { getStorageMode } = await import("@/lib/auth/config");
-    const { getAuthToken } = await import("@/lib/auth/api-auth-provider");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
     const { saveAmanahData } = await import("@/lib/storage/amanah-storage");
 
     vi.mocked(getStorageMode).mockReturnValue("api");
-    vi.mocked(getAuthToken).mockReturnValue("token");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
     vi.mocked(saveAmanahData).mockRejectedValueOnce(new Error("Speichern auf dem Server fehlgeschlagen."));
 
     useAmanahStore.getState().updateField("janazahWishes", {

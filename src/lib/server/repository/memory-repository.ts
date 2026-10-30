@@ -1,12 +1,12 @@
 import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { normalizeData } from "@/lib/domain/migration";
-import { hashPasswordSync } from "@/lib/auth/hash";
 import type { RepositorySession, RepositoryUser, ServerRepository } from "./types";
 import {
   getMemoryStore,
   createSessionToken,
 } from "../memory-store";
+import { hashPasswordServer, verifyPasswordServer } from "../crypto";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -24,10 +24,10 @@ export class MemoryRepository implements ServerRepository {
     }
 
     const user: RepositoryUser = {
-      id: `user-${Date.now()}`,
+      id: `user-${crypto.randomUUID()}`,
       email: normalizedEmail,
       name: name.trim() || normalizedEmail.split("@")[0],
-      passwordHash: hashPasswordSync(password),
+      passwordHash: await hashPasswordServer(password),
       createdAt: new Date().toISOString(),
     };
     store.users.set(user.id, user);
@@ -41,7 +41,7 @@ export class MemoryRepository implements ServerRepository {
     if (!userId) return null;
     const user = store.users.get(userId);
     if (!user) return null;
-    return hashPasswordSync(password) === user.passwordHash ? user : null;
+    return (await verifyPasswordServer(password, user.passwordHash)) ? user : null;
   }
 
   async createSession(userId: string): Promise<RepositorySession> {
@@ -92,6 +92,17 @@ export class MemoryRepository implements ServerRepository {
 
   async deleteAmanahData(userId: string): Promise<void> {
     getMemoryStore().amanahData.delete(userId);
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    const store = getMemoryStore();
+    const user = store.users.get(userId);
+    for (const [token, session] of store.sessions) {
+      if (session.userId === userId) store.sessions.delete(token);
+    }
+    store.amanahData.delete(userId);
+    store.users.delete(userId);
+    if (user) store.usersByEmail.delete(user.email);
   }
 
   async checkConnection(): Promise<boolean> {

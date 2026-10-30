@@ -1,16 +1,12 @@
 import { normalizeData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
-import { getAuthToken } from "@/lib/auth/api-auth-provider";
+import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import type { StorageProvider } from "./types";
 
 export class ApiStorageProvider implements StorageProvider {
   private getHeaders(): HeadersInit {
-    const token = getAuthToken();
-    if (!token) throw new Error("Nicht angemeldet — Server-Speicherung erfordert Anmeldung.");
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
+    if (!hasAuthSession()) throw new Error("Nicht angemeldet — Server-Speicherung erfordert Anmeldung.");
+    return { "Content-Type": "application/json" };
   }
 
   async load(): Promise<AmanahOrdnerData | null> {

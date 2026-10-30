@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
+import { crossOriginRejected, getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
+import { isSameOriginRequest, readSessionToken, setSessionCookie } from "@/lib/server/session-cookie";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 
 const LOGIN_ATTEMPTS_PER_MINUTE = 10;
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return crossOriginRejected();
   try {
     const body = await request.json();
     const { email, password } = body as { email?: string; password?: string };
@@ -26,8 +28,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "E-Mail oder Passwort ungültig." }, { status: 401 });
     }
 
+    // Session fixation: never reuse a token presented before authentication.
+    const previous = readSessionToken(request);
+    if (previous) await repo.deleteSession(previous);
+
     const session = await repo.createSession(user.id);
-    return NextResponse.json(sessionToResponse(session, user));
+    const response = NextResponse.json(sessionToResponse(session, user));
+    setSessionCookie(response, session.token, session.expiresAt);
+    return response;
   } catch {
     return NextResponse.json({ error: "Anmeldung fehlgeschlagen." }, { status: 500 });
   }
