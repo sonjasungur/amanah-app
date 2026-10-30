@@ -62,6 +62,9 @@ export function validateProductionEnv(
     errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
   }
 
+  if (env.AMANAH_BILLING_MODE === "sandbox") {
+    errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }

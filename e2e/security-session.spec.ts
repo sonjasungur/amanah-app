@@ -5,7 +5,7 @@
  * NEXT_PUBLIC_AUTH_MODE=api NEXT_PUBLIC_STORAGE_MODE=api
  * NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED=true AMANAH_PUBLIC_REGISTRATION_ENABLED=true
  * SESSION_SECRET=<32+ chars>, AMANAH_MAIL_TRANSPORT=outbox, AMANAH_INTERNAL_TOOLS=true,
- * AMANAH_PUBLIC_BASE_URL=http://127.0.0.1:3099 and SECURITY_API_E2E=true.
+ * AMANAH_PUBLIC_BASE_URL=http://127.0.0.1:3099, AMANAH_BILLING_MODE=sandbox and SECURITY_API_E2E=true.
  * Mails go to the in-memory outbox only (no real e-mails).
  */
 import { test, expect, request as playwrightRequest, type BrowserContext, type Page } from "@playwright/test";
@@ -138,13 +138,26 @@ test("password reset via e-mail link sets a new password", async () => {
   expect(oldLogin.status()).toBe(401);
 });
 
-test("account export downloads all data; deletion needs the password and removes the account", async ({ baseURL }) => {
+test("sandbox purchase unlocks Vorsorge Plus without real payment", async () => {
   await page.goto("/login");
   await page.getByPlaceholder("name@beispiel.de").fill(EMAIL);
   await page.getByPlaceholder("••••••••").fill(NEW_PASSWORD);
   await page.getByRole("button", { name: "Anmelden" }).last().click();
   await expect(page).toHaveURL(/\/dashboard/);
 
+  await page.goto("/dashboard/einstellungen");
+  await expect(page.getByTestId("billing-controls")).toContainText("nicht gebucht");
+  await page.getByTestId("billing-buy-sandbox").click();
+  await expect(page).toHaveURL(/\/kasse\/sandbox\?ref=sbx_/);
+  await expect(page.getByText("TESTMODUS – es findet keine echte Zahlung statt.")).toBeVisible();
+  await page.getByTestId("sandbox-pay-success").click();
+  await expect(page.getByTestId("sandbox-result")).toHaveText("Status: paid");
+
+  await page.goto("/dashboard/einstellungen");
+  await expect(page.getByTestId("billing-controls")).toContainText("freigeschaltet (Test)");
+});
+
+test("account export downloads all data; deletion needs the password and removes the account", async ({ baseURL }) => {
   await page.goto("/dashboard/einstellungen");
   await expect(page.getByTestId("settings-account")).toBeVisible();
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByTestId("account-export-link").click()]);

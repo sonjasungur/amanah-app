@@ -20,6 +20,20 @@ export interface RepositoryConsent {
 
 export type AuthTokenPurpose = "verify_email" | "reset_password";
 
+export type PurchaseStatus = "pending" | "paid" | "failed" | "refunded";
+
+export interface RepositoryPurchase {
+  id: string;
+  userId: string | null;
+  productId: string;
+  provider: string;
+  providerRef: string;
+  status: PurchaseStatus;
+  amountCents: number;
+  currency: string;
+  createdAt: string;
+}
+
 export interface RepositorySession {
   token: string;
   userId: string;
@@ -51,5 +65,12 @@ export interface ServerRepository {
   listConsents(userId: string): Promise<RepositoryConsent[]>;
   grantConsent(userId: string, purpose: string, textVersion: string): Promise<RepositoryConsent>;
   revokeConsent(userId: string, purpose: string): Promise<void>;
+  createPurchase(input: Omit<RepositoryPurchase, "id" | "createdAt">): Promise<RepositoryPurchase>;
+  getPurchaseByRef(providerRef: string): Promise<RepositoryPurchase | null>;
+  /** Conditional status change; returns false if the purchase was not in one of `from`. */
+  transitionPurchase(providerRef: string, from: PurchaseStatus[], to: PurchaseStatus): Promise<boolean>;
+  listPurchases(userId: string): Promise<RepositoryPurchase[]>;
+  /** Stores a provider event id; returns false if it was already processed (idempotency). */
+  recordPaymentEvent(eventId: string, provider: string, type: string, providerRef: string): Promise<boolean>;
   checkConnection?(): Promise<boolean>;
 }

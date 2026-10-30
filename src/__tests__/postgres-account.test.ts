@@ -73,4 +73,22 @@ describe.runIf(runIntegration)("Postgres: accounts, tokens and consent", () => {
     expect(await prisma.consentRecord.count({ where: { userId: user.id } })).toBe(0);
     expect(await prisma.authToken.count({ where: { userId: user.id } })).toBe(0);
   });
+
+  it("purchases: conditional transitions, idempotent events, anonymised on account deletion", async () => {
+    const { repo, user } = await setup();
+    const ref = `sbx_${crypto.randomUUID()}`;
+    await repo.createPurchase({ userId: user.id, productId: "vorsorge_plus", provider: "sandbox", providerRef: ref, status: "pending", amountCents: 2900, currency: "EUR" });
+    expect(await repo.transitionPurchase(ref, ["paid"], "refunded")).toBe(false);
+    expect(await repo.transitionPurchase(ref, ["pending"], "paid")).toBe(true);
+    expect((await repo.listPurchases(user.id))[0].status).toBe("paid");
+
+    const eventId = `evt_${crypto.randomUUID()}`;
+    expect(await repo.recordPaymentEvent(eventId, "sandbox", "payment_succeeded", ref)).toBe(true);
+    expect(await repo.recordPaymentEvent(eventId, "sandbox", "payment_succeeded", ref)).toBe(false);
+
+    await repo.deleteUser(user.id);
+    const kept = await repo.getPurchaseByRef(ref);
+    expect(kept?.userId).toBeNull();
+    expect(kept?.status).toBe("paid");
+  });
 });

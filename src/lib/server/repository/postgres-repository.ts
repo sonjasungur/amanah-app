@@ -11,7 +11,16 @@ import {
   normalizeEmail,
   verifyPasswordServer,
 } from "../crypto";
-import type { AuthTokenPurpose, RepositoryConsent, RepositorySession, RepositoryUser, ServerRepository } from "./types";
+import type {
+  AuthTokenPurpose,
+  PurchaseStatus,
+  RepositoryConsent,
+  RepositoryPurchase,
+  RepositorySession,
+  RepositoryUser,
+  ServerRepository,
+} from "./types";
+import { Prisma } from "@prisma/client";
 
 const SESSION_DAYS = 30;
 
@@ -171,6 +180,35 @@ export class PostgresRepository implements ServerRepository {
     await prisma.consentRecord.updateMany({ where: { userId, purpose, revokedAt: null }, data: { revokedAt: new Date() } });
   }
 
+  async createPurchase(input: Omit<RepositoryPurchase, "id" | "createdAt">): Promise<RepositoryPurchase> {
+    return toRepositoryPurchase(await prisma.purchase.create({ data: input }));
+  }
+
+  async getPurchaseByRef(providerRef: string): Promise<RepositoryPurchase | null> {
+    const row = await prisma.purchase.findUnique({ where: { providerRef } });
+    return row ? toRepositoryPurchase(row) : null;
+  }
+
+  async transitionPurchase(providerRef: string, from: PurchaseStatus[], to: PurchaseStatus): Promise<boolean> {
+    const { count } = await prisma.purchase.updateMany({ where: { providerRef, status: { in: from } }, data: { status: to } });
+    return count === 1;
+  }
+
+  async listPurchases(userId: string): Promise<RepositoryPurchase[]> {
+    const rows = await prisma.purchase.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
+    return rows.map(toRepositoryPurchase);
+  }
+
+  async recordPaymentEvent(eventId: string, provider: string, type: string, providerRef: string): Promise<boolean> {
+    try {
+      await prisma.paymentEvent.create({ data: { id: eventId, provider, type, providerRef } });
+      return true;
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return false;
+      throw e;
+    }
+  }
+
   async deleteUser(userId: string): Promise<void> {
     // Sessions and amanah_data cascade (onDelete: Cascade); explicit for clarity.
     await prisma.$transaction([
@@ -208,6 +246,20 @@ function toRepositoryUser(user: {
     createdAt: user.createdAt.toISOString(),
     emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
   };
+}
+
+function toRepositoryPurchase(row: {
+  id: string;
+  userId: string | null;
+  productId: string;
+  provider: string;
+  providerRef: string;
+  status: string;
+  amountCents: number;
+  currency: string;
+  createdAt: Date;
+}): RepositoryPurchase {
+  return { ...row, status: row.status as PurchaseStatus, createdAt: row.createdAt.toISOString() };
 }
 
 function toRepositoryConsent(row: {

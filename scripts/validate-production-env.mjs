@@ -65,6 +65,9 @@ export function validateProductionEnv(env = process.env) {
     errors.push("POSTGRES_PASSWORD still contains a placeholder value");
   }
 
+  if (env.AMANAH_BILLING_MODE === "sandbox") {
+    errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }

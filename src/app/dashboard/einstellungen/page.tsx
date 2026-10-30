@@ -4,6 +4,7 @@ import { useState } from "react";
 import { StorageControls } from "@/components/storage/storage-controls";
 import { AccountControls } from "@/components/storage/account-controls";
 import { ConsentControls } from "@/components/storage/consent-controls";
+import { BillingControls } from "@/components/billing/billing-controls";
 import { AiConsentBanner } from "@/components/ai/ai-consent-banner";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -129,6 +130,9 @@ export default function EinstellungenPage() {
           <CardTitle className="text-card-title text-primary-dark mb-3">Mein Konto</CardTitle>
           <div className="mb-6">
             <ConsentControls />
+          </div>
+          <div className="mb-6">
+            <BillingControls />
           </div>
           <AccountControls />
         </Card>

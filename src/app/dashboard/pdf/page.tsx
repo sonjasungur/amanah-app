@@ -13,6 +13,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { FileText, Printer } from "lucide-react";
+import { PlusGate } from "@/components/billing/plus-gate";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -202,9 +203,17 @@ export default function PdfPage() {
               <div className="flex-1">
                 <CardTitle className="text-base">{opt.title}</CardTitle>
                 <p className="text-sm text-muted mb-4">{opt.description}</p>
-                <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
-                  <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
-                </Button>
+                {opt.id === "full" ? (
+                  <PlusGate feature="complete_pdf_folder">
+                    <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
+                      <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
+                    </Button>
+                  </PlusGate>
+                ) : (
+                  <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
+                    <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
+                  </Button>
+                )}
               </div>
             </div>
           </Card>

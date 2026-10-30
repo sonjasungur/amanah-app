@@ -43,6 +43,8 @@ interface MemoryStoreState {
   consents: StoredConsent[];
   /** keyed by token hash */
   authTokens: Map<string, StoredAuthToken>;
+  purchases: import("./repository/types").RepositoryPurchase[];
+  paymentEvents: Set<string>;
 }
 
 declare global {
@@ -57,6 +59,8 @@ function createStore(): MemoryStoreState {
     amanahData: new Map(),
     consents: [],
     authTokens: new Map(),
+    purchases: [],
+    paymentEvents: new Set(),
   };
 }
 

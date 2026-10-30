@@ -1,7 +1,15 @@
 import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { normalizeData } from "@/lib/domain/migration";
-import type { AuthTokenPurpose, RepositoryConsent, RepositorySession, RepositoryUser, ServerRepository } from "./types";
+import type {
+  AuthTokenPurpose,
+  PurchaseStatus,
+  RepositoryConsent,
+  RepositoryPurchase,
+  RepositorySession,
+  RepositoryUser,
+  ServerRepository,
+} from "./types";
 import {
   getMemoryStore,
   createSessionToken,
@@ -106,6 +114,8 @@ export class MemoryRepository implements ServerRepository {
       if (token.userId === userId) store.authTokens.delete(hash);
     }
     store.consents = store.consents.filter((c) => c.userId !== userId);
+    // Purchases are kept anonymised (possible retention duties).
+    for (const p of store.purchases) if (p.userId === userId) p.userId = null;
     store.amanahData.delete(userId);
     store.users.delete(userId);
     if (user) store.usersByEmail.delete(user.email);
@@ -164,6 +174,35 @@ export class MemoryRepository implements ServerRepository {
     const record = { id: crypto.randomUUID(), userId, purpose, textVersion, grantedAt: new Date().toISOString(), revokedAt: null };
     getMemoryStore().consents.push(record);
     return toConsent(record);
+  }
+
+  async createPurchase(input: Omit<RepositoryPurchase, "id" | "createdAt">): Promise<RepositoryPurchase> {
+    const purchase = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+    getMemoryStore().purchases.push(purchase);
+    return { ...purchase };
+  }
+
+  async getPurchaseByRef(providerRef: string): Promise<RepositoryPurchase | null> {
+    const p = getMemoryStore().purchases.find((x) => x.providerRef === providerRef);
+    return p ? { ...p } : null;
+  }
+
+  async transitionPurchase(providerRef: string, from: PurchaseStatus[], to: PurchaseStatus): Promise<boolean> {
+    const p = getMemoryStore().purchases.find((x) => x.providerRef === providerRef);
+    if (!p || !from.includes(p.status)) return false;
+    p.status = to;
+    return true;
+  }
+
+  async listPurchases(userId: string): Promise<RepositoryPurchase[]> {
+    return getMemoryStore().purchases.filter((p) => p.userId === userId).map((p) => ({ ...p }));
+  }
+
+  async recordPaymentEvent(eventId: string): Promise<boolean> {
+    const events = getMemoryStore().paymentEvents;
+    if (events.has(eventId)) return false;
+    events.add(eventId);
+    return true;
   }
 
   async revokeConsent(userId: string, purpose: string): Promise<void> {
