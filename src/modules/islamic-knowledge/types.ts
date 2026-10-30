@@ -29,6 +29,34 @@ export interface LegacyOrigin {
   claimedStatus?: string;
 }
 
+export type SunniSchool = "hanafi" | "maliki" | "shafii" | "hanbali";
+
+export const SUNNI_SCHOOL_LABELS: Record<SunniSchool, string> = {
+  hanafi: "Hanafitisch",
+  maliki: "Malikitisch",
+  shafii: "Schafiitisch",
+  hanbali: "Hanbalitisch",
+};
+
+/**
+ * Position of one or more schools on a question. Only recorded with sources;
+ * no school is presented as "the" Islamic view unless agreement is documented.
+ */
+export interface SchoolPosition {
+  schools: SunniSchool[];
+  position: string;
+  sourceIds: string[];
+  /** Reference work for the school position (book, chapter/volume). */
+  reference?: string;
+}
+
+export interface SchoolDifference {
+  question: string;
+  /** "agreement" only when all four schools are documented to agree. */
+  kind: "agreement" | "difference";
+  positions: SchoolPosition[];
+}
+
 export interface KnowledgeArticleRecord {
   id: string;
   slug: string;
@@ -42,6 +70,8 @@ export interface KnowledgeArticleRecord {
   sourceIds: string[];
   /** Different recognised positions, labelled — never presented as the single view. */
   differingOpinions?: string;
+  /** Structured positions of the four Sunni schools. */
+  schoolDifferences?: SchoolDifference[];
   /** German-law aspects are kept separate from religious statements. */
   germanLawNote?: string;
   requiresLegalReview: boolean;

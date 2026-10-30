@@ -13,6 +13,7 @@ import {
   isPublishable,
   missingReviews,
   searchPublished,
+  structuralIssues,
   type KnowledgeArticleRecord,
 } from "@/modules/islamic-knowledge";
 
@@ -96,6 +97,31 @@ describe("publication gate", () => {
     expect(isPublishable({ ...published, sourceIds: ["quran-nisa-4-11"] })).toBe(false);
     expect(isPublishable({ ...published, sourceIds: ["unbekannte-quelle"] })).toBe(false);
     expect(isPublishable({ ...published, sourceIds: [] })).toBe(false);
+  });
+
+  it("only accepts 'agreement' when all four schools are documented, each position with a source", () => {
+    const threeSchools = {
+      ...published,
+      schoolDifferences: [
+        { question: "Frage", kind: "agreement" as const, positions: [{ schools: ["hanafi", "maliki", "shafii"] as const, position: "x", sourceIds: ["hadith-sadaqa-jariya"] }].map((p) => ({ ...p, schools: [...p.schools] })) },
+      ],
+    };
+    expect(structuralIssues(threeSchools)).toHaveLength(1);
+    expect(isPublishable(threeSchools)).toBe(false);
+
+    const unsourced = {
+      ...published,
+      schoolDifferences: [{ question: "Frage", kind: "difference" as const, positions: [{ schools: ["hanafi" as const], position: "x", sourceIds: [] }] }],
+    };
+    expect(isPublishable(unsourced)).toBe(false);
+  });
+
+  it("checks sources cited inside school positions", () => {
+    const nested = {
+      ...published,
+      schoolDifferences: [{ question: "Frage", kind: "difference" as const, positions: [{ schools: ["shafii" as const], position: "x", sourceIds: ["quran-nisa-4-11"] }] }],
+    };
+    expect(isPublishable(nested)).toBe(false);
   });
 
   it("moves forward one reviewed step at a time", () => {

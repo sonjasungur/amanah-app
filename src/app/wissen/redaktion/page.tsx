@@ -25,7 +25,7 @@ export default function KnowledgeEditorialPage() {
           <div className="space-y-3">
             {queue
               .filter((q) => q.article.area === area.id)
-              .map(({ article, missing, blockedSources, public: isPublic }) => (
+              .map(({ article, missing, blockedSources, issues, public: isPublic }) => (
                 <details key={article.id} className="rounded-xl border border-border bg-card p-4">
                   <summary className="cursor-pointer">
                     <span className="font-semibold">{article.title}</span>{" "}
@@ -44,6 +44,7 @@ export default function KnowledgeEditorialPage() {
                         : "keine — muss vor Quellenprüfung ergänzt werden"}
                     </p>
                     <p>Fehlende Prüfungen: {missing.length ? missing.join(", ") : "keine"}</p>
+                    {issues.length > 0 && <p className="text-danger">Strukturprobleme: {issues.join(" ")}</p>}
                     {blockedSources.length > 0 && (
                       <ul className="text-danger">
                         {blockedSources.map((id) => (

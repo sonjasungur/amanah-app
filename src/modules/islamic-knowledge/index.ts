@@ -4,7 +4,9 @@ export { KNOWLEDGE_CATALOG } from "./catalog";
 export {
   STATUS_LABELS,
   STATUS_ORDER,
+  allSourceIds,
   canTransition,
+  structuralIssues,
   describeMissingReviews,
   isPublishable,
   lastReviewDate,

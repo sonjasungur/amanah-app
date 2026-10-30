@@ -2,7 +2,7 @@ import { KNOWLEDGE_CATALOG } from "./catalog";
 import { KNOWLEDGE_AREAS } from "./structure";
 import type { KnowledgeAreaId, KnowledgeArticleRecord } from "./types";
 import { blockingSources } from "./source-verification";
-import { describeMissingReviews, isPublishable } from "./workflow";
+import { allSourceIds, describeMissingReviews, isPublishable, structuralIssues } from "./workflow";
 
 export function getPublishedArticles(catalog: KnowledgeArticleRecord[] = KNOWLEDGE_CATALOG): KnowledgeArticleRecord[] {
   return catalog.filter(isPublishable);
@@ -71,7 +71,8 @@ export function getEditorialQueue(catalog = KNOWLEDGE_CATALOG) {
   return catalog.map((a) => ({
     article: a,
     missing: describeMissingReviews(a),
-    blockedSources: blockingSources(a.sourceIds),
+    blockedSources: blockingSources(allSourceIds(a)),
+    issues: structuralIssues(a),
     public: isPublishable(a),
   }));
 }

@@ -6,11 +6,13 @@ import { ArticleActions } from "@/components/islamic-knowledge/article-actions";
 import { SourcesSection } from "@/components/knowledge/sources-section";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import {
+  allSourceIds,
   getKnowledgeArea,
   getPublishedArticleBySlug,
   getPublishedArticles,
   getRelatedPublished,
   lastReviewDate,
+  SUNNI_SCHOOL_LABELS,
 } from "@/modules/islamic-knowledge";
 
 export function generateStaticParams() {
@@ -66,6 +68,31 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
         </section>
       )}
 
+      {article.schoolDifferences && article.schoolDifferences.length > 0 && (
+        <section className="mt-8" data-testid="school-differences">
+          <h2 className="font-semibold text-primary mb-3">Positionen der Rechtsschulen</h2>
+          <div className="space-y-4">
+            {article.schoolDifferences.map((d) => (
+              <div key={d.question} className="rounded-xl border border-border bg-card p-4">
+                <p className="font-medium mb-1">{d.question}</p>
+                <p className="text-xs text-muted mb-2">
+                  {d.kind === "agreement" ? "Übereinstimmung der vier sunnitischen Schulen" : "Unterschiedliche Auffassungen"}
+                </p>
+                <ul className="space-y-2 text-sm">
+                  {d.positions.map((p) => (
+                    <li key={p.schools.join("-")}>
+                      <span className="font-semibold">{p.schools.map((sc) => SUNNI_SCHOOL_LABELS[sc]).join(", ")}:</span>{" "}
+                      {p.position}
+                      {p.reference && <span className="block text-xs text-muted">{p.reference}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {article.germanLawNote && (
         <section className="mt-6 rounded-xl border border-accent/30 bg-sand p-5">
           <h2 className="font-semibold text-primary mb-2">Deutsches Recht (getrennt von der islamischen Lehre)</h2>
@@ -73,7 +100,7 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
         </section>
       )}
 
-      <SourcesSection sourceIds={article.sourceIds} reviewStatus="reviewed" defaultCollapsed={false} />
+      <SourcesSection sourceIds={allSourceIds(article)} reviewStatus="reviewed" defaultCollapsed={false} />
 
       <section className="mt-8 text-sm text-muted" data-testid="article-reviews">
         <h2 className="font-semibold text-foreground mb-2">Fachliche Prüfung</h2>

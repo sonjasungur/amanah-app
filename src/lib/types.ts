@@ -73,9 +73,20 @@ export interface IslamicSource {
   translationVersion?: string;
   /** true when German text is paraphrase, not licensed translation */
   isParaphrase?: boolean;
-  /** Hadith collection for Sahih sources */
-  collection?: "bukhari" | "muslim";
+  /** Hadith collection (sunnah.com numbering) */
+  collection?: "bukhari" | "muslim" | "abudawud" | "tirmidhi" | "nasai" | "ibnmajah";
   hadithNumber?: string;
+  /** Authenticity gradings as published — several graders may differ. Required outside Bukhari/Muslim. */
+  gradings?: HadithGrading[];
+}
+
+export interface HadithGrading {
+  /** e.g. "sahih", "hasan", "daif" — as stated by the grader, not normalised. */
+  grade: string;
+  /** e.g. "al-Albani", "Darussalam (Zubair Ali Zai)", "at-Tirmidhi" */
+  grader: string;
+  /** Where the grading was read (URL or printed edition). */
+  source: string;
 }
 
 export type WissenFilter =

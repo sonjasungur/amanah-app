@@ -1,5 +1,6 @@
+import { islamicSources } from "@/lib/knowledge/sources";
 import { blockingSources } from "./source-verification";
-import type { ArticleStatus, KnowledgeArticleRecord, ReviewKind } from "./types";
+import type { ArticleStatus, KnowledgeArticleRecord, ReviewKind, SunniSchool } from "./types";
 
 export const STATUS_ORDER: ArticleStatus[] = ["DRAFT", "SOURCE_REVIEW", "SCHOLAR_REVIEW", "APPROVED", "PUBLISHED"];
 
@@ -41,6 +42,36 @@ export function describeMissingReviews(article: KnowledgeArticleRecord): string[
   return missingReviews(article).map((kind) => REVIEW_LABELS[kind]);
 }
 
+const ALL_SCHOOLS: SunniSchool[] = ["hanafi", "maliki", "shafii", "hanbali"];
+const SAHIHAYN = new Set(["bukhari", "muslim"]);
+
+/** Every source the article cites, including those behind school positions. */
+export function allSourceIds(article: KnowledgeArticleRecord): string[] {
+  const nested = (article.schoolDifferences ?? []).flatMap((d) => d.positions.flatMap((p) => p.sourceIds));
+  return [...new Set([...article.sourceIds, ...nested])];
+}
+
+/** Content rules that hold regardless of review state. */
+export function structuralIssues(article: KnowledgeArticleRecord): string[] {
+  const issues: string[] = [];
+  for (const d of article.schoolDifferences ?? []) {
+    const covered = new Set(d.positions.flatMap((p) => p.schools));
+    if (d.kind === "agreement" && !ALL_SCHOOLS.every((s) => covered.has(s))) {
+      issues.push(`„${d.question}“: Übereinstimmung nur mit Beleg für alle vier Schulen.`);
+    }
+    if (d.positions.some((p) => p.sourceIds.length === 0 && !p.reference)) {
+      issues.push(`„${d.question}“: Position ohne Quelle oder Werkangabe.`);
+    }
+  }
+  for (const id of allSourceIds(article)) {
+    const source = islamicSources[id];
+    if (source?.type === "hadith" && source.collection && !SAHIHAYN.has(source.collection) && !source.gradings?.length) {
+      issues.push(`${id}: Hadith außerhalb Bukhari/Muslim ohne Authentizitätseinstufung.`);
+    }
+  }
+  return issues;
+}
+
 /** Forward one step at a time; any step may go back to DRAFT (e.g. after an edit). */
 export function canTransition(article: KnowledgeArticleRecord, to: ArticleStatus): { allowed: boolean; reason?: string } {
   const from = STATUS_ORDER.indexOf(article.status);
@@ -56,7 +87,9 @@ export function canTransition(article: KnowledgeArticleRecord, to: ArticleStatus
     return { allowed: false, reason: "Artikel ohne Quellen kann nicht zur Gelehrtenprüfung." };
   }
   if (to === "APPROVED" || to === "PUBLISHED") {
-    const blocked = blockingSources(article.sourceIds);
+    const issues = structuralIssues(article);
+    if (issues.length > 0) return { allowed: false, reason: issues.join(" ") };
+    const blocked = blockingSources(allSourceIds(article));
     if (blocked.length > 0) return { allowed: false, reason: `Quellen mit offenem Befund: ${blocked.join(", ")}` };
     const missing = missingReviews(article);
     if (missing.length > 0) return { allowed: false, reason: `Fehlende Prüfungen: ${missing.join(", ")}` };
@@ -69,7 +102,8 @@ export function isPublishable(article: KnowledgeArticleRecord): boolean {
   return (
     article.status === "PUBLISHED" &&
     article.sourceIds.length > 0 &&
-    blockingSources(article.sourceIds).length === 0 &&
+    blockingSources(allSourceIds(article)).length === 0 &&
+    structuralIssues(article).length === 0 &&
     missingReviews(article).length === 0
   );
 }
