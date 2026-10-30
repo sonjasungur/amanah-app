@@ -12,18 +12,23 @@ import { linkButtonClassName } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 
+/** Main areas. Check and prices stay reachable from the homepage and the footer. */
 const navLinks = [
-  { href: "/", labelKey: "nav.home" as const },
-  { href: "/check", labelKey: "nav.check" as const },
   { href: "/wissen", labelKey: "nav.knowledge" as const },
-  { href: "/preise", labelKey: "nav.prices" as const },
-  { href: "/dashboard", labelKey: "nav.dashboard" as const },
+  { href: "/dashboard", labelKey: "nav.vorsorge" as const },
+  { href: "/dashboard/testament", labelKey: "nav.testament" as const },
+  { href: "/dashboard/janazah", labelKey: "nav.janazah" as const },
+  { href: "/dashboard/einstellungen", labelKey: "nav.account" as const },
 ];
+
+const SECTION_PREFIXES = ["/dashboard/testament", "/dashboard/janazah", "/dashboard/einstellungen"];
 
 function isNavActive(pathname: string, href: string): boolean {
   if (href === "/wissen") return pathname.startsWith("/wissen");
-  if (href === "/dashboard") return pathname.startsWith("/dashboard");
-  return pathname === href;
+  if (href === "/dashboard") {
+    return pathname.startsWith("/dashboard") && !SECTION_PREFIXES.some((p) => pathname.startsWith(p));
+  }
+  return pathname.startsWith(href);
 }
 
 export function Header() {
@@ -44,10 +49,12 @@ export function Header() {
       className="sticky top-0 z-40 bg-card/98 backdrop-blur-md border-b border-border no-print shadow-sm"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
-        <Logo />
+      <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+        <div className="shrink-0">
+          <Logo />
+        </div>
 
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden xl:flex items-center gap-1">
           {navLinks.map((link) => {
             const active = isNavActive(pathname, link.href);
             return (
@@ -55,7 +62,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "px-3.5 py-2 rounded-lg text-[15px] font-semibold transition-colors min-h-[44px] flex items-center",
+                  "px-3 py-2 rounded-lg text-[15px] font-semibold whitespace-nowrap transition-colors min-h-[44px] flex items-center",
                   active
                     ? "text-primary-dark bg-accent-soft ring-2 ring-primary/25 font-bold"
                     : "text-muted hover:text-primary-dark hover:bg-accent-soft/60"
@@ -81,9 +88,6 @@ export function Header() {
           {!isLoading &&
             (session ? (
               <div className="flex items-center gap-2 ml-1">
-                <Link href="/dashboard" className={linkButtonClassName({ size: "sm", variant: "primary" })}>
-                  Mein Konto
-                </Link>
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -109,7 +113,7 @@ export function Header() {
         </nav>
 
         <button
-          className="md:hidden p-2.5 rounded-lg hover:bg-accent-soft min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="xl:hidden p-2.5 rounded-lg hover:bg-accent-soft min-h-[44px] min-w-[44px] flex items-center justify-center"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Menü"
           aria-expanded={mobileOpen}
@@ -120,7 +124,7 @@ export function Header() {
       </div>
 
       {mobileOpen && (
-        <nav className="md:hidden border-t border-border px-4 py-4 space-y-1 bg-card" data-testid="site-mobile-nav">
+        <nav className="xl:hidden border-t border-border px-4 py-4 space-y-1 bg-card" data-testid="site-mobile-nav">
           {navLinks.map((link) => {
             const active = isNavActive(pathname, link.href);
             return (
