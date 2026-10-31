@@ -81,9 +81,9 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | F1 | Getrennte Staging-Konfiguration und Datenbank | `docker-compose.staging.yml` (DB im `internal`-Netz, ohne Port), Validator, Tests, Docker-Abnahme 31.10. (Doku 27) | TESTED (lokal, Container) |
 | F2 | Nur synthetische Daten erzwungen; interne Seiten unerreichbar | Domain-Allow-List, keine echten Mails, Banner, noindex; interne Werkzeuge auf Staging verboten, `AMANAH_DEV_OUTBOX` nur für die Outbox | TESTED (lokal, Container) |
 | F3 | Testkonten | `seed-staging-accounts.mjs` (lokal 3 Konten) | TESTED (lokal) |
-| F4 | Backups, Monitoring, Gesundheitsprüfung | Skripte, Cron-Vorschlag | IMPLEMENTED |
+| F4 | Backups, Monitoring, Gesundheitsprüfung | Auf dem Server eingerichtet (Cron, age-verschlüsseltes Backup, Restore in frische DB geprobt; Doku 28) | TESTED (Server) / REQUIRES_OWNER (eigener age-Schlüssel, Alarmweg) |
 | F5 | Deployment-Checkliste, Rückrollplan, Testprotokoll | Doku 27 §6–7, Doku 22 §7 | IMPLEMENTED |
-| F6 | Server, DNS, Caddy mit Basic Auth | Snippet vorbereitet | REQUIRES_OWNER |
+| F6 | Server, DNS, Caddy mit Basic Auth | 31.10.: Staging auf `gemeinsam1-prod` eingerichtet, nur 127.0.0.1 + SSH-Tunnel, Abnahme grün (Doku 28). DNS/HTTPS/Basic Auth übersprungen: keine Amanah-Domain (`amanahordner.de` NXDOMAIN) | TESTED (Server, ohne öffentlichen Zugang) / REQUIRES_OWNER (Domain) |
 
 ## Empfehlung
 

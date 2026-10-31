@@ -103,6 +103,8 @@ Danach wieder 20 Images / 10,81 GB, kein vorher vorhandenes Image entfernt, `/` 
 
 ## 6. Deployment-Checkliste Staging (jeder Schritt mit Freigabe, Reihenfolge einhalten)
 
+> Stand der Abarbeitung am 31.10.: siehe **Doku 28**. A1–A6, B, D12–D17 erledigt; C (DNS/Caddy) und D18 (Stripe) offen. A4 mangels Konto übersprungen.
+
 **A. Vorbereitung (ohne Serveränderung)**
 1. [ ] Owner-Freigabe für Server, DNS und Caddy (F6), mit Name der Testdomain.
 2. [ ] Host festlegen; mindestens 6 GB frei auf dem Docker-Datenträger (Build ≈ 3 GB inkl. Zwischen-Images).

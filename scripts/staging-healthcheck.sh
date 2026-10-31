@@ -18,7 +18,12 @@ body="$(curl -sf --max-time 10 "$BASE_URL/api/health" || true)"
 if [[ -z "$body" ]]; then
   bad "health endpoint unreachable ($BASE_URL/api/health)"
 else
-  field() { node -e "const b=JSON.parse(process.argv[1]); console.log(b[process.argv[2]])" "$body" "$1"; }
+  # jq on servers without Node (the app runs in Docker), Node as fallback for local use
+  if command -v jq >/dev/null 2>&1; then
+    field() { jq -r --arg k "$1" '.[$k] | tostring' <<<"$body"; }
+  else
+    field() { node -e "const b=JSON.parse(process.argv[1]); console.log(b[process.argv[2]])" "$body" "$1"; }
+  fi
   [[ "$(field status)" == "ok" ]] && ok "status ok" || bad "status not ok"
   [[ "$(field environment)" == "$EXPECT_ENV" ]] && ok "environment $EXPECT_ENV" || bad "environment is $(field environment), expected $EXPECT_ENV"
   [[ "$(field dbReachable)" == "true" ]] && ok "database reachable" || bad "database not reachable"
