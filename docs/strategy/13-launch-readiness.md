@@ -20,7 +20,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | A9 | Backups verschlüsselt (age), Restore geübt | 30.10. gegen Temp-DB; Staging-Cron vorbereitet (Doku 22) | TESTED (lokal) / REQUIRES_OWNER (Server, Empfängerschlüssel) | ja |
 | A10 | Security-Header + CSP | `csp.spec.ts`, `staging-security-check.sh` | TESTED | ja |
 | A11 | Produktions-Preflight | `validate-production-env.mjs` (+ Mail-Anbieter, Plus-Starttermin) | TESTED | ja |
-| A12 | Docker-Build + Start gegen Postgres | 31.10.: Runner + Migrate-Image auf Prisma-7-Stand, Container-Smoke | TESTED (Code-Stand `c5bf156`; seither nur Doku/Vorlagen) | ja |
+| A12 | Docker-Build + Start gegen Postgres | 31.10. nachmittags: Neubau `5c739f7` mit Staging-Argumenten; Verschlüsselung, Login, Export, Löschung, Vorsorgeprozess, Browser (Doku 27 §2) | TESTED | ja |
 | A13 | Domain in Caddy, Origin-Prüfung hinter Proxy | Platzhalter; Staging-Snippet vorbereitet | REQUIRES_OWNER | ja |
 | A14 | Host-Speicherplatz | Owner hat am 31.10. Platz geschaffen; nach den Builds 10 GB frei auf `/` (83 %), meine Prüf-Images +2,4 GB (Abschlussbericht §1) | REQUIRES_OWNER (Dauerlösung, Images) | ja |
 | A15 | Monitoring/Alarmierung | `staging-healthcheck.sh` (Health, DB, Platte, Backup-Alter), Cron-Vorschlag | IMPLEMENTED (Alarmweg REQUIRES_OWNER) | ja |
@@ -78,11 +78,11 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 
 | # | Kriterium | Nachweis | Status |
 |---|---|---|---|
-| F1 | Getrennte Staging-Konfiguration und Datenbank | `docker-compose.staging.yml`, Validator, Tests | TESTED (lokal) |
-| F2 | Nur synthetische Daten erzwungen | Domain-Allow-List, keine echten Mails, Banner, noindex | TESTED (lokal) |
+| F1 | Getrennte Staging-Konfiguration und Datenbank | `docker-compose.staging.yml` (DB im `internal`-Netz, ohne Port), Validator, Tests, Docker-Abnahme 31.10. (Doku 27) | TESTED (lokal, Container) |
+| F2 | Nur synthetische Daten erzwungen; interne Seiten unerreichbar | Domain-Allow-List, keine echten Mails, Banner, noindex; interne Werkzeuge auf Staging verboten, `AMANAH_DEV_OUTBOX` nur für die Outbox | TESTED (lokal, Container) |
 | F3 | Testkonten | `seed-staging-accounts.mjs` (lokal 3 Konten) | TESTED (lokal) |
 | F4 | Backups, Monitoring, Gesundheitsprüfung | Skripte, Cron-Vorschlag | IMPLEMENTED |
-| F5 | Rückrollplan, Testprotokoll | Doku 22 §5, §7 | IMPLEMENTED |
+| F5 | Deployment-Checkliste, Rückrollplan, Testprotokoll | Doku 27 §6–7, Doku 22 §7 | IMPLEMENTED |
 | F6 | Server, DNS, Caddy mit Basic Auth | Snippet vorbereitet | REQUIRES_OWNER |
 
 ## Empfehlung

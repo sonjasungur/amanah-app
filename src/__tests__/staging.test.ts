@@ -114,6 +114,9 @@ describe("staging compose file", () => {
   it("keeps the database off the host network and internal tools off", () => {
     const postgres = compose.slice(compose.indexOf("  postgres:"), compose.indexOf("  app:"));
     expect(postgres).not.toMatch(/ports:/);
+    expect(postgres).toContain("- staging_db");
+    expect(postgres).not.toContain("staging_edge");
+    expect(compose).toMatch(/staging_db:\n\s+name: amanah_staging_db\n\s+driver: bridge\n\s+internal: true/);
     expect(compose).toContain('AMANAH_INTERNAL_TOOLS: "false"');
     expect(compose).toContain('AMANAH_DEV_OUTBOX: "true"');
   });

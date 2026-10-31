@@ -23,7 +23,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - staging_internal
+      - staging_db
 
   postgres:
     image: postgres:16-alpine
@@ -41,7 +41,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - staging_internal
+      - staging_db
 
   app:
     build:
@@ -95,11 +95,18 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - staging_internal
+      - staging_db
+      - staging_edge
 
 networks:
-  staging_internal:
-    name: amanah_staging_internal
+  # Database network without any route to the outside; only migrate and app join it.
+  staging_db:
+    name: amanah_staging_db
+    driver: bridge
+    internal: true
+  # App only: published on 127.0.0.1 for Caddy, outbound for the Stripe test API.
+  staging_edge:
+    name: amanah_staging_edge
     driver: bridge
 
 volumes:

@@ -5,9 +5,9 @@ Stand: 2026-10-31 · **technisch vorbereitet, lokal geprobt, nicht deployt** · 
 ## 1. Aufbau
 
 ```
-Internet ─▶ Caddy (vorhanden, 443) ─ basic_auth + noindex ─▶ 127.0.0.1:3201 amanah-staging-app
-                                                               │  (Netz amanah_staging_internal)
-                                                               └▶ amanah-staging-postgres (Volume amanah_pg_staging)
+Internet ─▶ Caddy (vorhanden, 443) ─ basic_auth + noindex ─▶ 127.0.0.1:3201 amanah-staging-app ─▶ (ausgehend) Stripe-Test-API
+             /api/billing/webhook ohne Basic Auth (nur signiert)       │  Netz amanah_staging_db (internal, kein Internet)
+             /intern, /wissen/redaktion, /brand-review → 404          └▶ amanah-staging-postgres (Volume amanah_pg_staging, kein Port)
 ```
 
 | Datei | Zweck |
@@ -33,7 +33,8 @@ App-Änderungen dafür:
 - **Datenbank:** Eigene Datenbank, der Name muss „staging“ enthalten.
 - **KI und Zahlungen:** Externe KI aus. Billing nur Sandbox oder Stripe-**Testmodus** (`stripe_test`, nur mit Testschlüsseln des Amanah-Kontos, Doku 25), keine Sperren.
 - **Verschlüsselung:** wie in Produktion Pflicht, mit eigenen Schlüsseln.
-- **Erlaubt (nur hier):** Dev-Outbox, Sandbox-Kasse, interne Werkzeuge (für Testkonten und Tests).
+- **Erlaubt (nur hier):** Dev-Outbox (`AMANAH_DEV_OUTBOX`, nur der Outbox-Endpunkt für Testkonten), Sandbox-Kasse, Stripe-Testmodus.
+- **Verboten auch hier:** interne Werkzeuge (`AMANAH_INTERNAL_TOOLS`). Redaktions- und Prüfseiten sind auf Staging nicht erreichbar (App 404, zusätzlich Caddy 404).
 
 ## 3. Einrichtung (Owner-Schritte, je mit Freigabe)
 
