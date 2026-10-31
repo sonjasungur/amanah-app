@@ -9,14 +9,27 @@
 
 name: amanah-staging
 
+# Staging may share a host with production: hard caps on memory, CPU and log size so it can never
+# starve other services. Images can be built elsewhere and loaded (`up -d --no-build`).
+x-limits: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   migrate:
     build:
       context: .
       dockerfile: Dockerfile
       target: migrate
+    image: amanah-staging-migrate:${AMANAH_RELEASE:-local}
     container_name: amanah-staging-migrate
     restart: "no"
+    mem_limit: 512m
+    cpus: 1.0
+    <<: *logging
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.staging}
     depends_on:
@@ -29,6 +42,9 @@ services:
     image: postgres:16-alpine
     container_name: amanah-staging-postgres
     restart: unless-stopped
+    mem_limit: 384m
+    cpus: 0.5
+    <<: *logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-amanah_staging}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.staging}
@@ -56,6 +72,9 @@ services:
     image: amanah-staging-app:${AMANAH_RELEASE:-local}
     container_name: amanah-staging-app
     restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1.0
+    <<: *logging
     ports:
       - "127.0.0.1:${STAGING_APP_PORT:-3201}:3000"
     environment:
