@@ -3,6 +3,8 @@
 Grundlage: Doku 28 (Einrichtung), Doku 27 (Checkliste). Server `gemeinsam1-prod`, nur Amanah-Staging verändert.
 Keine Änderungen an Produktion, Caddy, DNS, Firewall oder gemeinsam1.
 
+**Stand 31.10., 18:05: Staging technisch abgenommen** (§2.2b): Owner-Restore-Test bestanden, Health 8/8, Wiederherstellung auf App-Ebene 18/18.
+
 Stand 17:45 nach Owner-Auftrag „nächste Freigaben und Prioritäten“:
 - Schlüsselarchitektur festgelegt: Owner-Schlüssel plus separater Testschlüssel.
 - ntfy vorbereitet.
@@ -12,9 +14,9 @@ Stand 17:45 nach Owner-Auftrag „nächste Freigaben und Prioritäten“:
 
 | Bereich | Stand |
 |---|---|
-| Git | bis `cc508c6` auf GitHub (gitleaks ohne Funde). Arbeit ab 17:33 lokal committet, nicht gepusht |
-| Backups | **nicht abgenommen.** Owner-Schlüssel fehlt. Ablauf mit Simulationsschlüssel vollständig geprobt (§2.5) und zurückgesetzt. Backup alarmiert, bis der Owner-Empfänger gesetzt ist |
-| Automatischer Restore-Test | separater Testschlüssel auf dem Server eingerichtet (Owner-Freigabe), läuft täglich 04:15, sobald es Backups gibt |
+| Git | bis `a489618` auf GitHub (18:03, gitleaks ohne Funde); diese Abnahme-Doku lokal committet |
+| Backups | **abgenommen.** Owner-Empfänger `2cfae5a85d555db6`; Backup 17:54 an Owner- und Testschlüssel; automatischer Restore-Test (Testschlüssel) und persönlicher Restore-Test des Owners (Laptop) bestanden; Wiederherstellung auf App-Ebene 18/18 (§2.2a/b) |
+| Automatischer Restore-Test | täglich 04:15 mit dem separaten Testschlüssel; Health verlangt Nachweis ≤ 2 Tage, Owner-Nachweis ≤ 35 Tage |
 | Alarmierung | lokal aktiv; ntfy vorbereitet und gegen einen lokalen ntfy-Server geprüft; extern **aus** |
 | Domain/Caddy | Variante B1 gewählt; Schritte für `staging.amanahordner.de` mit Prüfskript (§4.3); nichts angewandt, nichts gekauft |
 | Sicherheit | 8/8 ohne Befund (§5) |
@@ -83,14 +85,50 @@ Dauer etwa 10 Minuten. Alle Befehle im Repo-Ordner auf deinem Laptop; Claude fü
 | Backup `amanah_amanah_staging_20261031_175418.sql.gz.age` | erstellt (24,6 KB, Rechte 600), Kopf `age-encryption.org/v1`, **2 Empfänger-Einträge** (Owner + Testschlüssel), ohne Schlüssel nicht lesbar |
 | Automatischer Restore-Test (Testschlüssel) | 5 × OK; Nachweis an Owner-Empfänger `2cfae5a85d555db6` gebunden |
 | Health-Check | 7 × OK, 1 × FAIL „no passed owner restore test“ (erwartet, Alarm lokal) |
-| Persönlicher Restore-Test (Owner, Laptop) | **ausstehend**: `scripts/owner-backup-key.sh restore-test` |
+| Persönlicher Restore-Test (Owner, Laptop) | **bestanden** 17:59 (5 × OK laut Owner; Nachweis `state/owner-restore.ok` auf dem Server: gleiches Backup, Fingerprint `2cfae5a85d555db6`) |
 
 Hinweis: age speichert die Empfänger nicht lesbar im Kopf. Dass das Backup an den Owner-Schlüssel verschlüsselt ist, belegen:
 - der zum Backup-Zeitpunkt eingetragene Empfänger
 - die zwei Empfänger-Einträge im Kopf
 - **abschließend erst der persönliche Restore-Test**
 
-Staging gilt bis dahin nicht als vollständig abgenommen.
+Staging gilt bis dahin nicht als vollständig abgenommen. Inzwischen erledigt: Der persönliche Restore-Test hat bestätigt, dass das Backup mit dem Owner-Schlüssel entschlüsselbar ist.
+
+### 2.2b Wiederherstellung auf App-Ebene und technische Abnahme (31.10., 18:00–18:03)
+
+Health-Check vorher: **8/8** (inkl. „restore test passed within 2 days“ und „owner restore test passed within 35 days“); Entwarnung 18:00.
+
+Prüfskript auf dem Server: temporär unter `/root`, keine Passwörter, Cookies oder Inhalte ausgegeben, danach gelöscht. Ablauf:
+- Backup 17:54 mit dem Testschlüssel in die **frische** DB `amanah_staging_restore` eingespielt.
+- **Zweite App-Instanz** gestartet: gleiches Image `amanah-staging-app:f9022d3`, gleiche Datenschlüssel, nur `DATABASE_URL` auf die Kopie, 127.0.0.1:3202, 512 MB.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Wiederherstellung in frische DB | OK; 5 Konten wie live |
+| Verschlüsselung at rest in der Kopie | 5/5 Ordner `amanah-aes256gcm-v1`, 0 Klartext |
+| Zweite Instanz | healthy, `staging`, DB erreichbar; zeigt nachweislich auf die Kopie |
+| Vor dem Backup gelöschtes Konto 1 | Login 401: bleibt gelöscht |
+| Konto 2 und 3: Login auf der Kopie | 200 / 200 |
+| Entschlüsselung der Vorsorgedaten | eigener synthetischer Name lesbar; Ordner **identisch** mit live (Hash-Vergleich) |
+| Kontentrennung | Konto 2 sieht nichts von Konto 3 und umgekehrt; ohne Sitzung 401 |
+| Log der zweiten Instanz | 6 Zeilen, 0 sensible Treffer |
+| Live-Staging / Produktion | unverändert healthy / Health 200 |
+| Aufräumen | Container, DB, Arbeitsordner, Port 3202 entfernt; unabhängig nachgeprüft: keine Reste in Docker, `/root`, `/dev/shm`; DB-Netz wieder nur App + DB |
+
+Gesamt 18/18. Nebenwirkung: Die Live-Vergleichs-Logins haben 2 Sitzungen in der Live-Staging-DB angelegt (synthetische Konten).
+
+**Ergebnis: Staging ist technisch abgenommen.**
+
+Umfang:
+- Isolation, Sicherheit, Abläufe, Browser, Webhook-Signaturen (Doku 28)
+- Alarmierung lokal (§3)
+- Backups mit Owner-Schlüssel und Testschlüssel; automatischer, persönlicher und App-Ebene-Restore
+
+Nicht enthalten:
+- externer Alarmkanal
+- HTTPS/Basic Auth (keine Domain)
+
+Diese sind Voraussetzungen für den Pilot mit Testern (§9), nicht für die technische Abnahme.
 
 ### 2.3 Verlust und Wechsel
 
@@ -281,10 +319,10 @@ Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu
 
 ## 8. Offene Owner-Aufgaben
 
-1. **Backup-Schlüssel** nach §2.2 Schritte 1–5, dann nach Claudes Backup Schritt 7 (Restore-Test) und 8.
+1. ~~Backup-Schlüssel~~ erledigt (31.10.). Laufend: persönlicher Restore-Test mindestens alle 35 Tage (`scripts/owner-backup-key.sh restore-test --paste`); den Health-Alarm gibt es ab Tag 36. Lokale Schlüsseldatei nach Sicherung im Passwortmanager und in der Offline-Kopie mit `shred -u` löschen.
 2. **ntfy** nach §3.2 einrichten, dann mit `enable` freigeben.
 3. **Domain** `amanahordner.de` registrieren und DNS nach §4.3 Schritt 2. Danach Freigaben für die Schritte 3–9.
-4. Push-Freigabe für die Commits ab `cc508c6`.
+4. Push-Freigabe für den Abnahme-Doku-Commit nach `a489618`.
 5. Optional:
    - Build-Cache auf dem Server bereinigen
    - Befund §6 bei nächster Produktionsänderung
@@ -295,5 +333,5 @@ Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu
 | | Entscheidung |
 |---|---|
 | Owner testet selbst per Tunnel mit synthetischen Daten | **GO** |
-| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis: (1) Owner-Schlüssel verwahrt, Backup und beide Restore-Tests bestanden, (2) ntfy aktiv, (3) Zugang über B1 |
+| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis: ~~(1) Owner-Schlüssel, Backup, Restore-Tests~~ erledigt; offen: (2) ntfy aktiv, (3) Zugang über B1 (Domain, DNS, Caddy, HTTPS, Basic Auth), (4) Testkonten und Zugangsdaten je Tester |
 | Echte Personen oder echte Daten, öffentlicher Start | **NO-GO** (Sperren AI_HANDOFF §8) |
