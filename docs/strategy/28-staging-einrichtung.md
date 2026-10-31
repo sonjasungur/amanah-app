@@ -94,6 +94,8 @@ Hinweis: Auf dem Server liegen 13,3 GB Build-Cache und rund 5,9 GB nicht genutzt
 
 ## 8. Offene Voraussetzungen
 
+> Fortgeschrieben in Doku 29 (31.10., 15:30): Backup-Schlüssel, Alarmierung, Domain-Varianten A/B, Pilot-Status. Die Punkte 1–3 und die Go/No-Go-Bewertung in §9 sind dort ersetzt.
+
 1. **Domain:** Eine Amanah-Domain registrieren bzw. benennen (z. B. `amanahordner.de`). Dann:
    - DNS `staging.<domain>` → Server
    - Caddy-Block: Weil Caddy im gemeinsam1-Container läuft, nicht `127.0.0.1:3201` verwenden. Stattdessen Staging-App zusätzlich an ein eigenes Netz hängen, das auch Caddy kennt, **oder** `reverse_proxy host.docker.internal:3201` mit passender Bindung. Das ist eine Entscheidung am gemeinsamen Webserver.
@@ -107,6 +109,6 @@ Hinweis: Auf dem Server liegen 13,3 GB Build-Cache und rund 5,9 GB nicht genutzt
 
 ## 9. Go/No-Go
 
-**Privater Testdaten-Pilot: GO**, über SSH-Tunnel mit den synthetischen Testkonten. Für Tester ohne SSH-Zugang ist zuerst die Domain samt Caddy/HTTPS/Basic Auth nötig (§8.1); bis dahin gilt GO nur für Tester mit SSH-Zugang.
+**Überholt, siehe Doku 29 §9.** Damals: Privater Testdaten-Pilot GO, über SSH-Tunnel mit den synthetischen Testkonten. Für Tester ohne SSH-Zugang ist zuerst die Domain samt Caddy/HTTPS/Basic Auth nötig (§8.1); bis dahin gilt GO nur für Tester mit SSH-Zugang.
 
 **Pilot mit echten Personen und öffentlicher Start: NO-GO** (Rechts- und Datenschutzfreigaben, Doku 27 §10).

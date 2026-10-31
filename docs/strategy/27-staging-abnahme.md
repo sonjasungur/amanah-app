@@ -130,7 +130,7 @@ Danach wieder 20 Images / 10,81 GB, kein vorher vorhandenes Image entfernt, `/` 
 14. [ ] Testkonten: `seed-staging-accounts.mjs --count 5 --out <sicherer Pfad außerhalb des Repos>`.
 15. [ ] DB-Probe: alle Ordner `amanah-aes256gcm-v1`; App-Log ohne Adressen und Tokens.
 16. [ ] Backup ziehen und Restore in eine frische DB proben (Doku 22 §4).
-17. [ ] Cron: Health-Check alle 5 Minuten, Backup täglich, Sicherheitscheck wöchentlich; Alarmweg festlegen.
+17. [ ] Cron: `deploy/amanah-staging.cron` (Health 5 min, Backup täglich, Restore-Test täglich mit Prüfschlüssel, Sicherheitscheck wöchentlich) über `staging-cron.sh` mit Alarmierung; Kanal freigeben (Doku 29 §3).
 18. [ ] Bei Stripe: 6 Testfälle aus Doku 25 §5 protokollieren.
 19. [ ] Testprotokoll Doku 22 §7 ausfüllen, Ergebnis an den Owner.
 
