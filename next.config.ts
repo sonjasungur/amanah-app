@@ -22,6 +22,7 @@ const contentSecurityPolicy = [
 
 /** Baseline headers for every response. Caddy sets HSTS in production. */
 const securityHeaders = [
+  ...(process.env.NEXT_PUBLIC_AMANAH_ENVIRONMENT === "staging" ? [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] : []),
   { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },

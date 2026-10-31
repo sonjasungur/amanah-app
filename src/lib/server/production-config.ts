@@ -1,4 +1,5 @@
 import { DataEncryptionError, parseKeyring } from "./data-encryption";
+import { getDeploymentEnv } from "@/lib/deployment-env";
 
 export type ProductionEnvValidation = {
   valid: boolean;
@@ -124,7 +125,7 @@ export function validateProductionEnv(
 }
 
 export function getPublicEnvironmentLabel(): string {
-  return process.env.NODE_ENV === "production" ? "production" : "development";
+  return getDeploymentEnv();
 }
 
 export function sanitizeEnvForLogs(env: NodeJS.ProcessEnv = process.env): Record<string, string> {

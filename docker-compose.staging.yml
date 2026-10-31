@@ -1,0 +1,102 @@
+# Amanah — protected staging (synthetic test data only). PREPARED, NOT DEPLOYED.
+# Standalone: own project name, containers, network and database volume; nothing is shared
+# with production. The app listens on 127.0.0.1 only; access goes through Caddy with basic
+# auth (deploy/Caddyfile.staging-snippet). See docs/strategy/22-staging-und-pilot.md.
+#
+#   cp .env.staging.example .env.staging     # fill in staging-only secrets, never commit
+#   set -a; source .env.staging; set +a; node scripts/validate-staging-env.mjs
+#   docker compose -p amanah-staging -f docker-compose.staging.yml --env-file .env.staging up -d --build
+
+name: amanah-staging
+
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    container_name: amanah-staging-migrate
+    restart: "no"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.staging}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - staging_internal
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: amanah-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amanah_staging}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.staging}
+      POSTGRES_DB: ${POSTGRES_DB:-amanah_staging}
+    volumes:
+      - amanah_pg_staging:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - staging_internal
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_AUTH_MODE: api
+        NEXT_PUBLIC_STORAGE_MODE: api
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?Set NEXT_PUBLIC_SITE_URL in .env.staging}
+        NEXT_PUBLIC_AMANAH_ENVIRONMENT: staging
+        NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED: "true"
+    image: amanah-staging-app:${AMANAH_RELEASE:-local}
+    container_name: amanah-staging-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${STAGING_APP_PORT:-3201}:3000"
+    environment:
+      NODE_ENV: production
+      AMANAH_DEPLOYMENT_ENV: staging
+      NEXT_PUBLIC_AMANAH_ENVIRONMENT: staging
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env.staging}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env.staging}
+      AMANAH_SERVER_STORAGE: postgres
+      AMANAH_DATA_KEYS: ${AMANAH_DATA_KEYS:?Set staging-only AMANAH_DATA_KEYS}
+      AMANAH_DATA_KEY_ACTIVE: ${AMANAH_DATA_KEY_ACTIVE:?Set AMANAH_DATA_KEY_ACTIVE}
+      AMANAH_DATA_ENCRYPTION: required
+      AMANAH_PUBLIC_BASE_URL: ${AMANAH_PUBLIC_BASE_URL:?Set AMANAH_PUBLIC_BASE_URL}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      NEXT_PUBLIC_AUTH_MODE: api
+      NEXT_PUBLIC_STORAGE_MODE: api
+      AMANAH_PUBLIC_REGISTRATION_ENABLED: "true"
+      AMANAH_REGISTRATION_ALLOWED_DOMAINS: ${AMANAH_REGISTRATION_ALLOWED_DOMAINS:-staging.invalid}
+      AMANAH_MAIL_TRANSPORT: outbox
+      AMANAH_INTERNAL_TOOLS: "true"
+      AMANAH_BILLING_MODE: sandbox
+      AMANAH_BILLING_ENFORCE: "false"
+      AMANAH_SANDBOX_WEBHOOK_SECRET: ${AMANAH_SANDBOX_WEBHOOK_SECRET:?Set AMANAH_SANDBOX_WEBHOOK_SECRET}
+      AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS: "3900"
+      AMANAH_LEGACY_VERIFICATION_GRACE_DAYS: ${AMANAH_LEGACY_VERIFICATION_GRACE_DAYS:-60}
+      AMANAH_AI_ENABLED: "false"
+      NEXT_PUBLIC_AMANAH_AI_ENABLED: "false"
+      AMANAH_AI_PROVIDER: rules
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    networks:
+      - staging_internal
+
+networks:
+  staging_internal:
+    name: amanah_staging_internal
+    driver: bridge
+
+volumes:
+  amanah_pg_staging:
+    name: amanah_pg_staging

@@ -1,0 +1,23 @@
+# Staging block for an existing Caddy — PREPARED, NOT INSTALLED (changing the shared Caddy
+# is a server change and needs the owner's approval).
+# Prerequisites: DNS for staging.<domain>, staging app on 127.0.0.1:3201 (docker-compose.staging.yml).
+# Password hash: caddy hash-password  (store only the hash here, never the password)
+
+staging.REPLACE_WITH_DOMAIN {
+	basic_auth {
+		REPLACE_WITH_USER REPLACE_WITH_BCRYPT_HASH
+	}
+	encode gzip
+	reverse_proxy 127.0.0.1:3201
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+	log {
+		output file /var/log/caddy/amanah-staging.log {
+			roll_keep_for 14d
+		}
+		format json
+	}
+}

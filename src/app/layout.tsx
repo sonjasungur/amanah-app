@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
+import { StagingBanner } from "@/components/layout/staging-banner";
 import { Footer } from "@/components/layout/footer";
 import { BRAND } from "@/lib/brand";
 
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="de" className={`${geist.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <Providers>
+          <StagingBanner />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

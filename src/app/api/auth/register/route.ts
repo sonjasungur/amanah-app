@@ -6,6 +6,7 @@ import { isSameOriginRequest } from "@/lib/server/session-cookie";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
 import { CHECK_EMAIL_RESPONSE, emailKey, sendAccountExistsMail, sendVerificationMail } from "@/lib/server/account-recovery";
 import { MailNotConfiguredError } from "@/lib/server/mailer";
+import { isRegistrationDomainAllowed } from "@/lib/deployment-env";
 
 const REGISTRATIONS_PER_MINUTE = 5;
 
@@ -34,6 +35,10 @@ export async function POST(request: Request) {
 
     if (!email || !password || password.length < MIN_PASSWORD_LENGTH) {
       return NextResponse.json({ error: PASSWORD_REQUIREMENT_ERROR }, { status: 400 });
+    }
+    // Staging: only reserved test domains, so no real person's data can end up there.
+    if (!isRegistrationDomainAllowed(email)) {
+      return NextResponse.json({ error: "Diese E-Mail-Adresse ist in dieser Umgebung nicht zugelassen." }, { status: 400 });
     }
 
     const repo = getServerRepository();

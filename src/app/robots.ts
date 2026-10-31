@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/seo/site-url";
+import { isStagingBuild } from "@/lib/deployment-env";
 
 export default function robots(): MetadataRoute.Robots {
+  if (isStagingBuild()) return { rules: { userAgent: "*", disallow: "/" } };
   return {
     rules: {
       userAgent: "*",
