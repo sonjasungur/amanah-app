@@ -17,7 +17,7 @@ Stand 17:45 nach Owner-Auftrag „nächste Freigaben und Prioritäten“:
 | Git | bis `a489618` auf GitHub (18:03, gitleaks ohne Funde); diese Abnahme-Doku lokal committet |
 | Backups | **abgenommen.** Owner-Empfänger `2cfae5a85d555db6`; Backup 17:54 an Owner- und Testschlüssel; automatischer Restore-Test (Testschlüssel) und persönlicher Restore-Test des Owners (Laptop) bestanden; Wiederherstellung auf App-Ebene 18/18 (§2.2a/b) |
 | Automatischer Restore-Test | täglich 04:15 mit dem separaten Testschlüssel; Health verlangt Nachweis ≤ 2 Tage, Owner-Nachweis ≤ 35 Tage |
-| Alarmierung | lokal aktiv; ntfy vorbereitet und gegen einen lokalen ntfy-Server geprüft; extern **aus** |
+| Alarmierung | lokal aktiv; **E-Mail über Brevo SMTP** vorbereitet und lokal mit simuliertem SMTP-Server geprüft (Doku 30); Versand **aus**, ntfy aus |
 | Domain/Caddy | Variante B1 gewählt; Schritte für `staging.amanahordner.de` mit Prüfskript (§4.3); nichts angewandt, nichts gekauft |
 | Sicherheit | 8/8 ohne Befund (§5) |
 | Pilot | nur Owner per Tunnel (§9) |
@@ -182,37 +182,9 @@ Verhalten des Dispatchers:
 - Versendet werden nur `FAIL`-Zeilen oder „Job X mit Code N beendet“, keine Log-Inhalte.
 - URL und Token gehen über stdin an curl.
 
-### 3.2 ntfy (vorbereitet, extern aus)
+### 3.2 Kanal: E-Mail über Brevo SMTP (31.10., ersetzt ntfy)
 
-**Geprüft gegen einen echten ntfy-Server** (v2.11.0, lokal auf dem Laptop an 127.0.0.1, Zugriff nur mit Token; danach entfernt):
-
-| Prüfung | Ergebnis |
-|---|---|
-| Alarm | Titel „ALARM amanah-staging health“, Priorität 4, Tags `amanah,staging`, Text = FAIL-Zeilen + Host |
-| Entwarnung | Titel „OK …“, Priorität 3 |
-| Abruf ohne Token | 403 |
-| Falscher Token | lokal als „ntfy delivery failed“ vermerkt |
-| Topic und Token im lokalen Log | 0 Treffer |
-
-Einrichtung durch den Owner (Claude sieht Topic und Token nicht):
-1. ntfy-App auf dem Handy installieren.
-2. Zufälliges Topic auf deinem Rechner erzeugen: `echo "amanah-$(openssl rand -hex 16)"`. Das Topic wirkt wie ein Passwort: Wer es kennt, kann mitlesen.
-   - Inhalte sind nur Prüfmeldungen ohne Personendaten.
-   - Abonnieren in der App: Server `ntfy.sh`, dieses Topic.
-3. Auf dem Server speichern (Eingabe verdeckt; Token leer lassen, wenn keins):
-   ```bash
-   ssh -t gemeinsam1-prod /opt/amanah-staging/scripts/staging-alert-channel.sh set
-   ```
-   Danach ist der Kanal gespeichert, aber **aus** (`status` zeigt den Zustand).
-4. Freigabe und Einschalten:
-   ```bash
-   ssh gemeinsam1-prod /opt/amanah-staging/scripts/staging-alert-channel.sh enable
-   ```
-   - Sendet genau eine Testmeldung und eine Entwarnung.
-   - Offene Alarme werden beim nächsten Lauf ihres Jobs einmal erneut gesendet.
-   - Ausschalten: `… disable`.
-
-ntfy.sh ist ein externer, kostenloser Dienst. Alternativ später ein eigener ntfy-Server; dann nur die URL ändern.
+Owner-Entscheidung 31.10.: **E-Mail statt ntfy**, wie bei Nasib Nikah über Brevo SMTP. ntfy bleibt aus; der Code bleibt im Dispatcher, ist abgeschaltet und weiter getestet. Einrichtung, Tests, fehlende Angaben und Produktionswechsel: **Doku 30**.
 
 ### 3.3 Grenzen
 
@@ -320,7 +292,7 @@ Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu
 ## 8. Offene Owner-Aufgaben
 
 1. ~~Backup-Schlüssel~~ erledigt (31.10.). Laufend: persönlicher Restore-Test mindestens alle 35 Tage (`scripts/owner-backup-key.sh restore-test --paste`); den Health-Alarm gibt es ab Tag 36. Lokale Schlüsseldatei nach Sicherung im Passwortmanager und in der Offline-Kopie mit `shred -u` löschen.
-2. **ntfy** nach §3.2 einrichten, dann mit `enable` freigeben.
+2. **E-Mail-Alarmierung**: Brevo-Angaben nach Doku 30 §4 eintragen (`mail-set`), dann mit `enable` freigeben.
 3. **Domain** `amanahordner.de` registrieren und DNS nach §4.3 Schritt 2. Danach Freigaben für die Schritte 3–9.
 4. Push-Freigabe für den Abnahme-Doku-Commit nach `a489618`.
 5. Optional:
@@ -333,5 +305,5 @@ Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu
 | | Entscheidung |
 |---|---|
 | Owner testet selbst per Tunnel mit synthetischen Daten | **GO** |
-| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis: ~~(1) Owner-Schlüssel, Backup, Restore-Tests~~ erledigt; offen: (2) ntfy aktiv, (3) Zugang über B1 (Domain, DNS, Caddy, HTTPS, Basic Auth), (4) Testkonten und Zugangsdaten je Tester |
+| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis: ~~(1) Owner-Schlüssel, Backup, Restore-Tests~~ erledigt; offen: (2) E-Mail-Alarmierung aktiv (Doku 30), (3) Zugang über B1 (Domain, DNS, Caddy, HTTPS, Basic Auth), (4) Testkonten und Zugangsdaten je Tester |
 | Echte Personen oder echte Daten, öffentlicher Start | **NO-GO** (Sperren AI_HANDOFF §8) |
