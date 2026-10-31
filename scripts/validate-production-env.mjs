@@ -71,6 +71,14 @@ export function validateProductionEnv(env = process.env) {
   if (env.AMANAH_BILLING_ENFORCE === "true" && !env.AMANAH_PLUS_LAUNCH_AT?.trim()) {
     errors.push("AMANAH_BILLING_ENFORCE=true needs AMANAH_PLUS_LAUNCH_AT so existing accounts keep their features");
   }
+  if (env.AMANAH_MAIL_TRANSPORT === "brevo" || env.AMANAH_MAIL_TRANSPORT === "postmark") {
+    if (!env.AMANAH_MAIL_API_KEY?.trim() || isPlaceholderValue(env.AMANAH_MAIL_API_KEY)) {
+      errors.push("AMANAH_MAIL_API_KEY is required for the configured mail provider");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for the configured mail provider");
+    }
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }
