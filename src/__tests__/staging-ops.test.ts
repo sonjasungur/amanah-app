@@ -239,31 +239,45 @@ describe("owner backup key and alert channel setup", () => {
     expect(readFileSync(join(root, ".env.staging"), "utf8")).toContain("BACKUP_AGE_RECIPIENTS=\n");
   });
 
-  it("stores the ntfy channel switched off and never prints topic or token", () => {
+  const SMTP_KEY = "xsmtpsib-dummy-key-not-real-0123456789";
+  const mailSet = (root: string, login: string, key: string, from: string, to: string) =>
+    run(root, "staging-alert-channel.sh", ["mail-set"], `${login}\n${key}\n${from}\n${to}\n`, { ALERT_CONFIG: join(root, "alert.env") });
+
+  it("stores the e-mail channel switched off, keeps ntfy off and never prints login or key", () => {
     const root = stagingTree();
-    const url = "https://ntfy.invalid/amanah-0123456789abcdefABCDEF";
-    const set = run(root, "staging-alert-channel.sh", ["set"], `${url}\ntk_abcdefghijklmnopqrstuvwxyz\n`);
+    writeFileSync(join(root, "alert.env"), "ALERT_EXTERNAL=false\nALERT_REPEAT_HOURS=24\n");
+    const set = mailSet(root, "monitor-login@smtp-brevo.invalid", SMTP_KEY, "monitoring@ops.invalid", "owner@ops.invalid, second@ops.invalid");
     expect(set.status).toBe(0);
     const conf = readFileSync(join(root, "alert.env"), "utf8");
     expect(conf).toContain("ALERT_EXTERNAL=false");
-    expect(conf).toContain(`ALERT_NTFY_URL=${url}`);
-    const status = run(root, "staging-alert-channel.sh", ["status"], "");
-    expect(status.stdout).toContain("external delivery: OFF");
-    expect(status.stdout + set.stdout).not.toMatch(/amanah-0123|tk_abc/);
+    expect(conf).toContain("ALERT_REPEAT_HOURS=24");
+    expect(conf).toContain("ALERT_SMTP_HOST='smtp-relay.brevo.com'");
+    expect(conf).toContain("ALERT_SMTP_PORT='587'");
+    expect(conf).toContain(`ALERT_SMTP_PASSWORD='${SMTP_KEY}'`);
+    expect(conf).toContain("ALERT_MAIL_TO='owner@ops.invalid,second@ops.invalid'");
+    expect(conf).toContain("ALERT_NTFY_URL=''");
+    expect(spawnSync("stat", ["-c", "%a", join(root, "alert.env")], { encoding: "utf8" }).stdout.trim()).toBe("600");
+    const status = run(root, "staging-alert-channel.sh", ["status"], "", { ALERT_CONFIG: join(root, "alert.env") });
+    expect(status.stdout).toContain("sending: OFF");
+    expect(status.stdout).toContain("smtp key: set");
+    expect(status.stdout).toContain("recipients: 2");
+    expect(status.stdout).toContain("ntfy: off");
+    expect(status.stdout + set.stdout + set.stderr).not.toMatch(/xsmtpsib|monitor-login|owner@/);
     expect(curlCalls()).toBe("");
-    expect(run(root, "staging-alert-channel.sh", ["set"], "http://ntfy.invalid/short\n\n").status).toBe(1);
+    // The stored file is valid bash and yields the exact values.
+    const sourced = spawnSync("bash", ["-c", `set -a; . "${join(root, "alert.env")}"; printf '%s|%s' "$ALERT_SMTP_PASSWORD" "$ALERT_MAIL"`], { encoding: "utf8" });
+    expect(sourced.stdout).toBe(`${SMTP_KEY}|true`);
   });
 
-  it("enables delivery only on request and sends exactly one test alarm and all-clear", () => {
+  it("refuses incomplete or malformed mail settings and does not enable without a channel", () => {
     const root = stagingTree();
-    run(root, "staging-alert-channel.sh", ["set"], "https://ntfy.invalid/amanah-0123456789abcdefABCDEF\n\n");
-    const res = run(root, "staging-alert-channel.sh", ["enable"], "", { ALERT_CONFIG: join(root, "alert.env") });
-    expect(res.status).toBe(0);
-    expect(readFileSync(join(root, "alert.env"), "utf8")).toContain("ALERT_EXTERNAL=true");
-    const titles = curlCalls().match(/Title: [A-Z]+ amanah-staging channel-test/g);
-    expect(titles).toEqual(["Title: ALARM amanah-staging channel-test", "Title: OK amanah-staging channel-test"]);
-    run(root, "staging-alert-channel.sh", ["disable"], "");
-    expect(readFileSync(join(root, "alert.env"), "utf8")).toContain("ALERT_EXTERNAL=false");
+    expect(mailSet(root, "login", "short", "monitoring@ops.invalid", "owner@ops.invalid").status).toBe(1);
+    expect(mailSet(root, "login", SMTP_KEY, "not-an-address", "owner@ops.invalid").status).toBe(1);
+    expect(mailSet(root, "login", SMTP_KEY, "monitoring@ops.invalid", "owner@ops.invalid,x").status).toBe(1);
+    expect(mailSet(root, "lo'gin", SMTP_KEY, "monitoring@ops.invalid", "owner@ops.invalid").status).toBe(1);
+    const en = run(root, "staging-alert-channel.sh", ["enable"], "", { ALERT_CONFIG: join(root, "alert.env") });
+    expect(en.status).toBe(1);
+    expect(en.stderr).toContain("No e-mail channel configured");
   });
 
   it("owner helper creates the key with mode 600 outside repositories and sends only the public key", () => {
