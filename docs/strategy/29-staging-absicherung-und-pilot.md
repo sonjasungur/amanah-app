@@ -75,6 +75,23 @@ Dauer etwa 10 Minuten. Alle Befehle im Repo-Ordner auf deinem Laptop; Claude fü
    Spätere Tests (mindestens alle 35 Tage, der Health-Check erinnert) mit `scripts/owner-backup-key.sh restore-test --paste`: Die `AGE-SECRET-KEY-…`-Zeile wird verdeckt aus dem Passwortmanager eingefügt, liegt nur im RAM und wird danach gelöscht.
 9. Claude: Health-Check ohne FAIL, einmal Restore auf App-Ebene (zweite Instanz, Login, Ordner entschlüsselbar), Doku fortschreiben. **Erst dann** gilt Staging als vollständig abgenommen.
 
+### 2.2a Stand 31.10., 17:54 (Owner-Empfänger installiert)
+
+| Schritt | Ergebnis |
+|---|---|
+| Owner-Empfänger auf dem Server | 1 öffentlicher age-Schlüssel, Fingerprint `2cfae5a85d555db6` (= Owner-Angabe), verschieden vom Testschlüssel; kein privater Schlüssel in `/opt/amanah-staging` |
+| Backup `amanah_amanah_staging_20261031_175418.sql.gz.age` | erstellt (24,6 KB, Rechte 600), Kopf `age-encryption.org/v1`, **2 Empfänger-Einträge** (Owner + Testschlüssel), ohne Schlüssel nicht lesbar |
+| Automatischer Restore-Test (Testschlüssel) | 5 × OK; Nachweis an Owner-Empfänger `2cfae5a85d555db6` gebunden |
+| Health-Check | 7 × OK, 1 × FAIL „no passed owner restore test“ (erwartet, Alarm lokal) |
+| Persönlicher Restore-Test (Owner, Laptop) | **ausstehend**: `scripts/owner-backup-key.sh restore-test` |
+
+Hinweis: age speichert die Empfänger nicht lesbar im Kopf. Dass das Backup an den Owner-Schlüssel verschlüsselt ist, belegen:
+- der zum Backup-Zeitpunkt eingetragene Empfänger
+- die zwei Empfänger-Einträge im Kopf
+- **abschließend erst der persönliche Restore-Test**
+
+Staging gilt bis dahin nicht als vollständig abgenommen.
+
 ### 2.3 Verlust und Wechsel
 
 - **Owner-Schlüssel verloren:** Alle Backups sind nur noch mit dem Testschlüssel lesbar, solange der Server existiert. Neues Paar nach §2.2 erzeugen; damit werden beide Nachweise ungültig, bis neu getestet wurde.
