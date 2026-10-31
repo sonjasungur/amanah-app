@@ -20,7 +20,7 @@ import type {
   RepositoryUser,
   ServerRepository,
 } from "./types";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 const SESSION_DAYS = 30;
 

@@ -4,6 +4,18 @@
  * test runner, so the spec can mark its own synthetic accounts as legacy (as the migration does).
  */
 import { test, expect, type Page } from "@playwright/test";
+import { Client } from "pg";
+
+/** Plain SQL: the generated Prisma 7 client is ESM and cannot be loaded by the spec runner. */
+async function sql(text: string, values: unknown[]): Promise<void> {
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    await client.query(text, values);
+  } finally {
+    await client.end();
+  }
+}
 
 test.skip(
   process.env.SECURITY_API_E2E !== "true" || !process.env.DATABASE_URL,
@@ -26,11 +38,10 @@ async function legacyAccount(page: Page, markedDaysAgo: number): Promise<string>
     data: { email, password: PASSWORD, name: "Altkonto" },
   });
   expect(res.status()).toBe(202);
-  const { prisma } = await import("../src/lib/server/prisma");
-  await prisma.user.update({
-    where: { email },
-    data: { emailVerifiedAt: null, emailVerificationLegacyAt: new Date(Date.now() - markedDaysAgo * DAY) },
-  });
+  await sql(`UPDATE users SET email_verified_at = NULL, email_verification_legacy_at = $2 WHERE email = $1`, [
+    email,
+    new Date(Date.now() - markedDaysAgo * DAY),
+  ]);
   return email;
 }
 
@@ -56,9 +67,7 @@ async function linkFromOutbox(page: Page, email: string): Promise<string> {
 }
 
 test.afterAll(async () => {
-  const { prisma } = await import("../src/lib/server/prisma");
-  await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-legacy-" } } });
-  await prisma.$disconnect();
+  await sql(`DELETE FROM users WHERE email LIKE 'e2e-legacy-%'`, []);
 });
 
 test("legacy account in the grace period logs in, keeps working and confirms from the notice", async ({ page }) => {
