@@ -68,6 +68,9 @@ export function validateProductionEnv(env = process.env) {
   if (env.AMANAH_BILLING_MODE === "sandbox") {
     errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
   }
+  if (env.AMANAH_BILLING_ENFORCE === "true" && !env.AMANAH_PLUS_LAUNCH_AT?.trim()) {
+    errors.push("AMANAH_BILLING_ENFORCE=true needs AMANAH_PLUS_LAUNCH_AT so existing accounts keep their features");
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }

@@ -53,10 +53,10 @@ describe("webhook signature", () => {
 });
 
 describe("products", () => {
-  it("uses configurable test prices only (29 € or 39 €)", () => {
-    expect(getTestPriceCents({} as unknown as NodeJS.ProcessEnv)).toBe(2900);
-    expect(getTestPriceCents({ AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS: "3900" } as unknown as NodeJS.ProcessEnv)).toBe(3900);
-    expect(getTestPriceCents({ AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS: "100" } as unknown as NodeJS.ProcessEnv)).toBe(2900);
+  it("uses 39 € as planned test price; 29 € only on request; nothing else", () => {
+    expect(getTestPriceCents({} as unknown as NodeJS.ProcessEnv)).toBe(3900);
+    expect(getTestPriceCents({ AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS: "2900" } as unknown as NodeJS.ProcessEnv)).toBe(2900);
+    expect(getTestPriceCents({ AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS: "100" } as unknown as NodeJS.ProcessEnv)).toBe(3900);
     expect(getProducts().filter((p) => p.id.startsWith("testament")).every((p) => !p.available)).toBe(true);
   });
 });

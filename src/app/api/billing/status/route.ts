@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedUserId, getServerRepository } from "@/lib/server/auth-utils";
 import { getBillingMode, isBillingEnforced } from "@/lib/billing/config";
 import { getProducts } from "@/lib/billing/products";
+import { resolvePlusAccess } from "@/lib/billing/plus-access";
 
 export async function GET(request: Request) {
   const userId = await getAuthenticatedUserId(request);
-  const purchases = userId ? await getServerRepository().listPurchases(userId) : [];
+  const repo = getServerRepository();
+  const purchases = userId ? await repo.listPurchases(userId) : [];
+  const user = userId ? await repo.getUserById(userId) : null;
+  const entitlements = [...new Set(purchases.filter((p) => p.status === "paid").map((p) => p.productId))];
   return NextResponse.json({
     mode: getBillingMode(),
     enforced: isBillingEnforced(),
@@ -18,6 +22,7 @@ export async function GET(request: Request) {
       currency: p.currency,
       createdAt: p.createdAt,
     })),
-    entitlements: [...new Set(purchases.filter((p) => p.status === "paid").map((p) => p.productId))],
+    entitlements,
+    plusAccess: resolvePlusAccess({ accountCreatedAt: user?.createdAt ?? null, paidPlus: entitlements.includes("vorsorge_plus") }),
   });
 }

@@ -7,13 +7,13 @@ Stand: 2026-10-30 · technisch umgesetzt und getestet · **keine echte Zahlung m
 | Produkt | Preis | Status |
 |---|---|---|
 | Mein Wille Basis | kostenlos | aktiv |
-| Vorsorge Plus | **Testpreis** 29 € (Standard) oder 39 € (`AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS=3900`), andere Werte werden ignoriert | in der Sandbox buchbar |
+| Vorsorge Plus | **Testpreis 39 €** (Standard seit 31.10., Owner-Vorgabe) oder 29 € für Vergleichstests (`AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS=2900`), andere Werte werden ignoriert | in der Sandbox buchbar |
 | Testament-Vorbereitung | – | gesperrt (RDG-Prüfung, Owner-Freigabe) |
 | Testament mit juristischer Prüfung | – | gesperrt (Kanzleikooperation offen) |
 
 Das islamische Wissenszentrum ist in keinem Produkt enthalten und bleibt frei.
 
-**Funktionsabgrenzung Basis/Plus:** vorbereitet über `PlusGate` (z. B. vollständiger PDF-Ordner). Mit `AMANAH_BILLING_ENFORCE` (Standard: aus) wird **nichts** gesperrt. Welche Funktionen Plus sind, entscheidet der Owner (REQUIRES_OWNER). Hinweis: Druck/PDF entsteht im Browser; eine wirksame Sperre ist nur für serverseitige Leistungen (z. B. Konto-Speicherung) möglich.
+**Funktionsabgrenzung Basis/Plus:** Konzept mit Matrix und Bestandsschutz in Doku 20. Vorbereitet über `PlusGate` (z. B. vollständiger PDF-Ordner). Mit `AMANAH_BILLING_ENFORCE` (Standard: aus) wird **nichts** gesperrt. Welche Funktionen Plus sind, entscheidet der Owner (REQUIRES_OWNER). Hinweis: Druck/PDF entsteht im Browser; eine wirksame Sperre ist nur für serverseitige Leistungen (z. B. Konto-Speicherung) möglich.
 
 ## 2. Zahlungsablauf
 

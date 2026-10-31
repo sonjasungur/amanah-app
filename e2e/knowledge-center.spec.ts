@@ -38,6 +38,7 @@ test.describe("Islamic knowledge centre", () => {
       "/wissen/redaktion",
       "/wissen/redaktion/paket/ik-start-01-faraid-grundlagen",
       "/intern/pruefworkflow",
+      "/intern/vorsorge-plus",
     ]) {
       const res = await page.goto(path);
       expect(res?.status(), path).toBe(404);

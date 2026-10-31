@@ -1,7 +1,10 @@
 /**
- * Product catalog. Prices are TEST VALUES only (owner decision pending: 29 € or 39 €).
+ * Product catalog. Prices are TEST VALUES only. Planned test price for Vorsorge Plus:
+ * 39 € one-time (owner, 2026-10-31); 29 € stays selectable for comparison tests.
  * The Islamic knowledge centre is never part of any paid product.
  */
+import { featuresByTier } from "./plan-matrix";
+
 export type ProductId = "vorsorge_basis" | "vorsorge_plus" | "testament_vorbereitung" | "testament_pruefung";
 
 export type PlusFeature = "account_sync" | "complete_pdf_folder" | "family_letter_export" | "document_status";
@@ -17,7 +20,7 @@ export interface Product {
   features: string[];
 }
 
-export const TEST_PRICE_OPTIONS_CENTS = [2900, 3900] as const;
+export const TEST_PRICE_OPTIONS_CENTS = [3900, 2900] as const;
 
 export function getTestPriceCents(env: NodeJS.ProcessEnv = process.env): number {
   const configured = Number(env.AMANAH_TEST_PRICE_VORSORGE_PLUS_CENTS);
@@ -31,14 +34,14 @@ export function getProducts(env: NodeJS.ProcessEnv = process.env): Product[] {
       name: "Mein Wille Basis",
       testPriceCents: null,
       available: true,
-      features: ["Kostenloser Amanah-Check", "Alle Vorsorgebereiche auf diesem Gerät", "Druckansicht", "Islamisches Wissen (immer kostenlos)"],
+      features: featuresByTier("free").map((f) => f.title),
     },
     {
       id: "vorsorge_plus",
       name: "Mein Wille Vorsorge Plus",
       testPriceCents: getTestPriceCents(env),
       available: true,
-      features: ["Sichere, verschlüsselte Speicherung im Konto", "Vollständiger PDF-Vorsorgeordner", "Familienbrief-Export", "Dokumentenstatus"],
+      features: featuresByTier("plus").map((f) => f.title),
     },
     {
       id: "testament_vorbereitung",
