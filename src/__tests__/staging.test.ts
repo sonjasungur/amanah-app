@@ -121,6 +121,15 @@ describe("staging compose file", () => {
     expect(compose).toContain('AMANAH_DEV_OUTBOX: "true"');
   });
 
+  it("prepares the proxy network for variant B without exposing the database", () => {
+    const overlay = readFileSync("docker-compose.staging.proxy.yml", "utf8");
+    expect(overlay).toMatch(/staging_proxy:\n\s+name: amanah_staging_proxy\n\s+driver: bridge\n\s+internal: true/);
+    expect(overlay).not.toMatch(/postgres:|gemeinsam1-prod_internal|ports:/);
+    const snippet = readFileSync("deploy/Caddyfile.staging-snippet", "utf8");
+    expect(snippet).toContain("reverse_proxy amanah-staging-app:3000");
+    expect(snippet).not.toMatch(/reverse_proxy 127\.0\.0\.1/);
+  });
+
   it("passes every security-relevant variable to the app", () => {
     for (const key of ["AMANAH_DATA_KEYS", "AMANAH_DATA_KEY_ACTIVE", "AMANAH_DATA_ENCRYPTION: required", "AMANAH_PUBLIC_BASE_URL", "AMANAH_REGISTRATION_ALLOWED_DOMAINS", "AMANAH_MAIL_TRANSPORT: outbox", "AMANAH_DEPLOYMENT_ENV: staging", "NEXT_PUBLIC_AMANAH_ENVIRONMENT: staging", "AMANAH_SANDBOX_WEBHOOK_SECRET"]) {
       expect(compose, key).toContain(key);

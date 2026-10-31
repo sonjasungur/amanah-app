@@ -1,0 +1,22 @@
+# Variant B (docs 29 §4) — PREPARED, NOT APPLIED. Puts the staging app on its own proxy
+# network that only the shared Caddy joins, so Caddy reaches amanah-staging-app:3000 and
+# nothing else of Amanah, and staging reaches nothing of gemeinsam1.
+#
+#   docker compose -f docker-compose.staging.yml -f docker-compose.staging.proxy.yml --env-file .env.staging up -d --no-deps app
+#   docker network connect amanah_staging_proxy gemeinsam1-prod-caddy     # owner approval: shared Caddy
+#
+# internal: Caddy keeps its internet access (ACME) through its own network; nothing on this
+# network gets a route to the outside.
+
+services:
+  app:
+    networks:
+      - staging_db
+      - staging_edge
+      - staging_proxy
+
+networks:
+  staging_proxy:
+    name: amanah_staging_proxy
+    driver: bridge
+    internal: true

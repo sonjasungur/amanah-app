@@ -1,7 +1,13 @@
-# Staging block for an existing Caddy — PREPARED, NOT INSTALLED (changing the shared Caddy
-# is a server change and needs the owner's approval).
-# Prerequisites: DNS for staging.<domain>, staging app on 127.0.0.1:3201 (docker-compose.staging.yml).
-# Password hash: caddy hash-password  (store only the hash here, never the password)
+# Staging block for the shared Caddy (container gemeinsam1-prod-caddy) — PREPARED, NOT INSTALLED.
+# Changing the shared Caddy is a production change for gemeinsam1 and needs the owner's approval.
+# Prerequisites (docs 29 §4, variant B):
+#   - DNS for staging.<domain> (A/AAAA to the server; a record used only by Amanah)
+#   - staging app on the network amanah_staging_proxy (docker-compose.staging.proxy.yml) and
+#     Caddy connected to it. Caddy runs in a container: 127.0.0.1:3201 is NOT reachable from there.
+#   - Password hash: docker exec -it gemeinsam1-prod-caddy caddy hash-password  (only the hash goes here)
+# The Caddyfile is bind-mounted as a single file: write it in place (cat new > Caddyfile), never via
+# an editor or sed -i that replaces the file, or the container keeps the old content. Then
+# caddy validate + caddy reload (a failed reload keeps the running config).
 
 staging.REPLACE_WITH_DOMAIN {
 	# Defence in depth: internal editorial and review pages are never served on staging (the app
@@ -15,15 +21,18 @@ staging.REPLACE_WITH_DOMAIN {
 		REPLACE_WITH_USER REPLACE_WITH_BCRYPT_HASH
 	}
 	encode gzip
-	reverse_proxy 127.0.0.1:3201
+	reverse_proxy amanah-staging-app:3000
 	header {
 		Strict-Transport-Security "max-age=31536000"
 		X-Robots-Tag "noindex, nofollow"
 		-Server
 	}
+	# Inside the caddy_data volume (persistent; /var/log/caddy is not mounted in this container).
+	# Authorization headers are redacted by Caddy unless log_credentials is set (it is not).
 	log {
-		output file /var/log/caddy/amanah-staging.log {
-			roll_keep_for 14d
+		output file /data/amanah-staging/access.log {
+			roll_size 5MiB
+			roll_keep 3
 		}
 		format json
 	}
