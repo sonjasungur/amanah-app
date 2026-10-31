@@ -113,14 +113,10 @@ Dazu vor dem Pilot:
 | Mobil | Alle Fälle auf einem echten Smartphone | bedienbar, kein Querscrollen | | |
 | Betrieb | Health-Check, Backup, Restore-Probe | grün | | |
 
-## 8. Gefundene Lücke in der Produktionskonfiguration (nicht geändert)
+## 8. Lücke in der Produktionskonfiguration (behoben am 31.10.)
 
-`docker-compose.prod.yml` reicht die seit dem 30.10. nötigen Variablen nicht an die App weiter:
-- Datenschlüssel und Verschlüsselungsmodus
-- Basis-URL
-- Mail und Billing
-- Frist für Altkonten
+`docker-compose.prod.yml` reichte die seit dem 30.10. nötigen Variablen nicht an die App weiter (Datenschlüssel, Verschlüsselungsmodus, Basis-URL, Mail, Billing, Frist für Altkonten). Ohne Datenschlüssel wäre der Dienst faktisch ausgefallen: Speichern schlägt fehl, verschlüsselte Ordner sind nicht lesbar.
 
-Ein Deployment über diese Datei würde ohne Datenschlüssel starten. Weil die Verschlüsselung in Produktion standardmäßig Pflicht ist (`NODE_ENV=production`), würde nichts unverschlüsselt gespeichert. Speichern schlägt dann aber fehl, und verschlüsselte Ordner wären nicht lesbar: Der Dienst wäre faktisch ausgefallen. Mails würden ebenfalls fehlen, weil die Basis-URL nicht ankommt.
-
-Vorschlag: [`deploy/proposed/docker-compose.prod.env-passthrough.patch`](../../deploy/proposed/docker-compose.prod.env-passthrough.patch). Er lässt sich sauber anwenden (`git apply --check`), ist aber **nicht angewandt**, weil es sich um eine Produktionskonfiguration handelt (REQUIRES_OWNER). Anwenden: `git apply deploy/proposed/docker-compose.prod.env-passthrough.patch`.
+Auf Owner-Freigabe vom 31.10. im Repository angewandt (kein Deployment). Lokal geprüft mit `docker compose -f docker-compose.prod.yml --env-file <Dummy-Werte> config`:
+- Alle Variablen kommen an; Mail bleibt `disabled`, Billing `disabled`, Frist 60 Tage.
+- Fehlen `AMANAH_DATA_KEYS`, `AMANAH_DATA_KEY_ACTIVE` oder `AMANAH_PUBLIC_BASE_URL`, bricht Compose vor dem Start mit einer klaren Meldung ab.

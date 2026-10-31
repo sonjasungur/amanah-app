@@ -24,7 +24,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | A13 | Domain in Caddy, Origin-Prüfung hinter Proxy | Platzhalter; Staging-Snippet vorbereitet | REQUIRES_OWNER | ja |
 | A14 | Host-Speicherplatz | Owner hat am 31.10. Platz geschaffen; nach den Builds 10 GB frei auf `/` (83 %), meine Prüf-Images +2,4 GB (Abschlussbericht §1) | REQUIRES_OWNER (Dauerlösung, Images) | ja |
 | A15 | Monitoring/Alarmierung | `staging-healthcheck.sh` (Health, DB, Platte, Backup-Alter), Cron-Vorschlag | IMPLEMENTED (Alarmweg REQUIRES_OWNER) | ja |
-| A16 | **`docker-compose.prod.yml` reicht Schlüssel/Basis-URL/Mail/Billing nicht an die App weiter** | Patch `deploy/proposed/docker-compose.prod.env-passthrough.patch` (`git apply --check` ok) | **BLOCKED → REQUIRES_OWNER** (Produktionskonfiguration) | ja |
+| A16 | `docker-compose.prod.yml` reicht Schlüssel/Basis-URL/Mail/Billing an die App weiter | Patch am 31.10. angewandt; `docker compose config` mit Dummy-Werten: alle Variablen gesetzt, ohne Datenschlüssel Abbruch vor dem Start (Doku 22 §8) | TESTED (Konfiguration; nicht deployt) | ja |
 
 ## B. Datenschutz
 
