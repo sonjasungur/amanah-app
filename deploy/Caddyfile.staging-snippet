@@ -4,6 +4,10 @@
 # Password hash: caddy hash-password  (store only the hash here, never the password)
 
 staging.REPLACE_WITH_DOMAIN {
+	# Defence in depth: internal editorial and review pages are never served on staging (the app
+	# also answers 404 because AMANAH_INTERNAL_TOOLS is off there).
+	@internal path /intern /intern/* /wissen/redaktion /wissen/redaktion/* /brand-review /brand-review/*
+	respond @internal 404
 	# Stripe cannot send Basic Auth credentials: only the webhook path is reachable without them.
 	# The app accepts only POST there and only with a valid Stripe-Signature (docs 25).
 	@protected not path /api/billing/webhook

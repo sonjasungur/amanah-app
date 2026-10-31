@@ -94,6 +94,9 @@ export function validateProductionEnv(env = process.env) {
   if (env.AMANAH_INTERNAL_TOOLS === "true") {
     errors.push("AMANAH_INTERNAL_TOOLS must not be enabled in production");
   }
+  if (env.AMANAH_DEV_OUTBOX === "true") {
+    errors.push("AMANAH_DEV_OUTBOX must not be enabled in production");
+  }
   if (!env.AMANAH_PUBLIC_BASE_URL?.trim() && !env.NEXT_PUBLIC_SITE_URL?.trim() && !env.NEXT_PUBLIC_APP_URL?.trim()) {
     errors.push("AMANAH_PUBLIC_BASE_URL (or NEXT_PUBLIC_SITE_URL) is required for links in e-mails");
   }

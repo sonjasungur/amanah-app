@@ -28,7 +28,7 @@ const STAGING = {
   AMANAH_SERVER_STORAGE: "postgres",
   AMANAH_REGISTRATION_ALLOWED_DOMAINS: "staging.invalid",
   AMANAH_MAIL_TRANSPORT: "outbox",
-  AMANAH_INTERNAL_TOOLS: "true",
+  AMANAH_DEV_OUTBOX: "true",
   AMANAH_BILLING_MODE: "sandbox",
   AMANAH_SANDBOX_WEBHOOK_SECRET: "w".repeat(64),
 };
@@ -79,7 +79,7 @@ describe("registration on staging", () => {
 });
 
 describe("staging env validation", () => {
-  it("accepts a complete staging setup with outbox, sandbox and internal tools", () => {
+  it("accepts a complete staging setup with dev outbox and sandbox, internal tools off", () => {
     const result = validateStagingEnv(env(STAGING));
     expect(result.errors).toEqual([]);
   });
@@ -93,6 +93,7 @@ describe("staging env validation", () => {
     ["billing enforcement", { AMANAH_BILLING_ENFORCE: "true", AMANAH_PLUS_LAUNCH_AT: "2027-01-01" }, "AMANAH_BILLING_ENFORCE"],
     ["missing staging label", { AMANAH_DEPLOYMENT_ENV: "" }, "AMANAH_DEPLOYMENT_ENV"],
     ["no data keys", { AMANAH_DATA_KEYS: "" }, "AMANAH_DATA_KEYS"],
+    ["internal editorial tools", { AMANAH_INTERNAL_TOOLS: "true" }, "AMANAH_INTERNAL_TOOLS must stay off on staging"],
   ])("refuses %s", (_label, override, message) => {
     const result = validateStagingEnv(env({ ...STAGING, ...override }));
     expect(result.valid).toBe(false);
@@ -108,6 +109,13 @@ describe("staging compose file", () => {
     expect(compose).toContain("amanah_pg_staging");
     expect(compose).not.toMatch(/amanah_pg_prod|container_name: amanah-app\b|gemeinsam1-prod/);
     expect(compose).toMatch(/"127\.0\.0\.1:\$\{STAGING_APP_PORT:-3201\}:3000"/);
+  });
+
+  it("keeps the database off the host network and internal tools off", () => {
+    const postgres = compose.slice(compose.indexOf("  postgres:"), compose.indexOf("  app:"));
+    expect(postgres).not.toMatch(/ports:/);
+    expect(compose).toContain('AMANAH_INTERNAL_TOOLS: "false"');
+    expect(compose).toContain('AMANAH_DEV_OUTBOX: "true"');
   });
 
   it("passes every security-relevant variable to the app", () => {

@@ -40,6 +40,11 @@ code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${AUTH[@]}" -X POS
 code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${AUTH[@]}" "$BASE_URL/api/amanah")"
 [[ "$code" == "401" ]] && ok "folder API requires a session" || bad "folder API without session answered $code"
 
+for path in /intern/vorsorge-plus /intern/pruefworkflow /wissen/redaktion /brand-review; do
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${AUTH[@]}" "$BASE_URL$path")"
+  [[ "$code" == "404" ]] && ok "internal page $path not reachable" || bad "internal page $path answered $code"
+done
+
 # The webhook is the only path open without Basic Auth: unsigned events must be refused
 # (400 bad signature; 404 if billing is disabled).
 code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST -H 'Content-Type: application/json' \

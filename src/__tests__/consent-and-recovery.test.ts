@@ -209,4 +209,14 @@ describe("dev outbox", () => {
     vi.stubEnv("AMANAH_INTERNAL_TOOLS", "");
     expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(404);
   });
+
+  it("AMANAH_DEV_OUTBOX opens only the outbox (staging), never with a real mail transport", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AMANAH_INTERNAL_TOOLS", "");
+    vi.stubEnv("AMANAH_DEV_OUTBOX", "true");
+    vi.stubEnv("AMANAH_MAIL_TRANSPORT", "outbox");
+    expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(200);
+    vi.stubEnv("AMANAH_MAIL_TRANSPORT", "brevo");
+    expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(404);
+  });
 });

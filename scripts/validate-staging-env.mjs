@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Staging env validation: every production rule, except that the dev outbox, sandbox billing
- * and internal tools are allowed — plus rules that keep staging synthetic and closed:
+ * Staging env validation: every production rule, except that the dev outbox (AMANAH_DEV_OUTBOX)
+ * and sandbox / Stripe test billing are allowed — plus rules that keep staging synthetic and closed:
  * no real mail provider, registration only for reserved test domains, a database of its own,
  * no external AI. See docs/strategy/22-staging-und-pilot.md.
  *
@@ -16,6 +16,7 @@ const ALLOWED_IN_STAGING = [
   "AMANAH_MAIL_TRANSPORT=outbox",
   "AMANAH_BILLING_MODE=sandbox",
   "AMANAH_BILLING_MODE=stripe_test",
+  "AMANAH_DEV_OUTBOX must not",
   "AMANAH_INTERNAL_TOOLS must not",
 ];
 
@@ -54,6 +55,9 @@ export function validateStagingEnv(env = process.env) {
 
   if (!/staging/i.test(databaseName(env.DATABASE_URL ?? ""))) {
     errors.push("DATABASE_URL must point to a separate staging database (name contains 'staging')");
+  }
+  if (env.AMANAH_INTERNAL_TOOLS === "true") {
+    errors.push("AMANAH_INTERNAL_TOOLS must stay off on staging (editorial and review pages); use AMANAH_DEV_OUTBOX for test accounts");
   }
   if (env.AMANAH_AI_ENABLED === "true" || env.NEXT_PUBLIC_AMANAH_AI_ENABLED === "true") {
     errors.push("External AI must stay off on staging");

@@ -75,7 +75,9 @@ services:
       AMANAH_PUBLIC_REGISTRATION_ENABLED: "true"
       AMANAH_REGISTRATION_ALLOWED_DOMAINS: ${AMANAH_REGISTRATION_ALLOWED_DOMAINS:-staging.invalid}
       AMANAH_MAIL_TRANSPORT: outbox
-      AMANAH_INTERNAL_TOOLS: "true"
+      # Outbox endpoint for synthetic test accounts only; editorial/review pages stay unreachable
+      AMANAH_DEV_OUTBOX: "true"
+      AMANAH_INTERNAL_TOOLS: "false"
       # sandbox (built-in test checkout) or stripe_test (Stripe test mode of the Amanah account, docs 25)
       AMANAH_BILLING_MODE: ${AMANAH_BILLING_MODE:-sandbox}
       AMANAH_BILLING_ENFORCE: "false"
