@@ -8,6 +8,7 @@ import {
   allSourceIds,
   getKnowledgeArea,
   getSourceCheck,
+  questionsByRole,
   requiredReviews,
   structuralIssues,
 } from "@/modules/islamic-knowledge";
@@ -26,6 +27,7 @@ export default async function ReviewPackagePage({ params }: { params: Promise<{ 
   const area = getKnowledgeArea(article.area);
   const sources = getSourcesByIds(allSourceIds(article));
   const issues = structuralIssues(article);
+  const questions = questionsByRole(article);
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-8 text-sm leading-relaxed print:px-0">
@@ -114,8 +116,27 @@ export default async function ReviewPackagePage({ params }: { params: Promise<{ 
         </ul>
       </section>
 
+      <section className="mb-6">
+        <h2 className="font-bold mb-2">5. Konkrete Prüffragen</h2>
+        {requiredReviews(article).map((kind) => (
+          <div key={kind} className="mb-3 break-inside-avoid" data-testid={`review-questions-${kind}`}>
+            <p className="font-semibold">{REVIEW_TITLES[kind]}</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              {questions[kind].map((q) => (
+                <li key={q.question}>
+                  {q.question} <span className="text-muted">☐ ja ☐ nein ☐ Anmerkung</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+        {!article.requiresLegalReview && questions.legal.length > 0 && (
+          <p className="text-destructive">Der Text enthält juristische Prüfvermerke, aber keine juristische Prüfung ist vorgesehen.</p>
+        )}
+      </section>
+
       <section>
-        <h2 className="font-bold mb-2">5. Prüfvermerke (vom Prüfer auszufüllen)</h2>
+        <h2 className="font-bold mb-2">6. Prüfvermerke (vom Prüfer auszufüllen)</h2>
         {requiredReviews(article).map((kind) => (
           <div key={kind} className="border border-border p-3 mb-3 break-inside-avoid">
             <p className="font-semibold">{REVIEW_TITLES[kind]}</p>
