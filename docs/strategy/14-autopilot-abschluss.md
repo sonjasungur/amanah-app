@@ -3,6 +3,8 @@
 Stand: 2026-10-30 · Agent: Claude Code · Grundlage: Masterauftrag und P0-Auftrag vom 30.10.
 Keine externen Freigaben wurden erteilt oder ersetzt. Keine Produktion, keine echten Zahlungen, Mails oder Kontakte.
 
+> **Fortsetzung 31.10.:** [24-abschluss-technik-und-pilot.md](24-abschluss-technik-und-pilot.md) ersetzt §4, §5, §13 und §14 (Speicher, Prisma 7, Altkonten statt pauschaler Bestätigung, Plus-Abgrenzung, Anbieter, Staging).
+
 ## 1. Git-Stand und Branches
 
 | Branch | Stand | Remote |

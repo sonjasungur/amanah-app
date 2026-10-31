@@ -122,3 +122,22 @@ Weitere Quellen: Config-Referenz https://www.prisma.io/docs/orm/reference/prisma
 1. **Kurzfristig:** Kein Notfall-Upgrade nötig. Das Advisory betrifft nur die CLI bzw. Build-Zeit, für diese App ist es nicht ausnutzbar. Risk-Acceptance dokumentieren, um Release-Gates (`npm audit`) nicht zu blockieren.
 2. **Mittelfristig (empfohlen, in einem separaten Branch, nicht in `feat/vorsorge-testament-foundation`):** Auf **Prisma 7.10.1 (exakt gepinnt, nicht `latest` = 8.0 RC)** migrieren und gleichzeitig das Docker-Base-Image von Node 20 (EOL) auf 22 oder 24 LTS heben. Aufwand ca. 8–12 h. Das Datenrisiko ist gering, weil keine neue Migration und kein Formatwechsel nötig ist. Der Hauptaufwand liegt in Dockerfile/Standalone und Tests. Nebeneffekt: Das native Engine-Binary fällt weg, die Images werden einfacher.
 3. Commits, Merge und Deployment nur nach ausdrücklicher Owner-Freigabe (`AI_HANDOFF.md` §8).
+
+## 7. Stand 2026-10-31: bereit zur Integration (Vorschlag, nicht gemergt)
+
+`chore/prisma-7` @ `80bac16` (lokal, kein Push) liegt direkt auf `feat/vorsorge-testament-foundation` @ `02cc7ad`. Zwei Commits: Migration auf Prisma 7.10.1 und Anpassung von nach dem Branch-Schnitt hinzugekommenem Code (Billing-Idempotenz nutzt den `Prisma`-Namespace des generierten Clients; die Legacy-E2E-Spec nutzt `pg`, weil der generierte ESM-Client im Spec-Runner nicht ladbar ist).
+
+| Prüfung (alle selbst ausgeführt, 31.10.) | Ergebnis |
+|---|---|
+| tsc, ESLint | ok |
+| Vitest | 507 bestanden, 13 skipped (Postgres-Dateien ohne DB-Env) |
+| `migrate deploy` auf frischer DB, `migrate diff` Migrationen ↔ Schema | ok, keine Abweichung |
+| DB von Prisma 6.19.3 angelegt → Prisma 7: `migrate status`, Live-Diff | „up to date“, keine Abweichung |
+| Postgres-Integration auf dieser DB | 20/20 |
+| Playwright API-Modus + Postgres + Billing-Sandbox + CSP + Legacy-Spec | 61 bestanden, 9 skipped (Mobil-Duplikate) |
+| Playwright lokal (Desktop + Mobil) | 239 bestanden, 73 skipped (API-only) |
+| Docker: Runner- und Migrate-Image (Node 24, legacy builder), Migration per Container, App-Container gegen Postgres: Registrierung, Bestätigung, Einwilligung, Speichern/Lesen, Ordner verschlüsselt, Logs ohne Adressen und Tokens | ok (Image `amanah-p7-check:c5bf156` 276 MB) |
+| `npm audit --omit=dev` | **0 Schwachstellen** (Integration mit Prisma 6: 3 high) |
+| gitleaks 39 Commits | keine Funde |
+
+Empfehlung: `chore/prisma-7` per Fast-Forward in den Integrationsbranch übernehmen (**Owner-Freigabe**), danach Integrationsbranch → `main` nach Review.
