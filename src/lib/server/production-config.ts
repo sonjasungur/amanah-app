@@ -66,6 +66,15 @@ export function validateProductionEnv(
   if (env.AMANAH_BILLING_MODE === "sandbox") {
     errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
   }
+  if (env.AMANAH_BILLING_MODE === "stripe_test") {
+    errors.push("AMANAH_BILLING_MODE=stripe_test is not allowed in production (Stripe test mode is for staging only)");
+  }
+  // Live keys are refused everywhere until a live mode is implemented and approved (docs 25).
+  for (const name of ["AMANAH_STRIPE_SECRET_KEY", "AMANAH_STRIPE_PUBLISHABLE_KEY"]) {
+    if (/^(sk|rk|pk)_live_/.test(env[name]?.trim() ?? "")) {
+      errors.push(`${name} is a Stripe live key — only test mode is implemented`);
+    }
+  }
   if (env.AMANAH_BILLING_ENFORCE === "true" && !env.AMANAH_PLUS_LAUNCH_AT?.trim()) {
     errors.push("AMANAH_BILLING_ENFORCE=true needs AMANAH_PLUS_LAUNCH_AT so existing accounts keep their features");
   }

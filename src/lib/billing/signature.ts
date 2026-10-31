@@ -18,11 +18,12 @@ export function verifySignature(
   { toleranceSeconds = DEFAULT_TOLERANCE_SECONDS, now = Math.floor(Date.now() / 1000) } = {}
 ): boolean {
   if (!header) return false;
-  const parts = Object.fromEntries(header.split(",").map((p) => p.trim().split("=") as [string, string]));
-  const timestamp = Number(parts.t);
-  if (!Number.isInteger(timestamp) || !parts.v1) return false;
+  const parts = header.split(",").map((p) => p.trim().split("=") as [string, string | undefined]);
+  const timestamp = Number(parts.find(([k]) => k === "t")?.[1]);
+  // Several v1 entries are sent while a provider rotates the signing secret; any one may match.
+  const signatures = parts.filter(([k, v]) => k === "v1" && v).map(([, v]) => Buffer.from(v!, "hex"));
+  if (!Number.isInteger(timestamp) || signatures.length === 0) return false;
   if (Math.abs(now - timestamp) > toleranceSeconds) return false;
   const expected = createHmac("sha256", secret).update(`${timestamp}.${payload}`).digest();
-  const given = Buffer.from(parts.v1, "hex");
-  return given.length === expected.length && timingSafeEqual(given, expected);
+  return signatures.some((given) => given.length === expected.length && timingSafeEqual(given, expected));
 }

@@ -8,7 +8,7 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-/** Test receipt for sandbox purchases — explicitly not an invoice, no customer data. */
+/** Test receipt for sandbox and Stripe test-mode purchases — explicitly not an invoice, no customer data. */
 export async function GET(request: Request, { params }: { params: Promise<{ ref: string }> }) {
   const userId = await getAuthenticatedUserId(request);
   if (!userId) return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ ref:
   const product = getProducts().find((p) => p.id === purchase.productId);
   const html = `<!doctype html><html lang="de"><meta charset="utf-8"><title>Testbeleg</title>
 <body style="font-family:sans-serif;max-width:40rem;margin:2rem auto">
-<p style="border:2px solid #b45309;padding:.5rem;font-weight:bold">TESTBELEG – keine Rechnung, keine echte Zahlung (Sandbox)</p>
+<p style="border:2px solid #b45309;padding:.5rem;font-weight:bold">TESTBELEG – keine Rechnung, keine echte Zahlung (Testmodus)</p>
 <h1>Mein Wille</h1>
 <p>Produkt: ${escapeHtml(product?.name ?? purchase.productId)}</p>
 <p>Betrag: ${formatPrice(purchase.amountCents)} (${escapeHtml(purchase.currency)})</p>

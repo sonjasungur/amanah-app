@@ -2,6 +2,8 @@
 
 Stand: 2026-10-31 · Desktop-Recherche, **keine Konten eröffnet, kein Kontakt** · Preise netto laut Anbieterseiten bzw. Sekundärquellen (siehe Quellen); vor Vertragsschluss beim Anbieter bestätigen.
 
+**Entscheidung 31.10.:** Zahlung über Stripe, mit eigenem Amanah-Konto unter dem bestehenden Login. Einrichtung und Testmodus-Adapter: Doku 25.
+
 ## 0. Besonderheit von Amanah
 
 Schon die Tatsache, dass jemand Mails von „Mein Wille – islamische Vorsorge“ erhält oder dort etwas kauft, lässt auf die Religionszugehörigkeit schließen (Art. 9 DSGVO, zumindest mittelbar). Daraus folgt:

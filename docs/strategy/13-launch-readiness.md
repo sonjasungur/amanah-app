@@ -43,10 +43,10 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | # | Kriterium | Nachweis | Status | Start-relevant |
 |---|---|---|---|---|
 | C1 | Vorsorgebereiche | E2E lokal 239 | TESTED | ja |
-| C2 | Abgrenzung kostenlos/Plus mit Bestandsschutz | Matrix + Zugangsregel + interne Konzeptseite (Doku 20), Tests | IMPLEMENTED (Konzept) / REQUIRES_OWNER (bestätigen, Starttermin) | ja |
-| C3 | Preis | Testpreis 39 € einmalig als Standard | REQUIRES_OWNER (endgültig) | ja |
+| C2 | Abgrenzung kostenlos/Plus mit Bestandsschutz | Matrix + Zugangsregel + interne Konzeptseite (Doku 20), Tests; Bestandsschutz vom Owner am 31.10. bestätigt | IMPLEMENTED / REQUIRES_OWNER (Starttermin) | ja |
+| C3 | Preis | Testpreis 39 € einmalig (Owner 31.10.) | REQUIRES_OWNER (endgültiger Preis) | ja |
 | C4 | Zahlungs-Sandbox | `billing.test.ts`, E2E | TESTED | – |
-| C5 | Echter Zahlungsanbieter, Live-Adapter | Empfehlung Stripe Checkout (Doku 21); kein Live-Code | REQUIRES_OWNER | ja |
+| C5 | Zahlungsanbieter Stripe (Owner 31.10.) | Testmodus-Adapter Checkout + Webhook, Live-Schlüssel abgelehnt, `stripe-billing.test.ts` (nur Mocks); Einrichtung Doku 25 | TESTED (Testmodus, Mocks) / REQUIRES_OWNER (Amanah-Konto, Live-Modus) | ja |
 | C6 | AGB, Widerrufsbelehrung digitale Inhalte, Bestellbutton, Rechnung/USt | – | REQUIRES_LEGAL_REVIEW | ja |
 | C7 | Impressum | vorhanden | TESTED (Seite) | ja |
 | C8 | Support-Prozess, Sicherheitskontakt | Platzhalter | REQUIRES_OWNER | ja |
@@ -70,7 +70,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | E2 | Erbquoten-Anzeige | Regelwerk `unreviewed_draft` + Flag | REQUIRES_SCHOLAR_REVIEW |
 | E3 | Juristischer Prüfworkflow | nur interne Sandbox | Owner + Kooperationsvertrag + REQUIRES_LEGAL_REVIEW |
 | E4 | Externe KI | aus | Owner + Datenschutz |
-| E5 | Zahlungen | kein Live-Modus im Code | Owner + C5/C6 |
+| E5 | Zahlungen | kein Live-Modus im Code; `stripe_test` nur auf Staging, in Produktion vom Validator abgelehnt | Owner + C5/C6 |
 | E6 | Plus-Sperren | `AMANAH_BILLING_ENFORCE` aus; ohne Starttermin technisch abgelehnt | Owner + C2/C6 |
 | E7 | Mailversand | `AMANAH_MAIL_TRANSPORT=disabled` | Owner + A6/B5 |
 

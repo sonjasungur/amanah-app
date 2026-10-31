@@ -45,7 +45,7 @@ Ein Test stellt sicher, dass jeder Dashboard-Bereich genau einer Funktion zugeor
 
 ## 4. Was noch fehlt, bevor etwas gesperrt wird
 
-1. REQUIRES_OWNER: Matrix bestätigen (insbesondere: Janazah-Wünsche in Plus, Notfallkarte frei), Starttermin festlegen, endgültiger Preis.
+1. Owner-Entscheidung 31.10.: Vorsorge Plus mit **39 € einmalig als Testpreis** vorbereiten, **Bestandsschutz für Altkonten**. Weiter REQUIRES_OWNER: Starttermin (`AMANAH_PLUS_LAUNCH_AT`), endgültiger Preis, Freigabe der Sperren.
 2. Öffentliche Preisseite `/preise` ersetzen: Sie zeigt noch die alten Marketing-Stufen (Basic 29 €, Komplett 79 €, Familie 99 €, „Kauf noch nicht möglich“) und passt nicht zum Produktkatalog. Bewusst nicht geändert (Vorgabe: zunächst nur Konzept).
 3. REQUIRES_LEGAL_REVIEW: AGB, Widerrufsbelehrung für digitale Inhalte (§ 356 Abs. 5 BGB), Bestellbutton (§ 312j BGB), Rechnung/USt (Doku 17).
 4. Live-Zahlungsanbieter (Doku 21).

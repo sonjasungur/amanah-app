@@ -13,7 +13,7 @@ interface Purchase {
 }
 
 interface Status {
-  mode: "disabled" | "sandbox";
+  mode: "disabled" | "sandbox" | "stripe_test";
   products: Product[];
   purchases: Purchase[];
   entitlements: string[];
@@ -62,6 +62,14 @@ export function BillingControls() {
         <Button type="button" size="sm" variant="outline" onClick={() => void buy()} data-testid="billing-buy-sandbox">
           Vorsorge Plus testen (Sandbox, keine echte Zahlung)
         </Button>
+      )}
+      {status.mode === "stripe_test" && !hasPlus && (
+        <>
+          <Button type="button" size="sm" variant="outline" onClick={() => void buy()} data-testid="billing-buy-stripe-test">
+            Vorsorge Plus testen (Stripe-Testmodus, keine echte Zahlung)
+          </Button>
+          <p className="text-xs text-muted">Weiter zur Stripe-Testkasse. Dort nur Stripe-Testkarten verwenden, keine echten Kartendaten.</p>
+        </>
       )}
       {error && <p className="text-destructive" role="alert">{error}</p>}
       {status.purchases.length > 0 && (

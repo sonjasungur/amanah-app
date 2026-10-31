@@ -42,5 +42,6 @@ Zustände (`src/lib/server/email-verification.ts`):
 
 ## Offen
 
-- REQUIRES_OWNER: Länge der Frist; ob Altkonten vor dem Start per Mail informiert werden (Versand an echte Nutzer).
+- Frist: **60 Tage**, vom Owner am 31.10. bestätigt (Standardwert `AMANAH_LEGACY_VERIFICATION_GRACE_DAYS=60`).
+- REQUIRES_OWNER: ob Altkonten vor dem Start per Mail informiert werden (Versand an echte Nutzer).
 - Hinweis an die Rechtsberatung: Der Hinweistext gehört zu den Kontotexten (B2/B3).

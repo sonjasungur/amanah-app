@@ -15,6 +15,7 @@ const RESERVED_TLDS = [".invalid", ".test", ".example"];
 const ALLOWED_IN_STAGING = [
   "AMANAH_MAIL_TRANSPORT=outbox",
   "AMANAH_BILLING_MODE=sandbox",
+  "AMANAH_BILLING_MODE=stripe_test",
   "AMANAH_INTERNAL_TOOLS must not",
 ];
 
@@ -62,6 +63,15 @@ export function validateStagingEnv(env = process.env) {
   }
   if (env.AMANAH_BILLING_MODE === "sandbox" && (env.AMANAH_SANDBOX_WEBHOOK_SECRET?.trim().length ?? 0) < 32) {
     errors.push("AMANAH_SANDBOX_WEBHOOK_SECRET (32+ chars) is required for sandbox billing");
+  }
+  if (env.AMANAH_BILLING_MODE === "stripe_test") {
+    if (!/^(sk|rk)_test_[A-Za-z0-9]{10,}$/.test(env.AMANAH_STRIPE_SECRET_KEY?.trim() ?? "")) {
+      errors.push("AMANAH_STRIPE_SECRET_KEY must be a Stripe test key (sk_test_… or rk_test_…) of the Amanah account");
+    }
+    if (!/^whsec_[A-Za-z0-9]{10,}$/.test(env.AMANAH_STRIPE_WEBHOOK_SECRET?.trim() ?? "")) {
+      errors.push("AMANAH_STRIPE_WEBHOOK_SECRET (whsec_…) of the staging webhook endpoint is required");
+    }
+    warnings.push("Stripe: use the test keys of the separate Amanah account, never keys of another business (docs 25)");
   }
   warnings.push("Use data keys, session secret and database credentials that differ from production");
 

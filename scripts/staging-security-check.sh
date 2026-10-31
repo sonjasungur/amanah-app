@@ -40,4 +40,10 @@ code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${AUTH[@]}" -X POS
 code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "${AUTH[@]}" "$BASE_URL/api/amanah")"
 [[ "$code" == "401" ]] && ok "folder API requires a session" || bad "folder API without session answered $code"
 
+# The webhook is the only path open without Basic Auth: unsigned events must be refused
+# (400 bad signature; 404 if billing is disabled).
+code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST -H 'Content-Type: application/json' \
+  -H 'Stripe-Signature: t=1,v1=00' -d '{"id":"evt_probe","type":"checkout.session.completed"}' "$BASE_URL/api/billing/webhook")"
+[[ "$code" == "400" || "$code" == "404" ]] && ok "unsigned webhook rejected ($code)" || bad "unsigned webhook answered $code"
+
 exit "$FAILED"

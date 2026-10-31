@@ -31,7 +31,7 @@ App-Änderungen dafür:
 - **Mail:** Keine echte Mail; nur `outbox` (bleibt im Speicher) oder `disabled`.
 - **Registrierung:** Allow-List ist Pflicht und darf nur `.invalid`, `.test` oder `.example` enthalten.
 - **Datenbank:** Eigene Datenbank, der Name muss „staging“ enthalten.
-- **KI und Zahlungen:** Externe KI aus. Billing nur Sandbox, keine Sperren.
+- **KI und Zahlungen:** Externe KI aus. Billing nur Sandbox oder Stripe-**Testmodus** (`stripe_test`, nur mit Testschlüsseln des Amanah-Kontos, Doku 25), keine Sperren.
 - **Verschlüsselung:** wie in Produktion Pflicht, mit eigenen Schlüsseln.
 - **Erlaubt (nur hier):** Dev-Outbox, Sandbox-Kasse, interne Werkzeuge (für Testkonten und Tests).
 
@@ -40,7 +40,7 @@ App-Änderungen dafür:
 1. DNS `staging.<domain>` und eine Entscheidung, auf welchem Host Staging läuft. Speicher auf `/` beachten: am 31.10. noch 8,5 GB frei, ein Build braucht mehrere GB.
 2. `.env.staging` mit frischen Secrets anlegen (Befehle in der Vorlage), dann `node scripts/validate-staging-env.mjs`.
 3. `docker compose -p amanah-staging -f docker-compose.staging.yml --env-file .env.staging up -d --build`.
-4. Caddy-Block aus `deploy/Caddyfile.staging-snippet` mit eigenem Basic-Auth-Hash einsetzen und Caddy neu laden. Das ändert den gemeinsamen Webserver und braucht deshalb eine eigene Freigabe.
+4. Caddy-Block aus `deploy/Caddyfile.staging-snippet` mit eigenem Basic-Auth-Hash einsetzen und Caddy neu laden. Der Block nimmt nur `/api/billing/webhook` von der Basic Auth aus, damit Stripe-Testereignisse ankommen. Das ändert den gemeinsamen Webserver und braucht deshalb eine eigene Freigabe.
 5. Testkonten: `STAGING_BASE_URL=… STAGING_BASIC_AUTH=… node scripts/seed-staging-accounts.mjs --count 5 --out <sicherer Pfad>`.
 6. Cron (Vorschlag):
    - `*/5 * * * *` Health-Check
