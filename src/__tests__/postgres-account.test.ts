@@ -92,3 +92,23 @@ describe.runIf(runIntegration)("Postgres: accounts, tokens and consent", () => {
     expect(kept?.status).toBe("paid");
   });
 });
+
+describe.runIf(runIntegration)("Postgres: confirming a legacy account", () => {
+  it("the confirmation response already reports the confirmed state", async () => {
+    const { POST: verifyPOST } = await import("@/app/api/auth/verify-email/route");
+    const { resetServerRepository } = await import("@/lib/server/repository");
+    const { prisma } = await import("@/lib/server/prisma");
+    const { browserRequest } = await import("./session-helpers");
+    resetServerRepository();
+    const { repo, user } = await setup();
+    await prisma.user.update({ where: { id: user.id }, data: { emailVerificationLegacyAt: new Date() } });
+    const token = `tok-${crypto.randomUUID()}`;
+    await repo.createAuthToken(user.id, "verify_email", hashSessionToken(token), new Date(Date.now() + 60_000));
+    const res = await verifyPOST(
+      browserRequest("http://localhost/api/auth/verify-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token }) })
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).session.user.emailVerification.status).toBe("verified");
+    await repo.deleteUser(user.id);
+  });
+});

@@ -15,10 +15,11 @@ export async function POST(request: Request) {
   }
 
   await repo.markEmailVerified(user.id);
+  const confirmed = (await repo.getUserById(user.id)) ?? user;
   const previous = readSessionToken(request);
   if (previous) await repo.deleteSession(previous);
   const session = await repo.createSession(user.id);
-  const response = NextResponse.json(sessionToResponse(session, user));
+  const response = NextResponse.json(sessionToResponse(session, confirmed));
   setSessionCookie(response, session.token, session.expiresAt);
   return response;
 }

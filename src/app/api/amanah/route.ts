@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { normalizeData } from "@/lib/domain/migration";
 import { getAuthenticatedUserId, getServerRepository } from "@/lib/server/auth-utils";
 import { CONSENT_REQUIRED_RESPONSE, hasActiveConsent } from "@/lib/server/consent";
+import { folderWriteBlocked } from "@/lib/server/email-verification";
 
 export async function GET(request: Request) {
   const userId = await getAuthenticatedUserId(request);
@@ -25,6 +26,8 @@ export async function PUT(request: Request) {
     if (!(await hasActiveConsent(repo, userId, "sensitive_folder_storage"))) {
       return NextResponse.json(CONSENT_REQUIRED_RESPONSE, { status: 403 });
     }
+    const blocked = await folderWriteBlocked(repo, userId);
+    if (blocked) return blocked;
     const body = await request.json();
     const saved = await repo.saveAmanahData(userId, body);
     return NextResponse.json({ data: saved, lastSaved: saved.lastSaved });
@@ -44,6 +47,8 @@ export async function PATCH(request: Request) {
     if (!(await hasActiveConsent(repo, userId, "sensitive_folder_storage"))) {
       return NextResponse.json(CONSENT_REQUIRED_RESPONSE, { status: 403 });
     }
+    const blocked = await folderWriteBlocked(repo, userId);
+    if (blocked) return blocked;
     const body = await request.json();
     const saved = await repo.patchAmanahData(userId, body);
     return NextResponse.json({ data: saved, lastSaved: saved.lastSaved });

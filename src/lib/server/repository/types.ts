@@ -8,6 +8,8 @@ export interface RepositoryUser {
   createdAt: string;
   /** null until the e-mail address is confirmed. */
   emailVerifiedAt?: string | null;
+  /** Set for accounts that existed before e-mail confirmation; they log in during a grace period. */
+  emailVerificationLegacyAt?: string | null;
 }
 
 export interface RepositoryConsent {

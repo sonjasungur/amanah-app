@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { crossOriginRejected, getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
 import { isSameOriginRequest, readSessionToken, setSessionCookie } from "@/lib/server/session-cookie";
 import { checkRateLimit } from "@/lib/ai/rate-limit";
+import { emailVerificationInfo, mayLogIn } from "@/lib/server/email-verification";
 
 const LOGIN_ATTEMPTS_PER_MINUTE = 10;
 
@@ -28,7 +29,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "E-Mail oder Passwort ungültig." }, { status: 401 });
     }
     // Only reachable with the correct password, so it does not reveal accounts to strangers.
-    if (!user.emailVerifiedAt) {
+    // Accounts from before e-mail confirmation may log in and are asked to confirm.
+    if (!mayLogIn(emailVerificationInfo(user))) {
       return NextResponse.json(
         { error: "Bitte bestätige zuerst deine E-Mail-Adresse.", code: "email_unverified" },
         { status: 403 }

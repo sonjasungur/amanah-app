@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getAuthMode } from "./config";
 import { localAuthProvider } from "./local-auth-provider";
 import { apiAuthProvider, rememberSession } from "./api-auth-provider";
@@ -29,9 +29,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const authMode = getAuthMode();
   const provider = useMemo(() => getProvider(), []);
+  // A login or adopted session wins over a slower initial session check (e.g. e-mail confirmation).
+  const sessionVersion = useRef(0);
 
   useEffect(() => {
+    const version = sessionVersion.current;
     provider.getSession().then(async (s) => {
+      if (sessionVersion.current !== version) {
+        setIsLoading(false);
+        return;
+      }
       setSession(s);
       setIsLoading(false);
       if (s) {
@@ -44,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (input: LoginInput) => {
       const result = await provider.login(input);
       if (result.success && result.session) {
+        sessionVersion.current += 1;
         setSession(result.session);
         await syncStoreWithRemoteAfterAuth();
         return { success: true };
@@ -70,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const adoptSession = useCallback(async (next: AuthSession) => {
+    sessionVersion.current += 1;
     rememberSession(next);
     setSession(next);
     await syncStoreWithRemoteAfterAuth();
@@ -77,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await provider.logout();
+    sessionVersion.current += 1;
     setSession(null);
   }, [provider]);
 

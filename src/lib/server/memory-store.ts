@@ -11,6 +11,7 @@ export interface StoredUser {
   passwordHash: string;
   createdAt: string;
   emailVerifiedAt?: string | null;
+  emailVerificationLegacyAt?: string | null;
 }
 
 export interface StoredConsent {

@@ -237,6 +237,7 @@ function toRepositoryUser(user: {
   passwordHash: string;
   createdAt: Date;
   emailVerifiedAt: Date | null;
+  emailVerificationLegacyAt: Date | null;
 }): RepositoryUser {
   return {
     id: user.id,
@@ -245,6 +246,7 @@ function toRepositoryUser(user: {
     passwordHash: user.passwordHash,
     createdAt: user.createdAt.toISOString(),
     emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
+    emailVerificationLegacyAt: user.emailVerificationLegacyAt?.toISOString() ?? null,
   };
 }
 

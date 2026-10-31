@@ -3,6 +3,11 @@ export interface AuthUser {
   email: string;
   name: string;
   createdAt: string;
+  /** API mode only. Legacy accounts confirm their address during a grace period. */
+  emailVerification?: {
+    status: "verified" | "unverified" | "legacy_grace" | "legacy_overdue";
+    deadline: string | null;
+  };
 }
 
 export interface AuthSession {

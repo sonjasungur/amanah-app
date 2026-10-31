@@ -24,6 +24,7 @@ Offene Fragen für die Datenschutzberatung: endgültiger Einwilligungstext; Rech
 - Login unbestätigter Konten → 403 `email_unverified` (nur mit korrektem Passwort erreichbar); „Bestätigungslink erneut senden“ (generische Antwort, 3/15 min je Adresse).
 - Bestätigung meldet an (neue Sitzung, mitgebrachte wird verworfen).
 - Migration `20261030125505_consent_and_auth_tokens` setzt **Bestandskonten** auf bestätigt (`email_verified_at = created_at`) → **Owner-Entscheidung**: Alternative wäre Bestätigungspflicht auch für Bestandskonten.
+  - **Ersetzt am 31.10.:** Owner-Entscheidung gegen die pauschale Bestätigung; Altkonten durchlaufen eine Bestätigung mit Frist (Doku 19, Migration `20261031090000`).
 
 ## 3. Passwort-Reset
 
