@@ -8,7 +8,7 @@ Nicht erfolgt: Deployment, Produktionsänderung, Merge nach `main`, Push, echte 
 | Branch | Stand | Remote |
 |---|---|---|
 | `feat/vorsorge-testament-foundation` | `02cc7ad`; 8 neue Commits seit `54de095` (zuletzt auf GitHub) | **nicht gepusht** (keine Freigabe für diesen Schritt) |
-| `chore/prisma-7` | `80bac16` = Integration + 2 Commits | nur lokal |
+| `chore/prisma-7` | Integration + 2 Commits (Prisma 7, Anpassungen); Code getestet als `c5bf156` | nur lokal |
 | `main` | `1fdb5db` unverändert | – |
 
 Neue Commits: `5fdb570` Altkonten · `c573683` Vorsorge Plus · `145204b` Mail-Anbieter · `acbcc0c` Prüfpakete · `6e80a47` Staging · `d1ffc08`/`02cc7ad` Secret-Scan-Bereinigung · Doku-Commit (dieser Bericht).
@@ -50,7 +50,7 @@ Alle Prüfebenen sind grün:
 
 ## 3. Testergebnisse (alle selbst ausgeführt, 31.10.)
 
-| Prüfung | Integration `02cc7ad`¹ | Prisma 7 `80bac16`² |
+| Prüfung | Integration¹ | Prisma 7² |
 |---|---|---|
 | tsc, ESLint | ok | ok |
 | Vitest | 507 bestanden, 13 skipped | 507 bestanden, 13 skipped |
@@ -63,8 +63,8 @@ Alle Prüfebenen sind grün:
 | `npm audit --omit=dev` | 3 high (Prisma-6-CLI) | 0 |
 | gitleaks (Commits seit `main`) | 37, keine Funde | 39, keine Funde |
 
-¹ Unit, Lint und Typen auf `02cc7ad`. E2E und Postgres auf `6e80a47`; die beiden späteren Commits ändern nur `.env.staging.example` und `.gitleaksignore`.
-² Getestet auf `a5d2b65`/`c5bf156`; seither nur dieselben zwei Nicht-Code-Dateien.
+¹ Unit, Lint und Typen auf `02cc7ad`. E2E und Postgres auf `6e80a47`; spätere Commits ändern nur `.env.staging.example`, `.gitleaksignore` und Doku.
+² Getestet als `c5bf156`; seither nur dieselben Nicht-Code-Dateien (Rebases).
 
 **`NOT_RUN`:**
 - Basic Auth, HSTS und Caddy für Staging (kein Deployment)

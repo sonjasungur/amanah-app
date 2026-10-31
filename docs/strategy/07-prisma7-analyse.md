@@ -125,7 +125,7 @@ Weitere Quellen: Config-Referenz https://www.prisma.io/docs/orm/reference/prisma
 
 ## 7. Stand 2026-10-31: bereit zur Integration (Vorschlag, nicht gemergt)
 
-`chore/prisma-7` @ `80bac16` (lokal, kein Push) liegt direkt auf `feat/vorsorge-testament-foundation` @ `02cc7ad`. Zwei Commits: Migration auf Prisma 7.10.1 und Anpassung von nach dem Branch-Schnitt hinzugekommenem Code (Billing-Idempotenz nutzt den `Prisma`-Namespace des generierten Clients; die Legacy-E2E-Spec nutzt `pg`, weil der generierte ESM-Client im Spec-Runner nicht ladbar ist).
+`chore/prisma-7` (lokal, kein Push) liegt direkt auf `feat/vorsorge-testament-foundation`; Code getestet als `c5bf156`. Zwei Commits: Migration auf Prisma 7.10.1 und Anpassung von nach dem Branch-Schnitt hinzugekommenem Code (Billing-Idempotenz nutzt den `Prisma`-Namespace des generierten Clients; die Legacy-E2E-Spec nutzt `pg`, weil der generierte ESM-Client im Spec-Runner nicht ladbar ist).
 
 | Prüfung (alle selbst ausgeführt, 31.10.) | Ergebnis |
 |---|---|

@@ -1,6 +1,6 @@
 # Launch-Readiness – überprüfbare Freigabematrix
 
-Stand: 2026-10-31 · Integrationsbranch `feat/vorsorge-testament-foundation` @ `02cc7ad`, `chore/prisma-7` @ `80bac16` · Ziel: **erst privater Pilot (synthetische Daten), dann Start „Vorsorge Plus“ (ohne Testament, ohne Erbquoten)**
+Stand: 2026-10-31 · Integrationsbranch `feat/vorsorge-testament-foundation` @ `02cc7ad`, `chore/prisma-7` = Integration + 2 Commits · Ziel: **erst privater Pilot (synthetische Daten), dann Start „Vorsorge Plus“ (ohne Testament, ohne Erbquoten)**
 Status: TESTED (technisch nachgewiesen) · IMPLEMENTED (ohne vollständigen Nachweis) · TODO · BLOCKED · REQUIRES_OWNER · REQUIRES_LEGAL_REVIEW · REQUIRES_SCHOLAR_REVIEW
 
 Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relevant = ja“** auf TESTED bzw. erteilt stehen. Externe Freigaben werden nicht durch Tests ersetzt.
@@ -20,7 +20,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | A9 | Backups verschlüsselt (age), Restore geübt | 30.10. gegen Temp-DB; Staging-Cron vorbereitet (Doku 22) | TESTED (lokal) / REQUIRES_OWNER (Server, Empfängerschlüssel) | ja |
 | A10 | Security-Header + CSP | `csp.spec.ts`, `staging-security-check.sh` | TESTED | ja |
 | A11 | Produktions-Preflight | `validate-production-env.mjs` (+ Mail-Anbieter, Plus-Starttermin) | TESTED | ja |
-| A12 | Docker-Build + Start gegen Postgres | 31.10.: Runner + Migrate-Image auf Prisma-7-Stand, Container-Smoke | TESTED (Stand `c5bf156`; Code = `80bac16`) | ja |
+| A12 | Docker-Build + Start gegen Postgres | 31.10.: Runner + Migrate-Image auf Prisma-7-Stand, Container-Smoke | TESTED (Code-Stand `c5bf156`; seither nur Doku/Vorlagen) | ja |
 | A13 | Domain in Caddy, Origin-Prüfung hinter Proxy | Platzhalter; Staging-Snippet vorbereitet | REQUIRES_OWNER | ja |
 | A14 | Host-Speicherplatz | Owner hat am 31.10. Platz geschaffen; nach den Builds 10 GB frei auf `/` (83 %), meine Prüf-Images +2,4 GB (Abschlussbericht §1) | REQUIRES_OWNER (Dauerlösung, Images) | ja |
 | A15 | Monitoring/Alarmierung | `staging-healthcheck.sh` (Health, DB, Platte, Backup-Alter), Cron-Vorschlag | IMPLEMENTED (Alarmweg REQUIRES_OWNER) | ja |
