@@ -72,7 +72,7 @@ export default function PlusConceptPage() {
       <Card>
         <CardTitle>Bestandsschutz</CardTitle>
         <ul className="list-disc pl-5 text-sm space-y-1 mt-3">
-          <li>Konten, die vor dem Starttermin (<code>AMANAH_PLUS_LAUNCH_AT</code>) angelegt wurden, behalten alle Funktionen dauerhaft.</li>
+          <li>Konten, die vor dem Starttermin (<code>AMANAH_PLUS_LAUNCH_AT</code>) angelegt wurden, behalten dauerhaft die Funktionen, die vor dem Start vorhanden waren (<code>availableBeforeLaunch</code>). Später hinzukommende Plus-Funktionen sind nicht automatisch enthalten.</li>
           <li>Ohne Starttermin bleibt jedes Konto freigeschaltet; die Produktionsprüfung lehnt Sperren ohne Starttermin ab.</li>
           <li>Gespeicherte Daten werden nie wegen eines fehlenden Kaufs gelöscht oder unlesbar; Export und Löschung bleiben frei.</li>
           <li>Neue Nutzer sehen Plus-Bereiche als Vorschau mit Hinweis, nicht als Fehlerseite.</li>

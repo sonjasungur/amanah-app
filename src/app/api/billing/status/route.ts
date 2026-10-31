@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedUserId, getServerRepository } from "@/lib/server/auth-utils";
 import { getBillingMode, isBillingEnforced } from "@/lib/billing/config";
 import { getProducts } from "@/lib/billing/products";
-import { resolvePlusAccess } from "@/lib/billing/plus-access";
+import { resolvePlusAccess, resolvePlusAccessByFeature } from "@/lib/billing/plus-access";
 
 export async function GET(request: Request) {
   const userId = await getAuthenticatedUserId(request);
@@ -24,5 +24,6 @@ export async function GET(request: Request) {
     })),
     entitlements,
     plusAccess: resolvePlusAccess({ accountCreatedAt: user?.createdAt ?? null, paidPlus: entitlements.includes("vorsorge_plus") }),
+    plusAccessByFeature: resolvePlusAccessByFeature({ accountCreatedAt: user?.createdAt ?? null, paidPlus: entitlements.includes("vorsorge_plus") }),
   });
 }

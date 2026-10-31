@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ALWAYS_FREE_ACCOUNT_RIGHTS, PLAN_FEATURES, featureForRoute, featuresByTier } from "@/lib/billing/plan-matrix";
-import { resolvePlusAccess } from "@/lib/billing/plus-access";
+import { resolvePlusAccess, resolvePlusAccessByFeature } from "@/lib/billing/plus-access";
+import { readFileSync } from "node:fs";
 import { getProducts } from "@/lib/billing/products";
 import { moduleConfigs } from "@/lib/modules/config";
 import { validateProductionEnv } from "@/lib/server/production-config";
@@ -53,6 +54,28 @@ describe("Plus access without surprise removal", () => {
     expect(resolvePlusAccess({ accountCreatedAt: "2026-12-02T00:00:00Z", paidPlus: false }, e)).toEqual({ allowed: false, reason: "none" });
     expect(resolvePlusAccess({ accountCreatedAt: "2026-12-02T00:00:00Z", paidPlus: true }, e)).toEqual({ allowed: true, reason: "purchase" });
     expect(resolvePlusAccess({ accountCreatedAt: null, paidPlus: false }, e).allowed).toBe(false);
+  });
+
+  it("grandfathers only the scope that existed before the launch", () => {
+    const e = env({ AMANAH_BILLING_ENFORCE: "true", AMANAH_PLUS_LAUNCH_AT: launch });
+    for (const f of PLAN_FEATURES) expect(typeof f.availableBeforeLaunch, f.id).toBe("boolean");
+    const existing = { accountCreatedAt: "2026-11-01T00:00:00Z", paidPlus: false };
+    const laterFeature = { ...featuresByTier("plus")[0], id: "added_after_launch", availableBeforeLaunch: false };
+    expect(resolvePlusAccess({ ...existing, feature: featuresByTier("plus")[0] }, e).reason).toBe("existing_account");
+    expect(resolvePlusAccess({ ...existing, feature: laterFeature }, e)).toEqual({ allowed: false, reason: "none" });
+    expect(resolvePlusAccess({ ...existing, paidPlus: true, feature: laterFeature }, e).reason).toBe("purchase");
+    const byFeature = resolvePlusAccessByFeature(existing, e);
+    expect(Object.keys(byFeature)).toEqual(featuresByTier("plus").map((f) => f.id));
+    expect(Object.values(byFeature).every((a) => a.reason === "existing_account")).toBe(true);
+  });
+
+  it("public texts promise only the pre-launch scope and offer no purchase", () => {
+    const preise = readFileSync("src/app/preise/page.tsx", "utf8");
+    expect(preise).toContain("die vor der Einführung von Vorsorge Plus verfügbar waren");
+    expect(preise).not.toMatch(/behalten alle Funktionen/);
+    const notice = readFileSync("src/components/billing/plus-area-notice.tsx", "utf8");
+    expect(notice).not.toMatch(/<Button|checkout|kaufen/i);
+    expect(readFileSync("src/app/dashboard/pdf/page.tsx", "utf8")).toContain('<PlusGate feature="pdf_exports">');
   });
 
   it("grandfathers every account when enforcement lacks a launch date, and production refuses that setup", () => {

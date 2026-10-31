@@ -204,7 +204,7 @@ export default function PdfPage() {
                 <CardTitle className="text-base">{opt.title}</CardTitle>
                 <p className="text-sm text-muted mb-4">{opt.description}</p>
                 {opt.id === "full" ? (
-                  <PlusGate feature="complete_pdf_folder">
+                  <PlusGate feature="pdf_exports">
                     <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
                       <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
                     </Button>

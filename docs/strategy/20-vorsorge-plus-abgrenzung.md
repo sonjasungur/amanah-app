@@ -30,7 +30,7 @@ Ein Test stellt sicher, dass jeder Dashboard-Bereich genau einer Funktion zugeor
 | Regel | Umsetzung |
 |---|---|
 | Solange `AMANAH_BILLING_ENFORCE` nicht `true` ist, ist nichts gesperrt. | `resolvePlusAccess` → `not_enforced` |
-| Konten, die vor `AMANAH_PLUS_LAUNCH_AT` angelegt wurden, behalten **alle** Funktionen dauerhaft. | → `existing_account` |
+| Konten, die vor `AMANAH_PLUS_LAUNCH_AT` angelegt wurden, behalten dauerhaft die Funktionen, die **vor der Einführung** vorhanden waren (`availableBeforeLaunch: true`; Owner-Vorgabe 31.10.). Später hinzugefügte Plus-Funktionen setzen `false` und sind nicht automatisch enthalten. | → `existing_account` je Funktion (`resolvePlusAccessByFeature`) |
 | Sperren ohne Starttermin sind nicht möglich: Ohne Datum gilt jedes Konto als Bestand; die Produktionsprüfung lehnt `ENFORCE=true` ohne Datum ab. | `production-config.ts`, `validate-production-env.mjs` |
 | Gespeicherte Daten werden nie wegen eines fehlenden Kaufs gelöscht oder unlesbar. Lesen, Export und Löschen bleiben frei. | Sperre betrifft nur das Speichern neuer Angaben |
 | Neue Nutzer sehen Plus-Bereiche als Vorschau mit Hinweis, nicht als Fehlerseite. | `PlusGate` |
@@ -46,7 +46,7 @@ Ein Test stellt sicher, dass jeder Dashboard-Bereich genau einer Funktion zugeor
 ## 4. Was noch fehlt, bevor etwas gesperrt wird
 
 1. Owner-Entscheidung 31.10.: Vorsorge Plus mit **39 € einmalig als Testpreis** vorbereiten, **Bestandsschutz für Altkonten**. Weiter REQUIRES_OWNER: Starttermin (`AMANAH_PLUS_LAUNCH_AT`), endgültiger Preis, Freigabe der Sperren.
-2. Öffentliche Preisseite `/preise` ersetzen: Sie zeigt noch die alten Marketing-Stufen (Basic 29 €, Komplett 79 €, Familie 99 €, „Kauf noch nicht möglich“) und passt nicht zum Produktkatalog. Bewusst nicht geändert (Vorgabe: zunächst nur Konzept).
+2. `/preise` und Startseite zeigen seit 31.10. Kostenlos + Vorsorge Plus 39 €; jeder Plus-Bereich im Dashboard zeigt einen Hinweis (`plus-area-notice`), ohne Kaufknopf und ohne Sperre. Texte brauchen vor Veröffentlichung die Owner-Freigabe.
 3. REQUIRES_LEGAL_REVIEW: AGB, Widerrufsbelehrung für digitale Inhalte (§ 356 Abs. 5 BGB), Bestellbutton (§ 312j BGB), Rechnung/USt (Doku 17).
 4. Live-Zahlungsanbieter (Doku 21).
 5. Erst dann `AMANAH_BILLING_ENFORCE=true` mit `AMANAH_PLUS_LAUNCH_AT`.

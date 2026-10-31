@@ -73,7 +73,7 @@ export default function PreisePage() {
         </div>
         <ul className="mt-8 space-y-2 text-body text-muted max-w-3xl">
           <li>Das islamische Wissenszentrum bleibt immer kostenlos und ist nie Teil eines Pakets.</li>
-          <li>Bestehende Konten behalten alle Funktionen, die sie heute nutzen können.</li>
+          <li>Bestehende Konten behalten die Funktionen, die vor der Einführung von Vorsorge Plus verfügbar waren. Später neu hinzukommende Plus-Funktionen sind davon nicht automatisch umfasst.</li>
           <li>Deine Daten kannst du jederzeit exportieren und löschen, auch ohne Vorsorge Plus.</li>
         </ul>
       </section>

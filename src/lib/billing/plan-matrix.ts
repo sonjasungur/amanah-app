@@ -14,6 +14,12 @@ export interface PlanFeature {
   tier: PlanTier;
   routes: string[];
   enforcement: Enforcement;
+  /**
+   * Existed before the Plus launch, so accounts created before AMANAH_PLUS_LAUNCH_AT keep it.
+   * Features added after the launch must set this to false: grandfathering covers only the
+   * scope that existed before Plus was introduced.
+   */
+  availableBeforeLaunch: boolean;
   note?: string;
 }
 
@@ -24,6 +30,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "free",
     routes: ["/wissen"],
     enforcement: "never",
+    availableBeforeLaunch: true,
     note: "Sadaqa Jariya: dauerhaft frei, ohne Registrierung, nie Teil eines Pakets.",
   },
   {
@@ -32,6 +39,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "free",
     routes: ["/testament-erbe", "/janazah-kompass", "/akuter-todesfall", "/patientenverfuegung", "/konvertierte", "/islam-oder-kultur", "/barzakh", "/sadaqa-jariya"],
     enforcement: "never",
+    availableBeforeLaunch: true,
   },
   {
     id: "vorsorge_check",
@@ -39,6 +47,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "free",
     routes: ["/check"],
     enforcement: "never",
+    availableBeforeLaunch: true,
   },
   {
     id: "vorsorge_start",
@@ -46,6 +55,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "free",
     routes: ["/dashboard", "/dashboard/notfallkarte"],
     enforcement: "never",
+    availableBeforeLaunch: true,
     note: "Übersicht und Notfallkarte; Ansicht aller Bereiche als Vorschau.",
   },
   {
@@ -54,6 +64,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "plus",
     routes: ["/api/amanah"],
     enforcement: "server",
+    availableBeforeLaunch: true,
     note: "Einzige Leistung, die serverseitig wirksam gesperrt werden kann.",
   },
   {
@@ -62,6 +73,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "plus",
     routes: ["/dashboard/personen", "/dashboard/familie", "/dashboard/familiengespraech"],
     enforcement: "client_hint",
+    availableBeforeLaunch: true,
   },
   {
     id: "documents_overview",
@@ -69,6 +81,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "plus",
     routes: ["/dashboard/dokumente"],
     enforcement: "client_hint",
+    availableBeforeLaunch: true,
   },
   {
     id: "estate_debts",
@@ -76,6 +89,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "plus",
     routes: ["/dashboard/schulden-amanah", "/dashboard/digitaler-nachlass", "/dashboard/testament"],
     enforcement: "client_hint",
+    availableBeforeLaunch: true,
     note: "Die Testamentsvorbereitung bleibt unabhängig davon gesperrt.",
   },
   {
@@ -93,6 +107,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
       "/dashboard/sadaqa-jariya",
     ],
     enforcement: "client_hint",
+    availableBeforeLaunch: true,
   },
   {
     id: "pdf_exports",
@@ -100,6 +115,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     tier: "plus",
     routes: ["/dashboard/pdf"],
     enforcement: "client_hint",
+    availableBeforeLaunch: true,
     note: "Druck entsteht im Browser; der Konto-Export (Art. 15/20 DSGVO) bleibt immer frei.",
   },
 ];
@@ -114,6 +130,10 @@ export const ALWAYS_FREE_ACCOUNT_RIGHTS = [
 
 export function featuresByTier(tier: PlanTier): PlanFeature[] {
   return PLAN_FEATURES.filter((f) => f.tier === tier);
+}
+
+export function planFeature(id: string): PlanFeature | null {
+  return PLAN_FEATURES.find((f) => f.id === id) ?? null;
 }
 
 /** The plan feature that covers a route, matched by the longest prefix. */

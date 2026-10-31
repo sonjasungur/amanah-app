@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 
 interface BillingStatus {
   enforced: boolean;
   entitlements: string[];
   plusAccess?: { allowed: boolean };
+  plusAccessByFeature?: Record<string, { allowed: boolean }>;
 }
 
 async function fetchBillingStatus(): Promise<BillingStatus> {
@@ -38,11 +40,12 @@ export function PlusGate({ feature, children }: { feature: string; children: Rea
     };
   }, []);
 
-  if (!status || !status.enforced || status.plusAccess?.allowed || status.entitlements.includes("vorsorge_plus")) return children;
+  const allowed = status?.plusAccessByFeature?.[feature]?.allowed ?? status?.plusAccess?.allowed;
+  if (!status || !status.enforced || allowed || status.entitlements.includes("vorsorge_plus")) return children;
   return (
     <div className="rounded-xl border border-border bg-accent-soft p-4 text-sm" data-testid={`plus-gate-${feature}`}>
-      <p className="font-semibold mb-1">Teil von Vorsorge Plus</p>
-      <p className="text-muted mb-2">Alle anderen Bereiche bleiben kostenlos nutzbar.</p>
+      <p className="font-semibold mb-1">Teil von Vorsorge Plus ({formatPrice(getTestPriceCents())} einmalig)</p>
+      <p className="text-muted mb-2">Alle kostenlosen Bereiche, dein Datenexport und das Löschen bleiben immer nutzbar.</p>
       <Link href="/dashboard/einstellungen" className="text-primary font-semibold hover:underline">Paket ansehen</Link>
     </div>
   );
