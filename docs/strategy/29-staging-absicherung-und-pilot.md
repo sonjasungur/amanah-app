@@ -3,286 +3,280 @@
 Grundlage: Doku 28 (Einrichtung), Doku 27 (Checkliste). Server `gemeinsam1-prod`, nur Amanah-Staging verändert.
 Keine Änderungen an Produktion, Caddy, DNS, Firewall oder gemeinsam1.
 
+Stand 17:45 nach Owner-Auftrag „nächste Freigaben und Prioritäten“:
+- Schlüsselarchitektur festgelegt: Owner-Schlüssel plus separater Testschlüssel.
+- ntfy vorbereitet.
+- Variante B für `staging.amanahordner.de` konkretisiert.
+
 ## 1. Ergebnis
 
 | Bereich | Stand |
 |---|---|
-| Git | `c2da7b9..f7f9b05` auf GitHub gepusht (gitleaks: 2 Commits und gesamte Historie ohne Funde). Arbeit dieses Auftrags lokal committet, **nicht gepusht** |
-| Backups | **nicht abgenommen.** Es gibt noch keinen dauerhaft verwahrten Schlüssel. Der tote Testempfänger ist entfernt; das nächtliche Backup schlägt deshalb sichtbar fehl und alarmiert. Skripte für Restore-Test fertig und mit Wegwerf-Schlüssel auf dem Server geprüft |
-| Alarmierung | eingerichtet, **nur lokal** (`/var/log/amanah-staging-alerts.log`). Externer Kanal vorbereitet (ntfy oder Webhook), aus bis zur Freigabe |
-| Domain/Caddy | Variante A läuft (Tunnel). Variante B vorbereitet und geprüft (eigenes internes Proxy-Netz, Snippet validiert), nicht angewandt |
-| Sicherheit | alle 8 Punkte erneut geprüft, ohne Befund (§5) |
-| Pilot | Testdaten-Pilot nur für den Owner per Tunnel; **kein Pilot mit weiteren Testern**, bis Backup-Schlüssel und Restore-Test stehen (§9) |
+| Git | bis `cc508c6` auf GitHub (gitleaks ohne Funde). Arbeit ab 17:33 lokal committet, nicht gepusht |
+| Backups | **nicht abgenommen.** Owner-Schlüssel fehlt. Ablauf mit Simulationsschlüssel vollständig geprobt (§2.5) und zurückgesetzt. Backup alarmiert, bis der Owner-Empfänger gesetzt ist |
+| Automatischer Restore-Test | separater Testschlüssel auf dem Server eingerichtet (Owner-Freigabe), läuft täglich 04:15, sobald es Backups gibt |
+| Alarmierung | lokal aktiv; ntfy vorbereitet und gegen einen lokalen ntfy-Server geprüft; extern **aus** |
+| Domain/Caddy | Variante B1 gewählt; Schritte für `staging.amanahordner.de` mit Prüfskript (§4.3); nichts angewandt, nichts gekauft |
+| Sicherheit | 8/8 ohne Befund (§5) |
+| Pilot | nur Owner per Tunnel (§9) |
 
 ## 2. Staging-Backups
 
-### 2.1 Ausgangslage
+### 2.1 Schlüsselarchitektur
 
-- Das Backup vom 31.10. 13:48 ist mit einem Testschlüssel verschlüsselt, dessen privater Teil gelöscht ist. Es ist **nicht wiederherstellbar** und heißt jetzt `…134846.sql.gz.age.UNRESTORABLE-key-deleted` (zählt für keine Prüfung mehr).
-- Der Health-Check hatte dieses Backup als „OK“ gezählt. Das ist korrigiert: Ein Backup zählt erst, wenn ein Restore-Test **mit dem aktuellen Empfängerschlüssel** bestanden ist (§2.4).
-- `BACKUP_AGE_RECIPIENTS` in `/opt/amanah-staging/.env.staging` ist jetzt leer (Sicherung der vorherigen Datei: `/opt/amanah-staging/rollback/`). Folge: Das Backup um 03:45 bricht ab und alarmiert, statt wertlose Dateien zu erzeugen.
-
-### 2.2 Schlüssel erstellen und verwahren (Owner, auf dem eigenen Rechner)
-
-Der private Schlüssel entsteht **nicht** auf dem Server, nicht in einem Repository und nicht durch einen Agenten. Auf den Server kommt nur der öffentliche Teil (`age1…`).
-
-1. age installieren (Ubuntu: `sudo apt install age`).
-2. Schlüssel erzeugen, ohne ihn anzuzeigen:
-   ```bash
-   umask 077
-   mkdir -p ~/amanah-keys
-   age-keygen -o ~/amanah-keys/amanah-staging-backup.key   # gibt nur "Public key: age1…" aus
-   ```
-3. Verwahren, **zwei unabhängige Orte**:
-   - Passwortmanager: den ganzen Dateiinhalt als sichere Notiz („Amanah Staging Backup-Schlüssel“).
-   - Offline-Kopie: ausgedruckt oder auf einem verschlüsselten USB-Stick, getrennt vom Laptop aufbewahrt.
-   - Nicht in Cloud-Ordnern im Klartext, nicht in Git, nicht per Mail oder Chat.
-4. Die lokale Datei danach löschen (`shred -u ~/amanah-keys/amanah-staging-backup.key`). Für Restore-Tests wird sie kurzzeitig aus dem Passwortmanager wiederhergestellt.
-5. Den **öffentlichen** Schlüssel (`age1…`) an Claude geben oder selbst eintragen:
-   ```bash
-   ssh gemeinsam1-prod "sed -i 's/^BACKUP_AGE_RECIPIENTS=.*/BACKUP_AGE_RECIPIENTS=age1…/' /opt/amanah-staging/.env.staging"
-   ```
-6. Für die Produktion später einen **eigenen** Schlüssel erzeugen, nie diesen wiederverwenden.
-
-### 2.3 Optional: automatischer Restore-Test (Entscheidung Owner)
-
-Der Restore-Test braucht einen privaten Schlüssel. Zwei Wege:
-
-| | Nur Owner-Schlüssel | Zusätzlich Prüfschlüssel auf dem Server (empfohlen für Staging) |
+| Schlüssel | Wo der private Teil liegt | Zweck |
 |---|---|---|
-| Ablauf | Owner führt den Test wöchentlich aus (§2.4, Weg 2) | Nacht-Job 04:15 prüft das frische Backup automatisch |
-| Alarm bei Fehler | nur über das Alter des letzten Nachweises (> 8 Tage) | sofort am Morgen |
-| Risiko | keins zusätzlich | Wer Root auf dem Server hat, kann die Staging-Backups entschlüsseln. Diese Person kann die Staging-DB aber ohnehin lesen; Inhalte sind synthetisch |
+| **Owner-Schlüssel** | nur beim Owner (Passwortmanager und Offline-Kopie); nie auf dem Server, in Git, Logs oder Chat | dauerhafte Wiederherstellung, auch wenn der Server verloren ist |
+| **Testschlüssel** (`restore-check`) | `/root/.config/amanah-staging/restore-check.key` (600) auf dem Server | nur automatischer Restore-Test mit synthetischen Staging-Daten |
 
-Umsetzung des Prüfschlüssels (nur nach Freigabe):
-- Claude erzeugt `/root/.config/amanah-staging/restore-check.key` (600) auf dem Server, ohne Ausgabe.
-- Der öffentliche Teil kommt als **zweiter** Empfänger in `BACKUP_AGE_RECIPIENTS`.
-- In `ops.env` wird `AGE_IDENTITY` gesetzt.
-- Der Owner-Schlüssel bleibt der einzige Weg, falls der Server verloren geht.
+- Jedes Staging-Backup wird an **beide** öffentlichen Schlüssel verschlüsselt.
+- Ohne Owner-Empfänger entsteht **kein** Backup. Der Testschlüssel wird nur zusätzlich angehängt (`BACKUP_AGE_EXTRA_RECIPIENTS`) und reicht allein nicht.
+- `staging-set-recipient.sh` weist den Testschlüssel als Owner-Schlüssel zurück.
+- `staging-restore-test.sh` läuft nur mit einer Staging-Konfiguration (`AMANAH_DEPLOYMENT_ENV=staging`).
+- **Produktion:** kein Testschlüssel auf dem Server; Restore-Tests nur mit dem Owner-Schlüssel auf dem Owner-Rechner und einem eigenen Produktionsschlüssel.
 
-### 2.4 Restore-Test nach Bereitstellung des Schlüssels
+Der Health-Check verlangt zwei Nachweise, beide gebunden an den aktuellen Owner-Empfänger:
+- automatischer Restore-Test (`state/restore-test.ok`), höchstens 2 Tage alt
+- Restore-Test des Owners mit seinem Schlüssel (`state/owner-restore.ok`), höchstens 35 Tage alt
 
-`scripts/staging-restore-test.sh`:
-- spielt ein Backup in die Wegwerf-DB `amanah_restore_test` im Staging-Postgres ein
-- vergleicht Tabellenzahl und angewandte Migrationen mit der Live-DB und verlangt Konten
-- löscht die Wegwerf-DB wieder
-- schreibt bei Erfolg `/opt/amanah-staging/state/restore-test.ok` mit Datum, Backup-Name und SHA-256 der Empfänger
+Ein neuer Owner-Schlüssel macht beide ungültig, bis neu getestet wurde.
 
-Der Health-Check meldet FAIL, wenn:
-- kein Empfänger eingetragen ist,
-- der Nachweis fehlt,
-- der Nachweis zu anderen Empfängern gehört,
-- oder er älter als 8 Tage ist.
+### 2.2 Vorbereitung für den Owner (auf deinem Rechner)
 
-Ablauf nach Schritt 2.2:
-1. Claude: `scripts/staging-cron.sh backup` (neues Backup mit dem Owner-Empfänger).
-2. Owner, Weg 2: Der Schlüssel verlässt den Rechner nicht. Entschlüsselt wird lokal, nur die entschlüsselten synthetischen Daten gehen zurück auf den Server:
+Dauer etwa 10 Minuten. Alle Befehle im Repo-Ordner auf deinem Laptop; Claude führt sie nicht aus und sieht keinen Schlüssel.
+
+1. age installieren: `sudo apt install age`
+2. Schlüsselpaar erzeugen:
    ```bash
-   F=$(ssh gemeinsam1-prod 'ls -1t /opt/amanah-staging/backups/amanah_*.sql.gz.age | head -1')
-   ssh gemeinsam1-prod "cat $F" | age -d -i ~/amanah-keys/amanah-staging-backup.key \
-     | ssh gemeinsam1-prod "cd /opt/amanah-staging && BACKUP_NAME=$(basename $F) scripts/staging-restore-test.sh --stdin"
+   scripts/owner-backup-key.sh create
    ```
-   Erwartet: 5 × `OK`.
-3. Claude: Health-Check muss danach ohne FAIL laufen; einmal zusätzlich App-Ebene prüfen (zweite Instanz auf einer frischen DB, Login, Ordner entschlüsselbar), wie in Doku 28 §5.
+   - Ergebnis: `~/amanah-keys/amanah-staging-backup.key` (600) und ein Fingerprint (16 Zeichen).
+   - Das Skript zeigt den Schlüssel nicht an.
+   - Es verweigert das Überschreiben sowie Ablageorte in Git-Repositories und Cloud-Ordnern.
+3. Verwahren an **zwei unabhängigen Orten**:
+   - Passwortmanager: den ganzen Dateiinhalt als sichere Notiz („Amanah Staging Backup-Schlüssel“), z. B. per `cat` im eigenen Terminal kopieren.
+   - Offline-Kopie: ausgedruckt oder auf einem verschlüsselten USB-Stick, getrennt vom Laptop aufbewahrt.
+   - Nicht in Cloud-Ordner im Klartext, nicht per Mail oder Chat, nicht ins Repo.
+4. Öffentlichen Schlüssel auf den Server übertragen (geht über stdin, erscheint nirgends):
+   ```bash
+   scripts/owner-backup-key.sh install-recipient
+   ```
+   - Der Server antwortet mit seinem Fingerprint; er muss mit dem lokalen übereinstimmen.
+   - Ein versehentlich übergebener privater Schlüssel wird abgewiesen und nicht gespeichert.
+5. Claude Bescheid geben: „Empfänger gesetzt, Fingerprint …“. Der Fingerprint ist kein Schlüssel.
+6. Claude: neues Backup (`staging-cron.sh backup`) und automatischer Restore-Test (`staging-cron.sh restore`).
+7. Du: echter Wiederherstellungstest mit deinem Schlüssel:
+   ```bash
+   scripts/owner-backup-key.sh restore-test
+   ```
+   - Entschlüsselt wird auf deinem Rechner; nur die synthetischen Daten gehen in eine Wegwerf-DB auf dem Server.
+   - Erwartet: 5 × `OK`.
+8. Danach die lokale Schlüsseldatei löschen: `shred -u ~/amanah-keys/amanah-staging-backup.key`.
+   Spätere Tests (mindestens alle 35 Tage, der Health-Check erinnert) mit `scripts/owner-backup-key.sh restore-test --paste`: Die `AGE-SECRET-KEY-…`-Zeile wird verdeckt aus dem Passwortmanager eingefügt, liegt nur im RAM und wird danach gelöscht.
+9. Claude: Health-Check ohne FAIL, einmal Restore auf App-Ebene (zweite Instanz, Login, Ordner entschlüsselbar), Doku fortschreiben. **Erst dann** gilt Staging als vollständig abgenommen.
 
-**Skripttest heute** (Wegwerf-Schlüssel nur im RAM unter `/dev/shm`, danach gelöscht; kein Nachweis für die Abnahme):
+### 2.3 Verlust und Wechsel
 
-| Fall | Ergebnis |
+- **Owner-Schlüssel verloren:** Alle Backups sind nur noch mit dem Testschlüssel lesbar, solange der Server existiert. Neues Paar nach §2.2 erzeugen; damit werden beide Nachweise ungültig, bis neu getestet wurde.
+- **Testschlüssel verloren oder kompromittiert:** In `ops.env` den Eintrag `RESTORE_CHECK_RECIPIENT` neu setzen (neues Paar im age-Container). Der Owner-Schlüssel ist davon nicht betroffen.
+- Alte Backups entfernt die Aufbewahrung nach 7 Tagen.
+
+### 2.4 Ausgangszustand (unverändert)
+
+- Das Backup vom 31.10. 13:48 heißt `….UNRESTORABLE-key-deleted`; der Schlüssel dazu ist gelöscht, es zählt nicht.
+- `BACKUP_AGE_RECIPIENTS` ist leer. Das Backup um 03:45 schlägt fehl und alarmiert.
+
+### 2.5 Generalprobe und Skripttests (31.10., auf dem Server)
+
+Mit einem **Simulationsschlüssel an Stelle des Owner-Schlüssels**. Er lag nur in `/dev/shm`; danach wurden alles gelöscht und der Ausgangszustand wiederhergestellt. Das ist kein Abnahme-Nachweis.
+
+| Schritt | Ergebnis |
 |---|---|
-| richtiger Schlüssel, Datei-Weg | 5 × OK |
-| richtiger Schlüssel, stdin-Weg (Owner-Weg) | 5 × OK (erster Lauf scheiterte: Abfragen lasen stdin mit, behoben) |
-| falscher Schlüssel | FAIL, kein Nachweis geschrieben |
-| kein Schlüssel | FAIL „no age identity available“ |
-| altes Backup (Testschlüssel gelöscht) | FAIL: bestätigt nicht wiederherstellbar |
+| Empfänger über stdin setzen | gesetzt, nur Fingerprint ausgegeben, Sicherung in `rollback/` |
+| Backup (Owner + Testschlüssel) | ok, 28 KB |
+| Automatischer Restore mit Testschlüssel | 5 × OK, Nachweis geschrieben |
+| Owner-Weg über stdin mit Simulationsschlüssel | 5 × OK, eigener Nachweis |
+| Health-Check | 8/8 OK; Backup- und Health-Alarm mit Entwarnung |
+| Rücksetzen | Empfänger leer, Nachweise und Probe-Backup gelöscht, `/dev/shm` leer, Wegwerf-DB entfernt; Alarm wieder aktiv |
 
-Danach waren nur `amanah_staging`, `postgres` und die Vorlagen-DBs vorhanden, und `/dev/shm` war leer.
-
-### 2.5 Verlust und Wechsel
-
-- Schlüssel verloren: Alle Backups mit diesem Empfänger sind wertlos. Neuen Schlüssel nach §2.2 erzeugen, eintragen, sofort Backup und Restore-Test.
-- Wechsel: Neuen Empfänger eintragen. Der Health-Check meldet FAIL, bis ein Restore-Test mit dem neuen Schlüssel bestanden ist. Alte Backups bleiben mit dem alten Schlüssel lesbar, bis die Aufbewahrung von 7 Tagen sie entfernt.
+Ebenfalls geprüft:
+- Vorher (15:28): falscher Schlüssel, kein Schlüssel und das alte Backup führen jeweils zu FAIL, ohne Nachweis.
+- Unit-Tests (`staging-ops.test.ts`, mit Stubs, ohne Netz):
+  - Setzen des Empfängers: privater Schlüssel, Unsinn und der Testschlüssel als Owner-Schlüssel werden abgewiesen; die übrige env-Datei bleibt erhalten.
+  - Owner-Helfer: Datei 600; kein Überschreiben; kein Git- oder Cloud-Ordner; über ssh geht nur der öffentliche Schlüssel.
 
 ## 3. Alarmierung
 
 ### 3.1 Aufbau
 
-`/etc/cron.d/amanah-staging` ruft für jeden Job `scripts/staging-cron.sh <job>` auf. Die Ausgabe landet in `/var/log/amanah-staging-<job>.log`, das Ergebnis geht an `scripts/staging-alert.sh`.
+`/etc/cron.d/amanah-staging` ruft `scripts/staging-cron.sh <job>` auf. Die Ausgabe landet in `/var/log/amanah-staging-<job>.log`, das Ergebnis geht an `scripts/staging-alert.sh`.
 
 | Ereignis | Prüfung | Takt | Schwelle |
 |---|---|---|---|
 | Staging-Ausfall | `health`: `/api/health`, Umgebung, DB, KI aus | alle 5 min | sofort |
 | Speicher kritisch | `health`: Belegung `/` | alle 5 min | > 85 % (aktuell 83 %) |
-| Backup fehlgeschlagen | `backup`: Exit-Code; `health`: kein Backup jünger als 26 h | 03:45 / 5 min | sofort |
-| Restore-Test fehlgeschlagen | `restore` (mit Prüfschlüssel) und `health`: Nachweis fehlt, falscher Schlüssel oder älter als 8 Tage | 04:15 / 5 min | sofort |
-| Zertifikat läuft ab | `health` mit `CERT_HOST` (erst ab Variante B) | alle 5 min | < 21 Tage (Caddy erneuert ab 30 Tagen; Alarm heißt: Erneuerung gescheitert) |
-| Sicherheitscheck | `security`: Header, Allow-List, interne Seiten, Webhook | Mo 04:30 | sofort |
+| Backup fehlgeschlagen | `backup`-Exit-Code; `health`: kein Backup jünger als 26 h | 03:45 / 5 min | sofort |
+| Restore-Test fehlgeschlagen | `restore` (Testschlüssel); `health`: Nachweise fehlen, falscher Schlüssel, zu alt (2 bzw. 35 Tage) | 04:15 / 5 min | sofort |
+| Zertifikat läuft ab | `health` mit `CERT_HOST` (ab Variante B) | alle 5 min | < 21 Tage |
+| Sicherheitscheck | `security` | Mo 04:30 | sofort |
 
 Verhalten des Dispatchers:
-- **Alarm** bei neuem oder geändertem Fehler; ein reiner Zahlenwechsel (86 % → 87 %) zählt als derselbe Fehler.
+- **Alarm** bei neuem oder geändertem Fehler.
 - **Erinnerung** alle 24 h, solange der Fehler besteht.
 - **Entwarnung**, sobald die Prüfung wieder besteht.
-- Versendet werden nur die `FAIL`-Zeilen der Prüfskripte oder „Job X mit Code N beendet“, nie Log-Inhalte.
-- URL und Token gehen über stdin an curl, nie als Prozessargument.
-- Tests: `src/__tests__/staging-ops.test.ts` (11).
+- Versendet werden nur `FAIL`-Zeilen oder „Job X mit Code N beendet“, keine Log-Inhalte.
+- URL und Token gehen über stdin an curl.
 
-### 3.2 Kanal
+### 3.2 ntfy (vorbereitet, extern aus)
 
-Auf dem Server gibt es keinen Mailversand, und es gibt keinen bestehenden Benachrichtigungsweg. Optionen:
+**Geprüft gegen einen echten ntfy-Server** (v2.11.0, lokal auf dem Laptop an 127.0.0.1, Zugriff nur mit Token; danach entfernt):
 
-| Kanal | Aufwand | Bewertung |
-|---|---|---|
-| **ntfy** (App auf dem Handy, ntfy.sh oder später selbst betrieben) | Topic mit langem Zufallsnamen bzw. Konto mit Token; keine Serverpakete nötig | **empfohlen**: kostenlos, nur curl, sofort aufs Handy |
-| Chat-Webhook (Mattermost, Slack, Rocket.Chat) | Webhook-URL | wenn ein Team-Chat existiert |
-| E-Mail | Mailprogramm auf dem Server (Paketinstallation) + SMTP-Zugang | mehr Serveränderung, Zugangsdaten auf dem Server |
+| Prüfung | Ergebnis |
+|---|---|
+| Alarm | Titel „ALARM amanah-staging health“, Priorität 4, Tags `amanah,staging`, Text = FAIL-Zeilen + Host |
+| Entwarnung | Titel „OK …“, Priorität 3 |
+| Abruf ohne Token | 403 |
+| Falscher Token | lokal als „ntfy delivery failed“ vermerkt |
+| Topic und Token im lokalen Log | 0 Treffer |
 
-Einschalten (nach Freigabe, Owner trägt Werte selbst ein; Claude liest die Datei nicht aus):
-1. `/opt/amanah-staging/alert.env` (600) bearbeiten: `ALERT_NTFY_URL`, ggf. `ALERT_NTFY_TOKEN`, `ALERT_EXTERNAL=true`.
-2. Test: `scripts/staging-alert.sh kanaltest 1` → eine Testnachricht, dann `scripts/staging-alert.sh kanaltest 0` → Entwarnung.
+Einrichtung durch den Owner (Claude sieht Topic und Token nicht):
+1. ntfy-App auf dem Handy installieren.
+2. Zufälliges Topic auf deinem Rechner erzeugen: `echo "amanah-$(openssl rand -hex 16)"`. Das Topic wirkt wie ein Passwort: Wer es kennt, kann mitlesen.
+   - Inhalte sind nur Prüfmeldungen ohne Personendaten.
+   - Abonnieren in der App: Server `ntfy.sh`, dieses Topic.
+3. Auf dem Server speichern (Eingabe verdeckt; Token leer lassen, wenn keins):
+   ```bash
+   ssh -t gemeinsam1-prod /opt/amanah-staging/scripts/staging-alert-channel.sh set
+   ```
+   Danach ist der Kanal gespeichert, aber **aus** (`status` zeigt den Zustand).
+4. Freigabe und Einschalten:
+   ```bash
+   ssh gemeinsam1-prod /opt/amanah-staging/scripts/staging-alert-channel.sh enable
+   ```
+   - Sendet genau eine Testmeldung und eine Entwarnung.
+   - Offene Alarme werden beim nächsten Lauf ihres Jobs einmal erneut gesendet.
+   - Ausschalten: `… disable`.
 
-Sobald der Kanal aktiv ist, meldet er sofort den offenen Alarm „kein Backup-Empfänger“.
+ntfy.sh ist ein externer, kostenloser Dienst. Alternativ später ein eigener ntfy-Server; dann nur die URL ändern.
 
 ### 3.3 Grenzen
 
-- Fällt der ganze Server aus, läuft auch Cron nicht, und es kommt keine Meldung. Abhilfe: externer Uptime-Prüfer auf die HTTPS-Adresse (ab Variante B, erwartet 401) oder ein Heartbeat-Dienst. Beides wäre ein neuer externer Dienst und braucht deine Freigabe.
-- Speicher-Alarm ab 85 %. Der Server liegt bei 83 %, Hauptverursacher sind 13,3 GB fremder Build-Cache (nicht angefasst).
+- Fällt der ganze Server aus, kommt keine Meldung, weil auch Cron nicht läuft. Abhilfe ab Variante B: externer Uptime-Prüfer auf `https://staging.amanahordner.de` (erwartet 401). Das wäre ein neuer Dienst und braucht deine Freigabe.
+- Die Platte liegt bei 83 %; 13,3 GB davon sind fremder Build-Cache.
 
 ## 4. Domain und Caddy
 
-### 4.1 Netzwerkanalyse (nur lesend)
+### 4.1 Netzwerkanalyse (nur lesend, 15:25)
 
-- Caddy ist der Container `gemeinsam1-prod-caddy` (Caddy 2.11.4) und hängt nur im Netz `gemeinsam1-prod_internal`. Die Caddyfile ist als **einzelne Datei** eingebunden.
-- Staging-App: Netze `amanah_staging_db` (internal) und `amanah_staging_edge`, Port nur `127.0.0.1:3201` auf dem Host.
-- **Caddy erreicht Staging heute nicht**:
-  - `127.0.0.1` im Caddy-Container ist der Container selbst, nicht der Host.
-  - Caddy und Staging teilen kein Netz.
-  - Beides geprüft: `wget amanah-staging-app` aus Caddy → „bad address“.
-- Das alte Snippet hatte `reverse_proxy 127.0.0.1:3201` und hätte deshalb nicht funktioniert. Korrigiert.
-- Die Amanah-Produktion hängt per `docker-compose.prod.nocaddy.yml` im Netz `gemeinsam1-prod_internal` (siehe §6).
-- sshd: nur Schlüssel-Login, Weiterleitung erlaubt, einziger Login-Nutzer ist `root`.
+- Caddy (`gemeinsam1-prod-caddy`, v2.11.4) hängt nur in `gemeinsam1-prod_internal`; die Caddyfile ist als Einzeldatei eingebunden.
+- Staging hängt in `amanah_staging_db` (internal) und `amanah_staging_edge`, Port nur `127.0.0.1:3201`.
+- Caddy erreicht Staging heute nicht („bad address“), denn `127.0.0.1` im Container ist nicht der Host.
+- gemeinsam1.com hat nur IPv4 (A `167.233.152.17`, kein AAAA). sshd: nur Schlüssel, nur `root`.
 
-### 4.2 Variante A: SSH-Tunnel ohne Domain (aktiver Stand)
+### 4.2 Variante A: SSH-Tunnel (aktueller Stand)
 
-- Zugang: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
-- Vorteile: keine öffentliche Angriffsfläche, keine Änderung an Caddy, DNS oder Firewall, kein Zertifikat.
-- Nachteile:
-  - Heute nur mit Root-Zugang zum Server, also **nur für den Owner geeignet**.
-  - Die App läuft mit `http://127.0.0.1:3201` als Basis-URL. Links in Outbox-Mails zeigen dorthin; für Tester mit Tunnel ist das passend.
-- Erweiterung A2 für Tester, die keinen Server-Zugang bekommen sollen (Serveränderung, nur nach Freigabe):
-  - Eigener Nutzer `amanah-tunnel` ohne Passwort und ohne Shell. Je Tester eine Zeile in `authorized_keys`:
-    ```
-    restrict,port-forwarding,permitopen="127.0.0.1:3201",command="/usr/sbin/nologin" ssh-ed25519 AAAA… tester-name
-    ```
-  - Der Tester kann damit nur Port 3201 weiterleiten: keine Shell, keine anderen Ports.
-  - Rückroll: Zeile löschen bzw. Nutzer entfernen.
+- `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
+- Nur für den Owner (Root-Zugang).
+- Erweiterung A2 für einzelne Tester: Nutzer `amanah-tunnel` ohne Shell, Schlüsselzeile mit `restrict,port-forwarding,permitopen="127.0.0.1:3201",command="/usr/sbin/nologin"`. Das ist eine Serveränderung und braucht eine Freigabe.
 
-### 4.3 Variante B: eigene Subdomain mit HTTPS und Basic Auth (vorbereitet)
+### 4.3 Variante B1 (gewählt): `staging.amanahordner.de` über eigenes Proxy-Netz
 
-Geprüfte Anbindungen:
+Prinzip: Das Netz `amanah_staging_proxy` (internal) enthält nur Caddy und `amanah-staging-app`. Caddy sieht nur `amanah-staging-app:3000`; Staging sieht nichts von gemeinsam1.
 
-| Weg | Bewertung |
-|---|---|
-| **B1: eigenes internes Netz `amanah_staging_proxy`** nur für Caddy und Staging-App | **empfohlen.** Caddy sieht nur `amanah-staging-app:3000`; Staging sieht nichts von gemeinsam1; das Netz ist `internal`, keine Route nach außen |
-| B2: Caddy → Host (`host.docker.internal:3201`) | abgelehnt: Caddy-Container müsste neu erstellt werden (extra_hosts), Staging-Port müsste ans Docker-Gateway, plus UFW-Regel |
-| B3: Staging ins Netz `gemeinsam1-prod_internal` | abgelehnt: Staging könnte `gemeinsam1-prod-db` und Backend erreichen |
-| B4: eigener Proxy für Amanah | nicht möglich, 80/443 sind belegt |
+Andere Wege, verworfen:
+- über den Host: Caddy müsste neu erstellt werden, und eine UFW-Regel wäre nötig
+- Staging im gemeinsam1-Netz: Zugriff auf `gemeinsam1-prod-db`
+- eigener Proxy: 80/443 sind belegt
 
-Vorbereitet im Repo:
-- `docker-compose.staging.proxy.yml` (Overlay; `docker compose config` geprüft: nur die App bekommt das Proxy-Netz, DB bleibt im internen DB-Netz).
-- `deploy/Caddyfile.staging-snippet`:
-  - Upstream `amanah-staging-app:3000`
-  - Basic Auth außer für den Stripe-Webhook
-  - interne Seiten 404, HSTS, noindex
-  - Log im `caddy_data`-Volume mit Rotation
-  - mit Caddy 2.11.4 validiert („Valid configuration“; lokaler Wegwerf-Container, Image danach entfernt)
+Vorbereitet und geprüft:
+- `docker-compose.staging.proxy.yml`: `docker compose config` ergibt nur die App im Proxy-Netz.
+- `deploy/Caddyfile.staging-snippet`: mit Caddy 2.11.4 validiert.
+- `scripts/staging-domain-preflight.sh` (nur lesend):
+  - prüft Nameserver, A/AAAA, CAA, Caddyfile-Eintrag, Caddy-Container, Proxy-Netz (internal, nur erlaubte Mitglieder) und Port 80
+  - Stand 31.10. für `staging.amanahordner.de`: FAIL „keine Nameserver“, FAIL „kein A-Record“, alles andere OK
+  - Gegenprobe mit `gemeinsam1.com` korrekt
 
-Ablauf B1 (jeder Schritt mit Freigabe; Schritte 3–5 ändern den gemeinsam genutzten Caddy):
-1. Domain festlegen/registrieren. DNS: `staging.<domain>` A und AAAA auf den Server (nur ein Amanah-Eintrag).
-2. Staging-Image mit `NEXT_PUBLIC_SITE_URL`/`AMANAH_PUBLIC_BASE_URL=https://staging.<domain>` neu bauen (lokal) und laden, dann `up -d --no-deps app` mit dem Overlay. Das ist eine neue Staging-Version.
-3. `docker network connect amanah_staging_proxy gemeinsam1-prod-caddy`. Das geschieht im laufenden Betrieb ohne Neustart.
-   - Dauerhaft wäre ein Eintrag in der gemeinsam1-Compose-Datei nötig.
-   - Geht die Verbindung verloren, ist nur Staging betroffen (502).
-4. Basic-Auth-Passwort im Passwortmanager anlegen; Hash mit `docker exec -it gemeinsam1-prod-caddy caddy hash-password`.
-5. Caddyfile:
-   - Sicherung `cp -p Caddyfile Caddyfile.bak-<datum>`
-   - neue Fassung = alte + Snippet
-   - `caddy validate` (im Container auf eine Kopie)
-   - **in place schreiben** (`cat neu > Caddyfile`, wegen der Einzeldatei-Einbindung)
-   - `caddy reload`
-   - danach `gemeinsam1.com` und `api.gemeinsam1.com` prüfen (200)
-6. Prüfen:
-   - ohne Anmeldung 401
-   - mit Anmeldung 200
-   - Zertifikat gültig
-   - `staging-security-check.sh` mit `EXPECT_BASIC_AUTH=true EXPECT_HSTS=true`
-   - Webhook ohne Signatur 400
-   - `CERT_HOST` in `ops.env` setzen
-7. Rückroll:
-   - Caddyfile aus der Sicherung in place zurückschreiben, `caddy reload`
-   - `docker network disconnect amanah_staging_proxy gemeinsam1-prod-caddy`
-   - DNS-Eintrag löschen
-   - App ohne Overlay starten
+Stand: `amanahordner.de` hat keine Nameserver und ist vermutlich nicht registriert. **Nicht gekauft.**
 
-Hinweis: Das Zertifikat läuft über das ACME-Konto von gemeinsam1 (`admin@gemeinsam1.com`); Ablaufwarnungen gehen dorthin. Das ist ein zusätzlicher Grund für die Zertifikatsprüfung in §3.
+Schritte, jeder mit eigener Owner-Freigabe; ab Schritt 5 wird der gemeinsam genutzte Caddy berührt:
 
-### 4.4 Empfehlung
+| # | Wer | Schritt | Prüfung |
+|---|---|---|---|
+| 1 | Owner | `amanahordner.de` registrieren (Kosten beim Owner) | Preflight: Nameserver OK |
+| 2 | Owner | DNS: `staging.amanahordner.de. 300 IN A 167.233.152.17`; vorerst kein AAAA (wie gemeinsam1.com); keine anderen Einträge ändern; falls CAA gesetzt wird, `letsencrypt.org` erlauben | `staging-domain-preflight.sh staging.amanahordner.de` ohne FAIL |
+| 3 | Claude | `.env.staging`: `AMANAH_PUBLIC_BASE_URL` und `NEXT_PUBLIC_SITE_URL` = `https://staging.amanahordner.de` (Sicherung vorher). Image lokal mit diesem `NEXT_PUBLIC_SITE_URL` bauen, als neues `AMANAH_RELEASE` laden. Das ist eine neue Staging-Version und braucht eine Freigabe | Image-Größe/Platte prüfen (Doku 28 §6) |
+| 4 | Claude | `docker compose -f docker-compose.staging.yml -f docker-compose.staging.proxy.yml --env-file .env.staging up -d --no-deps app` | Health 6/6; Preflight: Netz internal, nur App |
+| 5 | Claude | `docker network connect amanah_staging_proxy gemeinsam1-prod-caddy` (ohne Neustart) | Preflight: Mitglieder nur App + Caddy; `docker exec gemeinsam1-prod-caddy wget -qO- http://amanah-staging-app:3000/api/health` |
+| 6 | Owner | Basic-Auth-Passwort im Passwortmanager anlegen; `ssh -t gemeinsam1-prod docker exec -it gemeinsam1-prod-caddy caddy hash-password` | nur der Hash wird verwendet |
+| 7 | Claude | Caddyfile: `cp -p /opt/gemeinsam1/deploy/Caddyfile /opt/gemeinsam1/deploy/Caddyfile.bak-<datum>`; neue Fassung = alte + Snippet (Domain `staging.amanahordner.de`, Nutzer, Hash); `docker cp` in den Container und dort `caddy validate --adapter caddyfile` gegen die Kopie; `diff` zeigt nur den neuen Block; **in place schreiben** (`cat neu > Caddyfile`); `docker exec gemeinsam1-prod-caddy caddy reload --config /etc/caddy/Caddyfile` | `gemeinsam1.com` und `api.gemeinsam1.com` 200 vor und nach dem Reload; Caddy-Log: Zertifikat für `staging.amanahordner.de` |
+| 8 | Claude | Abnahme: ohne Anmeldung 401, mit Anmeldung 200; `BASE_URL=https://staging.amanahordner.de EXPECT_BASIC_AUTH=true EXPECT_HSTS=true STAGING_BASIC_AUTH=… scripts/staging-security-check.sh`; Webhook ohne Signatur 400; von außen 3201/5432 weiter zu | alle OK |
+| 9 | Claude | `ops.env`: `BASE_URL` bleibt intern, `CERT_HOST=staging.amanahordner.de` | Health „certificate … valid“ |
 
-- **Jetzt**: Variante A für den Owner.
-- **Für den Pilot mit Testern**: Variante B1, sobald die Domain feststeht. A2 nur, wenn die Tester mit SSH umgehen können und die Domain noch fehlt.
+Rückroll, jeweils einzeln möglich:
+- Caddyfile aus `.bak-<datum>` in place zurückschreiben, `caddy reload`.
+- `docker network disconnect amanah_staging_proxy gemeinsam1-prod-caddy`.
+- App ohne Overlay starten (`up -d --no-deps app` mit nur der Staging-Datei).
+- `.env.staging` aus `rollback/`.
+- DNS-Eintrag löschen.
+- Betroffen ist nur Staging; gemeinsam1 bleibt unberührt, solange in Schritt 7 nur ein Block ergänzt wird.
+
+Hinweise:
+- Das Zertifikat läuft über das ACME-Konto von gemeinsam1 (`admin@gemeinsam1.com`), deshalb die eigene Zertifikatsprüfung (§3).
+- Nach einer Neuerstellung des Caddy-Containers fehlt die Netzverbindung aus Schritt 5. Dann ist nur Staging betroffen (502). Dauerhaft wäre ein Eintrag in der gemeinsam1-Compose-Datei nötig; das ist eine Entscheidung im Projekt gemeinsam1.
+- Die Registrierung auf Staging bleibt auf `staging.invalid` beschränkt; Tester erhalten vorbereitete Testkonten.
 
 ## 5. Sicherheitsprüfung (31.10., 15:30, nur lesend)
 
 | Punkt | Ergebnis |
 |---|---|
-| Staging-DB nicht öffentlich | keine Portbindung; Netz `amanah_staging_db` internal mit nur App und DB; kein Listener auf 5432/5433; von außen 5432, 5433, 3201, 3001 zu (Kontrolle 443 offen) |
-| Keine echten Nutzerdaten | 5 Konten, alle `@staging.invalid`; Registrierung nur für diese Domain |
-| Keine Stripe-Live-Schlüssel | Billing `sandbox`, Sperren aus, kein Stripe-Schlüssel gesetzt; 0 Live-Muster in env-Datei und Container |
-| Keine echten E-Mails | Transport `outbox`, keine Mail-Anbieter-Variablen im Container |
-| Keine öffentlichen religiösen Entwürfe | ungeprüfter Artikel `/wissen/faraid-und-wasiyya-das-wichtigste` 404; `/wissen/redaktion`, `/intern`, `/brand-review` 404 |
-| Keine aktive Erbquotenberechnung | `NEXT_PUBLIC_AMANAH_TESTAMENT_PREPARATION` nicht gesetzt (Sperre greift; Browserprüfung Doku 28) |
-| Keine sensiblen Logs | App-Log 6 Zeilen, DB-Log 78 Zeilen: 0 Treffer (Adressen, Passwörter, Tokens, Schlüsselmuster, DB-Passwort, Session-Secret); Job-Logs 0 Treffer |
-| Kein Zugriff auf Produktionsdaten | Aus der Staging-App sind `amanah-postgres`, `amanah-app`, `gemeinsam1-prod-db` und deren IPs zu (Positivkontrolle: Staging-DB offen); Caddy erreicht Staging nicht; App ohne Volumes |
-| Wöchentlicher Sicherheitscheck | über den neuen Job erneut ausgeführt: bestanden |
-| Produktion | `amanah-app` Health 200; alle 6 Produktionscontainer unverändert „Up“ |
+| Staging-DB nicht öffentlich | keine Portbindung; Netz `amanah_staging_db` internal mit nur App und DB; von außen 5432, 5433, 3201, 3001 zu (Kontrolle 443 offen) |
+| Keine echten Nutzerdaten | 5 Konten, alle `@staging.invalid` |
+| Keine Stripe-Live-Schlüssel | Billing `sandbox`, kein Stripe-Schlüssel; 0 Live-Muster in env-Datei und Container |
+| Keine echten E-Mails | Transport `outbox`, keine Mail-Anbieter-Variablen |
+| Keine öffentlichen religiösen Entwürfe | ungeprüfter Artikel und interne Seiten 404 |
+| Keine aktive Erbquotenberechnung | `NEXT_PUBLIC_AMANAH_TESTAMENT_PREPARATION` nicht gesetzt |
+| Keine sensiblen Logs | App 6 Zeilen, DB 78 Zeilen, Job-Logs: 0 Treffer |
+| Kein Zugriff auf Produktionsdaten | Produktions-DBs/-App aus Staging zu (Positivkontrolle Staging-DB offen); Caddy erreicht Staging nicht |
+
+17:40: Durch den Testschlüssel, die Generalprobe und das Prüfskript kam nichts Öffentliches hinzu. Der Testschlüssel ist root-only (Ordner 700, Datei 600); der age-Container läuft ohne Netzwerk.
 
 ## 6. Separater Befund: Amanah-Produktion im gemeinsam1-Netz (nichts geändert)
 
-- `amanah-app` (Produktion) hängt über `docker-compose.prod.nocaddy.yml` (`SHARED_PROXY_NETWORK`, Standard `gemeinsam1-prod_internal`) im selben Netz wie `gemeinsam1-prod-db`, -backend und -frontend. Die Caddyfile hat keine Amanah-Route; der Zweck war offenbar die spätere Proxy-Anbindung.
-- Risiko:
-  - Ein kompromittierter gemeinsam1-Dienst erreicht die Amanah-App direkt, unter Umgehung des Proxys.
-  - Umgekehrt erreicht die Amanah-App die gemeinsam1-Datenbank auf Netzebene; deren Passwort bleibt die einzige Hürde.
-  - Bewertung: mittel bis niedrig, beide Dienste sind eigene Projekte des Owners.
-- Sichere Abhilfe (Produktionsänderung, nur nach Freigabe): Analog zu B1 ein eigenes Netz `amanah_prod_proxy` nur für Caddy und `amanah-app`, `SHARED_PROXY_NETWORK` darauf umstellen, beim nächsten geplanten Produktions-Deploy anwenden.
+- `amanah-app` (Produktion) hängt über `docker-compose.prod.nocaddy.yml` (`SHARED_PROXY_NETWORK`, Standard `gemeinsam1-prod_internal`) im selben Netz wie `gemeinsam1-prod-db`, -backend und -frontend.
+- Risiko mittel bis niedrig.
+- Abhilfe (Produktionsänderung, nur nach Freigabe): eigenes Netz `amanah_prod_proxy` analog zu B1 beim nächsten geplanten Produktions-Deploy.
 
-## 7. Heute auf dem Server geändert (nur `/opt/amanah-staging` und eigene Dateien)
+## 7. Auf dem Server geändert (nur `/opt/amanah-staging`, eigene Dateien)
 
-- Skripte aktualisiert bzw. neu: `staging-healthcheck.sh`, `staging-alert.sh`, `staging-restore-test.sh`, `staging-cron.sh`.
-- Konfiguration:
-  - `ops.env` (ohne Geheimnisse)
-  - `alert.env` (600, `ALERT_EXTERNAL=false`)
-  - `.env.staging`: `BACKUP_AGE_RECIPIENTS` geleert
-- `/etc/cron.d/amanah-staging` auf `staging-cron.sh` umgestellt; Restore-Job 04:15 neu (überspringt ohne `AGE_IDENTITY`).
-- Unbrauchbares Backup umbenannt (`.UNRESTORABLE-key-deleted`).
-- Neu: `/var/lib/amanah-staging-alerts/` (Zustand) und `/var/log/amanah-staging-{alerts,health,backup,restore,security}.log`. Die alten Dateien `health.last`/`health.alarm` sind entfernt.
-- Sicherungen der vorherigen Cron- und env-Datei: `/opt/amanah-staging/rollback/` (700).
-- Rückroll: beide Dateien aus `rollback/` zurückkopieren.
-- Die Container wurden nicht neu gestartet und laufen seit der Einrichtung unverändert.
+15:20–15:38:
+- Ops-Skripte; `ops.env`; `alert.env` (600, extern aus)
+- `/etc/cron.d/amanah-staging` auf `staging-cron.sh` umgestellt
+- toter Empfänger geleert, altes Backup umbenannt
+- Zustand in `/var/lib/amanah-staging-alerts/`; Logs `/var/log/amanah-staging-*.log`
+
+17:35–17:45:
+- Skripte aktualisiert (`backup-postgres.sh` im Staging-Ordner, Health-Check, Restore-Test, Cron-Wrapper) und neu eingespielt (`staging-set-recipient.sh`, `staging-alert-channel.sh`, `staging-domain-preflight.sh`)
+- Testschlüssel `/root/.config/amanah-staging/restore-check.key` (Ordner 700, Datei 600)
+- `ops.env`: `RESTORE_CHECK_RECIPIENT` (öffentlich), `AGE_IDENTITY`, Altersgrenzen 2/35 Tage
+- Generalprobe vollständig zurückgesetzt
+
+Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu gestartet. Produktion und `/opt/amanah-app` unberührt.
 
 ## 8. Offene Owner-Aufgaben
 
-1. **Backup-Schlüssel** nach §2.2 erzeugen und verwahren, öffentlichen Schlüssel liefern. Danach Restore-Test nach §2.4, Weg 2 (ein Befehl auf deinem Rechner).
-2. **Entscheidung Prüfschlüssel** auf dem Server für den automatischen Restore-Test (§2.3).
-3. **Alarmkanal** wählen (Empfehlung ntfy) und freigeben, Werte selbst in `alert.env` eintragen (§3.2).
-4. **Domain** festlegen und Freigabe für Variante B1 (DNS-Eintrag, Netzanschluss am gemeinsamen Caddy, Caddyfile-Ergänzung, neues Staging-Image) oder A2 (Tunnel-Nutzer).
-5. Freigabe für den Push der Commits dieses Auftrags.
-6. Optional:
-   - Build-Cache auf dem Server bereinigen (13,3 GB, nicht von Amanah-Staging)
-   - Befund §6 bei nächster Produktionsänderung beheben
-   - Befund Port 5433 aus Doku 28 im Projekt `gemeinsam1-ai-platform` beheben
+1. **Backup-Schlüssel** nach §2.2 Schritte 1–5, dann nach Claudes Backup Schritt 7 (Restore-Test) und 8.
+2. **ntfy** nach §3.2 einrichten, dann mit `enable` freigeben.
+3. **Domain** `amanahordner.de` registrieren und DNS nach §4.3 Schritt 2. Danach Freigaben für die Schritte 3–9.
+4. Push-Freigabe für die Commits ab `cc508c6`.
+5. Optional:
+   - Build-Cache auf dem Server bereinigen
+   - Befund §6 bei nächster Produktionsänderung
+   - Port 5433 im Projekt `gemeinsam1-ai-platform` (Doku 28)
 
 ## 9. Pilot-Status
 
 | | Entscheidung |
 |---|---|
 | Owner testet selbst per Tunnel mit synthetischen Daten | **GO** |
-| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis erledigt: (1) Backup-Schlüssel verwahrt + Restore-Test bestanden, (2) Alarmkanal aktiv, (3) Zugang über B1 (oder A2) |
-| Pilot mit echten Personen oder echten Daten, öffentlicher Start | **NO-GO** (unverändert, Sperren aus AI_HANDOFF §8) |
+| Privater Testdaten-Pilot mit weiteren Testern | **NO-GO** bis: (1) Owner-Schlüssel verwahrt, Backup und beide Restore-Tests bestanden, (2) ntfy aktiv, (3) Zugang über B1 |
+| Echte Personen oder echte Daten, öffentlicher Start | **NO-GO** (Sperren AI_HANDOFF §8) |
