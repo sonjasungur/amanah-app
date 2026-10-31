@@ -95,13 +95,12 @@ describe("branding — Mein Wille", () => {
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("homepage teaser shows all four public prices and no paid purchase button", () => {
+  it("homepage teaser shows the free offer and Vorsorge Plus, no paid purchase button", () => {
     const home = read("src/app/page.tsx");
     expect(home).toContain('name: "Amanah-Check"');
-    expect(home).toContain('name: "Basic"');
-    expect(home).toContain('name: "Komplett"');
-    expect(home).toContain('name: "Familie"');
-    expect(home).toContain('price: "29 €"');
+    expect(home).toContain('name: "Vorsorge Plus"');
+    expect(home).toContain("price: formatPrice(getTestPriceCents())");
+    expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
     expect(home).toContain("In Vorbereitung");
     expect(home).not.toContain("Details");
   });

@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
+import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 import { computeCheckResult, isContextProfileQuestion, pickPrimaryRecommendation } from "@/lib/check/results";
 import { CHECK_QUESTIONS } from "@/lib/check/questions";
 import { mergeCheckProgressIntoFolder, hasCheckProgress, CHECK_PROGRESS_VERSION } from "@/lib/check/progress";
@@ -227,16 +228,16 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
 });
 
 describe("professional core phase 1 — pricing teaser and checkout safety", () => {
-  it("shows all four public prices on homepage teaser", () => {
+  it("homepage teaser and /preise show the owner-confirmed split: free + Vorsorge Plus (39 € test price)", () => {
     const home = read("src/app/page.tsx");
     expect(home).toContain('name: "Amanah-Check"');
     expect(home).toContain('price: "0 €"');
-    expect(home).toContain('name: "Basic"');
-    expect(home).toContain('price: "29 €"');
-    expect(home).toContain('name: "Komplett"');
-    expect(home).toContain('price: "79 €"');
-    expect(home).toContain('name: "Familie"');
-    expect(home).toContain('price: "99 €"');
+    expect(home).toContain('name: "Vorsorge Plus"');
+    const preise = read("src/app/preise/page.tsx");
+    expect(preise).toContain('featuresByTier("plus")');
+    expect(preise).toContain('statusNote="In Vorbereitung"');
+    expect(preise).not.toMatch(/"(29|79|99) €"/);
+    expect(formatPrice(getTestPriceCents())).toBe("39 €");
   });
 
   it("keeps paid teaser cards in preparation without active buy CTA", () => {

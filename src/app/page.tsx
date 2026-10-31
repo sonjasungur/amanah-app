@@ -10,6 +10,7 @@ import {
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
+import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 import { Button, linkButtonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -88,10 +89,8 @@ const AREAS = [
 ] as const;
 
 const PRICING_TEASER = [
-  { name: "Amanah-Check", price: "0 €", note: "Einmalig kostenlos, ohne Konto", highlighted: false },
-  { name: "Basic", price: "29 €", note: "Einmalig — wichtigste Wünsche dokumentieren", highlighted: false },
-  { name: "Komplett", price: "79 €", note: "Einmalig — alle Bereiche, empfohlen", highlighted: true },
-  { name: "Familie", price: "99 €", note: "Einmalig — maximal zwei Erwachsenenprofile", highlighted: false },
+  { name: "Amanah-Check", price: "0 €", note: "Kostenlos, ohne Konto — mit Wissen und Vorsorge-Einstieg", highlighted: false },
+  { name: "Vorsorge Plus", price: formatPrice(getTestPriceCents()), note: "Einmalig — vollständiger Vorsorgeordner, kein Abo", highlighted: true },
 ];
 
 function HeroCheckInfoCard({ className }: { className?: string }) {
@@ -262,7 +261,7 @@ export default function HomePage() {
             description="Starte kostenlos. Vollständige Dokumentation ist als Einmalpaket geplant — kein Abo."
             accent={COLORS.emerald}
           />
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+          <div className="grid sm:grid-cols-2 gap-5 mb-8 max-w-3xl">
             {PRICING_TEASER.map((p) => (
               <PricingCard
                 key={p.name}

@@ -1,6 +1,6 @@
 # Launch-Readiness – überprüfbare Freigabematrix
 
-Stand: 2026-10-31 · Integrationsbranch `feat/vorsorge-testament-foundation` @ `02cc7ad`, `chore/prisma-7` = Integration + 2 Commits · Ziel: **erst privater Pilot (synthetische Daten), dann Start „Vorsorge Plus“ (ohne Testament, ohne Erbquoten)**
+Stand: 2026-10-31 (Nachmittag) · Integrationsbranch `feat/vorsorge-testament-foundation` inklusive Prisma 7 · Ziel: **erst privater Pilot (synthetische Daten), dann Start „Vorsorge Plus“ (ohne Testament, ohne Erbquoten)**
 Status: TESTED (technisch nachgewiesen) · IMPLEMENTED (ohne vollständigen Nachweis) · TODO · BLOCKED · REQUIRES_OWNER · REQUIRES_LEGAL_REVIEW · REQUIRES_SCHOLAR_REVIEW
 
 Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relevant = ja“** auf TESTED bzw. erteilt stehen. Externe Freigaben werden nicht durch Tests ersetzt.
@@ -9,8 +9,8 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 
 | # | Kriterium | Nachweis (reproduzierbar) | Status | Start-relevant |
 |---|---|---|---|---|
-| A1 | Abhängigkeiten ohne kritische Lücken | Integration: 0 critical, 3 high (nur Prisma-6-CLI, Doku 07); `chore/prisma-7`: 0 | TESTED | ja |
-| A2 | Prisma 7 | Doku 07 §7: alle Test-Ebenen + Docker grün | TESTED / REQUIRES_OWNER (Merge) | ja (beseitigt A1-Restrisiko) |
+| A1 | Abhängigkeiten ohne kritische Lücken | `npm audit --omit=dev` nach Prisma-7-Übernahme (Doku 26) | TESTED | ja |
+| A2 | Prisma 7 | Doku 07 §8; am 31.10. per Fast-Forward in den Integrationsbranch übernommen (Owner-Freigabe), Tests danach erneut grün (Doku 26) | TESTED | ja |
 | A3 | Sessions: HttpOnly/Secure/`__Host-`, CSRF, Fixation, Logout | `session-security.test.ts`, E2E `security-session.spec.ts` | TESTED | ja |
 | A4 | Passwortregeln, Rate-Limits | Unit + E2E | TESTED | ja |
 | A5 | E-Mail-Bestätigung, Reset, Enumeration-Schutz; **Altkonten mit Frist statt pauschaler Bestätigung** | `consent-and-recovery`, `legacy-email-verification`, `postgres-legacy-migration`, E2E (Doku 19) | TESTED | ja |
@@ -50,7 +50,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | C6 | AGB, Widerrufsbelehrung digitale Inhalte, Bestellbutton, Rechnung/USt | – | REQUIRES_LEGAL_REVIEW | ja |
 | C7 | Impressum | vorhanden | TESTED (Seite) | ja |
 | C8 | Support-Prozess, Sicherheitskontakt | Platzhalter | REQUIRES_OWNER | ja |
-| C9 | Öffentliche Preisseite `/preise` passend zum Katalog | zeigt noch alte Stufen 29/79/99 € | TODO (nach C2/C3) | ja |
+| C9 | Öffentliche Preisseite `/preise` passend zum Katalog | 31.10.: `/preise` und Startseiten-Teaser zeigen Kostenlos + Vorsorge Plus (39 €, „In Vorbereitung“, kein Kaufknopf), Inhalte aus `plan-matrix.ts`; alte Stufen 29/79/99 € entfernt; nicht deployt | IMPLEMENTED / REQUIRES_OWNER (Text-Freigabe vor Veröffentlichung) | ja |
 
 ## D. Islamisches Wissenszentrum (dauerhaft kostenlos)
 
@@ -90,7 +90,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 **Öffentlicher Start: No-Go.** **Privater Pilot mit synthetischen Daten: Go, sobald der Owner F6, A13 und A14 freigibt** (Server, DNS, Caddy, Speicher). Dafür sind keine Rechtstexte nötig, weil keine echten Personen beteiligt sind.
 
 **Weg zum öffentlichen Start:**
-1. A16 (Patch) und A2 (Prisma-7-Merge)
+1. ~~A16 und A2~~ erledigt am 31.10.
 2. A6/A8/A9 auf dem Server, A15-Alarmweg
 3. B2–B5, B7
 4. C2/C3 bestätigen, C5, C6, C8, C9

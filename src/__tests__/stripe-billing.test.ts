@@ -172,7 +172,7 @@ describe("Stripe Checkout session", () => {
 describe("Stripe webhook", () => {
   it("unlocks Plus on a signed, paid checkout.session.completed and is idempotent", async () => {
     const { ref } = await startStripeCheckout();
-    const raw = stripeEvent("checkout.session.completed", paidSession(ref), { id: "evt_paid_1" });
+    const raw = stripeEvent("checkout.session.completed", paidSession(ref), { id: `evt_paid_${crypto.randomUUID()}` });
     expect(await (await sendWebhook(raw)).json()).toMatchObject({ received: true, result: "applied" });
     expect((await getServerRepository().getPurchaseByRef(ref))?.status).toBe("paid");
     expect((await (await sendWebhook(raw)).json()).result).toBe("duplicate");
