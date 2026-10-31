@@ -139,10 +139,27 @@ describe("staging health check: restore proof and certificate", () => {
     const stamp = join(dir, "restore-test.ok");
     writeFileSync(stamp, `date=x\nbackup=y\nrecipients_sha256=${sha("age1abc age1def")}\n`);
     const env = { RESTORE_STAMP: stamp, RESTORE_RECIPIENTS: "age1abc age1def" };
-    expect(health(env)).toContain("OK   restore test passed within 8 days");
-    const old = new Date(Date.now() - 10 * 86400 * 1000);
+    expect(health(env)).toContain("OK   restore test passed within 2 days");
+    const old = new Date(Date.now() - 3 * 86400 * 1000);
     utimesSync(stamp, old, old);
-    expect(health(env)).toContain("FAIL last passed restore test older than 8 days");
+    expect(health(env)).toContain("FAIL last passed restore test older than 2 days");
+  });
+
+  it("tracks the owner's own restore test separately with its own age limit", () => {
+    const auto = join(dir, "restore-test.ok");
+    const owner = join(dir, "owner-restore.ok");
+    const line = `recipients_sha256=${sha("age1abc")}\n`;
+    writeFileSync(auto, line);
+    const env = { RESTORE_STAMP: auto, OWNER_RESTORE_STAMP: owner, RESTORE_RECIPIENTS: "age1abc" };
+    let out = health(env);
+    expect(out).toContain("OK   restore test passed within 2 days");
+    expect(out).toContain("FAIL no passed owner restore test for the current backup key");
+    writeFileSync(owner, line);
+    const old = new Date(Date.now() - 20 * 86400 * 1000);
+    utimesSync(owner, old, old);
+    out = health(env);
+    expect(out).toContain("OK   owner restore test passed within 35 days");
+    expect(health({ OWNER_RESTORE_STAMP: owner, RESTORE_RECIPIENTS: "age1abc" })).not.toMatch(/^.*restore test passed within 2/m);
   });
 
   it("reports a missing certificate when HTTPS is expected but not answering", () => {
@@ -166,5 +183,119 @@ describe("staging cron wiring", () => {
     for (const job of ["health", "backup", "restore", "security"]) {
       expect(table).toContain(`scripts/staging-cron.sh ${job}`);
     }
+  });
+});
+
+describe("owner backup key and alert channel setup", () => {
+  const PUB = `age1${"q".repeat(58)}`;
+  const PUB2 = `age1${"p".repeat(58)}`;
+
+  // Mirror of /opt/amanah-staging: scripts/ next to .env.staging, ops.env and alert.env.
+  function stagingTree(): string {
+    const root = join(dir, "srv");
+    spawnSync("mkdir", ["-p", join(root, "scripts")]);
+    for (const f of ["staging-set-recipient.sh", "staging-alert-channel.sh", "staging-alert.sh"]) {
+      spawnSync("cp", [join(ROOT, "scripts", f), join(root, "scripts", f)]);
+    }
+    writeFileSync(join(root, ".env.staging"), "POSTGRES_PASSWORD=pw\nBACKUP_AGE_RECIPIENTS=\nOTHER=1\n");
+    writeFileSync(join(root, "ops.env"), `RESTORE_CHECK_RECIPIENT=${PUB2}\n`);
+    return root;
+  }
+  const run = (root: string, script: string, args: string[], input: string, env: Record<string, string> = {}) =>
+    spawnSync("bash", [join(root, "scripts", script), ...args], {
+      input,
+      encoding: "utf8",
+      env: {
+        NODE_ENV: "test",
+        PATH: `${fakeCurl()}:${process.env.PATH}`,
+        ALERT_STATE_DIR: join(dir, "state"),
+        ALERT_LOG: join(dir, "alerts.log"),
+        ...env,
+      },
+    });
+
+  it("sets only a public owner key, keeps the rest of the env file and leaves a rollback copy", () => {
+    const root = stagingTree();
+    const res = run(root, "staging-set-recipient.sh", [], `# public key: ${PUB}\n${PUB}\n`);
+    expect(res.status).toBe(0);
+    expect(res.stdout).not.toContain(PUB);
+    expect(res.stdout).toContain(createHash("sha256").update(PUB).digest("hex").slice(0, 16));
+    const env = readFileSync(join(root, ".env.staging"), "utf8");
+    expect(env).toContain(`BACKUP_AGE_RECIPIENTS=${PUB}\n`);
+    expect(env).toContain("POSTGRES_PASSWORD=pw\n");
+    expect(spawnSync("ls", ["-A", join(root, "rollback")], { encoding: "utf8" }).stdout).toMatch(/\.env\.staging\.\d+_\d+/);
+  });
+
+  it("refuses private keys, malformed input and the server's own restore-check key", () => {
+    const root = stagingTree();
+    const priv = run(root, "staging-set-recipient.sh", [], "AGE-SECRET-KEY-1QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ\n");
+    expect(priv.status).toBe(1);
+    expect(priv.stderr).toContain("PRIVATE key");
+    expect(priv.stdout + priv.stderr).not.toContain("AGE-SECRET-KEY-1QQ");
+    expect(run(root, "staging-set-recipient.sh", [], "age1short\n").status).toBe(1);
+    expect(run(root, "staging-set-recipient.sh", [], `${PUB2}\n`).stderr).toContain("restore-check key");
+    expect(readFileSync(join(root, ".env.staging"), "utf8")).toContain("BACKUP_AGE_RECIPIENTS=\n");
+  });
+
+  it("stores the ntfy channel switched off and never prints topic or token", () => {
+    const root = stagingTree();
+    const url = "https://ntfy.invalid/amanah-0123456789abcdefABCDEF";
+    const set = run(root, "staging-alert-channel.sh", ["set"], `${url}\ntk_abcdefghijklmnopqrstuvwxyz\n`);
+    expect(set.status).toBe(0);
+    const conf = readFileSync(join(root, "alert.env"), "utf8");
+    expect(conf).toContain("ALERT_EXTERNAL=false");
+    expect(conf).toContain(`ALERT_NTFY_URL=${url}`);
+    const status = run(root, "staging-alert-channel.sh", ["status"], "");
+    expect(status.stdout).toContain("external delivery: OFF");
+    expect(status.stdout + set.stdout).not.toMatch(/amanah-0123|tk_abc/);
+    expect(curlCalls()).toBe("");
+    expect(run(root, "staging-alert-channel.sh", ["set"], "http://ntfy.invalid/short\n\n").status).toBe(1);
+  });
+
+  it("enables delivery only on request and sends exactly one test alarm and all-clear", () => {
+    const root = stagingTree();
+    run(root, "staging-alert-channel.sh", ["set"], "https://ntfy.invalid/amanah-0123456789abcdefABCDEF\n\n");
+    const res = run(root, "staging-alert-channel.sh", ["enable"], "", { ALERT_CONFIG: join(root, "alert.env") });
+    expect(res.status).toBe(0);
+    expect(readFileSync(join(root, "alert.env"), "utf8")).toContain("ALERT_EXTERNAL=true");
+    const titles = curlCalls().match(/Title: [A-Z]+ amanah-staging channel-test/g);
+    expect(titles).toEqual(["Title: ALARM amanah-staging channel-test", "Title: OK amanah-staging channel-test"]);
+    run(root, "staging-alert-channel.sh", ["disable"], "");
+    expect(readFileSync(join(root, "alert.env"), "utf8")).toContain("ALERT_EXTERNAL=false");
+  });
+
+  it("owner helper creates the key with mode 600 outside repositories and sends only the public key", () => {
+    const bin = join(dir, "ownerbin");
+    spawnSync("mkdir", ["-p", bin]);
+    // age-keygen stand-in: -o writes a fake identity, -y prints the matching public key.
+    writeFileSync(
+      join(bin, "age-keygen"),
+      `#!/usr/bin/env bash\nif [[ "$1" == "-o" ]]; then echo "# public key: ${PUB}" > "$2"; echo "AGE-SECRET-KEY-1FAKEFAKE" >> "$2"; echo "Public key: ${PUB}" >&2; else echo "${PUB}"; fi\n`,
+    );
+    writeFileSync(join(bin, "ssh"), `#!/usr/bin/env bash\necho "SSH $*" >> "${dir}/ssh.calls"\ncat >> "${dir}/ssh.calls"\n`);
+    chmodSync(join(bin, "age-keygen"), 0o755);
+    chmodSync(join(bin, "ssh"), 0o755);
+    const owner = (args: string[]) =>
+      spawnSync("bash", [join(ROOT, "scripts/owner-backup-key.sh"), ...args], {
+        encoding: "utf8",
+        env: { NODE_ENV: "test", PATH: `${bin}:${process.env.PATH}`, HOME: join(dir, "home") },
+      });
+
+    const created = owner(["create"]);
+    expect(created.status).toBe(0);
+    const key = join(dir, "home/amanah-keys/amanah-staging-backup.key");
+    expect((spawnSync("stat", ["-c", "%a", key], { encoding: "utf8" }).stdout || "").trim()).toBe("600");
+    expect(created.stdout + created.stderr).not.toContain("AGE-SECRET-KEY");
+    expect(owner(["create"]).status).toBe(1);
+
+    spawnSync("mkdir", ["-p", join(dir, "repo/.git")]);
+    expect(owner(["create", join(dir, "repo/keys/k.key")]).stderr).toContain("Git repository");
+    expect(owner(["create", join(dir, "home/Nextcloud/k.key")]).stderr).toContain("cloud folder");
+
+    expect(owner(["install-recipient"]).status).toBe(0);
+    const calls = readFileSync(join(dir, "ssh.calls"), "utf8");
+    expect(calls).toContain("/opt/amanah-staging/scripts/staging-set-recipient.sh");
+    expect(calls).toContain(PUB);
+    expect(calls).not.toContain("AGE-SECRET-KEY");
   });
 });

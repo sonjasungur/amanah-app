@@ -3,9 +3,14 @@
 # staging Postgres container, compares it with the live database, drops it again and records
 # the result for the health check. The live staging database is only read.
 #
-# Decrypt on the server with a restore-check identity (automatic, cron):
+# Staging only: refuses to run unless the env file says AMANAH_DEPLOYMENT_ENV=staging. The
+# restore-check key is a separate test key for synthetic staging data; production restore
+# tests use the owner's key on the owner's computer only.
+#
+# Decrypt on the server with the restore-check identity (automatic, cron; stamp restore-test.ok):
 #   AGE_IDENTITY=/root/.config/amanah-staging/restore-check.key scripts/staging-restore-test.sh [backup.sql.gz.age]
-# Decrypt on the owner's computer — the durable key never leaves it (docs 29):
+# Decrypt on the owner's computer — the owner key never leaves it (docs 29; stamp owner-restore.ok,
+# easiest via scripts/owner-backup-key.sh restore-test):
 #   ssh <server> 'cat /opt/amanah-staging/backups/<file>.age' | age -d -i <key> \
 #     | ssh <server> 'cd /opt/amanah-staging && BACKUP_NAME=<file> scripts/staging-restore-test.sh --stdin'
 #
@@ -18,7 +23,11 @@ cd "$ROOT"
 ENV_FILE="${ENV_FILE:-.env.staging}"
 CONTAINER="${POSTGRES_CONTAINER:-amanah-staging-postgres}"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/backups}"
-STAMP_FILE="${RESTORE_STAMP:-$ROOT/state/restore-test.ok}"
+if [[ "${1:-}" == "--stdin" ]]; then
+  STAMP_FILE="${OWNER_RESTORE_STAMP:-$ROOT/state/owner-restore.ok}"
+else
+  STAMP_FILE="${RESTORE_STAMP:-$ROOT/state/restore-test.ok}"
+fi
 AGE_IMAGE="${AGE_IMAGE:-amanah-staging-age:1}"
 TEST_DB="amanah_restore_test"
 FAILED=0
@@ -32,6 +41,7 @@ source "$ENV_FILE"
 set +a
 POSTGRES_USER="${POSTGRES_USER:-amanah}"
 POSTGRES_DB="${POSTGRES_DB:-amanah}"
+if [[ "${AMANAH_DEPLOYMENT_ENV:-}" != "staging" ]]; then echo "FAIL restore test: $ENV_FILE is not a staging configuration"; exit 1; fi
 if [[ "$POSTGRES_DB" == "$TEST_DB" ]]; then echo "FAIL restore test: refusing to use the live database name"; exit 1; fi
 
 # No -i: with --stdin the backup arrives on stdin and must reach only the restore below.

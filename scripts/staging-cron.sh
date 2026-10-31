@@ -21,22 +21,26 @@ fi
 BASE_URL="${BASE_URL:-http://127.0.0.1:3201}"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/backups}"
 RESTORE_STAMP="${RESTORE_STAMP:-$ROOT/state/restore-test.ok}"
+OWNER_RESTORE_STAMP="${OWNER_RESTORE_STAMP:-$ROOT/state/owner-restore.ok}"
 # Public recipients only (age1...); the app secrets in .env.staging are not loaded here.
 recipients="$(grep -m1 '^BACKUP_AGE_RECIPIENTS=' .env.staging 2>/dev/null | cut -d= -f2- | tr -d "\"'")"
 
 case "$JOB" in
   health)
-    BASE_URL="$BASE_URL" BACKUP_DIR="$BACKUP_DIR" RESTORE_STAMP="$RESTORE_STAMP" RESTORE_RECIPIENTS="$recipients" \
+    # The automatic restore proof is only required once a restore-check key is configured.
+    BASE_URL="$BASE_URL" BACKUP_DIR="$BACKUP_DIR" RESTORE_RECIPIENTS="$recipients" \
+      RESTORE_STAMP="${AGE_IDENTITY:+$RESTORE_STAMP}" OWNER_RESTORE_STAMP="$OWNER_RESTORE_STAMP" \
       scripts/staging-healthcheck.sh > "$LOG" 2>&1
     ;;
   backup)
+    # Owner recipients come from .env.staging (required); the restore-check key is added on top.
     ENV_FILE=.env.staging POSTGRES_CONTAINER=amanah-staging-postgres BACKUP_DIR="$BACKUP_DIR" \
-      AGE_BIN="$ROOT/bin/age" BACKUP_REQUIRE_ENCRYPTION=true scripts/backup-postgres.sh > "$LOG" 2>&1 \
+      BACKUP_AGE_EXTRA_RECIPIENTS="${RESTORE_CHECK_RECIPIENT:-}" AGE_BIN="$ROOT/bin/age" BACKUP_REQUIRE_ENCRYPTION=true scripts/backup-postgres.sh > "$LOG" 2>&1 \
       && find "$BACKUP_DIR" -name 'amanah_*.sql.gz.age' -mtime +"${BACKUP_KEEP_DAYS:-7}" -delete
     ;;
   restore)
-    # Automatic only with a restore-check identity on the server (docs 29); otherwise the
-    # owner runs the --stdin variant and the health check reports the stamp's age.
+    # Automatic only with the separate restore-check identity on the server (docs 29). The
+    # owner's own test (--stdin) is tracked separately through OWNER_RESTORE_STAMP.
     if [[ -z "${AGE_IDENTITY:-}" ]]; then
       echo "restore test skipped: no AGE_IDENTITY configured (owner runs it manually)" > "$LOG"
       exit 0

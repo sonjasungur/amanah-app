@@ -4,7 +4,8 @@
 #
 #   BASE_URL=http://127.0.0.1:3201 EXPECT_ENV=staging ./scripts/staging-healthcheck.sh
 #   Optional: DISK_PATH=/ DISK_MAX_PERCENT=85 BACKUP_DIR=/srv/backups/amanah-staging BACKUP_MAX_AGE_HOURS=26
-#             RESTORE_STAMP=<restore-test.ok> RESTORE_RECIPIENTS="age1..." RESTORE_MAX_AGE_DAYS=8
+#             RESTORE_RECIPIENTS="age1..." RESTORE_STAMP=<restore-test.ok> RESTORE_MAX_AGE_DAYS=2
+#             OWNER_RESTORE_STAMP=<owner-restore.ok> OWNER_RESTORE_MAX_AGE_DAYS=35
 #             CERT_HOST=staging.<domain> CERT_MIN_DAYS=21
 set -uo pipefail
 
@@ -41,21 +42,29 @@ if [[ -n "${BACKUP_DIR:-}" ]]; then
   [[ -n "$latest" ]] && ok "encrypted backup younger than ${BACKUP_MAX_AGE_HOURS:-26} h" || bad "no encrypted backup younger than ${BACKUP_MAX_AGE_HOURS:-26} h in $BACKUP_DIR"
 fi
 
-# A backup only counts once a restore test with the current recipients passed
-# (written by staging-restore-test.sh). RESTORE_RECIPIENTS = current BACKUP_AGE_RECIPIENTS.
-if [[ -n "${RESTORE_STAMP:-}" ]]; then
-  max_days="${RESTORE_MAX_AGE_DAYS:-8}"
+# A backup only counts once restore tests for the current owner recipients passed (stamps
+# written by staging-restore-test.sh). RESTORE_RECIPIENTS = current BACKUP_AGE_RECIPIENTS.
+#   RESTORE_STAMP        automatic test with the separate restore-check key (daily)
+#   OWNER_RESTORE_STAMP  test decrypted with the owner's key on the owner's computer
+check_stamp() { # $1 stamp, $2 max days, $3 label
+  local want
   want="$(printf '%s' "${RESTORE_RECIPIENTS:-}" | sha256sum | cut -d' ' -f1)"
+  if [[ ! -f "$1" ]]; then
+    bad "no passed $3 for the current backup key"
+  elif ! grep -qx "recipients_sha256=$want" "$1"; then
+    bad "last $3 used a different backup key"
+  elif [[ -z "$(find "$1" -mtime "-$2")" ]]; then
+    bad "last passed $3 older than $2 days"
+  else
+    ok "$3 passed within $2 days"
+  fi
+}
+if [[ -n "${RESTORE_STAMP:-}${OWNER_RESTORE_STAMP:-}" ]]; then
   if [[ -z "${RESTORE_RECIPIENTS:-}" ]]; then
     bad "no backup recipient configured (BACKUP_AGE_RECIPIENTS empty)"
-  elif [[ ! -f "$RESTORE_STAMP" ]]; then
-    bad "no passed restore test for the current backup key"
-  elif ! grep -qx "recipients_sha256=$want" "$RESTORE_STAMP"; then
-    bad "last restore test used a different backup key"
-  elif [[ -z "$(find "$RESTORE_STAMP" -mtime "-$max_days")" ]]; then
-    bad "last passed restore test older than $max_days days"
   else
-    ok "restore test passed within $max_days days"
+    [[ -n "${RESTORE_STAMP:-}" ]] && check_stamp "$RESTORE_STAMP" "${RESTORE_MAX_AGE_DAYS:-2}" "restore test"
+    [[ -n "${OWNER_RESTORE_STAMP:-}" ]] && check_stamp "$OWNER_RESTORE_STAMP" "${OWNER_RESTORE_MAX_AGE_DAYS:-35}" "owner restore test"
   fi
 fi
 

@@ -42,7 +42,9 @@ if [[ -n "${BACKUP_AGE_RECIPIENTS:-}" ]]; then
     exit 1
   fi
   RECIPIENT_ARGS=()
-  for r in $BACKUP_AGE_RECIPIENTS; do RECIPIENT_ARGS+=(-r "$r"); done
+  # BACKUP_AGE_EXTRA_RECIPIENTS: staging only — the restore-check key for the automatic restore
+  # test (docs 29). Added on top of the owner's recipients, never instead of them.
+  for r in $BACKUP_AGE_RECIPIENTS ${BACKUP_AGE_EXTRA_RECIPIENTS:-}; do RECIPIENT_ARGS+=(-r "$r"); done
   OUT="$OUT.age"
   echo "Creating encrypted backup: $OUT"
   umask 077
