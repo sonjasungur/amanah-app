@@ -1,0 +1,4 @@
+# Reviewed false positives only (fingerprint = commit:file:rule:line). Never add real findings.
+# 6e80a47: placeholder text REPLACE_WITH_64_HEX_CHARS in the staging template, replaced in d1ffc08.
+6e80a47a756addf01b79fe42d29551c4b85753e6:.env.staging.example:generic-api-key:15
+6e80a47a756addf01b79fe42d29551c4b85753e6:.env.staging.example:generic-api-key:37
