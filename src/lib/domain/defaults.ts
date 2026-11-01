@@ -130,8 +130,8 @@ export const defaultAmanahData: AmanahOrdnerData = {
     openQuestionsLawyer: "",
   },
   testamentPreparation: {
-    personalWishes: { wishes: "", charitableWishes: "" },
-    islamicModel: { wantsIslamicDistribution: "", preferredSchool: "", ownGender: "", fatherAlive: "", motherAlive: "", grandparentsAlive: "", grandchildrenViaDeceasedSon: "" },
+    personalWishes: { wishes: "", charitableWishes: "", executorWish: "", executorPerson: "", guardianPerson: "", guardianExcluded: "" },
+    islamicModel: { wantsIslamicDistribution: "", preferredSchool: "", ownGender: "", fatherAlive: "", motherAlive: "", grandparentsAlive: "", grandchildrenViaDeceasedSon: "", halfSiblings: "", adoptedChildren: "", moreThanOneSpouse: "", otherRelatives: "" },
     legalFacts: {
       maritalStatus: "",
       propertyRegime: "",
@@ -144,6 +144,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
       assetsAbroadCountries: "",
       businessInterests: "",
       differentReligionRelatives: "",
+      minorChildren: "",
     },
     currentStep: 0,
   },

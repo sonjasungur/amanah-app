@@ -15,6 +15,7 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
   const p = data.inheritanceProfile;
   const hasChildren = p.sons + p.daughters > 0 || data.familyMembers.some((m) => m.relationType === "kind");
   const minorChildren = data.familyMembers.some((m) => m.relationType === "kind" && isMinor(m.birthDate));
+  const w = data.testamentPreparation.personalWishes;
   const q: LawyerQuestion[] = [];
 
   q.push({ id: "form", question: "Welche Form ist für mein Testament die richtige – eigenhändig oder notariell?", reference: "§§ 2231, 2232, 2247 BGB" });
@@ -36,9 +37,14 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
     q.push({ id: "religion", question: "Wie werden Angehörige mit anderer Religion nach deutschem Recht und nach meinen Wünschen berücksichtigt?", reference: "Pflichtteil; ordre public (Art. 35 EuErbVO)" });
   }
   if (p.stepchildren || p.fosterChildren) q.push({ id: "step", question: "Wie kann ich Stief- oder Pflegekinder bedenken?", reference: "Vermächtnis §§ 2147 ff. BGB" });
-  if (minorChildren || (hasChildren && data.familyMembers.some((m) => m.roles?.includes("vormund_wunsch")))) {
-    q.push({ id: "guardian", question: "Wie benenne ich wirksam einen Vormund für meine minderjährigen Kinder?", reference: "§ 1782 BGB" });
+  if (f.minorChildren === "ja" || minorChildren || (hasChildren && data.familyMembers.some((m) => m.roles?.includes("vormund_wunsch")))) {
+    q.push({ id: "guardian", question: "Wie benenne ich wirksam einen Vormund für meine minderjährigen Kinder, und wie schließe ich jemanden aus?", reference: "§§ 1782, 1783 BGB" });
   }
+  if (w.executorWish === "ja" || w.executorWish === "unsicher") {
+    q.push({ id: "executor", question: "Ist für mich eine Testamentsvollstreckung sinnvoll, und was müsste ich dafür regeln?", reference: "§§ 2197 ff. BGB" });
+  }
+  if (i.adoptedChildren === "ja") q.push({ id: "adopted", question: "Wie werden meine adoptierten Kinder nach deutschem Recht und nach meinen Wünschen berücksichtigt?", reference: "Gesetzliche Erbfolge; Pflichtteil" });
+  if (i.moreThanOneSpouse === "ja") q.push({ id: "spouses", question: "Wie wird meine familiäre Situation mit mehr als einer Ehe rechtlich behandelt?", reference: "Internationales Familien- und Erbrecht" });
   if (data.testamentPreparation.personalWishes.charitableWishes.trim()) {
     q.push({ id: "charity", question: "Wie setze ich ein Vermächtnis an eine gemeinnützige Organisation um?", reference: "§§ 2147 ff. BGB; Erbschaftsteuer" });
   }

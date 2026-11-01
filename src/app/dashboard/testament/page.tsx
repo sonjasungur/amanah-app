@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { RelatedKnowledge } from "@/components/islamic-knowledge/related-knowledge";
+import { AssetOverview } from "@/components/testament/asset-overview";
 
 const statusConfig = {
   green: {
@@ -46,6 +47,7 @@ export default function TestamentPage() {
       fields={inheritanceFields}
       disclaimerType="islamic"
     >
+      <AssetOverview />
       <Card className={cn("mt-6 border-2", config.bg)}>
         <CardTitle className={cn("flex items-center gap-2", config.text)}>
           <StatusIcon size={22} />

@@ -15,6 +15,7 @@ import { PART_LABELS, PREPARATION_STEPS, isStepRelevant, readStepValue, writeSte
 import { buildLawyerQuestions } from "@/lib/testament/lawyer-questions";
 import { toFaraidInput } from "@/lib/testament/faraid-mapping";
 import { calculateFaraid, isRuleSetDisplayable } from "@/lib/inheritance";
+import { FaraidModelResult } from "@/components/testament/faraid-model-result";
 
 function LockedNotice() {
   return (
@@ -118,6 +119,9 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
         <CardTitle className="text-base">1. Persönliche Wünsche</CardTitle>
         <p className="text-sm whitespace-pre-wrap">{prep.personalWishes.wishes || "—"}</p>
         <p className="text-sm whitespace-pre-wrap mt-2">Wohltätig: {prep.personalWishes.charitableWishes || "—"}</p>
+        {prep.personalWishes.executorPerson && <p className="text-sm mt-2">Wunsch Testamentsvollstreckung: {prep.personalWishes.executorPerson}</p>}
+        {prep.personalWishes.guardianPerson && <p className="text-sm mt-2">Wunsch Vormund: {prep.personalWishes.guardianPerson}</p>}
+        {prep.personalWishes.guardianExcluded && <p className="text-sm mt-2">Nicht als Vormund: {prep.personalWishes.guardianExcluded}</p>}
       </Card>
 
       <Card data-testid="preparation-islamic-model">
@@ -130,6 +134,7 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
             Die Modellrechnung ist gesperrt, bis das Regelwerk von qualifizierten Gelehrten geprüft ist (Regelwerk {model.ruleSet.id} {model.ruleSet.version}, Status: ungeprüft).
           </p>
         )}
+        {model?.status === "calculated" && <FaraidModelResult model={model} featureEnabled={isTestamentPreparationEnabled()} />}
       </Card>
 
       <Card>

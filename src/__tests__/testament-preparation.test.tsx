@@ -47,7 +47,7 @@ describe("questionnaire logic", () => {
     const res = toFaraidInput(
       data(
         { maritalStatus: "verheiratet", differentReligionRelatives: "nein" },
-        { ownGender: "male", fatherAlive: "nein", motherAlive: "nein", grandparentsAlive: "nein", grandchildrenViaDeceasedSon: "nein" },
+        { ownGender: "male", fatherAlive: "nein", motherAlive: "nein", grandparentsAlive: "nein", grandchildrenViaDeceasedSon: "nein", halfSiblings: "nein", adoptedChildren: "nein", moreThanOneSpouse: "nein" },
         { sons: 1, daughters: 1, siblings: false, spouseAlive: true }
       )
     );
@@ -82,6 +82,7 @@ describe("preparation page", () => {
     answer("Nein"); // abroad
     answer("Nein"); // business
     answer("Nein"); // other religion
+    answer("Nein"); // minor children
     answer("Ja"); // islamic wish
     answer("Hanafitisch");
     answer("ein Mann");
@@ -89,8 +90,13 @@ describe("preparation page", () => {
     answer("Nein"); // mother
     answer("Nein"); // grandparents
     answer("Nein"); // grandchildren
+    answer("Nein"); // half siblings
+    answer("Nein"); // adopted children
+    answer("Nein"); // more than one marriage
+    answer("Nein"); // other relatives
     fireEvent.click(screen.getByTestId("preparation-next"));
     fireEvent.click(screen.getByTestId("preparation-next"));
+    answer("Nein"); // executor wish
     expect(screen.getByTestId("preparation-summary")).toBeTruthy();
     expect(screen.getByTestId("faraid-locked").textContent).toContain("gesperrt");
     expect(screen.getByTestId("preparation-lawyer-questions").textContent).toContain("§§ 2303 ff. BGB");

@@ -43,6 +43,7 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "abroadCountries", part: "legalFacts", field: "assetsAbroadCountries", question: "In welchen Ländern?", type: "text" },
   { id: "business", part: "legalFacts", field: "businessInterests", question: "Bist du an einem Unternehmen beteiligt?", type: "choice", options: YES_NO_UNSURE },
   { id: "religion", part: "legalFacts", field: "differentReligionRelatives", question: "Gibt es nahe Angehörige mit anderer Religion?", help: "Das kann islamrechtlich und nach deutschem Recht unterschiedliche Folgen haben.", type: "choice", options: YES_NO_UNSURE },
+  { id: "minorChildren", part: "legalFacts", field: "minorChildren", question: "Hast du minderjährige Kinder?", type: "choice", options: YES_NO_UNSURE },
   { id: "islamicWish", part: "islamicModel", field: "wantsIslamicDistribution", question: "Möchtest du, dass dein Nachlass nach islamischen Erbgrundsätzen verteilt wird?", help: "Das wird nur wirksam, wenn es in einem formgültigen Testament konkret geregelt ist. Diese Frage hilft, das Gespräch mit Anwalt oder Notar vorzubereiten.", type: "choice", options: YES_NO_UNSURE },
   { id: "school", part: "islamicModel", field: "preferredSchool", question: "Folgst du einer Rechtsschule?", type: "choice", options: [
     { value: "hanafi", label: "Hanafitisch" }, { value: "maliki", label: "Malikitisch" }, { value: "shafii", label: "Schafiitisch" }, { value: "hanbali", label: "Hanbalitisch" }, { value: "unsicher", label: "Weiß ich nicht" },
@@ -54,8 +55,16 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "mother", part: "islamicModel", field: "motherAlive", question: "Lebt deine Mutter?", type: "choice", options: YES_NO_UNSURE },
   { id: "grandparents", part: "islamicModel", field: "grandparentsAlive", question: "Lebt einer deiner Großeltern?", type: "choice", options: YES_NO_UNSURE },
   { id: "grandchildren", part: "islamicModel", field: "grandchildrenViaDeceasedSon", question: "Hast du Enkel von einem bereits verstorbenen Sohn?", type: "choice", options: YES_NO_UNSURE },
+  { id: "halfSiblings", part: "islamicModel", field: "halfSiblings", question: "Hast du Halbgeschwister?", type: "choice", options: YES_NO_UNSURE },
+  { id: "adoptedChildren", part: "islamicModel", field: "adoptedChildren", question: "Hast du adoptierte Kinder?", help: "Wird für das deutsche Recht und die islamische Modellinformation getrennt betrachtet.", type: "choice", options: YES_NO_UNSURE },
+  { id: "moreThanOneSpouse", part: "islamicModel", field: "moreThanOneSpouse", question: "Bist du mit mehr als einer Person verheiratet, auch nach ausländischem Recht?", type: "choice", options: YES_NO_UNSURE },
+  { id: "otherRelatives", part: "islamicModel", field: "otherRelatives", question: "Leben Kinder deiner Brüder, Brüder deines Vaters oder deren Söhne?", type: "choice", options: YES_NO_UNSURE },
   { id: "wishes", part: "personalWishes", field: "wishes", question: "Was ist dir für deinen Nachlass persönlich wichtig?", help: "Zum Beispiel bestimmte Gegenstände für bestimmte Personen.", type: "textarea" },
   { id: "charity", part: "personalWishes", field: "charitableWishes", question: "Möchtest du etwas für wohltätige Zwecke bestimmen?", type: "textarea" },
+  { id: "executorWish", part: "personalWishes", field: "executorWish", question: "Wünschst du dir jemanden, der die Abwicklung deines Nachlasses übernimmt (Testamentsvollstreckung)?", help: "Nur als Frage für das Gespräch. Eingesetzt wird damit niemand.", type: "choice", options: YES_NO_UNSURE },
+  { id: "executorPerson", part: "personalWishes", field: "executorPerson", question: "Wen wünschst du dir dafür?", type: "text" },
+  { id: "guardianPerson", part: "personalWishes", field: "guardianPerson", question: "Wen wünschst du dir als Vormund für deine minderjährigen Kinder?", help: "Eine Person oder ein Ehepaar. Nur als Wunsch für das Gespräch: Wirksam wird eine Benennung erst in einer formgültigen letztwilligen Verfügung.", type: "text" },
+  { id: "guardianExcluded", part: "personalWishes", field: "guardianExcluded", question: "Gibt es jemanden, der nicht Vormund werden soll?", type: "text" },
 ];
 
 export function readStepValue(prep: TestamentPreparation, step: PreparationStep): string {
@@ -71,5 +80,8 @@ export function isStepRelevant(prep: TestamentPreparation, step: PreparationStep
   if (step.id === "regime" || step.id === "jointWill") return prep.legalFacts.maritalStatus === "verheiratet";
   if (step.id === "abroadCountries") return prep.legalFacts.assetsAbroad === "ja";
   if (step.id === "school") return prep.islamicModel.wantsIslamicDistribution !== "nein";
+  if (step.id === "moreThanOneSpouse") return prep.legalFacts.maritalStatus === "verheiratet";
+  if (step.id === "executorPerson") return prep.personalWishes.executorWish === "ja";
+  if (step.id === "guardianPerson" || step.id === "guardianExcluded") return prep.legalFacts.minorChildren === "ja";
   return true;
 }

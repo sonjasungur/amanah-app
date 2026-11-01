@@ -166,11 +166,14 @@ export interface DocumentEntry {
 
 export interface AssetEntry {
   id: string;
-  type: "real_estate" | "bank" | "investment" | "vehicle" | "business" | "other";
+  type: "real_estate" | "bank" | "investment" | "pension" | "life_insurance" | "gold_silver" | "vehicle" | "business" | "other";
   description: string;
   approximateValue?: string;
   locationHint?: string;
   notes?: string;
+  /** Real estate only. */
+  mortgage?: "ja" | "nein" | "unsicher";
+  ownership?: "allein" | "gemeinsam" | "unsicher";
 }
 
 export interface DebtAmanahItem {
@@ -266,6 +269,11 @@ export interface TestamentPreparation {
   personalWishes: {
     wishes: string;
     charitableWishes: string;
+    /** Wishes for the conversation with a lawyer or notary; they appoint nobody by themselves. */
+    executorWish: YesNoUnsure;
+    executorPerson: string;
+    guardianPerson: string;
+    guardianExcluded: string;
   };
   islamicModel: {
     wantsIslamicDistribution: YesNoUnsure;
@@ -276,6 +284,10 @@ export interface TestamentPreparation {
     motherAlive: YesNoUnsure;
     grandparentsAlive: YesNoUnsure;
     grandchildrenViaDeceasedSon: YesNoUnsure;
+    halfSiblings: YesNoUnsure;
+    adoptedChildren: YesNoUnsure;
+    moreThanOneSpouse: YesNoUnsure;
+    otherRelatives: YesNoUnsure;
   };
   legalFacts: {
     maritalStatus: "ledig" | "verheiratet" | "geschieden" | "verwitwet" | "";
@@ -289,6 +301,7 @@ export interface TestamentPreparation {
     assetsAbroadCountries: string;
     businessInterests: YesNoUnsure;
     differentReligionRelatives: YesNoUnsure;
+    minorChildren: YesNoUnsure;
   };
   currentStep: number;
 }
