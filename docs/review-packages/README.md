@@ -15,4 +15,4 @@ Erzeugt 2026-11-01 mit `npm run export:review-packages`. Nicht zur Veröffentlic
 | [Islamische Bestattung in Deutschland](ik-start-09-bestattung-deutschland.md) | source, scholar, legal | source: 3 · scholar: 4 · legal: 4 |
 | [Sadaqa Jāriya und wohltätige Vermächtnisse](ik-start-10-sadaqa-jariya.md) | source, scholar, legal | source: 5 · scholar: 4 · legal: 4 |
 
-Übergreifend: [Prüfliste für islamische Fachpersonen](PRUEFLISTE-GELEHRTE.md) · [Quellenübersicht](QUELLENUEBERSICHT.md)
+Übergreifend: [Prüfliste für islamische Fachpersonen](PRUEFLISTE-GELEHRTE.md) · [Quellenübersicht](QUELLENUEBERSICHT.md) · [Regelwerk der Modellrechnung](REGELWERK-MODELLRECHNUNG.md)

@@ -19,7 +19,7 @@ export const RULE_SETS: Record<string, RuleSet> = {
   [`${SUNNI_NUCLEAR_FAMILY_V1.id}@${SUNNI_NUCLEAR_FAMILY_V1.version}`]: SUNNI_NUCLEAR_FAMILY_V1,
 };
 
-/** A result may only reach the UI when the rule set is reviewed and the product flag is on. */
+/** A result may only reach the UI when a named review is recorded and the product flag is on. */
 export function isRuleSetDisplayable(ruleSet: RuleSet, featureEnabled: boolean): boolean {
-  return featureEnabled && ruleSet.reviewStatus === "scholar_reviewed";
+  return featureEnabled && ruleSet.reviewStatus === "scholar_reviewed" && Boolean(ruleSet.reviewedBy?.trim()) && Boolean(ruleSet.reviewedAt?.trim());
 }

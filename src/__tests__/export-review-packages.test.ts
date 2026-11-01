@@ -2,6 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { getSourcesByIds } from "@/lib/knowledge/sources";
+import { ruleSetReviewMarkdown } from "@/lib/inheritance";
 import { allSourceIds } from "@/modules/islamic-knowledge";
 import { START_ARTICLE_DRAFTS } from "@/modules/islamic-knowledge/drafts/start-articles";
 import { questionsByRole, requiredReviews, reviewPackageMarkdown, scholarChecklistMarkdown, sourceOverviewMarkdown } from "@/modules/islamic-knowledge";
@@ -53,9 +54,10 @@ describe("review packages as Markdown", () => {
       const roles = requiredReviews(article);
       index.push(`| [${article.title}](${article.id}.md) | ${roles.join(", ")} | ${roles.map((r) => `${r}: ${q[r].length}`).join(" · ")} |`);
     }
-    index.push("", "Übergreifend: [Prüfliste für islamische Fachpersonen](PRUEFLISTE-GELEHRTE.md) · [Quellenübersicht](QUELLENUEBERSICHT.md)");
+    index.push("", "Übergreifend: [Prüfliste für islamische Fachpersonen](PRUEFLISTE-GELEHRTE.md) · [Quellenübersicht](QUELLENUEBERSICHT.md) · [Regelwerk der Modellrechnung](REGELWERK-MODELLRECHNUNG.md)");
     writeFileSync(path.join(dir, "README.md"), index.join("\n") + "\n");
     writeFileSync(path.join(dir, "PRUEFLISTE-GELEHRTE.md"), scholarChecklistMarkdown(START_ARTICLE_DRAFTS, date));
     writeFileSync(path.join(dir, "QUELLENUEBERSICHT.md"), sourceOverviewMarkdown(START_ARTICLE_DRAFTS, date));
+    writeFileSync(path.join(dir, "REGELWERK-MODELLRECHNUNG.md"), ruleSetReviewMarkdown(date));
   });
 });
