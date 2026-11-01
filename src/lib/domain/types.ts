@@ -265,10 +265,29 @@ export type YesNoUnsure = "ja" | "nein" | "unsicher" | "";
  * Testament preparation — facts and wishes for a conversation with a lawyer or notary.
  * Never a will, never legal advice. Kept strictly in separate parts.
  */
+/**
+ * A wish for the conversation with a lawyer or notary. It bequeaths nothing by itself, and nothing
+ * in the product says whether it could be legally effective.
+ */
+export interface BequestWish {
+  id: string;
+  kind: "amount" | "percent" | "item";
+  /** Euro for "amount", percent for "percent". */
+  value?: number;
+  /** Description for "item". */
+  item?: string;
+  beneficiary: string;
+  beneficiaryKind: "person" | "organisation";
+  /** Whether the beneficiary would also inherit. Persons only. */
+  alsoHeir: YesNoUnsure;
+  note?: string;
+}
+
 export interface TestamentPreparation {
   personalWishes: {
     wishes: string;
     charitableWishes: string;
+    bequests: BequestWish[];
     /** Wishes for the conversation with a lawyer or notary; they appoint nobody by themselves. */
     executorWish: YesNoUnsure;
     executorPerson: string;

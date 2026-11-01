@@ -130,7 +130,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
     openQuestionsLawyer: "",
   },
   testamentPreparation: {
-    personalWishes: { wishes: "", charitableWishes: "", executorWish: "", executorPerson: "", guardianPerson: "", guardianExcluded: "" },
+    personalWishes: { wishes: "", charitableWishes: "", bequests: [], executorWish: "", executorPerson: "", guardianPerson: "", guardianExcluded: "" },
     islamicModel: { wantsIslamicDistribution: "", preferredSchool: "", ownGender: "", fatherAlive: "", motherAlive: "", grandparentsAlive: "", grandchildrenViaDeceasedSon: "", halfSiblings: "", adoptedChildren: "", moreThanOneSpouse: "", otherRelatives: "" },
     legalFacts: {
       maritalStatus: "",

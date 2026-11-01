@@ -45,7 +45,16 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
   }
   if (i.adoptedChildren === "ja") q.push({ id: "adopted", question: "Wie werden meine adoptierten Kinder nach deutschem Recht und nach meinen Wünschen berücksichtigt?", reference: "Gesetzliche Erbfolge; Pflichtteil" });
   if (i.moreThanOneSpouse === "ja") q.push({ id: "spouses", question: "Wie wird meine familiäre Situation mit mehr als einer Ehe rechtlich behandelt?", reference: "Internationales Familien- und Erbrecht" });
-  if (data.testamentPreparation.personalWishes.charitableWishes.trim()) {
+  if (w.bequests.length > 0) {
+    q.push({ id: "bequests", question: "Wie lassen sich meine Vermächtniswünsche umsetzen, und sind sie so bestimmt genug?", reference: "§§ 2147 ff., 2065 BGB" });
+    if (w.bequests.some((b) => b.kind === "percent")) {
+      q.push({ id: "bequest-percent", question: "Worauf beziehen sich meine Prozentangaben, und macht ein Anteil am Vermögen die Person zum Erben statt zum Vermächtnisnehmer?", reference: "§ 2087 BGB" });
+    }
+    if (w.bequests.some((b) => b.alsoHeir === "ja" || b.alsoHeir === "unsicher")) {
+      q.push({ id: "bequest-heir", question: "Was gilt, wenn eine bedachte Person auch Erbe wird?", reference: "§ 2150 BGB" });
+    }
+  }
+  if (w.charitableWishes.trim() || w.bequests.some((b) => b.beneficiaryKind === "organisation")) {
     q.push({ id: "charity", question: "Wie setze ich ein Vermächtnis an eine gemeinnützige Organisation um?", reference: "§§ 2147 ff. BGB; Erbschaftsteuer" });
   }
   q.push({ id: "storage", question: "Soll mein Testament amtlich verwahrt werden?", reference: "§ 2248 BGB, Zentrales Testamentsregister" });

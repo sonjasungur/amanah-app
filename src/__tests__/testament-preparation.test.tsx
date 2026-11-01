@@ -96,10 +96,30 @@ describe("preparation page", () => {
     answer("Nein"); // other relatives
     fireEvent.click(screen.getByTestId("preparation-next"));
     fireEvent.click(screen.getByTestId("preparation-next"));
+    expect(screen.getByTestId("bequest-editor")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Für wen?"), { target: { value: "Aisha" } });
+    fireEvent.change(screen.getByLabelText("Betrag in Euro"), { target: { value: "1.000" } });
+    fireEvent.click(screen.getByTestId("bequest-add"));
+    fireEvent.click(screen.getByTestId("preparation-next"));
     answer("Nein"); // executor wish
     expect(screen.getByTestId("preparation-summary")).toBeTruthy();
+    expect(screen.getByTestId("bequest-summary").textContent).toContain("1.000 € für Aisha");
+    expect(screen.getByTestId("bequest-summary").textContent).toContain("nur als Wunsch");
+    expect(screen.getByTestId("preparation-lawyer-questions").textContent).toContain("§§ 2147 ff., 2065 BGB");
     expect(screen.getByTestId("faraid-locked").textContent).toContain("gesperrt");
     expect(screen.getByTestId("preparation-lawyer-questions").textContent).toContain("§§ 2303 ff. BGB");
     expect(screen.getByText(/Gesprächsunterlage – kein Testament/)).toBeTruthy();
+  });
+
+  it("shows no model at all when no Islamic distribution is wanted", () => {
+    vi.stubEnv("NEXT_PUBLIC_AMANAH_TESTAMENT_PREPARATION", "true");
+    const prep = structuredClone(defaultAmanahData.testamentPreparation);
+    prep.islamicModel.wantsIslamicDistribution = "nein";
+    prep.currentStep = PREPARATION_STEPS.length;
+    useAmanahStore.setState({ testamentPreparation: prep });
+    renderPage();
+    expect(screen.getByTestId("faraid-not-wanted")).toBeTruthy();
+    expect(screen.queryByTestId("faraid-locked")).toBeNull();
+    expect(screen.getByTestId("preparation-islamic-model").textContent).not.toContain("fehlen");
   });
 });

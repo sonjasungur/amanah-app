@@ -1,7 +1,8 @@
 import { defaultAmanahData } from "./defaults";
 import { SCHEMA_VERSION } from "./schema";
-import type { AmanahOrdnerData } from "./types";
+import type { AmanahOrdnerData, TestamentPreparation } from "./types";
 import { normalizeCheckProgress } from "@/lib/check/progress";
+import { sanitizeBequests } from "@/lib/testament/bequests";
 
 type LegacyRawData = Record<string, unknown>;
 
@@ -31,6 +32,12 @@ export function migrateV0ToV1(raw: LegacyRawData): AmanahOrdnerData {
   return normalizeData(merged);
 }
 
+function normalizeTestamentPreparation(raw: unknown): TestamentPreparation {
+  const prep = (isObject(raw) ? raw : defaultAmanahData.testamentPreparation) as unknown as TestamentPreparation;
+  const wishes = isObject(prep.personalWishes) ? prep.personalWishes : defaultAmanahData.testamentPreparation.personalWishes;
+  return { ...prep, personalWishes: { ...wishes, bequests: sanitizeBequests(wishes.bequests) } };
+}
+
 export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData {
   const merged = deepMerge(defaultAmanahData as unknown as Record<string, unknown>, data as LegacyRawData) as unknown as AmanahOrdnerData;
   return {
@@ -39,6 +46,7 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
     familyMembers: merged.familyMembers ?? [],
     documents: merged.documents ?? [],
     assets: merged.assets ?? [],
+    testamentPreparation: normalizeTestamentPreparation(merged.testamentPreparation),
     donations: merged.donations ?? [],
     importantInstructions: merged.importantInstructions ?? [],
     debtsAmanah: merged.debtsAmanah ?? [],

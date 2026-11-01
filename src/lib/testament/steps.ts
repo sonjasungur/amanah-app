@@ -9,7 +9,7 @@ export interface PreparationStep {
   field: string;
   question: string;
   help?: string;
-  type: "choice" | "text" | "textarea";
+  type: "choice" | "text" | "textarea" | "bequests";
   options?: { value: string; label: string }[];
 }
 
@@ -61,6 +61,7 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "otherRelatives", part: "islamicModel", field: "otherRelatives", question: "Leben Kinder deiner Brüder, Brüder deines Vaters oder deren Söhne?", type: "choice", options: YES_NO_UNSURE },
   { id: "wishes", part: "personalWishes", field: "wishes", question: "Was ist dir für deinen Nachlass persönlich wichtig?", help: "Zum Beispiel bestimmte Gegenstände für bestimmte Personen.", type: "textarea" },
   { id: "charity", part: "personalWishes", field: "charitableWishes", question: "Möchtest du etwas für wohltätige Zwecke bestimmen?", type: "textarea" },
+  { id: "bequests", part: "personalWishes", field: "bequests", question: "Möchtest du bestimmten Personen oder Einrichtungen etwas zukommen lassen?", help: "Nur als Wunsch für das Gespräch. Damit wird nichts vermacht. Ob und wie es sich umsetzen lässt, klären Anwalt oder Notar.", type: "bequests" },
   { id: "executorWish", part: "personalWishes", field: "executorWish", question: "Wünschst du dir jemanden, der die Abwicklung deines Nachlasses übernimmt (Testamentsvollstreckung)?", help: "Nur als Frage für das Gespräch. Eingesetzt wird damit niemand.", type: "choice", options: YES_NO_UNSURE },
   { id: "executorPerson", part: "personalWishes", field: "executorPerson", question: "Wen wünschst du dir dafür?", type: "text" },
   { id: "guardianPerson", part: "personalWishes", field: "guardianPerson", question: "Wen wünschst du dir als Vormund für deine minderjährigen Kinder?", help: "Eine Person oder ein Ehepaar. Nur als Wunsch für das Gespräch: Wirksam wird eine Benennung erst in einer formgültigen letztwilligen Verfügung.", type: "text" },

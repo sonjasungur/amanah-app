@@ -14,8 +14,9 @@ import { isTestamentPreparationEnabled } from "@/lib/flags/testament-preparation
 import { PART_LABELS, PREPARATION_STEPS, isStepRelevant, readStepValue, writeStepValue } from "@/lib/testament/steps";
 import { buildLawyerQuestions } from "@/lib/testament/lawyer-questions";
 import { toFaraidInput } from "@/lib/testament/faraid-mapping";
-import { calculateFaraid, isRuleSetDisplayable } from "@/lib/inheritance";
+import { SUNNI_NUCLEAR_FAMILY_V1, calculateFaraid, isRuleSetDisplayable } from "@/lib/inheritance";
 import { FaraidModelResult } from "@/components/testament/faraid-model-result";
+import { BequestEditor, BequestSummary } from "@/components/testament/bequest-editor";
 
 function LockedNotice() {
   return (
@@ -78,6 +79,12 @@ export default function TestamentVorbereitungPage() {
                   {o.label}
                 </Button>
               ))}
+            {step.type === "bequests" && (
+              <BequestEditor
+                bequests={prep.personalWishes.bequests}
+                onChange={(bequests) => save({ ...prep, personalWishes: { ...prep.personalWishes, bequests } })}
+              />
+            )}
             {step.type === "text" && (
               <Input aria-label={step.question} value={readStepValue(prep, step)} onChange={(e) => save(writeStepValue(prep, step, e.target.value))} />
             )}
@@ -119,6 +126,7 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
         <CardTitle className="text-base">1. Persönliche Wünsche</CardTitle>
         <p className="text-sm whitespace-pre-wrap">{prep.personalWishes.wishes || "—"}</p>
         <p className="text-sm whitespace-pre-wrap mt-2">Wohltätig: {prep.personalWishes.charitableWishes || "—"}</p>
+        <BequestSummary bequests={prep.personalWishes.bequests} ruleSet={SUNNI_NUCLEAR_FAMILY_V1} featureEnabled={isTestamentPreparationEnabled()} />
         {prep.personalWishes.executorPerson && <p className="text-sm mt-2">Wunsch Testamentsvollstreckung: {prep.personalWishes.executorPerson}</p>}
         {prep.personalWishes.guardianPerson && <p className="text-sm mt-2">Wunsch Vormund: {prep.personalWishes.guardianPerson}</p>}
         {prep.personalWishes.guardianExcluded && <p className="text-sm mt-2">Nicht als Vormund: {prep.personalWishes.guardianExcluded}</p>}
@@ -127,6 +135,10 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
       <Card data-testid="preparation-islamic-model">
         <CardTitle className="text-base">2. Islamische Erbwünsche (Modellinformation)</CardTitle>
         <p className="text-sm">Wunsch nach islamischer Verteilung: {prep.islamicModel.wantsIslamicDistribution || "—"} · Rechtsschule: {prep.islamicModel.preferredSchool || "—"}</p>
+        {prep.islamicModel.wantsIslamicDistribution === "nein" ? (
+          <p className="text-sm text-muted mt-2" data-testid="faraid-not-wanted">Du hast keine islamische Verteilung gewünscht. Deshalb wird hier keine Modellrechnung gezeigt.</p>
+        ) : (
+          <>
         {"missing" in mapping && <p className="text-sm text-muted mt-2">Für eine Modellrechnung fehlen: {mapping.missing.join(", ")}.</p>}
         {model?.status === "blocked" && <p className="text-sm text-muted mt-2">Sonderfall – keine Modellrechnung: {model.reasons.join(" ")}</p>}
         {model?.status === "calculated" && !isRuleSetDisplayable(model.ruleSet, isTestamentPreparationEnabled()) && (
@@ -135,6 +147,8 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
           </p>
         )}
         {model?.status === "calculated" && <FaraidModelResult model={model} featureEnabled={isTestamentPreparationEnabled()} />}
+          </>
+        )}
       </Card>
 
       <Card>
