@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link2, Mail, MessageCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookmarkButton } from "./bookmark-button";
+import { ReadingSizeToggle } from "./reading-size-toggle";
 
 /**
  * Share a direct link with family and print — no tracking, no account needed. Nothing is sent
@@ -49,6 +50,7 @@ export function ArticleActions({ title, slug }: { title: string; slug?: string }
   return (
     <div className="no-print flex flex-wrap gap-2">
       {slug && <BookmarkButton slug={slug} />}
+      <ReadingSizeToggle />
       <Button type="button" variant="outline" size="sm" onClick={share} data-testid="article-share">
         <Link2 size={16} className="mr-2" aria-hidden /> {copyState === "copied" ? "Link kopiert" : "Link teilen"}
       </Button>
@@ -58,7 +60,7 @@ export function ArticleActions({ title, slug }: { title: string; slug?: string }
       <Button type="button" variant="outline" size="sm" onClick={shareEmail} data-testid="article-share-email">
         <Mail size={16} className="mr-2" aria-hidden /> E-Mail
       </Button>
-      <Button type="button" variant="outline" size="sm" onClick={() => window.print()}>
+      <Button type="button" variant="outline" size="sm" onClick={() => window.print()} data-testid="article-print">
         <Printer size={16} className="mr-2" aria-hidden /> Drucken
       </Button>
       {copyState === "failed" && (

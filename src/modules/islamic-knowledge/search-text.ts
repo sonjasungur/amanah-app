@@ -15,6 +15,9 @@ const VARIANT_GROUPS: string[][] = [
   ["sadaqa", "sadaqah", "sadaka"],
   ["jariya", "jariyah", "dschariya", "cariye"],
   ["salat", "salah", "namaz"],
+  ["bestattung", "beerdigung", "beisetzung"],
+  ["nachlass", "hinterlassenschaft"],
+  ["uberfuhrung", "ruckfuhrung"],
 ];
 
 const FILLER_WORDS = new Set(

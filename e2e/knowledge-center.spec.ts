@@ -23,6 +23,23 @@ test.describe("Islamic knowledge centre", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("search names its result, offers suggestions and clears with Escape", async ({ page }) => {
+    await page.goto("/wissen?q=Gusl");
+    const box = page.getByRole("searchbox", { name: "Wissen durchsuchen" });
+    await expect(page.getByRole("search")).toBeVisible();
+    await expect(page.getByTestId("knowledge-search-count")).toContainText("0 Ergebnisse für „Gusl“");
+    await expect(page.getByTestId("knowledge-search-count")).toContainText("in Vorbereitung");
+    await expect(page.getByTestId("knowledge-search-suggestions")).toHaveCount(0);
+    await box.fill("qqqxyz");
+    await page.getByTestId("knowledge-search-suggestions").getByRole("button", { name: "Kafan" }).click();
+    await expect(box).toHaveValue("Kafan");
+    await expect(page.getByTestId("knowledge-search-prepared")).toBeVisible();
+    await expect(page.locator('a[href^="/wissen/islam/"]')).toHaveCount(0);
+    await box.press("Escape");
+    await expect(box).toHaveValue("");
+    await expect(page.getByTestId("knowledge-search-count")).toHaveCount(0);
+  });
+
   test("a search can be linked, survives a reload and can be cleared", async ({ page }) => {
     await page.goto("/wissen?q=Gusl");
     const box = page.getByRole("searchbox", { name: "Wissen durchsuchen" });
@@ -104,13 +121,51 @@ test.describe("Testament preparation lock", () => {
     await expect(page.getByTestId("testament-preparation-locked")).toBeVisible();
     await expect(page.getByTestId("preparation-summary")).toHaveCount(0);
   });
+
+  test("stored answers do not open the locked area", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem(
+        "amanah-ordner-data",
+        JSON.stringify({
+          state: {
+            assets: [{ id: "a1", type: "bank", description: "Girokonto" }],
+            testamentPreparation: {
+              currentStep: 999,
+              personalWishes: { bequests: [{ id: "b1", kind: "percent", value: 50, beneficiary: "Moschee", beneficiaryKind: "organisation", alsoHeir: "" }] },
+            },
+          },
+          version: 0,
+        }),
+      );
+    });
+    await page.goto("/dashboard/testament/vorbereitung");
+    await expect(page.getByTestId("testament-preparation-locked")).toBeVisible();
+    for (const id of ["preparation-summary", "preparation-assets", "bequest-editor", "bequest-summary", "faraid-model-result", "preparation-progress"]) {
+      await expect(page.getByTestId(id)).toHaveCount(0);
+    }
+    await expect(page.getByText("Moschee")).toHaveCount(0);
+  });
 });
 
 test.describe("Testament hints", () => {
-  test("module shows neutral hints, never an approval", async ({ page }) => {
+  test("the module shows neutral questions and no verdict", async ({ page }) => {
     await page.goto("/dashboard/testament");
-    await expect(page.getByText(/Erste Hinweise:/)).toBeVisible();
-    await expect(page.getByText(/Automatische Stichwort-Hinweise, keine Prüfung/)).toBeVisible();
-    await expect(page.getByText("Grundsätzlich in Ordnung")).toHaveCount(0);
+    await expect(page.getByTestId("inheritance-conversation-points")).toContainText("Fragen für dein Gespräch");
+    await expect(page.getByText(/Erste Hinweise:/)).toHaveCount(0);
+    await expect(page.getByText("Keine Auffälligkeiten erkannt")).toHaveCount(0);
+    await expect(page.getByText("Möglicher Konflikt mit festen Erbanteilen")).toHaveCount(0);
+    await expect(page.getByLabel(/Notizen zur Waṣiyya/)).toBeVisible();
+    await expect(page.getByText("(max. 1/3)")).toHaveCount(0);
+  });
+
+  test("the printed overview cannot pass for a legal document", async ({ page }) => {
+    await page.goto("/dashboard/pdf");
+    await page.emulateMedia({ media: "print" });
+    const view = page.getByTestId("full-print-view");
+    await expect(view).toBeVisible();
+    await expect(view.getByRole("heading", { level: 1 })).toHaveText("Vorsorge-Übersicht");
+    await expect(page.getByTestId("full-print-page-notice")).toContainText("kein Testament, keine Vollmacht, keine Patientenverfügung");
+    await expect(view).not.toContainText("Mein Wille — Komplett");
+    await expect(view).toContainText("keine Patientenverfügung");
   });
 });

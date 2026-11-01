@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ArticleActions } from "@/components/islamic-knowledge/article-actions";
+import { ArticlePrintSource } from "@/components/islamic-knowledge/article-print-source";
 import { SourcesSection } from "@/components/knowledge/sources-section";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import {
@@ -45,9 +46,10 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
   const related = getRelatedPublished(article);
   const currentReviews = article.reviews.filter((r) => r.version === article.version);
   const jsonLd = articleJsonLd(article, getSiteUrl());
+  const reviewedOn = new Date(lastReviewDate(article) ?? "").toLocaleDateString("de-DE");
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
+    <article className="reading-content max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />}
       <nav className="no-print mb-6">
         <Link href="/wissen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 min-h-[44px]">
@@ -60,7 +62,7 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
       <p className="text-lg text-muted mb-6">{article.summary}</p>
       <ArticleActions title={article.title} slug={article.slug} />
 
-      <div className="mt-8 space-y-4 text-foreground leading-relaxed">
+      <div className="mt-8 space-y-4 text-foreground leading-relaxed max-w-prose">
         {article.body.split(/\n\s*\n/).map((p, i) => (
           <p key={i}>{p}</p>
         ))}
@@ -116,7 +118,7 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
             </li>
           ))}
         </ul>
-        <p className="mt-2">Version {article.version} · zuletzt überprüft am {new Date(lastReviewDate(article) ?? "").toLocaleDateString("de-DE")}</p>
+        <p className="mt-2">Version {article.version} · zuletzt überprüft am {reviewedOn}</p>
       </section>
 
       {related.length > 0 && (
@@ -135,6 +137,7 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
       <div className="mt-10">
         <Disclaimer type="islamic" />
       </div>
+      <ArticlePrintSource url={`${getSiteUrl()}/wissen/islam/${article.slug}`} status={`Version ${article.version}, zuletzt überprüft am ${reviewedOn}`} />
     </article>
   );
 }

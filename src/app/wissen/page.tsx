@@ -44,6 +44,14 @@ function enriched(): KnowledgeArticle[] {
 
 const MAX_QUERY_LENGTH = 200;
 
+/** Offered when a search finds nothing. Search words only, no content. */
+const SEARCH_SUGGESTIONS = ["Janazah", "Ghusl", "Kafan", "Waṣiyya", "Sadaqa Jariya"];
+
+function searchCountText(query: string, found: number, prepared: number): string {
+  const articles = `${found} ${found === 1 ? "Ergebnis" : "Ergebnisse"} für „${query.trim()}“`;
+  return prepared > 0 ? `${articles}, ${prepared} ${prepared === 1 ? "Thema" : "Themen"} in Vorbereitung` : articles;
+}
+
 /**
  * Restores a search from the URL once. In its own Suspense boundary so that the rest of the page
  * stays prerendered.
@@ -107,13 +115,19 @@ export default function WissenPage() {
             title="Islamisches Wissen"
             description="Erbe, Tod, Janazah und Vorsorge — dauerhaft kostenlos, ohne Konto und ohne Werbung. Veröffentlicht wird nur, was Quellen- und Gelehrtenprüfung durchlaufen hat."
           />
-          <div className="relative max-w-2xl">
+          <div className="relative max-w-2xl" role="search">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={22} aria-hidden />
             <input
               type="search"
               value={query}
               maxLength={MAX_QUERY_LENGTH}
               onChange={(e) => changeQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") changeQuery("");
+              }}
+              enterKeyHint="search"
+              autoComplete="off"
+              spellCheck={false}
               placeholder="Worüber möchtest du mehr wissen?"
               className="w-full pl-12 pr-14 py-4 rounded-2xl border-2 border-border bg-background text-foreground text-body-lg min-h-[56px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-emerald/30"
               aria-label="Wissen durchsuchen"
@@ -162,9 +176,10 @@ export default function WissenPage() {
           <main className="min-w-0 space-y-12 scroll-mt-28">
             {isSearching ? (
               <section>
-                <h2 className="text-section-title font-bold text-foreground mb-5" role="status" data-testid="knowledge-search-count">
-                  Suchergebnisse ({filtered.length + islamicResults.length})
-                </h2>
+                <h2 className="text-section-title font-bold text-foreground mb-2">Suchergebnisse</h2>
+                <p className="text-muted mb-5" role="status" data-testid="knowledge-search-count">
+                  {searchCountText(query, filtered.length + islamicResults.length, preparedTopics.length)}
+                </p>
                 <div className="space-y-3">
                   {islamicResults.map((a) => (
                     <Link key={a.id} href={`/wissen/islam/${a.slug}`} className="block rounded-xl border border-border bg-card p-4 hover:border-primary/30">
@@ -182,6 +197,18 @@ export default function WissenPage() {
                       ? "Dazu gibt es noch keinen veröffentlichten Artikel. Wir veröffentlichen erst nach fachlicher Prüfung."
                       : "Kein Thema gefunden — Suche anpassen."}
                   </p>
+                )}
+                {filtered.length + islamicResults.length + preparedTopics.length === 0 && (
+                  <div className="text-center" data-testid="knowledge-search-suggestions">
+                    <p className="text-sm text-muted mb-2">Du kannst zum Beispiel suchen nach:</p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {SEARCH_SUGGESTIONS.map((word) => (
+                        <Button key={word} type="button" variant="outline" size="sm" onClick={() => changeQuery(word)}>
+                          {word}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 )}
                 {preparedTopics.length > 0 && (
                   <div className="rounded-xl border border-border bg-card p-4" data-testid="knowledge-search-prepared">
