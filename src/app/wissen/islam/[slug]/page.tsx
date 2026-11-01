@@ -12,8 +12,11 @@ import {
   getPublishedArticles,
   getRelatedPublished,
   lastReviewDate,
+  serializeJsonLd,
   SUNNI_SCHOOL_LABELS,
+  articleJsonLd,
 } from "@/modules/islamic-knowledge";
+import { getSiteUrl } from "@/lib/seo/site-url";
 
 export function generateStaticParams() {
   return getPublishedArticles().map((a) => ({ slug: a.slug }));
@@ -41,9 +44,11 @@ export default async function IslamicKnowledgeArticlePage({ params }: { params: 
   const area = getKnowledgeArea(article.area);
   const related = getRelatedPublished(article);
   const currentReviews = article.reviews.filter((r) => r.version === article.version);
+  const jsonLd = articleJsonLd(article, getSiteUrl());
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />}
       <nav className="no-print mb-6">
         <Link href="/wissen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center gap-1 min-h-[44px]">
           <ArrowLeft size={16} aria-hidden /> Islamisches Wissen

@@ -23,6 +23,7 @@ export {
   searchPreparedTopics,
   searchPublished,
 } from "./publication";
+export { articleJsonLd, serializeJsonLd } from "./structured-data";
 export { matchesQuery, normalizeSearchText, searchTerms } from "./search-text";
 export { SOURCE_CHECKS, blockingSources, getSourceCheck, type SourceCheck } from "./source-verification";
 export { questionsByRole, reviewQuestions, type ReviewQuestion } from "./review-questions";

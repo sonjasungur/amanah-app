@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { getPublicWissenTopics } from "@/lib/knowledge/wissen-topics";
 import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
 import {
@@ -21,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { KnowledgeAreasOverview } from "@/components/islamic-knowledge/knowledge-areas-overview";
 import { matchesQuery, searchPreparedTopics, searchPublished } from "@/modules/islamic-knowledge";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { BRAND } from "@/lib/brand";
 
 /** Everything a reader sees on a topic page, so the search finds what the page says. */
@@ -41,8 +42,33 @@ function enriched(): KnowledgeArticle[] {
   return getPublicWissenTopics().map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }));
 }
 
+const MAX_QUERY_LENGTH = 200;
+
+/**
+ * Restores a search from the URL once. In its own Suspense boundary so that the rest of the page
+ * stays prerendered.
+ */
+function QueryFromUrl({ onQuery }: { onQuery: (query: string) => void }) {
+  const fromUrl = useSearchParams().get("q");
+  const applied = useRef(false);
+  useEffect(() => {
+    if (applied.current) return;
+    applied.current = true;
+    if (fromUrl) onQuery(fromUrl.slice(0, MAX_QUERY_LENGTH));
+  }, [fromUrl, onQuery]);
+  return null;
+}
+
 export default function WissenPage() {
   const [query, setQuery] = useState("");
+  /** Keeps the search on "back" from an article and makes it linkable. Stays in the browser until reloaded or shared. */
+  const changeQuery = (next: string) => {
+    setQuery(next);
+    const url = new URL(window.location.href);
+    if (next.trim()) url.searchParams.set("q", next);
+    else url.searchParams.delete("q");
+    window.history.replaceState(null, "", url);
+  };
   const topics = useMemo(() => enriched(), []);
   const isSearching = query.trim().length > 0;
   const islamicResults = useMemo(() => searchPublished(query), [query]);
@@ -72,6 +98,9 @@ export default function WissenPage() {
 
   return (
     <div className="bg-background min-h-screen pb-28">
+      <Suspense fallback={null}>
+        <QueryFromUrl onQuery={setQuery} />
+      </Suspense>
       <div className="bg-card border-b border-border">
         <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
           <PageHeader
@@ -83,11 +112,23 @@ export default function WissenPage() {
             <input
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              maxLength={MAX_QUERY_LENGTH}
+              onChange={(e) => changeQuery(e.target.value)}
               placeholder="Worüber möchtest du mehr wissen?"
-              className="w-full pl-12 pr-5 py-4 rounded-2xl border-2 border-border bg-background text-foreground text-body-lg min-h-[56px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-emerald/30"
+              className="w-full pl-12 pr-14 py-4 rounded-2xl border-2 border-border bg-background text-foreground text-body-lg min-h-[56px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-emerald/30"
               aria-label="Wissen durchsuchen"
             />
+            {query && (
+              <button
+                type="button"
+                onClick={() => changeQuery("")}
+                aria-label="Suche löschen"
+                data-testid="knowledge-search-clear"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center min-h-[44px] min-w-[44px] rounded-xl text-muted hover:text-primary"
+              >
+                <X size={20} aria-hidden />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -121,7 +162,7 @@ export default function WissenPage() {
           <main className="min-w-0 space-y-12 scroll-mt-28">
             {isSearching ? (
               <section>
-                <h2 className="text-section-title font-bold text-foreground mb-5">
+                <h2 className="text-section-title font-bold text-foreground mb-5" role="status" data-testid="knowledge-search-count">
                   Suchergebnisse ({filtered.length + islamicResults.length})
                 </h2>
                 <div className="space-y-3">

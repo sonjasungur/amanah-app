@@ -23,6 +23,22 @@ test.describe("Islamic knowledge centre", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
+  test("a search can be linked, survives a reload and can be cleared", async ({ page }) => {
+    await page.goto("/wissen?q=Gusl");
+    const box = page.getByRole("searchbox", { name: "Wissen durchsuchen" });
+    await expect(box).toHaveValue("Gusl");
+    await expect(page.getByTestId("knowledge-search-prepared")).toContainText("Ghusl des Verstorbenen");
+    await box.fill("Kafan");
+    await expect(page).toHaveURL(/\?q=Kafan$/);
+    await page.reload();
+    await expect(page.getByRole("searchbox", { name: "Wissen durchsuchen" })).toHaveValue("Kafan");
+    await page.getByTestId("knowledge-search-clear").click();
+    await expect(page).toHaveURL(/\/wissen$/);
+    await expect(page.getByTestId("knowledge-search-count")).toHaveCount(0);
+    await expect(page.locator('a[href^="/wissen/islam/"]')).toHaveCount(0);
+    expect(await hasHorizontalOverflow(page)).toBe(false);
+  });
+
   test("hub shows areas A–E and no unreviewed articles", async ({ page }) => {
     await page.goto("/wissen");
     await expect(page.getByRole("heading", { level: 1, name: "Islamisches Wissen" })).toBeVisible();
