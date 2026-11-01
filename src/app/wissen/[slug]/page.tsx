@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPublicWissenTopics } from "@/lib/knowledge/wissen-topics";
 import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
 import { RichArticleCard, WissenFormCta } from "@/components/knowledge/rich-article-card";
+import { ArticleActions } from "@/components/islamic-knowledge/article-actions";
 import { CHECK_LABELS } from "@/lib/design-tokens";
 import { ArrowLeft } from "lucide-react";
 
@@ -30,6 +31,10 @@ export default async function WissenDetailPage({ params }: { params: Promise<{ s
           <ArrowLeft size={16} aria-hidden /> Zurück zu allen Themen
         </Link>
       </nav>
+
+      <div className="mb-6">
+        <ArticleActions title={article.title} />
+      </div>
 
       <RichArticleCard article={{ ...article, wissenMeta: meta }} />
 

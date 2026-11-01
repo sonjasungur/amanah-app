@@ -20,8 +20,10 @@ export {
   getPublishedArticles,
   getPublishedByArea,
   getRelatedPublished,
+  searchPreparedTopics,
   searchPublished,
 } from "./publication";
+export { matchesQuery, normalizeSearchText, searchTerms } from "./search-text";
 export { SOURCE_CHECKS, blockingSources, getSourceCheck, type SourceCheck } from "./source-verification";
 export { questionsByRole, reviewQuestions, type ReviewQuestion } from "./review-questions";
 export { reviewPackageMarkdown } from "./review-package-markdown";

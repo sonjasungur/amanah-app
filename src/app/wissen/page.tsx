@@ -19,10 +19,23 @@ import { WissenTopicRow } from "@/components/wissen/wissen-topic-row";
 import { useWissenScrollSpy } from "@/components/wissen/use-wissen-scroll-spy";
 import { Button } from "@/components/ui/button";
 import { KnowledgeAreasOverview } from "@/components/islamic-knowledge/knowledge-areas-overview";
-import { searchPublished } from "@/modules/islamic-knowledge";
+import { matchesQuery, searchPreparedTopics, searchPublished } from "@/modules/islamic-knowledge";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Search } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+
+/** Everything a reader sees on a topic page, so the search finds what the page says. */
+function topicSearchTexts(t: KnowledgeArticle): string[] {
+  const d = t.details;
+  return [
+    t.title,
+    t.summary,
+    t.content,
+    ...(d
+      ? [d.whyImportant, d.ifMissing, d.safeStorage, d.tellFamily, ...d.prepareItems, ...(d.todayActions ?? []), ...d.documents, ...(d.legalNotes ?? []), ...d.commonMistakes, ...(d.janazahChecklist ?? [])]
+      : []),
+  ];
+}
 
 function enriched(): KnowledgeArticle[] {
   return getPublicWissenTopics().map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }));
@@ -33,14 +46,12 @@ export default function WissenPage() {
   const topics = useMemo(() => enriched(), []);
   const isSearching = query.trim().length > 0;
   const islamicResults = useMemo(() => searchPublished(query), [query]);
+  const preparedTopics = useMemo(() => (isSearching ? searchPreparedTopics(query) : []), [isSearching, query]);
   const { active, scrollToSection } = useWissenScrollSpy(!isSearching);
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    if (!q) return topics;
-    return topics.filter(
-      (t) => t.title.toLowerCase().includes(q) || t.summary.toLowerCase().includes(q)
-    );
+    if (!query.trim()) return topics;
+    return topics.filter((t) => matchesQuery(query, topicSearchTexts(t)));
   }, [topics, query]);
 
   const entryTopics = topics.filter((t) =>
@@ -125,9 +136,23 @@ export default function WissenPage() {
                   ))}
                 </div>
                 {filtered.length + islamicResults.length === 0 && (
-                  <p className="text-center text-muted py-12 text-body">
-                    Kein Thema gefunden — Suche anpassen.
+                  <p className="text-center text-muted py-8 text-body" data-testid="knowledge-search-empty">
+                    {preparedTopics.length > 0
+                      ? "Dazu gibt es noch keinen veröffentlichten Artikel. Wir veröffentlichen erst nach fachlicher Prüfung."
+                      : "Kein Thema gefunden — Suche anpassen."}
                   </p>
+                )}
+                {preparedTopics.length > 0 && (
+                  <div className="rounded-xl border border-border bg-card p-4" data-testid="knowledge-search-prepared">
+                    <h3 className="font-semibold text-foreground mb-2">Themen in Vorbereitung</h3>
+                    <ul className="space-y-1 text-sm text-muted">
+                      {preparedTopics.map((t) => (
+                        <li key={`${t.areaTitle}-${t.id}`}>
+                          {t.title} <span className="text-xs">({t.areaTitle})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </section>
             ) : topics.length === 0 ? (
