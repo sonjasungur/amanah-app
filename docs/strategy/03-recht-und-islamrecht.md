@@ -1,5 +1,7 @@
 # Phase C – Rechtliche Vorrecherche: Testamentsvorbereitung, islamisches Erbrecht, Umsetzung im deutschen Recht
 
+> **Korrekturen 01.11.2026:** siehe [Doku 32 §4](32-juristische-pruefpunkte.md) (§§ 59a/59b BRAO, BGH IX ZR 89/23, Spannung zu BGH IV ZR 110/21, § 10 IV LPartG, EuErbVO-Text abrufbar).
+
 **Projekt:** Amanah (digitales Vorsorgeportal für muslimische Familien in Deutschland)
 **Stand der Recherche:** 2026-10-30
 **Zweck:** Arbeitsmaterial für die Prüfung durch unabhängige Fachanwältinnen/Fachanwälte für Erbrecht.

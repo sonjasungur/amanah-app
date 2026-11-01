@@ -1,5 +1,7 @@
 # Phase B – Benchmark True Wills (UK) für Amanah (DE)
 
+> **Korrekturen 01.11.2026:** siehe [Doku 32 §4](32-juristische-pruefpunkte.md) (§ 2260 BGB weggefallen, § 1783 BGB, Smartlaw-Maßstab) und [Doku 31 §2](31-produktparitaet-und-markteintritt.md) (Abo-Preisverlauf ungeklärt; Marketingkanäle ergänzt). Die Rohdaten unter `tw_raw/` existieren nicht mehr.
+
 Recherche: 2026-10-30, nur lesend. Kein Konto angelegt, keine Formulare abgeschickt, kein Kontakt.
 Zweck: Funktionsvergleich. Es wurden keine Texte, Designs oder Vorlagen übernommen. Beschreibungen
 sind eigene Worte; einzelne kurze Zitate sind als „Zitat“ markiert.

@@ -40,7 +40,7 @@ Nicht enthalten: Testament-Vorbereitung mit Quoten, Anwaltsprüfung (spätere Pr
 - [ ] Einmalzahlung per gehosteter Checkout-Seite (keine Kartendaten auf eigenem Server)
 - [ ] Webhook mit Signaturprüfung → `Entitlement` (userId, productId, source, grantedAt); Freischaltung nur deterministisch über Webhook, nie über Client
 - [ ] Bestellbutton „zahlungspflichtig bestellen“ (§ 312j BGB) und Pflichtinformationen
-- [ ] Widerruf bei digitalen Inhalten: Erlöschen des Widerrufsrechts nur mit ausdrücklicher Zustimmung und Bestätigung (§ 356 Abs. 5 BGB) → Text und Ablauf **anwaltlich prüfen**
+- [ ] Widerruf bei digitalen Inhalten: Erlöschen des Widerrufsrechts nur mit ausdrücklicher Zustimmung und Bestätigung (§ 356 Abs. 6 BGB, dazu § 356a BGB; Korrektur 01.11., Doku 32) → Text und Ablauf **anwaltlich prüfen**
 - [ ] Rechnung/USt (Rechnungsstellung über Anbieter oder eigenes Tool), Kleinunternehmer-/OSS-Fragen mit Steuerberatung
 - [ ] Erstattungsprozess und Rückbuchung (Entitlement entziehen, Daten bleiben exportierbar)
 - [ ] Testmodus des Anbieters; **keine echten Zahlungen ohne Freigabe**

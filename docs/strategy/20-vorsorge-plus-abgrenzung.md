@@ -47,6 +47,6 @@ Ein Test stellt sicher, dass jeder Dashboard-Bereich genau einer Funktion zugeor
 
 1. Owner-Entscheidung 31.10.: Vorsorge Plus mit **39 € einmalig als Testpreis** vorbereiten, **Bestandsschutz für Altkonten**. Weiter REQUIRES_OWNER: Starttermin (`AMANAH_PLUS_LAUNCH_AT`), endgültiger Preis, Freigabe der Sperren.
 2. `/preise` und Startseite zeigen seit 31.10. Kostenlos + Vorsorge Plus 39 €; jeder Plus-Bereich im Dashboard zeigt einen Hinweis (`plus-area-notice`), ohne Kaufknopf und ohne Sperre. Texte brauchen vor Veröffentlichung die Owner-Freigabe.
-3. REQUIRES_LEGAL_REVIEW: AGB, Widerrufsbelehrung für digitale Inhalte (§ 356 Abs. 5 BGB), Bestellbutton (§ 312j BGB), Rechnung/USt (Doku 17).
+3. REQUIRES_LEGAL_REVIEW: AGB, Widerrufsbelehrung für digitale Inhalte (§ 356 Abs. 6 BGB, dazu § 356a BGB; Korrektur 01.11., Doku 32), Bestellbutton (§ 312j BGB), Rechnung/USt (Doku 17).
 4. Live-Zahlungsanbieter (Doku 21).
 5. Erst dann `AMANAH_BILLING_ENFORCE=true` mit `AMANAH_PLUS_LAUNCH_AT`.
