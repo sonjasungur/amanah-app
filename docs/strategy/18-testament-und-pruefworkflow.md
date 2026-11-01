@@ -1,5 +1,7 @@
 # Testamentsvorbereitung, Erbquoten-Engine und juristischer Prüfworkflow
 
+> Fortgeschrieben 01.11.2026: Prozess und Freigabetore in [Doku 35](35-testamentsprozess-deutschland.md).
+
 Stand: 2026-10-30 · alles technisch umgesetzt und getestet · **alles gesperrt bzw. Sandbox**
 
 ## 1. Testamentsvorbereitung (`/dashboard/testament/vorbereitung`)

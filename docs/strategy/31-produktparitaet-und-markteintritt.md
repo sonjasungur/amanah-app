@@ -96,6 +96,8 @@ Code-Stand `d9b23f9`, gelesen 01.11. Status: **aktiv**, **gesperrt** (fertig hin
 
 ## 4. Fehlende Funktionen und Entwicklungsplan
 
+**Fortschritt 01.11. (lokal, hinter den bestehenden Sperren, Details [Doku 35](35-testamentsprozess-deutschland.md)):** vollständigeres Erbenmodell mit Sperrfällen, Vollstrecker- und Vormund-Wünsche, Anzeige der Modellrechnung (nur mit Flag **und** geprüftem Regelwerk), Vermögensübersicht (aktiv, ohne Rechtsaussage). Erbquoten, Dokumente und Rechtsberatung bleiben gesperrt.
+
 Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter. Alles bleibt hinter den bestehenden Sperren, bis die Freigabe vorliegt.
 
 | Prio | Funktion | Aufwand (PT) | Freigabe vor Aktivierung |

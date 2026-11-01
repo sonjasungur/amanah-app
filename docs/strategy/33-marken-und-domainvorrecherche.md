@@ -4,6 +4,8 @@
 
 **Selbst an der Quelle nachgeprüft:** DE 3020212315921, amanah-bestattungen.de, was-bleibt.de. Die übrigen Angaben stammen aus dem Rechercheabruf vom 01.11. und wurden nicht einzeln wiederholt.
 
+**Owner-Entscheidung 01.11.:** „Amanah“ ist bis zur rechtlichen Klärung nur **interner Arbeitsname**. Neue Namenskandidaten: [Doku 34](34-namenskandidaten.md).
+
 ## Kernbefund
 
 **„Amanah“ ist im Kernumfeld belegt:**
