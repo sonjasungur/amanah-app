@@ -106,7 +106,7 @@ Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter
 | **1** | Vollständiges Erbenmodell (Datenmodell, Oberfläche) | 5–8 | G, A |
 | 1 | Anzeige der Modellrechnung hinter dem Flag | 1–2 | G, A |
 | 1 | Vermögen strukturiert (`AssetEntry`-Oberfläche) | 2–3 | – |
-| 1 | Vermächtnis-Modul (Prozent, Betrag, Gegenstand, Drittel-Warnung) | 3–5 | G, A |
+| 1 | Vermächtniswünsche (Prozent, Betrag, Gegenstand): am 01.11. lokal gebaut und gesperrt; Drittel-Frage nur nach Gelehrtenprüfung, offene Punkte in Doku 36 B | erledigt, Freigabe offen | G, A |
 | 1 | Vollstrecker, Vormund (eine Person bzw. Ehegatten, Ausschluss, Kindbezug) | 2–3 | A |
 | 1 | Geführter Testament-Ablauf mit Eignungsfilter | 4–7 | A |
 | **2** | Abschreibvorlage mit Form-Checkliste | 2–3 | A |
