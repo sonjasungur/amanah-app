@@ -1,6 +1,6 @@
 # Prüfpaket: Ghusl des Verstorbenen
 
-`ik-start-07-ghusl` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-07-ghusl` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 

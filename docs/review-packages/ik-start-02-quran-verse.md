@@ -1,6 +1,6 @@
 # Prüfpaket: Qurʾān 4:11, 4:12 und 4:176 verständlich erklärt
 
-`ik-start-02-quran-verse` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-02-quran-verse` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 

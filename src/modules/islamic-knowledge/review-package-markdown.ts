@@ -2,7 +2,7 @@ import { getSourcesByIds } from "@/lib/knowledge/sources";
 import type { KnowledgeArticleRecord, ReviewKind } from "./types";
 import { SUNNI_SCHOOL_LABELS } from "./types";
 import { STATUS_LABELS, allSourceIds, requiredReviews, structuralIssues } from "./workflow";
-import { getSourceCheck } from "./source-verification";
+import { blockingSources, getSourceCheck, type SourceCheckStatus } from "./source-verification";
 import { questionsByRole } from "./review-questions";
 
 const ROLE_TITLES: Record<ReviewKind, string> = {
@@ -76,5 +76,72 @@ export function reviewPackageMarkdown(article: KnowledgeArticleRecord, generated
       ""
     );
   }
+  return lines.join("\n");
+}
+
+const CHECK_STATUS: Record<SourceCheckStatus, string> = {
+  checked_ok: "technisch abgeglichen",
+  needs_correction: "**blockiert: Korrektur nötig**",
+};
+
+/** One checklist for the scholars across all articles. Questions only; every answer field stays empty. */
+export function scholarChecklistMarkdown(articles: KnowledgeArticleRecord[], generatedAt: string): string {
+  const lines: string[] = [
+    "# Prüfliste für islamische Fachpersonen",
+    "",
+    `Erzeugt ${generatedAt} mit \`npm run export:review-packages\`. **Nicht zur Veröffentlichung, keine Fatwa, nichts vorausgefüllt.**`,
+    "",
+    "Volltext, Quellen und Prüfvermerke stehen im Prüfpaket des jeweiligen Artikels. Es erscheint nichts, bevor Quellen- und Fachprüfung (bei deutschem Recht zusätzlich die juristische Prüfung) für genau diese Version vermerkt sind.",
+    "",
+    "## A. Grundsatzfragen an das Gremium",
+    "",
+    "1. Welche Rechtsschulen soll das Wissenszentrum darstellen, und in welchem Umfang?  ☐ festgelegt · Anmerkung: ____",
+    "2. Wie sollen Punkte mit Meinungsverschiedenheit dargestellt werden, und wann darf von Übereinstimmung gesprochen werden?  ☐ festgelegt · Anmerkung: ____",
+    "3. Welche Werke gelten für die Schulpositionen als Beleg (Titel, Band, Seite)?  ☐ festgelegt · Anmerkung: ____",
+    "4. Wer darf Hadith-Einstufungen und Wiedergaben endgültig bestätigen?  ☐ festgelegt · Anmerkung: ____",
+    "5. Wie werden Angaben wiederholt geprüft, wenn sich ein Text ändert (je Version)?  ☐ festgelegt · Anmerkung: ____",
+    "",
+    "## B. Artikel",
+    "",
+  ];
+  for (const article of articles) {
+    const scholar = questionsByRole(article).scholar;
+    lines.push(`### ${article.title}`, "", `\`${article.id}\` · Version ${article.version} · [Prüfpaket](${article.id}.md)`, "");
+    scholar.forEach((q, i) => lines.push(`${i + 1}. ${q.question}  ☐ ja ☐ nein · Anmerkung: ____`));
+    lines.push("", "Ergebnis: ☐ freigegeben ☐ Änderungen erforderlich ☐ abgelehnt · Name, Qualifikation, Datum: ____", "");
+  }
+  return lines.join("\n");
+}
+
+/** Every source of the articles with its technical check. The check never replaces the human review. */
+export function sourceOverviewMarkdown(articles: KnowledgeArticleRecord[], generatedAt: string): string {
+  const usedBy = new Map<string, string[]>();
+  for (const article of articles) {
+    for (const id of allSourceIds(article)) usedBy.set(id, [...(usedBy.get(id) ?? []), article.id]);
+  }
+  const ids = [...usedBy.keys()].sort();
+  const sources = getSourcesByIds(ids);
+  const known = new Set(sources.map((s) => s.id));
+  const lines: string[] = [
+    "# Quellenübersicht der Startartikel",
+    "",
+    `Erzeugt ${generatedAt} mit \`npm run export:review-packages\`. **Nicht zur Veröffentlichung.**`,
+    "",
+    "„Technisch abgeglichen“ heißt nur: Fundstelle und Wortlaut wurden maschinell verglichen. Das ersetzt nicht die Quellenprüfung durch eine Fachperson.",
+    "",
+    `Quellen gesamt: ${ids.length} · blockiert oder ungeprüft: ${blockingSources(ids).length}`,
+    "",
+    "| Fundstelle | Art | Technischer Abgleich | Befund | Artikel | Fachprüfung (Name, Datum) |",
+    "|---|---|---|---|---|---|",
+  ];
+  for (const s of sources) {
+    const check = getSourceCheck(s.id);
+    const status = check ? CHECK_STATUS[check.status] : "**nicht geprüft**";
+    lines.push(`| ${s.reference} | ${s.type} | ${status} | ${check?.finding ?? "–"} | ${usedBy.get(s.id)!.join(", ")} | ____ |`);
+  }
+  for (const id of ids.filter((x) => !known.has(x))) {
+    lines.push(`| \`${id}\` | unbekannt | **nicht im Quellenregister** | – | ${usedBy.get(id)!.join(", ")} | ____ |`);
+  }
+  lines.push("");
   return lines.join("\n");
 }

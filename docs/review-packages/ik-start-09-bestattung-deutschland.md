@@ -1,6 +1,6 @@
 # Prüfpaket: Islamische Bestattung in Deutschland
 
-`ik-start-09-bestattung-deutschland` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-09-bestattung-deutschland` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 

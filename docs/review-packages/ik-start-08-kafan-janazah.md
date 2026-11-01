@@ -1,6 +1,6 @@
 # Prüfpaket: Kafan und Salāt al-Janāza
 
-`ik-start-08-kafan-janazah` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-08-kafan-janazah` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 

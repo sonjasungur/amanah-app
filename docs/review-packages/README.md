@@ -1,6 +1,6 @@
 # Prüfpakete – zehn Startartikel
 
-Erzeugt 2026-10-31 mit `npm run export:review-packages`. Nicht zur Veröffentlichung.
+Erzeugt 2026-11-01 mit `npm run export:review-packages`. Nicht zur Veröffentlichung.
 
 | Artikel | Prüfungen | Fragen |
 |---|---|---|
@@ -14,3 +14,5 @@ Erzeugt 2026-10-31 mit `npm run export:review-packages`. Nicht zur Veröffentlic
 | [Kafan und Salāt al-Janāza](ik-start-08-kafan-janazah.md) | source, scholar | source: 7 · scholar: 6 |
 | [Islamische Bestattung in Deutschland](ik-start-09-bestattung-deutschland.md) | source, scholar, legal | source: 3 · scholar: 4 · legal: 4 |
 | [Sadaqa Jāriya und wohltätige Vermächtnisse](ik-start-10-sadaqa-jariya.md) | source, scholar, legal | source: 5 · scholar: 4 · legal: 4 |
+
+Übergreifend: [Prüfliste für islamische Fachpersonen](PRUEFLISTE-GELEHRTE.md) · [Quellenübersicht](QUELLENUEBERSICHT.md)

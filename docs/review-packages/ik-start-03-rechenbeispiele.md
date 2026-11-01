@@ -1,6 +1,6 @@
 # Prüfpaket: Erbanteile von Ehepartnern, Kindern und Eltern – mit Rechenbeispielen
 
-`ik-start-03-rechenbeispiele` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-03-rechenbeispiele` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 

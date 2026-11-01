@@ -1,6 +1,6 @@
 # Prüfpaket: Schulden des Verstorbenen
 
-`ik-start-05-schulden` · Version 1 · Entwurf · erstellt 2026-10-31 · **nicht zur Veröffentlichung**
+`ik-start-05-schulden` · Version 1 · Entwurf · erstellt 2026-11-01 · **nicht zur Veröffentlichung**
 
 ## 1. Text (Entwurf)
 
