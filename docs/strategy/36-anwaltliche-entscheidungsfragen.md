@@ -24,14 +24,14 @@ Heute gibt es weder Abschreibvorlage noch Notarentwurf. Gebaut und gesperrt ist 
 
 ### Heute schon aktiv: bitte mit prüfen
 
-Diese Funktionen sind nutzbar. Sie wurden nie anwaltlich geprüft.
+Diese Funktionen sind nutzbar und wurden nie anwaltlich geprüft. Am 01.11. wurde der Stand vorsorglich entschärft; die Änderung ist technisch, keine rechtliche Bewertung. Stand im Code: lokal, noch nicht deployt.
 
-| Nr. | Funktion | Frage | Optionen |
-|---|---|---|---|
-| A8 | **Vermögensübersicht** mit Druck (`asset-print-view.tsx`): Art, Bezeichnung, Ort der Unterlagen, bei Immobilien Kredit und Eigentum. Ohne Beträge, Titel „Kein Testament“. | Unbedenklich als Bestandsaufnahme? | ☐ ja ☐ mit Änderung: ______ ☐ nein |
-| A9 | **Ampel „Erste Hinweise“** im Erbprofil (grün, gelb, rot) und Ausdruck „Testament-Vorbereitung“. Doku 32 führt die familienbezogene Ampel als unsicher. | Darf das so bleiben? | ☐ ja ☐ mit Änderung: ______ ☐ abschalten |
-| A10 | **Bezeichnungen:** „Mein Wille als PDF speichern“, Ausdruck „Mein Wille — Komplett“. Erwecken sie den Eindruck eines Testaments (R-UWG-01)? | Beibehalten? | ☐ ja ☐ ändern: ______ |
-| A11 | **Freitextfeld „Gewünschte Waṣiyya“** samt Ausdruck. Besteht das Risiko, dass ein Ausdruck als Verfügung missverstanden wird? | Maßnahme? | ☐ keine ☐ Hinweis: ______ ☐ entfernen |
+| Nr. | Funktion | Stand nach der Durchsicht | Frage | Optionen |
+|---|---|---|---|---|
+| A8 | **Vermögensübersicht** mit Druck (`asset-print-view.tsx`), eigene Seite `/dashboard/vermoegen`, vorläufig kostenlos | Art, Bezeichnung, Ort der Unterlagen, bei Immobilien Kredit und Eigentum. Ohne Beträge und Notizen, Titel „Kein Testament“ | Unbedenklich als Bestandsaufnahme? | ☐ ja ☐ mit Änderung: ______ ☐ nein |
+| A9 | **Ampel „Erste Hinweise“** (grün, gelb, rot) | **Abgeschaltet** hinter `NEXT_PUBLIC_AMANAH_INHERITANCE_HINTS`. Gründe: Sie bewertet Freitext und Familienangaben automatisch; „Keine Auffälligkeiten erkannt“ kann als Prüfung gelesen werden; die Warnungen enthalten ungeprüfte religiöse Aussagen (etwa „maximal ein Drittel“); die Stichwortsuche liefert Fehlalarme (Sadaqa-Text „Brunnen 2025“ gilt als über 33). Ersatz: neutrale Fragen allein aus den Fakten, ohne Auswertung des Freitexts | Dürfen die neutralen Fragen bleiben? Darf die Ampel in irgendeiner Form zurückkommen? | Fragen: ☐ ja ☐ mit Änderung: ______ ☐ nein. Ampel: ☐ ja, so ☐ mit Änderung: ______ ☐ nie |
+| A10 | **Bezeichnungen des Gesamtausdrucks** | Geändert: „Mein Wille — Komplett“ wurde „Vorsorge-Übersicht“, „Mein Wille als PDF speichern“ wurde „Gesamtübersicht als PDF speichern“. Auf jeder Druckseite steht „kein Testament, keine Vollmacht, keine Patientenverfügung“. Abschnitte heißen z. B. „Wünsche zur medizinischen Behandlung (keine Patientenverfügung)“. Offen bleibt der Produktname „Mein Wille“ selbst (Doku 33, R-UWG-01) | Reicht das? Ist „Mein Wille“ als Produktname für diesen Dienst vertretbar? Ist der Bereichstitel „Testament & Erbe“ vertretbar? | ☐ ja ☐ ändern: ______ |
+| A11 | **Freitextfeld Waṣiyya** samt Ausdruck | Geändert: „Gewünschte Waṣiyya (max. 1/3)“ wurde „Deine Notizen zur Waṣiyya (unverbindlich)“, mit dem Hinweis, dass die Notiz kein Testament ist und nichts regelt. Die Drittel-Angabe ist entfernt: Sie ist eine ungeprüfte religiöse Aussage und zivilrechtlich keine Grenze. Gleiches gilt für Sadaqa Jariya | Besteht weiter das Risiko, dass ein Ausdruck als Verfügung missverstanden wird? | ☐ keine Maßnahme ☐ Hinweis: ______ ☐ entfernen |
 
 ## B. Vermächtniswünsche
 
@@ -39,7 +39,7 @@ Gebaut und gesperrt: Eingabe von Betrag, Prozent oder Gegenstand mit Begünstigt
 
 | Nr. | Entscheidungsfrage | Optionen | Folge im Produkt |
 |---|---|---|---|
-| B1 | **Prozentangaben:** Nach § 2087 Abs. 1 BGB ist die Zuwendung eines Bruchteils des Vermögens als Erbeinsetzung anzusehen. Führt eine Prozent-Eingabe unter dem Titel „Vermächtniswunsch“ in die Irre? | ☐ so lassen ☐ andere Bezeichnung: ______ ☐ Warnhinweis: ______ ☐ Prozent streichen | Der Owner wünscht das Feld ausdrücklich. Es bleibt bis zur Antwort gesperrt. |
+| B1 | **Prozentangaben:** Nach § 2087 Abs. 1 BGB ist die Zuwendung eines Bruchteils des Vermögens als Erbeinsetzung anzusehen. Die Oberfläche nennt die Einträge jetzt „unverbindliche Wünsche zur fachlichen Prüfung“ und erklärt bei jeder Prozentangabe, dass die Einordnung offen ist und ein Anteil als Einsetzung zum Erben gelten kann. Reicht das? | ☐ so lassen ☐ andere Bezeichnung: ______ ☐ Prozent-Eingabe entfernen | Bezeichnung und Feld |
 | B2 | Ist „Vermächtnis“ als Wort für einen unverbindlichen Wunsch zulässig (R-UWG-01)? | ☐ ja ☐ nur „Zuwendungswunsch“ ☐ anders: ______ | Oberflächentext |
 | B3 | Ist die Addition der Prozente und der Hinweis über 100 % noch reine Eingabehilfe? | ☐ ja ☐ nein | Summe bleibt oder entfällt |
 | B4 | Ist die Frage „Würde die Person auch erben?“ zulässig? Sie führt zu einer Frage zum Vorausvermächtnis (§ 2150 BGB). | ☐ ja ☐ nein | Feld bleibt oder entfällt |

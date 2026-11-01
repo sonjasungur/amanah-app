@@ -105,8 +105,8 @@ Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter
 | **0** | Entscheidungen: Name, Fachprüfer, Kanzleimodell (§ 7) | – | Owner, A |
 | **1** | Vollständiges Erbenmodell (Datenmodell, Oberfläche) | 5–8 | G, A |
 | 1 | Anzeige der Modellrechnung hinter dem Flag | 1–2 | G, A |
-| 1 | Vermögen strukturiert (`AssetEntry`-Oberfläche) | 2–3 | – |
-| 1 | Vermächtniswünsche (Prozent, Betrag, Gegenstand): am 01.11. lokal gebaut und gesperrt; Drittel-Frage nur nach Gelehrtenprüfung, offene Punkte in Doku 36 B | erledigt, Freigabe offen | G, A |
+| 1 | Vermögen strukturiert (`AssetEntry`-Oberfläche): am 01.11. lokal fertig, eigene Seite `/dashboard/vermoegen` mit einfachem Ausdruck, vorläufig kostenlos, als getrennte Anlage in der gesperrten Gesprächsunterlage | erledigt | A (Doku 36 A8) |
+| 1 | Vermächtniswünsche (Prozent, Betrag, Gegenstand): am 01.11. lokal gebaut und gesperrt; bearbeitbar, als unverbindliche Wünsche gekennzeichnet; Drittel-Frage nur nach Gelehrtenprüfung, offene Punkte in Doku 36 B | erledigt, Freigabe offen | G, A |
 | 1 | Vollstrecker, Vormund (eine Person bzw. Ehegatten, Ausschluss, Kindbezug) | 2–3 | A |
 | 1 | Geführter Testament-Ablauf mit Eignungsfilter | 4–7 | A |
 | **2** | Abschreibvorlage mit Form-Checkliste | 2–3 | A |
@@ -228,6 +228,8 @@ Zielwerte werden erst nach echten Pilotdaten festgelegt. Heute ist im Code keine
 |---|---|---|
 | Wissenszentrum (Struktur, Suche, Teilen, Prüfworkflow) | fertig | **nein:** 0 von 44 Einträgen veröffentlicht |
 | Zehn Startartikel | Entwürfe mit Prüfpaketen | **nein** |
+| Vermögensübersicht mit Ausdruck | fertig, vorläufig kostenlos | **nein:** Doku 36 A8 |
+| Ampel „Erste Hinweise“ | seit 01.11. lokal abgeschaltet, neutrale Fragen als Ersatz | **nein:** Doku 36 A9 |
 | Vorsorge-Check | fertig | Texte nicht juristisch geprüft |
 | Vorsorge-Ordner, Janazah, Notfallkarte | fertig, verschlüsselt | Religiöse Inhalte nicht geprüft; Einwilligungstext „Entwurf“ |
 | Vorsorge Plus | Sandbox/Stripe-Test | **nein:** AGB, Widerruf, Preis, Sperren offen |

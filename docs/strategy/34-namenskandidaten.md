@@ -63,7 +63,7 @@ Geprüft wurden 15 Vorschläge; die zehn mit der besten Mischung aus Bedeutung, 
 
 **Korrigiert am 01.11.:** Die frühere Empfehlung von Baqiya ist zurückgezogen (§6.1). Es ist keine Markenentscheidung.
 
-1. **Sorgana** als Name ohne gefundene Konflikte und ohne religiöse Festlegung; mit Zusatz wie „Islamisch vorsorgen“ erkennbar.
+1. **Sorgana** als Name ohne gefundene Konflikte und ohne religiöse Festlegung; mit Zusatz wie „Islamisch vorsorgen“ erkennbar. Seit dem 01.11. mit offenem Klanganklang an Urdu „sargana“ (§7.1).
 2. **Zikra** und **Wafiya**, wenn die anwaltliche Prüfung sie trägt.
 3. **Nachwerk** als deutsche Alternative, nur mit Domain-Zusatz.
 
@@ -114,3 +114,40 @@ Baqiya stand bisher auf Platz 1. **Das ziehe ich zurück.** Die Vorrecherche hat
 
 - **Sabila:** EM 019057933 betrifft laut Register Waschmittel und Reinigungsmittel, nicht Kosmetik. Kosmetik führt nur die abgelaufene EM 004720851.
 - **Vorsana:** Die Marke EM 012171741 FORSANA fehlte.
+
+## 7. Weitere Kandidaten und Auswahl für den Zielgruppentest (Stand 01.11.2026)
+
+**Keine Markenentscheidung.** Vorrecherche durch einen Rechercheagenten. Selbst nachgeprüft: DPMA-Trefferzahlen Sorgana, Wahrana, Tadbira, Sorgwerk (je 0), Zikra und Ordana (je 1); RDAP dieser Namen außer Zikra und Ordana; Eintrag „sarGana“ im Rekhta-Wörterbuch; Registereintrag Ordana. Alle übrigen Angaben unten stammen aus dem Rechercheabruf. „0 Treffer“ heißt nicht „frei“.
+
+**Baqiya ist ausgeschlossen (§6.1).**
+
+### 7.1 Neuer Befund zu Sorgana
+
+Der bisher führende Kandidat hat einen Klanganklang, der in §6 fehlte: Urdu und Hindi **„sargana“** heißt „Anführer, Rädelsführer, Bandenchef“ ([Rekhta](https://rekhtadictionary.com/meaning-of-sarGana)). Hindi-Medien verwenden das Wort laut Suchauszug auch für Terrorchefs. Es ist ein Allgemeinwort und kein Szenebegriff, und Sorgana ist nicht dasselbe Wort. Der Fall liegt also anders als bei Baqiya. Sorgana bleibt im Test, braucht aber vor jeder Festlegung Urdu- und Hindi-Sprechende.
+
+Weitere schwächere Anklänge: skandinavisch „sorg“ (Trauer), türkisch „sorgu“ (auch Verhör), „Fata Morgana“. `sorgana.com` ist registriert und laut Abruf auf einem Domain-Marktplatz; `sorgana.de` hat keinen RDAP-Eintrag.
+
+### 7.2 Geprüfte neue Namen
+
+| Name | Herkunft | Warnzeichen | DPMA | .de / .com (RDAP) | Einschätzung |
+|---|---|---|---|---|---|
+| **Wahrana** | Kunstwort aus „wahren, bewahren“ | Anklang an Wahrān (Oran), „Wahrsagen“ | 0 | kein Eintrag / kein Eintrag | in den Test |
+| **Tadbira** | von arabisch und Urdu „tadbīr“ (Planung, Vorkehrung); „Tadbira“ selbst nicht belegt | Slogan „tadbir va omid“ der iranischen Regierung Rohani | 0; IR 1629391 als Inhabertreffer bei „Tadbir“ | kein Eintrag / registriert | in den Test |
+| **Sorgwerk** | deutsch | „Werk“ klingt technisch; für Nicht-Muttersprachler schwerer | 0 | registriert / kein Eintrag | in den Test |
+| Vorsinn | deutsches Kunstwort | Sinn unklar, Reim auf „Wahnsinn“, englisch „for sin“ | 0 | kein Eintrag / kein Eintrag | Reserve |
+| Ruhana | arabischer Vorname („Seele“), Anklang „Ruhe“ | wirkt als Vorname; im Todeskontext testen | 0 | kein Eintrag / geparkt | Reserve |
+| Sorgsinn | deutsches Kunstwort | sperrig | 0 | kein Eintrag / kein Eintrag | zurückgestellt |
+| Vorlass | Archiv-Fachbegriff | wohl wenig unterscheidungskräftig | 0 | registriert / kein Eintrag | zurückgestellt |
+| Ordana | Kunstwort | **DE 3020120087590 „ordana“, Kl. 35, 37, 42, eingetragen**; IT-Dienstleister | 1 | Inhalt nicht lesbar / Sportbekleidung | ausgeschieden |
+| Mirasa | Nähe zu „miras“ (Erbe) | **EM 019342877 MIRAS, Kl. 35, 36, 42, 45**; „Mirasi“ ist eine stigmatisierte Bezeichnung in Südasien | 0, „Miras“ 47 | Verkaufsseite / registriert | ausgeschieden |
+| Sanada | von „sanad“ (Stütze) | „Sanad“ ist ein syrischer Sicherheitsdienst mit EU-Sanktionen (Suchauszug); EM 018905190, Kl. 29, 30, 33 | 2 | registriert / Marktplatz | ausgeschieden |
+| Wadia | „wadīʿa“ (Verwahrung, Einlage) | Finanzbegriff, Firmenname; schon in §2 aussortiert | 5, ausgewertete inaktiv | Verkaufsseite / nicht lesbar | ausgeschieden |
+| Hifzana | von „hifz“ | Erwartung einer Koran-App; Anklang an Hefazat-e-Islam | 0 | kein Eintrag / kein Eintrag | ausgeschieden |
+
+### 7.3 Auswahl für den Test
+
+**Sorgana, Wahrana, Tadbira, Zikra, Sorgwerk.** Die Auswahl mischt bewusst Herkünfte: deutsche Wurzel als Kunstwort, arabische Wurzel, deutsches Wort. Sie ist kein Ranking. Zikra stammt aus §6; Wafiya (Marke „Wafia“ in Kl. 35) und Nachwerk (ähnlich wie Sorgwerk, stärker mit dem Tod verbunden) rücken zurück. Fragebogen: [Doku 37](37-zielgruppenfragebogen-namen.md).
+
+### 7.4 Nicht geprüft
+
+EUIPO, TMview, WIPO (nicht automatisch abfragbar); phonetische Registersuche und arabische Schrift; Handels- und Vereinsregister, Titelschutz, Social-Media-Namen; Domain-Verfügbarkeit beim Registrar; verwertbare Google-Play-Suche. Die Extremismus-Gegenprobe beruht nur auf Websuche, das ADL-Glossar war nicht abrufbar; „nichts gefunden“ ist deshalb ein schwaches Signal. **Keine Bestätigung durch Muttersprachler.**
