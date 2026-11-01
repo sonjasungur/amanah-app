@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { FileText, Printer } from "lucide-react";
 import { PlusGate } from "@/components/billing/plus-gate";
+import { AssetPrintView } from "@/components/print/asset-print-view";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -158,13 +159,14 @@ function FamilienbriefPrintView() {
   );
 }
 
-type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "schulden" | "familienbrief";
+type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "vermoegen" | "schulden" | "familienbrief";
 
 const exportOptions: { id: PrintTarget; title: string; description: string; icon: string }[] = [
   { id: "full", title: "Mein Wille als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
   { id: "notfallkarte", title: "Notfallkarte", description: "Kompakte Karte für den Notfall", icon: "🆘" },
   { id: "janazah", title: "Janazah-Bericht", description: "Islamische Bestattungswünsche", icon: "🕌" },
   { id: "testament", title: "Testament-Vorbereitung", description: "Erbprofil mit ersten Hinweisen (kein Testament)", icon: "📜" },
+  { id: "vermoegen", title: "Vermögensübersicht", description: "Was es gibt und wo die Unterlagen liegen (kein Testament)", icon: "🗂️" },
   { id: "schulden", title: "Schulden & Amanah", description: "Liste offener Rechte und Pflichten", icon: "⚖️" },
   { id: "familienbrief", title: "Familienbrief", description: "Brief an deine Familie", icon: "👨‍👩‍👧‍👦" },
 ];
@@ -174,11 +176,18 @@ export default function PdfPage() {
 
   const handlePrint = (target: PrintTarget) => {
     setActivePrint(target);
-    setTimeout(() => window.print(), 150);
+    setTimeout(() => {
+      // The browser suggests the page title as file name; this one must not read like a will.
+      const title = document.title;
+      if (target === "vermoegen") document.title = "Vermögensübersicht – kein Testament";
+      window.print();
+      document.title = title;
+    }, 150);
   };
 
   return (
     <div className="space-y-8">
+      <div className="space-y-8 no-print">
       <div>
         <h1 className="text-2xl font-bold text-primary mb-2 flex items-center gap-2">
           <FileText size={28} /> PDF & Export
@@ -197,7 +206,7 @@ export default function PdfPage() {
 
       <div className="grid sm:grid-cols-2 gap-4">
         {exportOptions.map((opt) => (
-          <Card key={opt.id} className="hover:border-primary/30 transition-all">
+          <Card key={opt.id} id={`export-${opt.id}`} data-testid={`export-${opt.id}`} className="hover:border-primary/30 transition-all">
             <div className="flex items-start gap-3">
               <span className="text-2xl">{opt.icon}</span>
               <div className="flex-1">
@@ -219,12 +228,14 @@ export default function PdfPage() {
           </Card>
         ))}
       </div>
+      </div>
 
       <div className="print-only">
         {activePrint === "full" && <FullPrintView />}
         {activePrint === "notfallkarte" && <NotfallkartePrintView />}
         {activePrint === "janazah" && <JanazahPrintView />}
         {activePrint === "testament" && <TestamentPrintView />}
+        {activePrint === "vermoegen" && <AssetPrintView />}
         {activePrint === "schulden" && <SchuldenPrintView />}
         {activePrint === "familienbrief" && <FamilienbriefPrintView />}
       </div>

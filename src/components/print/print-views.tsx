@@ -3,6 +3,7 @@
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { AssetPrintEntries, ASSET_PRINT_NOTICE } from "@/components/print/asset-print-view";
 
 interface PrintButtonProps {
   label?: string;
@@ -130,6 +131,11 @@ export function FullPrintView() {
 
       <PrintSection title="13. Familienbrief">
         <p className="text-sm whitespace-pre-wrap">{d.familyMessage.familyLetter || "—"}</p>
+      </PrintSection>
+
+      <PrintSection title="14. Vermögensübersicht (Bestandsaufnahme, kein Testament)">
+        <p className="text-xs text-muted mb-2">{ASSET_PRINT_NOTICE}</p>
+        <AssetPrintEntries assets={d.assets} />
       </PrintSection>
 
       <PrintSection title="15. Disclaimer">

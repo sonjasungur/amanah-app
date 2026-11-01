@@ -13,9 +13,16 @@ test.describe("Janazah wishes persistence", () => {
     await page.goto("/dashboard/janazah");
     await expect(page.getByTestId("janazah-guided-flow")).toBeVisible();
 
-    await page.getByTestId("janazah-fullName").locator("input").fill(JANAZAH_SAMPLE.fullName);
-    await page.getByTestId("janazah-locationRegion").locator("input").fill(JANAZAH_SAMPLE.locationRegion);
-    await page.getByTestId("janazah-trustedContact").locator("input").fill(JANAZAH_SAMPLE.trustedContact);
+    // Input made before hydration never reaches the store: repeat it until it is really stored.
+    await expect(async () => {
+      await page.getByTestId("janazah-fullName").locator("input").fill(JANAZAH_SAMPLE.fullName);
+      await page.getByTestId("janazah-locationRegion").locator("input").fill(JANAZAH_SAMPLE.locationRegion);
+      await page.getByTestId("janazah-trustedContact").locator("input").fill(JANAZAH_SAMPLE.trustedContact);
+      const stored = await page.evaluate(() => JSON.stringify(Object.values({ ...localStorage })));
+      expect(stored).toContain(JANAZAH_SAMPLE.fullName);
+      expect(stored).toContain(JANAZAH_SAMPLE.locationRegion);
+      expect(stored).toContain(JANAZAH_SAMPLE.trustedContact);
+    }).toPass();
 
     await page.getByTestId("janazah-next-button").click();
     await expect(page.getByTestId("janazah-step-progress")).toBeVisible({ timeout: 5000 });

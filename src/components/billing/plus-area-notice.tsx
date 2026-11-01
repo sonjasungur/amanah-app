@@ -14,7 +14,7 @@ export function PlusAreaNotice() {
   if (!feature || feature.tier !== "plus") return null;
   return (
     <aside
-      className="mb-6 rounded-xl border border-border bg-accent-soft p-4 text-sm"
+      className="no-print mb-6 rounded-xl border border-border bg-accent-soft p-4 text-sm"
       data-testid="plus-area-notice"
       data-feature={feature.id}
       aria-label="Hinweis zu Vorsorge Plus"

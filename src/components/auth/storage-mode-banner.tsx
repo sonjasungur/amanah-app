@@ -20,7 +20,7 @@ export function StorageModeBanner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-xl border px-4 py-3 text-sm flex items-start gap-3",
+        "no-print rounded-xl border px-4 py-3 text-sm flex items-start gap-3",
         isApi ? "border-primary/30 bg-primary/5" : "border-warning/40 bg-warning/10",
         className
       )}
