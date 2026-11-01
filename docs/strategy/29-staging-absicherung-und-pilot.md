@@ -17,7 +17,7 @@ Stand 17:45 nach Owner-Auftrag „nächste Freigaben und Prioritäten“:
 | Git | bis `a489618` auf GitHub (18:03, gitleaks ohne Funde); diese Abnahme-Doku lokal committet |
 | Backups | **abgenommen.** Owner-Empfänger `2cfae5a85d555db6`; Backup 17:54 an Owner- und Testschlüssel; automatischer Restore-Test (Testschlüssel) und persönlicher Restore-Test des Owners (Laptop) bestanden; Wiederherstellung auf App-Ebene 18/18 (§2.2a/b) |
 | Automatischer Restore-Test | täglich 04:15 mit dem separaten Testschlüssel; Health verlangt Nachweis ≤ 2 Tage, Owner-Nachweis ≤ 35 Tage |
-| Alarmierung | lokal aktiv; **E-Mail über Brevo SMTP** vorbereitet und lokal mit simuliertem SMTP-Server geprüft (Doku 30); Versand **aus**, ntfy aus |
+| Alarmierung | lokal aktiv; **E-Mail über Brevo SMTP** vorbereitet und lokal mit simuliertem SMTP-Server geprüft (Doku 30); **echter SMTP-Versand nicht abgenommen und zurückgestellt bis zur Domain**; Versand **aus**, ntfy aus |
 | Domain/Caddy | Variante B1 gewählt; Schritte für `staging.amanahordner.de` mit Prüfskript (§4.3); nichts angewandt, nichts gekauft |
 | Sicherheit | 8/8 ohne Befund (§5) |
 | Pilot | nur Owner per Tunnel (§9) |
@@ -186,6 +186,8 @@ Verhalten des Dispatchers:
 
 Owner-Entscheidung 31.10.: **E-Mail statt ntfy**, wie bei Nasib Nikah über Brevo SMTP. ntfy bleibt aus; der Code bleibt im Dispatcher, ist abgeschaltet und weiter getestet. Einrichtung, Tests, fehlende Angaben und Produktionswechsel: **Doku 30**.
 
+**Stand 01.11.:** Echter SMTP-Versand nicht abgenommen, zurückgestellt bis zur endgültigen Domain mit Amanah-Absendern. Externer Versand aus; Alarme stehen bis dahin nur im lokalen Log auf dem Server, ohne Benachrichtigung.
+
 ### 3.3 Grenzen
 
 - Fällt der ganze Server aus, kommt keine Meldung, weil auch Cron nicht läuft. Abhilfe ab Variante B: externer Uptime-Prüfer auf `https://staging.amanahordner.de` (erwartet 401). Das wäre ein neuer Dienst und braucht deine Freigabe.
@@ -292,7 +294,7 @@ Sicherungen liegen in `/opt/amanah-staging/rollback/` (700). Container nicht neu
 ## 8. Offene Owner-Aufgaben
 
 1. ~~Backup-Schlüssel~~ erledigt (31.10.). Laufend: persönlicher Restore-Test mindestens alle 35 Tage (`scripts/owner-backup-key.sh restore-test --paste`); den Health-Alarm gibt es ab Tag 36. Lokale Schlüsseldatei nach Sicherung im Passwortmanager und in der Offline-Kopie mit `shred -u` löschen.
-2. **E-Mail-Alarmierung**: Brevo-Angaben nach Doku 30 §4 eintragen (`mail-set`), dann mit `enable` freigeben.
+2. **E-Mail-Alarmierung**: zurückgestellt bis zur Domain; danach Amanah-Absender eintragen (`mail-set`), mit `enable` freigeben, Eingang bestätigen (Doku 30 §3a).
 3. **Domain** `amanahordner.de` registrieren und DNS nach §4.3 Schritt 2. Danach Freigaben für die Schritte 3–9.
 4. Push-Freigabe für den Abnahme-Doku-Commit nach `a489618`.
 5. Optional:

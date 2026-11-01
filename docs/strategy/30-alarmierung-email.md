@@ -1,9 +1,11 @@
-# Alarmierung per E-Mail (Brevo SMTP) – Staging, vorbereitet (31.10.2026)
+# Alarmierung per E-Mail (Brevo SMTP) – Staging, zurückgestellt (Stand 01.11.2026)
 
-**Stand:**
-- Eingerichtet und lokal getestet; auf Amanah-Staging eingespielt, aber **ausgeschaltet**.
-- Keine echten Zugangsdaten verwendet, keine E-Mail verschickt.
-- ntfy wird nicht verwendet und bleibt aus.
+**Stand 01.11.2026, 13:03:**
+- **Echter SMTP-Versand: NICHT ABGENOMMEN.** Owner-Entscheidung: zurückgestellt, bis die endgültige Domain und passende Amanah-Absenderadressen eingerichtet sind.
+- Externer Versand auf Staging **aus** (`ALERT_EXTERNAL=false`). Eingetragene Zugangsdaten bleiben unverändert auf dem Server.
+- Weiter aktiv: Health-Überwachung, Backup- und Restore-Prüfungen, Alarmprotokollierung im lokalen Log.
+- Keine weitere SMTP-Fehlersuche. ntfy wird nicht verwendet und bleibt aus.
+- Lokale Tests mit simuliertem SMTP-Server sind bestanden (§3). Sie belegen die Logik, nicht die Zustellung über Brevo.
 
 Ersetzt Doku 29 §3.2 (ntfy).
 
@@ -115,7 +117,22 @@ Gesamtsuite 554 bestanden, `tsc` 0 Fehler.
 - Der Mailer überspringt mangels Konfiguration.
 - Health-Job 8/8 ohne Versandversuch.
 
+## 3a. Echter Versuch vom 01.11.2026 (nicht abgenommen)
+
+| Punkt | Befund | Quelle |
+|---|---|---|
+| Einrichtung | Kanal vom Owner eingetragen, Versand 12:56 eingeschaltet | `staging-alert-channel.sh status`, Dateidatum `alert.env` |
+| Lokales Log | 12:56:11 je eine Zeile ALARM und OK für `channel-test`, keine `DELIVERY`-Zeile | `/var/log/amanah-staging-alerts.log` |
+| Zustellung | **nicht belegt.** Eine fehlende `DELIVERY`-Zeile heißt nur, dass der Mailer keinen Fehler gemeldet hat; das Postfach wurde nicht geprüft | – |
+| Abschaltung | 01.11. 13:03 per `disable`; alle anderen Einstellungen per Hash unverändert, Trockenprobe mit getrenntem Zustand ohne Versandversuch | Serverprüfung |
+
+**Für den späteren Neustart (nicht weiter untersucht):** `status` zeigt die Absenderdomain `nasibikah.de`. Die Nasib-Domain wird sonst `nasibnikah.de` geschrieben. Da ohnehin Amanah-Absender vorgesehen sind, ist der Eintrag beim Neustart mit `mail-set` zu ersetzen.
+
+**Neustart:** erst nach Domain und Absender: `mail-set` mit Amanah-Absender und eigenem SMTP-Schlüssel, Freigabe, `enable`, Eingang im Postfach bestätigen. Erst dann gilt der Versand als abgenommen.
+
 ## 4. Angaben für den ersten echten Testversand
+
+> Stand 01.11.: zurückgestellt (§3a). Fehlend sind vor allem die endgültige Domain und die Amanah-Absenderadresse.
 
 | # | Angabe | Wo | Hinweis |
 |---|---|---|---|

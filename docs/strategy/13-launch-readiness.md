@@ -23,7 +23,7 @@ Regel: Ein Start ist erst möglich, wenn **alle Zeilen der Spalte „Start-relev
 | A12 | Docker-Build + Start gegen Postgres | 31.10. nachmittags: Neubau `5c739f7` mit Staging-Argumenten; Verschlüsselung, Login, Export, Löschung, Vorsorgeprozess, Browser (Doku 27 §2) | TESTED | ja |
 | A13 | Domain in Caddy, Origin-Prüfung hinter Proxy | Platzhalter; Staging-Snippet vorbereitet | REQUIRES_OWNER | ja |
 | A14 | Host-Speicherplatz | Owner hat am 31.10. Platz geschaffen; nach den Builds 10 GB frei auf `/` (83 %), meine Prüf-Images +2,4 GB (Abschlussbericht §1) | REQUIRES_OWNER (Dauerlösung, Images) | ja |
-| A15 | Monitoring/Alarmierung | `staging-cron.sh` + `staging-alert.sh` auf dem Server: Ausfall, Platte, Backup, Restore-Nachweis, Zertifikat, Sicherheitscheck; Alarm/Erinnerung/Entwarnung lokal (Doku 29 §3) | TESTED (Server lokal; E-Mail-Kanal Brevo SMTP gegen simulierten SMTP-Server, Doku 30) / REQUIRES_OWNER (Brevo-Login, eigener SMTP-Schlüssel, Absender, Empfänger, Freigabe Testversand) | ja |
+| A15 | Monitoring/Alarmierung | `staging-cron.sh` + `staging-alert.sh` auf dem Server: Ausfall, Platte, Backup, Restore-Nachweis, Zertifikat, Sicherheitscheck; Alarm/Erinnerung/Entwarnung lokal (Doku 29 §3) | TESTED (Server lokal; E-Mail-Logik gegen simulierten SMTP-Server, Doku 30) / **echter SMTP-Versand NICHT abgenommen**, Versand aus, zurückgestellt bis Domain und Amanah-Absender (REQUIRES_OWNER) | ja |
 | A16 | `docker-compose.prod.yml` reicht Schlüssel/Basis-URL/Mail/Billing an die App weiter | Patch am 31.10. angewandt; `docker compose config` mit Dummy-Werten: alle Variablen gesetzt, ohne Datenschlüssel Abbruch vor dem Start (Doku 22 §8) | TESTED (Konfiguration; nicht deployt) | ja |
 
 ## B. Datenschutz
