@@ -54,6 +54,19 @@ export function bequestFromDraft(draft: BequestDraft, id: string): BequestWish {
   return wish;
 }
 
+/** Back into the form, written the way a person in Germany would type it. */
+export function bequestToDraft(b: BequestWish): BequestDraft {
+  return {
+    kind: b.kind,
+    value: b.value === undefined ? "" : b.value.toLocaleString("de-DE", { maximumFractionDigits: 20 }),
+    item: b.item ?? "",
+    beneficiary: b.beneficiary,
+    beneficiaryKind: b.beneficiaryKind,
+    alsoHeir: b.alsoHeir,
+    note: b.note ?? "",
+  };
+}
+
 export function describeBequestSubject(b: BequestWish): string {
   if (b.kind === "item") return b.item ?? "";
   const n = (b.value ?? 0).toLocaleString("de-DE");

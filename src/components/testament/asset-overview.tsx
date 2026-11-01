@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import type { AssetEntry } from "@/lib/domain/types";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { ASSET_TYPES, MORTGAGE, OWNERSHIP } from "@/lib/testament/asset-labels";
+import { ASSET_PRINT_TITLE, ASSET_TYPES, MORTGAGE, OWNERSHIP } from "@/lib/testament/asset-labels";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
+
+/** The browser suggests the page title as file name; this one must not read like a will. */
+function printInventory() {
+  const title = document.title;
+  document.title = ASSET_PRINT_TITLE;
+  window.print();
+  document.title = title;
+}
 
 /** Where things are, so the family can find them. No amounts required, no legal assessment. */
 export function AssetOverview() {
@@ -131,9 +138,9 @@ export function AssetOverview() {
         </ul>
       )}
       {assets.length > 0 && (
-        <Link href="/dashboard/pdf#export-vermoegen" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline min-h-[44px]" data-testid="asset-print-link">
-          <Printer size={16} aria-hidden /> Übersicht als PDF speichern oder drucken
-        </Link>
+        <Button type="button" variant="outline" className="mt-3" onClick={printInventory} data-testid="asset-print">
+          <Printer size={16} className="mr-2" aria-hidden /> Als PDF speichern oder drucken
+        </Button>
       )}
     </Card>
   );

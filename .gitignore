@@ -20,6 +20,7 @@
 
 # next.js
 /.next/
+/.next-e2e-flags/
 /out/
 
 # production

@@ -1,5 +1,7 @@
 import type { AssetEntry } from "@/lib/domain/types";
 
+export const ASSET_PRINT_TITLE = "Vermögensübersicht – kein Testament";
+
 export const ASSET_TYPES: Record<AssetEntry["type"], string> = {
   bank: "Bankkonto",
   real_estate: "Immobilie",

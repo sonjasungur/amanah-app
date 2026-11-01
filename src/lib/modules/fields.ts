@@ -93,8 +93,18 @@ export const inheritanceFields: FieldConfig[] = [
   { key: "foreignProperty", label: "Auslandseigentum?", type: "boolean" },
   { key: "approximateWealth", label: "Vermögen grob", type: "text" },
   { key: "debts", label: "Schulden", type: "textarea" },
-  { key: "desiredWasiyyah", label: "Gewünschte Waṣiyya (max. 1/3)", type: "textarea" },
-  { key: "desiredSadaqaJariya", label: "Gewünschte Sadaqa Jariya", type: "textarea" },
+  {
+    key: "desiredWasiyyah",
+    label: "Deine Notizen zur Waṣiyya (unverbindlich)",
+    type: "textarea",
+    helpText: "Nur eine Notiz für das Gespräch. Sie ist kein Testament und regelt nichts. Ob und wie sich ein Wunsch umsetzen lässt, klären Gelehrte und Anwalt oder Notar.",
+  },
+  {
+    key: "desiredSadaqaJariya",
+    label: "Deine Notizen zur Sadaqa Jariya (unverbindlich)",
+    type: "textarea",
+    helpText: "Nur eine Notiz für das Gespräch. Damit wird nichts bestimmt oder angewiesen.",
+  },
   { key: "openQuestionsImam", label: "Offene Fragen an Imam", type: "textarea" },
   { key: "openQuestionsLawyer", label: "Offene Fragen an Anwalt/Notar", type: "textarea" },
 ];

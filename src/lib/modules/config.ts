@@ -62,7 +62,7 @@ export const moduleConfigs: ModuleConfig[] = [
   {
     id: "testament",
     title: "Testament & Erbe",
-    description: "Farāʾiḍ, Waṣiyya und erste Hinweise.",
+    description: "Erbprofil, Notizen und Fragen für das Gespräch.",
     icon: "📜",
     path: "/dashboard/testament",
     criticalFields: ["inheritanceProfile.married", "inheritanceProfile.sons", "inheritanceProfile.daughters"],

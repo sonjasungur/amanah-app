@@ -59,6 +59,15 @@ export const PLAN_FEATURES: PlanFeature[] = [
     note: "Übersicht und Notfallkarte; Ansicht aller Bereiche als Vorschau.",
   },
   {
+    id: "asset_overview",
+    title: "Vermögensübersicht mit einfachem Ausdruck",
+    tier: "free",
+    routes: ["/dashboard/vermoegen"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Vorläufig kostenlos (Owner 01.11.2026). Reine Bestandsaufnahme, kein Testament.",
+  },
+  {
     id: "persistent_folder",
     title: "Dauerhaft nutzbarer persönlicher Vorsorgeordner (verschlüsselt im Konto)",
     tier: "plus",

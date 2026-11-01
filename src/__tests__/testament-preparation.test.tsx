@@ -104,7 +104,7 @@ describe("preparation page", () => {
     answer("Nein"); // executor wish
     expect(screen.getByTestId("preparation-summary")).toBeTruthy();
     expect(screen.getByTestId("bequest-summary").textContent).toContain("1.000 € für Aisha");
-    expect(screen.getByTestId("bequest-summary").textContent).toContain("nur als Wunsch");
+    expect(screen.getByTestId("bequest-summary").textContent).toContain("Unverbindliche Wünsche zur fachlichen Prüfung");
     expect(screen.getByTestId("preparation-lawyer-questions").textContent).toContain("§§ 2147 ff., 2065 BGB");
     expect(screen.getByTestId("faraid-locked").textContent).toContain("gesperrt");
     expect(screen.getByTestId("preparation-lawyer-questions").textContent).toContain("§§ 2303 ff. BGB");

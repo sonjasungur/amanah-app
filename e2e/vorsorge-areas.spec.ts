@@ -28,7 +28,7 @@ test.describe("Meine Vorsorge: Dokumente und Personen", () => {
   });
 
   test("assets can be listed without amounts and survive a reload", async ({ page }) => {
-    await page.goto("/dashboard/testament");
+    await page.goto("/dashboard/vermoegen");
     const overview = page.getByTestId("asset-overview");
     // A selection made before hydration is lost: repeat it until the form has reacted.
     await expect(async () => {
@@ -46,7 +46,7 @@ test.describe("Meine Vorsorge: Dokumente und Personen", () => {
   });
 
   test("assets can be edited and printed as an inventory, not as a will", async ({ page }) => {
-    await page.goto("/dashboard/testament");
+    await page.goto("/dashboard/vermoegen");
     const overview = page.getByTestId("asset-overview");
     await expect(async () => {
       await overview.getByLabel("Bezeichnung").fill("Girokonto");
@@ -59,14 +59,12 @@ test.describe("Meine Vorsorge: Dokumente und Personen", () => {
     await expect(page.getByTestId("asset-list")).toContainText("Tagesgeld");
     await expect(page.getByTestId("asset-list").locator("li")).toHaveCount(1);
 
-    await page.getByTestId("asset-print-link").click();
-    await expect(page).toHaveURL(/\/dashboard\/pdf#export-vermoegen$/);
     await page.evaluate(() => {
       window.print = () => {
         (window as unknown as { printedTitle: string }).printedTitle = document.title;
       };
     });
-    await page.getByTestId("export-vermoegen").getByRole("button").click();
+    await page.getByTestId("asset-print").click();
     await expect.poll(() => page.evaluate(() => (window as unknown as { printedTitle?: string }).printedTitle)).toBe("Vermögensübersicht – kein Testament");
 
     await page.emulateMedia({ media: "print" });
@@ -74,9 +72,7 @@ test.describe("Meine Vorsorge: Dokumente und Personen", () => {
     await expect(view).toBeVisible();
     await expect(view).toContainText("Kein Testament");
     await expect(view).toContainText("Tagesgeld");
-    await expect(page.getByTestId("export-vermoegen")).toBeHidden();
-    await expect(page.getByRole("heading", { name: "PDF & Export" })).toBeHidden();
-    await expect(page.getByTestId("plus-area-notice")).toBeHidden();
+    await expect(page.getByTestId("asset-overview")).toBeHidden();
     await expect(page.getByText("Lokaler Demo-Modus")).toBeHidden();
   });
 });

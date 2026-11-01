@@ -1,16 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import type { BequestWish, YesNoUnsure } from "@/lib/domain/types";
 import { isRuleSetDisplayable, type RuleSet } from "@/lib/inheritance";
-import { BEQUEST_KINDS, bequestFromDraft, describeBequestSubject, percentTotal, validateBequestDraft, type BequestDraft } from "@/lib/testament/bequests";
+import { BEQUEST_KINDS, bequestFromDraft, bequestToDraft, describeBequestSubject, percentTotal, validateBequestDraft, type BequestDraft } from "@/lib/testament/bequests";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 
 const EMPTY_DRAFT: BequestDraft = { kind: "amount", value: "", item: "", beneficiary: "", beneficiaryKind: "person", alsoHeir: "", note: "" };
 
 const ALSO_HEIR: Record<Exclude<YesNoUnsure, "">, string> = { ja: "Ja", nein: "Nein", unsicher: "Weiß ich nicht" };
+
+export const BEQUEST_NON_BINDING = "Unverbindliche Wünsche zur fachlichen Prüfung. Damit wird nichts vermacht, und über die rechtliche Wirksamkeit sagt das nichts aus.";
+
+/** § 2087 BGB: a share of the estate can count as appointing an heir. Open in Doku 36, B1. */
+export const BEQUEST_PERCENT_NOTE = "Prozentangaben: Rechtlich noch nicht eingeordnet. Ein Anteil am Vermögen kann als Einsetzung zum Erben gelten, auch wenn du ihn als Wunsch für eine Person meinst (§ 2087 BGB). Bitte mit Anwalt oder Notar klären, auch worauf sich die Prozente beziehen.";
+
+function PercentNote() {
+  return <p className="text-sm text-muted mt-2" data-testid="bequest-percent-note">{BEQUEST_PERCENT_NOTE}</p>;
+}
 
 function PercentTotal({ bequests }: { bequests: BequestWish[] }) {
   if (!bequests.some((b) => b.kind === "percent")) return null;
@@ -37,19 +46,42 @@ function BequestLine({ bequest }: { bequest: BequestWish }) {
 /** Structured wishes for the conversation. It validates the input and never assesses a wish legally. */
 export function BequestEditor({ bequests, onChange }: { bequests: BequestWish[]; onChange: (next: BequestWish[]) => void }) {
   const [draft, setDraft] = useState<BequestDraft>(EMPTY_DRAFT);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const set = (patch: Partial<BequestDraft>) => setDraft((d) => ({ ...d, ...patch }));
 
-  const add = () => {
+  const reset = () => {
+    setDraft(EMPTY_DRAFT);
+    setEditingId(null);
+    setErrors([]);
+  };
+
+  const submit = () => {
     const found = validateBequestDraft(draft);
     setErrors(found);
     if (found.length) return;
-    onChange([...bequests, bequestFromDraft(draft, crypto.randomUUID())]);
-    setDraft(EMPTY_DRAFT);
+    onChange(
+      editingId
+        ? bequests.map((b) => (b.id === editingId ? bequestFromDraft(draft, editingId) : b))
+        : [...bequests, bequestFromDraft(draft, crypto.randomUUID())],
+    );
+    reset();
+  };
+
+  const edit = (bequest: BequestWish) => {
+    setDraft(bequestToDraft(bequest));
+    setEditingId(bequest.id);
+    setErrors([]);
+  };
+
+  const remove = (id: string) => {
+    onChange(bequests.filter((x) => x.id !== id));
+    if (editingId === id) reset();
   };
 
   return (
     <div data-testid="bequest-editor">
+      <p className="text-sm font-medium mb-3" data-testid="bequest-non-binding">{BEQUEST_NON_BINDING}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="bequest-kind">Was?</Label>
@@ -102,22 +134,33 @@ export function BequestEditor({ bequests, onChange }: { bequests: BequestWish[];
           {errors.map((e) => <li key={e}>{e}</li>)}
         </ul>
       )}
-      <Button type="button" variant="outline" className="mt-3" onClick={add} data-testid="bequest-add">
-        <Plus size={16} className="mr-2" aria-hidden /> Wunsch hinzufügen
-      </Button>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button type="button" variant="outline" onClick={submit} data-testid="bequest-add">
+          {editingId ? "Änderung speichern" : <><Plus size={16} className="mr-2" aria-hidden /> Wunsch hinzufügen</>}
+        </Button>
+        {editingId && (
+          <Button type="button" variant="outline" onClick={reset} data-testid="bequest-edit-cancel">Abbrechen</Button>
+        )}
+      </div>
       {bequests.length > 0 && (
         <ul className="mt-4 divide-y divide-border" data-testid="bequest-list">
           {bequests.map((b) => (
             <li key={b.id} className="flex items-start justify-between gap-3 py-2 text-sm">
               <p className="min-w-0"><BequestLine bequest={b} /></p>
-              <Button type="button" variant="outline" size="sm" aria-label={`Wunsch für ${b.beneficiary} entfernen`} onClick={() => onChange(bequests.filter((x) => x.id !== b.id))}>
-                <Trash2 size={14} aria-hidden />
-              </Button>
+              <div className="flex shrink-0 gap-2">
+                <Button type="button" variant="outline" size="sm" aria-label={`Wunsch für ${b.beneficiary} bearbeiten`} onClick={() => edit(b)}>
+                  <Pencil size={14} aria-hidden />
+                </Button>
+                <Button type="button" variant="outline" size="sm" aria-label={`Wunsch für ${b.beneficiary} entfernen`} onClick={() => remove(b.id)}>
+                  <Trash2 size={14} aria-hidden />
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
       )}
       <PercentTotal bequests={bequests} />
+      {(draft.kind === "percent" || bequests.some((b) => b.kind === "percent")) && <PercentNote />}
     </div>
   );
 }
@@ -131,13 +174,14 @@ export function BequestSummary({ bequests, ruleSet, featureEnabled }: { bequests
   const scholarQuestions = isRuleSetDisplayable(ruleSet, featureEnabled);
   return (
     <div className="mt-3" data-testid="bequest-summary">
-      <p className="text-sm font-medium">Vermächtniswünsche (nur als Wunsch, nichts davon ist damit geregelt)</p>
+      <p className="text-sm font-medium">Unverbindliche Wünsche zur fachlichen Prüfung (nichts davon ist damit geregelt)</p>
       <ul className="list-disc pl-5 text-sm space-y-1 mt-1">
         {bequests.map((b) => (
           <li key={b.id}><BequestLine bequest={b} /></li>
         ))}
       </ul>
       <PercentTotal bequests={bequests} />
+      {bequests.some((b) => b.kind === "percent") && <PercentNote />}
       {scholarQuestions && (percentTotal(bequests) > 100 / 3 || bequests.some((b) => b.alsoHeir === "ja")) && (
         <p className="text-sm text-muted mt-2" data-testid="bequest-scholar-questions">
           Für das Gespräch mit einer Gelehrten oder einem Gelehrten: Wie sind Wünsche über einem Drittel oder zugunsten von Erben zu bewerten?

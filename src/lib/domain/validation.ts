@@ -184,6 +184,22 @@ export const INHERITANCE_HINT_LABELS: Record<InheritanceTrafficLight, string> = 
 export const INHERITANCE_HINT_NOTICE =
   "Automatische Stichwort-Hinweise, keine Prüfung. Sie ersetzen weder Gelehrte noch Anwalt/Notar und sind kein Testament.";
 
+export const INHERITANCE_POINTS_NOTICE =
+  "Diese Fragen ergeben sich nur aus deinen Angaben. Sie bewerten deine Wünsche nicht. Ob etwas religiös oder rechtlich passt, klären Gelehrte und Anwalt oder Notar.";
+
+/** Neutral questions for the conversation. Facts only: never reads the free text, never gives a verdict. */
+export function inheritanceConversationPoints(profile: InheritanceProfile): string[] {
+  const points: string[] = [];
+  if (profile.desiredWasiyyah.trim()) points.push("Du hast Notizen zur Waṣiyya festgehalten: Wie lassen sie sich religiös und rechtlich einordnen?");
+  if (profile.desiredSadaqaJariya.trim()) points.push("Du hast Notizen zur Sadaqa Jariya festgehalten: Was davon lässt sich aus dem Nachlass umsetzen?");
+  if (profile.stepchildren) points.push("Du hast Stiefkinder angegeben: Wie sollen sie in deiner Planung berücksichtigt werden?");
+  if (profile.fosterChildren) points.push("Du hast Pflegekinder angegeben: Wie sollen sie in deiner Planung berücksichtigt werden?");
+  if (profile.nonMuslimRelatives) points.push("Du hast nicht-muslimische Angehörige angegeben: Was gilt für sie?");
+  if (profile.foreignProperty) points.push("Du hast Auslandseigentum angegeben: Welches Recht gilt dafür?");
+  if (profile.companyGmbH) points.push("Du hast eine Firma oder GmbH angegeben: Was ist für die Nachfolge zu regeln?");
+  return points;
+}
+
 export function checkInheritance(profile: InheritanceProfile): InheritanceCheckResult {
   const warnings: string[] = [];
   const recommendations: string[] = [];

@@ -17,6 +17,7 @@ import { toFaraidInput } from "@/lib/testament/faraid-mapping";
 import { SUNNI_NUCLEAR_FAMILY_V1, calculateFaraid, isRuleSetDisplayable } from "@/lib/inheritance";
 import { FaraidModelResult } from "@/components/testament/faraid-model-result";
 import { BequestEditor, BequestSummary } from "@/components/testament/bequest-editor";
+import { AssetPrintEntries, ASSET_PRINT_NOTICE } from "@/components/print/asset-print-view";
 
 function LockedNotice() {
   return (
@@ -179,6 +180,17 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
         <CardTitle className="text-base">5. Rechtlich freigegebene Dokumente</CardTitle>
         <p className="text-sm text-muted">Keine. Mein Wille erstellt keine Testamente und prüft keine Rechtslage.</p>
       </Card>
+
+      {/* Printed on its own page: what exists is not connected to who should receive it. */}
+      <section className="print-page space-y-3 border-t-2 border-dashed border-border pt-4" data-testid="preparation-assets" aria-labelledby="preparation-assets-heading">
+        <h2 id="preparation-assets-heading" className="text-lg font-bold text-primary">Anlage: Vermögensbestandsaufnahme (keine Verfügung)</h2>
+        <p className="text-sm font-semibold">Diese Anlage gehört nicht zu deinen Wünschen oben. Sie ist kein Testament und bestimmt nichts darüber, wer etwas erhält.</p>
+        <p className="text-xs text-muted">{ASSET_PRINT_NOTICE}</p>
+        <AssetPrintEntries assets={data.assets} />
+        <Link href="/dashboard/vermoegen" className="no-print text-sm text-primary font-semibold hover:underline inline-flex items-center min-h-[44px]">
+          Bestandsaufnahme ändern
+        </Link>
+      </section>
 
       <div className="flex flex-wrap gap-2 no-print">
         <Button type="button" variant="outline" size="sm" onClick={onEdit}>Antworten ändern</Button>

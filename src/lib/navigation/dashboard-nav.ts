@@ -35,6 +35,7 @@ export const moreNavItems: NavItem[] = [
   { href: "/dashboard/vollmacht", label: "Vorsorgevollmacht" },
   { href: "/dashboard/janazah", label: "Janazah-Wünsche" },
   { href: "/dashboard/testament", label: "Testament & Erbe" },
+  { href: "/dashboard/vermoegen", label: "Vermögensübersicht" },
   { href: "/dashboard/schulden-amanah", label: "Schulden & Amanah" },
   { href: "/dashboard/digitaler-nachlass", label: "Digitaler Nachlass" },
   { href: "/dashboard/sadaqa-jariya", label: "Sadaqa Jariya" },

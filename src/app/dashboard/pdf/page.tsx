@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { checkInheritance } from "@/lib/utils/progress";
-import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE } from "@/lib/domain/validation";
+import { INHERITANCE_HINT_LABELS, INHERITANCE_HINT_NOTICE, INHERITANCE_POINTS_NOTICE, inheritanceConversationPoints } from "@/lib/domain/validation";
+import { isInheritanceHintsEnabled } from "@/lib/flags/inheritance-hints";
 import {
+  FULL_PRINT_TITLE,
   FullPrintView,
   PrintField,
   PrintSection,
@@ -14,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { FileText, Printer } from "lucide-react";
 import { PlusGate } from "@/components/billing/plus-gate";
-import { AssetPrintView } from "@/components/print/asset-print-view";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -53,7 +55,7 @@ function JanazahPrintView() {
     <div className="print-view max-w-2xl mx-auto p-8 bg-white">
       <div className="text-center mb-8 border-b-2 border-primary pb-4">
         <h1 className="text-2xl font-bold text-primary">Janazah-Wünsche</h1>
-        <p className="text-sm text-muted">Mein Wille — {new Date().toLocaleDateString("de-DE")}</p>
+        <p className="text-sm text-muted">Persönliche Wünsche, keine rechtliche Verfügung — {new Date().toLocaleDateString("de-DE")}</p>
       </div>
       <PrintSection title="Grundwünsche">
         <PrintField label="Islamische Bestattung" value={d.janazahWishes.islamicBurialDesired} />
@@ -80,15 +82,21 @@ function JanazahPrintView() {
 
 function TestamentPrintView() {
   const d = useAmanahStore();
-  const result = checkInheritance(d.inheritanceProfile);
+  // The verdict stays off until a lawyer has approved it; the sheet then only lists neutral questions.
+  const result = isInheritanceHintsEnabled() ? checkInheritance(d.inheritanceProfile) : null;
+  const points = inheritanceConversationPoints(d.inheritanceProfile);
 
   return (
     <div className="print-view max-w-2xl mx-auto p-8 bg-white">
       <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Testament-Vorbereitung</h1>
-        <p className="text-sm text-muted">Erste Hinweise: {INHERITANCE_HINT_LABELS[result.status]} — {new Date().toLocaleDateString("de-DE")}</p>
+        <h1 className="text-2xl font-bold text-primary">Erbprofil für das Gespräch</h1>
+        <p className="text-sm font-semibold">Kein Testament</p>
+        <p className="text-sm text-muted">
+          {result && <>Erste Hinweise: {INHERITANCE_HINT_LABELS[result.status]} — </>}
+          {new Date().toLocaleDateString("de-DE")}
+        </p>
         <p className="text-xs text-muted mt-2">
-          {INHERITANCE_HINT_NOTICE} Dieses Blatt ist kein Testament: Ein eigenhändiges Testament muss vollständig
+          {result ? INHERITANCE_HINT_NOTICE : INHERITANCE_POINTS_NOTICE} Dieses Blatt ist kein Testament: Ein eigenhändiges Testament muss vollständig
           handschriftlich geschrieben und unterschrieben sein (§ 2247 BGB).
         </p>
       </div>
@@ -100,16 +108,21 @@ function TestamentPrintView() {
         <PrintField label="Stiefkinder" value={d.inheritanceProfile.stepchildren} />
         <PrintField label="Nicht-muslimische Angehörige" value={d.inheritanceProfile.nonMuslimRelatives} />
       </PrintSection>
-      <PrintSection title="Waṣiyya & Sadaqa">
-        <PrintField label="Gewünschte Waṣiyya" value={d.inheritanceProfile.desiredWasiyyah} />
-        <PrintField label="Sadaqa Jariya" value={d.inheritanceProfile.desiredSadaqaJariya} />
+      <PrintSection title="Notizen zu Waṣiyya und Sadaqa (unverbindlich)">
+        <PrintField label="Notizen zur Waṣiyya" value={d.inheritanceProfile.desiredWasiyyah} />
+        <PrintField label="Notizen zur Sadaqa Jariya" value={d.inheritanceProfile.desiredSadaqaJariya} />
       </PrintSection>
-      {result.warnings.length > 0 && (
+      {points.length > 0 && (
+        <PrintSection title="Fragen für das Gespräch">
+          {points.map((p) => <p key={p} className="text-sm mb-1">• {p}</p>)}
+        </PrintSection>
+      )}
+      {result && result.warnings.length > 0 && (
         <PrintSection title="Warnungen">
           {result.warnings.map((w, i) => <p key={i} className="text-sm mb-1">• {w}</p>)}
         </PrintSection>
       )}
-      {result.recommendations.length > 0 && (
+      {result && result.recommendations.length > 0 && (
         <PrintSection title="Empfehlungen">
           {result.recommendations.map((r, i) => <p key={i} className="text-sm mb-1">• {r}</p>)}
         </PrintSection>
@@ -159,14 +172,13 @@ function FamilienbriefPrintView() {
   );
 }
 
-type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "vermoegen" | "schulden" | "familienbrief";
+type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "schulden" | "familienbrief";
 
 const exportOptions: { id: PrintTarget; title: string; description: string; icon: string }[] = [
-  { id: "full", title: "Mein Wille als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
+  { id: "full", title: "Gesamtübersicht als PDF speichern", description: "Alle deine Angaben zum Nachschlagen. Kein Testament, keine Vollmacht, keine Patientenverfügung.", icon: "📁" },
   { id: "notfallkarte", title: "Notfallkarte", description: "Kompakte Karte für den Notfall", icon: "🆘" },
   { id: "janazah", title: "Janazah-Bericht", description: "Islamische Bestattungswünsche", icon: "🕌" },
-  { id: "testament", title: "Testament-Vorbereitung", description: "Erbprofil mit ersten Hinweisen (kein Testament)", icon: "📜" },
-  { id: "vermoegen", title: "Vermögensübersicht", description: "Was es gibt und wo die Unterlagen liegen (kein Testament)", icon: "🗂️" },
+  { id: "testament", title: "Erbprofil für das Gespräch", description: "Deine Angaben und Fragen für Gelehrte, Anwalt oder Notar (kein Testament)", icon: "📜" },
   { id: "schulden", title: "Schulden & Amanah", description: "Liste offener Rechte und Pflichten", icon: "⚖️" },
   { id: "familienbrief", title: "Familienbrief", description: "Brief an deine Familie", icon: "👨‍👩‍👧‍👦" },
 ];
@@ -179,7 +191,7 @@ export default function PdfPage() {
     setTimeout(() => {
       // The browser suggests the page title as file name; this one must not read like a will.
       const title = document.title;
-      if (target === "vermoegen") document.title = "Vermögensübersicht – kein Testament";
+      if (target === "full") document.title = FULL_PRINT_TITLE;
       window.print();
       document.title = title;
     }, 150);
@@ -227,6 +239,18 @@ export default function PdfPage() {
             </div>
           </Card>
         ))}
+        <Card id="export-vermoegen" data-testid="export-vermoegen" className="hover:border-primary/30 transition-all">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">🗂️</span>
+            <div className="flex-1">
+              <CardTitle className="text-base">Vermögensübersicht</CardTitle>
+              <p className="text-sm text-muted mb-4">Was es gibt und wo die Unterlagen liegen (kein Testament). Der einfache Ausdruck liegt direkt dort und gehört nicht zu Vorsorge Plus.</p>
+              <Link href="/dashboard/vermoegen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center min-h-[44px]" data-testid="export-vermoegen-link">
+                Zur Vermögensübersicht
+              </Link>
+            </div>
+          </div>
+        </Card>
       </div>
       </div>
 
@@ -235,7 +259,6 @@ export default function PdfPage() {
         {activePrint === "notfallkarte" && <NotfallkartePrintView />}
         {activePrint === "janazah" && <JanazahPrintView />}
         {activePrint === "testament" && <TestamentPrintView />}
-        {activePrint === "vermoegen" && <AssetPrintView />}
         {activePrint === "schulden" && <SchuldenPrintView />}
         {activePrint === "familienbrief" && <FamilienbriefPrintView />}
       </div>

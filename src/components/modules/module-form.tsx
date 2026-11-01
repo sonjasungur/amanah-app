@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Input, Textarea, Label, Select } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n/context";
 
@@ -23,14 +24,19 @@ interface ModuleFormProps {
 
 export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
   const { t } = useI18n();
+  const formId = useId();
   return (
     <div className="space-y-5">
-      {fields.map((field) => (
+      {fields.map((field) => {
+        const id = `${formId}-${field.key}`;
+        const control = { id, "aria-describedby": field.helpText ? `${id}-help` : undefined };
+        return (
         <div key={field.key} data-testid={field.testId}>
-          <Label>{field.label}</Label>
-          {field.helpText && <p className="text-xs text-muted mb-1.5">{field.helpText}</p>}
+          <Label htmlFor={id}>{field.label}</Label>
+          {field.helpText && <p id={`${id}-help`} className="text-xs text-muted mb-1.5">{field.helpText}</p>}
           {field.type === "textarea" && (
             <Textarea
+              {...control}
               value={(values[field.key] as string) || ""}
               onChange={(e) => onChange(field.key, e.target.value)}
               placeholder={field.placeholder}
@@ -38,6 +44,7 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
           )}
           {field.type === "text" && (
             <Input
+              {...control}
               value={(values[field.key] as string) || ""}
               onChange={(e) => onChange(field.key, e.target.value)}
               placeholder={field.placeholder}
@@ -45,6 +52,7 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
           )}
           {field.type === "number" && (
             <Input
+              {...control}
               type="number"
               min={0}
               value={(values[field.key] as number) || 0}
@@ -52,7 +60,7 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
             />
           )}
           {field.type === "select" && (
-            <Select value={(values[field.key] as string) || ""} onChange={(e) => onChange(field.key, e.target.value)}>
+            <Select {...control} value={(values[field.key] as string) || ""} onChange={(e) => onChange(field.key, e.target.value)}>
               <option value="">{t("common.pleaseSelect")}</option>
               {field.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -61,6 +69,7 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
           )}
           {field.type === "boolean" && (
             <Select
+              {...control}
               value={values[field.key] === null ? "" : values[field.key] ? "yes" : "no"}
               onChange={(e) => onChange(field.key, e.target.value === "" ? null : e.target.value === "yes")}
             >
@@ -70,7 +79,8 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
             </Select>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
