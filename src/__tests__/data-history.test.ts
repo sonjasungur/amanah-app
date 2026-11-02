@@ -1,8 +1,10 @@
+import { readFileSync } from "fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as historyGET, DELETE as historyDELETE } from "@/app/api/amanah/history/route";
 import { POST as restorePOST } from "@/app/api/amanah/history/[id]/restore/route";
+import { DELETE as versionDELETE, GET as versionGET } from "@/app/api/amanah/history/[id]/route";
 import { DELETE as amanahDELETE, GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
-import { DELETE as accountDELETE, } from "@/app/api/account/route";
+import { DELETE as accountDELETE } from "@/app/api/account/route";
 import { GET as exportGET } from "@/app/api/account/export/route";
 import { DELETE as consentDELETE } from "@/app/api/consent/route";
 import { defaultAmanahData } from "@/lib/domain/defaults";
@@ -17,15 +19,19 @@ import {
   HISTORY_MAX_VERSIONS,
   HISTORY_RETENTION_DAYS,
   HISTORY_SECTIONS,
+  isDataHistoryEnabled,
   openVersion,
   overlayVersions,
   planHistoryWrite,
+  retentionCutoff,
   sealVersion,
   stripSecretFields,
   versionsToPrune,
   type VersionPayload,
 } from "@/lib/server/data-history";
+import { runHistoryPurge } from "@/lib/server/history-purge";
 import { clearOutbox } from "@/lib/server/mailer";
+import type { ServerRepository } from "@/lib/server/repository/types";
 import { getMemoryStore } from "@/lib/server/memory-store";
 import { getServerRepository, resetServerRepository } from "@/lib/server/repository";
 import { browserRequest, registerVerified } from "./session-helpers";
@@ -288,6 +294,113 @@ describe("deleting and retention", () => {
   });
 });
 
+describe("viewing and deleting single versions", () => {
+  beforeEach(() => vi.stubEnv("AMANAH_DATA_HISTORY", "true"));
+  const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
+  const get = (id: string, cookie?: string) => versionGET(browserRequest(`${BASE}/api/amanah/history/${id}`, {}, cookie), ctx(id));
+  const del = (id: string, cookie?: string) => versionDELETE(browserRequest(`${BASE}/api/amanah/history/${id}`, { method: "DELETE" }, cookie), ctx(id));
+
+  async function twoVersions() {
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    await put(withLetter("eins"), cookie);
+    await put(withLetter("zwei"), cookie);
+    age();
+    await put(withLetter("drei"), cookie);
+    return { cookie, versions: await list(cookie) };
+  }
+
+  it("shows the content to the owner, uncached", async () => {
+    const { cookie, versions } = await twoVersions();
+    const res = await get(versions[1].id, cookie);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    const { version } = await res.json();
+    expect(version.prior.familyMessage.familyLetter).toBe("eins");
+  });
+
+  it("refuses others and anonymous requests for reading and deleting, and changes nothing", async () => {
+    const { cookie, versions } = await twoVersions();
+    const other = await registerVerified(BASE, newEmail(), "testpass1");
+    expect((await get(versions[0].id, other)).status).toBe(404);
+    expect((await get(versions[0].id)).status).toBe(401);
+    expect((await del(versions[0].id, other)).status).toBe(404);
+    expect((await del(versions[0].id)).status).toBe(401);
+    const foreign = new Request(`${BASE}/api/amanah/history/${versions[0].id}`, { method: "DELETE", headers: { Origin: "https://evil.example", "Sec-Fetch-Site": "cross-site", Cookie: cookie } });
+    expect((await versionDELETE(foreign, ctx(versions[0].id))).status).toBe(403);
+    expect(await list(cookie)).toHaveLength(2);
+  });
+
+  it("deleting removes this and all older versions, and keeps newer ones and the folder", async () => {
+    const { cookie, versions } = await twoVersions();
+    expect((await del(versions[1].id, cookie)).status).toBe(200);
+    expect((await list(cookie)).map((v) => v.id)).toEqual([versions[0].id]);
+    expect((await del(versions[0].id, cookie)).status).toBe(200);
+    expect(await list(cookie)).toEqual([]);
+    expect(await letter(cookie)).toBe("drei");
+  });
+
+  it("is hidden while switched off, but deleting still works", async () => {
+    const { cookie, versions } = await twoVersions();
+    vi.stubEnv("AMANAH_DATA_HISTORY", "false");
+    expect((await get(versions[0].id, cookie)).status).toBe(404);
+    expect((await del(versions[0].id, cookie)).status).toBe(200);
+  });
+});
+
+describe("automatic removal", () => {
+  beforeEach(() => vi.stubEnv("AMANAH_DATA_HISTORY", "true"));
+
+  it("removes expired versions of every account, also when nobody writes or the history is off, and logs only a count", async () => {
+    const a = await registerVerified(BASE, newEmail(), "testpass1");
+    const b = await registerVerified(BASE, newEmail(), "testpass1");
+    for (const cookie of [a, b]) {
+      await put(withLetter("Persönlich alt"), cookie);
+      await put(withLetter("neu"), cookie);
+    }
+    age((HISTORY_RETENTION_DAYS + 1) * 864e5);
+    await put(withLetter("neuer"), a);
+    vi.stubEnv("AMANAH_DATA_HISTORY", "false");
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    expect(await runHistoryPurge()).toBeGreaterThanOrEqual(1);
+    expect(getMemoryStore().dataVersions.every((v) => v.createdAt >= retentionCutoff())).toBe(true);
+    expect(info.mock.calls[0][0]).toMatch(/^\[history\] removed \d+ expired versions$/);
+    info.mockRestore();
+  });
+
+  it("a failure is logged without details and does not throw", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const broken = { purgeExpiredDataVersions: () => Promise.reject(new Error("secret detail")) } as unknown as ServerRepository;
+    expect(await runHistoryPurge(broken)).toBe(0);
+    expect(JSON.stringify(error.mock.calls)).not.toContain("secret detail");
+    error.mockRestore();
+  });
+
+  it("an expired version is not exported, even before the daily run", async () => {
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    await put(withLetter("Alt und abgelaufen"), cookie);
+    await put(withLetter("neu"), cookie);
+    age((HISTORY_RETENTION_DAYS + 1) * 864e5);
+    const exported = await (await exportGET(browserRequest(`${BASE}/api/account/export`, {}, cookie))).json();
+    expect(exported.dataHistory).toEqual([]);
+    expect(JSON.stringify(exported)).not.toContain("Alt und abgelaufen");
+    expect(getMemoryStore().dataVersions).toHaveLength(0);
+  });
+
+  it("the script uses the same retention", () => {
+    expect(readFileSync("scripts/purge-data-history.mjs", "utf8")).toContain(`RETENTION_DAYS = ${HISTORY_RETENTION_DAYS}`);
+    expect(HISTORY_RETENTION_DAYS).toBe(90);
+    expect(HISTORY_MAX_VERSIONS).toBe(50);
+    expect(HISTORY_MAX_BYTES).toBe(5 * 1024 * 1024);
+  });
+
+  it("nothing switches the history on by default", () => {
+    expect(isDataHistoryEnabled({} as NodeJS.ProcessEnv)).toBe(false);
+    for (const file of [".env.example", ".env.production.example", ".env.staging.example"]) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/AMANAH_DATA_HISTORY\s*=\s*true/);
+    }
+  });
+});
+
 describe("rules", () => {
   const row = (seq: number, over: Partial<{ createdAt: Date; sizeBytes: number }> = {}) => ({ id: `v${seq}`, seq, changeType: "save", sizeBytes: 10, createdAt: new Date(), ...over });
 
@@ -297,7 +410,16 @@ describe("rules", () => {
     const many = Array.from({ length: HISTORY_MAX_VERSIONS + 2 }, (_, i) => row(i + 1));
     expect(versionsToPrune(many, now)).toEqual(["v1", "v2"]);
     expect(versionsToPrune([row(1, { sizeBytes: HISTORY_MAX_BYTES }), row(2, { sizeBytes: 10 })], now)).toEqual(["v1"]);
-    expect(versionsToPrune([row(1, { sizeBytes: HISTORY_MAX_BYTES * 2 })], now)).toEqual([]);
+  });
+
+  it("does not keep a change above the account limit at all", () => {
+    const before = normalizeData({});
+    const after = withLetter("x");
+    const huge = "ä".repeat(HISTORY_MAX_BYTES);
+    expect(planHistoryWrite({ before: withLetter(huge), after, latest: null, changeType: "save" }).kind).toBe("none");
+    const payload: VersionPayload = { kind: "amanah-data-version", seq: 1, sections: ["assets"], prior: { assets: [] } };
+    expect(planHistoryWrite({ before: withLetter(huge), after, latest: { row: row(1), payload }, changeType: "save" }).kind).toBe("none");
+    expect(planHistoryWrite({ before, after, latest: null, changeType: "save" }).kind).toBe("create");
   });
 
   it("removes fields that look like secrets, at any depth", () => {

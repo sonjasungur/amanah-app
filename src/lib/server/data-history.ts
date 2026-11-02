@@ -107,22 +107,21 @@ export function planHistoryWrite(input: {
   if (sections.length === 0) return { kind: "none" };
   const prior = Object.fromEntries(sections.map((s) => [s, stripSecretFields(input.before[s])]));
   const seq = (input.latest?.row.seq ?? 0) + 1;
+  const tooLarge = (payload: VersionPayload) => Buffer.byteLength(JSON.stringify(payload), "utf8") > HISTORY_MAX_BYTES;
   const latest = input.latest;
   const withinWindow = latest && (input.now ?? new Date()).getTime() - latest.row.createdAt.getTime() < HISTORY_COALESCE_MS;
   if (input.changeType === "save" && withinWindow && latest.payload && latest.row.changeType === "save") {
     // The oldest value within the window is the one worth going back to.
-    return {
-      kind: "extend",
-      id: latest.row.id,
-      seq: latest.row.seq,
-      payload: {
-        ...latest.payload,
-        sections: [...new Set([...latest.payload.sections, ...sections])],
-        prior: { ...prior, ...latest.payload.prior },
-      },
+    const payload = {
+      ...latest.payload,
+      sections: [...new Set([...latest.payload.sections, ...sections])],
+      prior: { ...prior, ...latest.payload.prior },
     };
+    return tooLarge(payload) ? { kind: "none" } : { kind: "extend", id: latest.row.id, seq: latest.row.seq, payload };
   }
-  return { kind: "create", seq, payload: { kind: VERSION_KIND, seq, sections, prior } };
+  const payload: VersionPayload = { kind: VERSION_KIND, seq, sections, prior };
+  // A single change above the account limit is not kept: the limit holds without exception.
+  return tooLarge(payload) ? { kind: "none" } : { kind: "create", seq, payload };
 }
 
 /** Oldest first: everything past its retention, then whatever exceeds the count or size limit. */

@@ -145,7 +145,15 @@ export class PostgresRepository implements ServerRepository {
     return rows.map((row) => toDataVersion(row, openVersionOrNull(row.data, userId, row.seq)?.sections ?? []));
   }
 
+  async getDataVersion(userId: string, versionId: string): Promise<RepositoryDataVersionExport | null> {
+    const row = await prisma.amanahDataVersion.findFirst({ where: { id: versionId, userId, createdAt: { gte: retentionCutoff() } } });
+    if (!row) return null;
+    const payload = openVersionOrNull(row.data, userId, row.seq);
+    return { ...toDataVersion(row, payload?.sections ?? []), prior: payload?.prior ?? null };
+  }
+
   async exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]> {
+    await prisma.amanahDataVersion.deleteMany({ where: { userId, createdAt: { lt: retentionCutoff() } } });
     const rows = await prisma.amanahDataVersion.findMany({ where: { userId }, orderBy: { seq: "desc" } });
     return rows.map((row) => {
       const payload = openVersionOrNull(row.data, userId, row.seq);
@@ -170,6 +178,13 @@ export class PostgresRepository implements ServerRepository {
 
   async deleteDataVersions(userId: string): Promise<void> {
     await prisma.amanahDataVersion.deleteMany({ where: { userId } });
+  }
+
+  async deleteDataVersionsUpTo(userId: string, versionId: string): Promise<boolean> {
+    const target = await prisma.amanahDataVersion.findFirst({ where: { id: versionId, userId } });
+    if (!target) return false;
+    await prisma.amanahDataVersion.deleteMany({ where: { userId, seq: { lte: target.seq } } });
+    return true;
   }
 
   async purgeExpiredDataVersions(now: Date = new Date()): Promise<number> {

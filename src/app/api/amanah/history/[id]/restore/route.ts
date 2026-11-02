@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const data = await repo.restoreDataVersion(userId, id, scope === "free_sections" ? FREE_ACCOUNT_SECTIONS : undefined);
     if (!data) return NextResponse.json({ error: "Version nicht gefunden." }, { status: 404 });
-    return NextResponse.json({ data, lastSaved: data.lastSaved });
+    return NextResponse.json({ data, lastSaved: data.lastSaved, writeScope: scope });
   } catch {
     return NextResponse.json({ error: "Wiederherstellung fehlgeschlagen. Es wurde nichts geändert." }, { status: 500 });
   }

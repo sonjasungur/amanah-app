@@ -95,6 +95,50 @@ describe.runIf(runIntegration)("Postgres: change history", () => {
     await repo.deleteUser(user.id);
   });
 
+  it("large synthetic folders save, encrypt and read back; the size report shows classes, not content", async () => {
+    vi.stubEnv("AMANAH_DATA_KEYS", `a:${keyA}`);
+    const { repo, user } = await setup();
+    const huge = "ä".repeat(5 * 1024 * 1024);
+    const started = Date.now();
+    await repo.saveAmanahData(user.id, withLetter(huge));
+    expect((await repo.getAmanahData(user.id))?.familyMessage.familyLetter).toBe(huge);
+    expect(Date.now() - started).toBeLessThan(5000);
+    const report = spawnSync("node", ["scripts/report-folder-sizes.mjs"], { cwd: process.cwd(), env: process.env, encoding: "utf8" });
+    expect(report.status).toBe(0);
+    expect(JSON.parse(report.stdout)["über 2,67 MiB"]).toBeGreaterThanOrEqual(1);
+    expect(report.stdout).not.toContain(user.id);
+    await repo.deleteUser(user.id);
+  });
+
+  it("an expired version is removed by the export and not returned", async () => {
+    vi.stubEnv("AMANAH_DATA_HISTORY", "true");
+    const { repo, user, age } = await setup();
+    await repo.saveAmanahData(user.id, withLetter("alt"));
+    await repo.saveAmanahData(user.id, withLetter("neu"));
+    await age((HISTORY_RETENTION_DAYS + 1) * 24 * 60 * 60 * 1000);
+    expect(await repo.exportDataVersions(user.id)).toEqual([]);
+    expect(await repo.getDataVersion(user.id, "missing")).toBeNull();
+    await repo.deleteUser(user.id);
+  });
+
+  it("a single version is reachable and deletable by its owner only; deleting takes older ones along", async () => {
+    vi.stubEnv("AMANAH_DATA_HISTORY", "true");
+    const a = await setup();
+    const b = await setup();
+    await a.repo.saveAmanahData(a.user.id, withLetter("eins"));
+    await a.repo.saveAmanahData(a.user.id, withLetter("zwei"));
+    await a.age();
+    await a.repo.saveAmanahData(a.user.id, withLetter("drei"));
+    const [newer, older] = await a.repo.listDataVersions(a.user.id);
+    expect(await b.repo.getDataVersion(b.user.id, older.id)).toBeNull();
+    expect(await b.repo.deleteDataVersionsUpTo(b.user.id, older.id)).toBe(false);
+    expect(((await a.repo.getDataVersion(a.user.id, older.id))?.prior?.familyMessage as { familyLetter: string }).familyLetter).toBe("eins");
+    expect(await a.repo.deleteDataVersionsUpTo(a.user.id, newer.id)).toBe(true);
+    expect(await a.repo.listDataVersions(a.user.id)).toEqual([]);
+    await a.repo.deleteUser(a.user.id);
+    await b.repo.deleteUser(b.user.id);
+  });
+
   it("is removed with the folder, the account, the history delete and at the end of retention", async () => {
     vi.stubEnv("AMANAH_DATA_HISTORY", "true");
     const { repo, prisma, user, age } = await setup();
@@ -127,7 +171,7 @@ describe.runIf(runIntegration)("Postgres: change history", () => {
   it("key rotation covers the history; the purge script is a dry run by default", async () => {
     vi.stubEnv("AMANAH_DATA_HISTORY", "true");
     vi.stubEnv("AMANAH_DATA_KEYS", `a:${keyA}`);
-    const { repo, user, age } = await setup();
+    const { repo, prisma, user, age } = await setup();
     await repo.saveAmanahData(user.id, withLetter("alt"));
     await repo.saveAmanahData(user.id, withLetter("neu"));
     const run = (script: string, args: string[], env: Record<string, string>) =>
@@ -146,11 +190,11 @@ describe.runIf(runIntegration)("Postgres: change history", () => {
     const dry = run("scripts/purge-data-history.mjs", [], {});
     expect(dry.status).toBe(0);
     expect(dry.stdout).toContain("dry run");
-    const count = () => repo.exportDataVersions(user.id);
-    expect((await count()).length).toBeGreaterThan(0);
+    const count = () => prisma.amanahDataVersion.count({ where: { userId: user.id } });
+    expect(await count()).toBeGreaterThan(0);
     expect(run("scripts/purge-data-history.mjs", ["--apply"], {}).status).toBe(2);
     expect(run("scripts/purge-data-history.mjs", ["--apply"], { AMANAH_PURGE_CONFIRM: "yes" }).status).toBe(0);
-    expect(await count()).toEqual([]);
+    expect(await count()).toBe(0);
     await repo.deleteUser(user.id);
   });
 });

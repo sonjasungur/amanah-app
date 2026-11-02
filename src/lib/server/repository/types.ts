@@ -69,11 +69,15 @@ export interface ServerRepository {
   deleteAmanahData(userId: string): Promise<void>;
   /** Newest first, without expired versions. */
   listDataVersions(userId: string): Promise<RepositoryDataVersion[]>;
-  /** Everything stored in the history, for the account export (Art. 15/20 DSGVO). */
+  /** One version with its content, for its owner. Null when it is not this user's or expired. */
+  getDataVersion(userId: string, versionId: string): Promise<RepositoryDataVersionExport | null>;
+  /** What the history holds, for the account export (Art. 15/20 DSGVO). Expired versions are deleted first. */
   exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]>;
   /** Only ever called on an explicit user action. Null when the version is not this user's or expired. */
   restoreDataVersion(userId: string, versionId: string, allowedSections?: readonly string[]): Promise<AmanahOrdnerData | null>;
   deleteDataVersions(userId: string): Promise<void>;
+  /** Deletes this version and all older ones, so that the remaining ones stay complete. False when it is not this user's. */
+  deleteDataVersionsUpTo(userId: string, versionId: string): Promise<boolean>;
   /** Removes versions past their retention for all accounts; returns how many. */
   purgeExpiredDataVersions(now?: Date): Promise<number>;
   /** Removes the user, all sessions and all stored data (Art. 17 DSGVO). */

@@ -155,7 +155,17 @@ export class MemoryRepository implements ServerRepository {
       .map((v) => toDataVersion(v, openVersionOrNull(v.data, userId, v.seq)?.sections ?? []));
   }
 
+  async getDataVersion(userId: string, versionId: string): Promise<RepositoryDataVersionExport | null> {
+    const version = this.versionsOf(userId).find((v) => v.id === versionId && v.createdAt >= retentionCutoff());
+    if (!version) return null;
+    const payload = openVersionOrNull(version.data, userId, version.seq);
+    return { ...toDataVersion(version, payload?.sections ?? []), prior: payload?.prior ?? null };
+  }
+
   async exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]> {
+    const store = getMemoryStore();
+    const cutoff = retentionCutoff();
+    store.dataVersions = store.dataVersions.filter((v) => v.userId !== userId || v.createdAt >= cutoff);
     return this.versionsOf(userId).map((v) => {
       const payload = openVersionOrNull(v.data, userId, v.seq);
       return { ...toDataVersion(v, payload?.sections ?? []), prior: payload?.prior ?? null };
@@ -176,6 +186,14 @@ export class MemoryRepository implements ServerRepository {
   async deleteDataVersions(userId: string): Promise<void> {
     const store = getMemoryStore();
     store.dataVersions = store.dataVersions.filter((v) => v.userId !== userId);
+  }
+
+  async deleteDataVersionsUpTo(userId: string, versionId: string): Promise<boolean> {
+    const store = getMemoryStore();
+    const target = this.versionsOf(userId).find((v) => v.id === versionId);
+    if (!target) return false;
+    store.dataVersions = store.dataVersions.filter((v) => v.userId !== userId || v.seq > target.seq);
+    return true;
   }
 
   async purgeExpiredDataVersions(now: Date = new Date()): Promise<number> {

@@ -9,7 +9,10 @@ export async function GET(request: Request) {
   const userId = await getAuthenticatedUserId(request);
   if (!userId) return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
   const versions = await getServerRepository().listDataVersions(userId);
-  return NextResponse.json({ versions, retentionDays: HISTORY_RETENTION_DAYS, maxVersions: HISTORY_MAX_VERSIONS });
+  return NextResponse.json(
+    { versions, retentionDays: HISTORY_RETENTION_DAYS, maxVersions: HISTORY_MAX_VERSIONS },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 /** Deleting stays possible when the history is switched off: data that exists must remain deletable. */
