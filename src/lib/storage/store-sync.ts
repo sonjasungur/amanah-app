@@ -36,14 +36,17 @@ export function hasMeaningfulLocalData(data: AmanahOrdnerData): boolean {
 
 /**
  * Without Plus access the account holds only the free sections, so what exists only in this
- * browser must not be overwritten on login. The account still wins for the free sections.
+ * browser must not be overwritten on login. For free sections the account wins, unless it holds
+ * nothing yet: then the entries from this browser count and are uploaded.
  */
 export function keepLocalOnlySections(remote: AmanahOrdnerData, local: AmanahOrdnerData): AmanahOrdnerData {
   const merged: Record<string, unknown> = { ...remote };
+  const account = remote as unknown as Record<string, unknown>;
   const defaults = defaultAmanahData as unknown as Record<string, unknown>;
+  const isDefault = (key: string, value: unknown) => JSON.stringify(value) === JSON.stringify(defaults[key]);
   for (const [key, value] of Object.entries(local)) {
-    if ((FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key) || key === "lastSaved") continue;
-    if (JSON.stringify(value) !== JSON.stringify(defaults[key])) merged[key] = value;
+    if (key === "lastSaved" || isDefault(key, value)) continue;
+    if (!(FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key) || isDefault(key, account[key])) merged[key] = value;
   }
   return merged as unknown as AmanahOrdnerData;
 }
@@ -95,13 +98,16 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
   useAmanahStore.setState({ saveStatus: "saving", saveError: null });
 
   try {
-    const localData = pickDataFields(useAmanahStore.getState());
     const remoteData = await loadAmanahData();
+    // Read only now: what was entered while the account data was loading must not be lost.
+    const localData = pickDataFields(useAmanahStore.getState());
     const remoteHasData = hasMeaningfulLocalData(remoteData);
     const localHasData = hasMeaningfulLocalData(localData);
 
     if (remoteHasData && lastFolderWriteScope() === "free_sections") {
-      useAmanahStore.getState().importData(keepLocalOnlySections(remoteData, localData));
+      const merged = keepLocalOnlySections(remoteData, localData);
+      useAmanahStore.getState().importData(merged);
+      if (JSON.stringify(merged) !== JSON.stringify(remoteData)) await saveToAccount(merged);
       return;
     }
 

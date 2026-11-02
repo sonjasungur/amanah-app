@@ -86,12 +86,16 @@ export const useAmanahStore = create<AmanahStore>()(
         const migrated = migrateRawData((persisted ?? {}) as Record<string, unknown>);
         return { ...current, ...migrated };
       },
+      // Local storage answers synchronously, so this runs while `useAmanahStore` is still being created.
+      // Touching it right away throws, and the store would never report itself as hydrated.
       onRehydrateStorage: () => (state, error) => {
-        if (error) {
-          useAmanahStore.setState({ saveStatus: "error", saveError: "Fehler beim Laden der gespeicherten Daten" });
-        } else if (state) {
-          useAmanahStore.setState({ saveStatus: "saved", saveError: null });
-        }
+        queueMicrotask(() => {
+          if (error) {
+            useAmanahStore.setState({ saveStatus: "error", saveError: "Fehler beim Laden der gespeicherten Daten" });
+          } else if (state) {
+            useAmanahStore.setState({ saveStatus: "saved", saveError: null });
+          }
+        });
       },
     }
   )

@@ -89,10 +89,11 @@ test.describe("Delete confirmation requires two steps", () => {
   test("delete requires confirmation before executing", async ({ page }) => {
     await page.goto("/dashboard/einstellungen");
     await page.waitForSelector('[data-testid="settings-delete-data-button"]');
-    await page.getByTestId("settings-delete-data-button").click();
-    await expect(
-      page.getByTestId("settings-delete-data-confirm")
-    ).toBeVisible();
+    // A click before hydration does nothing: repeat it until the page has reacted.
+    await expect(async () => {
+      await page.getByTestId("settings-delete-data-button").click();
+      await expect(page.getByTestId("settings-delete-data-confirm")).toBeVisible({ timeout: 500 });
+    }).toPass();
     await page.getByText(/Abbrechen|Cancel/).click();
     await expect(
       page.getByTestId("settings-delete-data-confirm")
