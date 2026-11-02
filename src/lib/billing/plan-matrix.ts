@@ -60,12 +60,12 @@ export const PLAN_FEATURES: PlanFeature[] = [
   },
   {
     id: "asset_overview",
-    title: "Vermögensübersicht mit einfachem Ausdruck",
+    title: "Vermögensübersicht mit Speicherung im Konto und einfachem Ausdruck",
     tier: "free",
     routes: ["/dashboard/vermoegen"],
     enforcement: "never",
     availableBeforeLaunch: true,
-    note: "Vorläufig kostenlos (Owner 01.11.2026). Reine Bestandsaufnahme, kein Testament.",
+    note: "Dauerhaft kostenlos, auch bei Plus-Zwang (Owner 01.11.2026). Reine Bestandsaufnahme, kein Testament.",
   },
   {
     id: "persistent_folder",
@@ -74,7 +74,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     routes: ["/api/amanah"],
     enforcement: "server",
     availableBeforeLaunch: true,
-    note: "Einzige Leistung, die serverseitig wirksam gesperrt werden kann.",
+    note: "Einzige Leistung, die serverseitig wirksam gesperrt werden kann. Ausgenommen ist FREE_ACCOUNT_SECTIONS.",
   },
   {
     id: "family_people",
@@ -128,6 +128,9 @@ export const PLAN_FEATURES: PlanFeature[] = [
     note: "Druck entsteht im Browser; der Konto-Export (Art. 15/20 DSGVO) bleibt immer frei.",
   },
 ];
+
+/** Sections every account may save on the server, also without Plus and with enforcement on. */
+export const FREE_ACCOUNT_SECTIONS = ["assets"] as const;
 
 /** Never paid, whatever the plan: data subject rights and account control. */
 export const ALWAYS_FREE_ACCOUNT_RIGHTS = [

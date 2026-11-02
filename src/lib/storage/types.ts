@@ -1,12 +1,22 @@
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 
-export type SaveStatus = "idle" | "saving" | "saved" | "error";
+/** "partial": saved in this browser, but the account stored only part of it (no Plus access). */
+export type SaveStatus = "idle" | "saving" | "saved" | "partial" | "error";
+
+export interface SaveResult {
+  /** Sections the account did not store. */
+  notStored?: string[];
+}
+
+export type FolderWriteScope = "full" | "free_sections";
 
 export const STORAGE_KEY = "amanah-ordner-data";
 
 export interface StorageProvider {
   load(): Promise<AmanahOrdnerData | null>;
-  save(data: AmanahOrdnerData): Promise<void>;
+  save(data: AmanahOrdnerData): Promise<SaveResult | void>;
+  /** From the last load; only the account provider knows it. */
+  lastWriteScope?(): FolderWriteScope;
   clear(): Promise<void>;
 }
 

@@ -2,9 +2,10 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import { getStorageMode } from "@/lib/auth/config";
+import { FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { loadAmanahData, saveAmanahData } from "./amanah-storage";
+import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-storage";
 import { getActiveStorageLabel } from "./storage-config";
 
 export type StorageLocationLabel = "local" | "api" | "local-demo";
@@ -33,6 +34,29 @@ export function hasMeaningfulLocalData(data: AmanahOrdnerData): boolean {
   return JSON.stringify(data) !== JSON.stringify(defaultAmanahData);
 }
 
+/**
+ * Without Plus access the account holds only the free sections, so what exists only in this
+ * browser must not be overwritten on login. The account still wins for the free sections.
+ */
+export function keepLocalOnlySections(remote: AmanahOrdnerData, local: AmanahOrdnerData): AmanahOrdnerData {
+  const merged: Record<string, unknown> = { ...remote };
+  const defaults = defaultAmanahData as unknown as Record<string, unknown>;
+  for (const [key, value] of Object.entries(local)) {
+    if ((FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key) || key === "lastSaved") continue;
+    if (JSON.stringify(value) !== JSON.stringify(defaults[key])) merged[key] = value;
+  }
+  return merged as unknown as AmanahOrdnerData;
+}
+
+async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
+  const result = await saveAmanahData(data);
+  useAmanahStore.setState({
+    saveStatus: result?.notStored?.length ? "partial" : "saved",
+    saveError: null,
+    lastSaved: new Date().toISOString(),
+  });
+}
+
 export async function persistStoreChanges(): Promise<void> {
   const state = useAmanahStore.getState();
   const data = pickDataFields(state);
@@ -44,7 +68,8 @@ export async function persistStoreChanges(): Promise<void> {
 
   try {
     if (isRemotePersistenceActive()) {
-      await saveAmanahData(data);
+      await saveToAccount(data);
+      return;
     }
 
     useAmanahStore.setState({
@@ -75,6 +100,11 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
     const remoteHasData = hasMeaningfulLocalData(remoteData);
     const localHasData = hasMeaningfulLocalData(localData);
 
+    if (remoteHasData && lastFolderWriteScope() === "free_sections") {
+      useAmanahStore.getState().importData(keepLocalOnlySections(remoteData, localData));
+      return;
+    }
+
     if (remoteHasData) {
       const remoteCheckEmpty =
         !remoteData.checkProgress ||
@@ -94,12 +124,7 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
     }
 
     if (localHasData) {
-      await saveAmanahData(localData);
-      useAmanahStore.setState({
-        saveStatus: "saved",
-        saveError: null,
-        lastSaved: new Date().toISOString(),
-      });
+      await saveToAccount(localData);
       return;
     }
 

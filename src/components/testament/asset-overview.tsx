@@ -80,11 +80,11 @@ export function AssetOverview() {
         </div>
         <div>
           <Label htmlFor="asset-description">{type === "real_estate" ? "Adresse oder Bezeichnung" : "Bezeichnung"}</Label>
-          <Input id="asset-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="z. B. Girokonto bei …" />
+          <Input id="asset-description" maxLength={300} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="z. B. Girokonto bei …" />
         </div>
         <div className="sm:col-span-2">
           <Label htmlFor="asset-location">Wo liegen die Unterlagen?</Label>
-          <Input id="asset-location" value={locationHint} onChange={(e) => setLocationHint(e.target.value)} placeholder="z. B. Ordner im Arbeitszimmer" />
+          <Input id="asset-location" maxLength={300} value={locationHint} onChange={(e) => setLocationHint(e.target.value)} placeholder="z. B. Ordner im Arbeitszimmer" />
         </div>
         {type === "real_estate" && (
           <>

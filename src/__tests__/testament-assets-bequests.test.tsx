@@ -82,7 +82,7 @@ describe("asset print: an inventory, not a will", () => {
     const titles: string[] = [];
     const print = vi.spyOn(window, "print").mockImplementation(() => void titles.push(document.title));
     document.title = "Seitentitel";
-    render(<VermoegenPage />);
+    render(<I18nProvider><VermoegenPage /></I18nProvider>);
     expect(screen.getByTestId("asset-overview").closest(".no-print")).not.toBeNull();
     expect(screen.getByTestId("asset-print-view").closest(".print-only")).not.toBeNull();
     fireEvent.click(screen.getByTestId("asset-print"));

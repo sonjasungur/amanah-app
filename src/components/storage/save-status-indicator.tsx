@@ -23,7 +23,9 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
         ? t("storage.status.saving")
         : saveStatus === "error"
           ? t("storage.status.error")
-          : null;
+          : saveStatus === "partial"
+            ? t("storage.status.partial")
+            : null;
 
   const locationHint =
     saveStatus === "saved"
@@ -42,18 +44,24 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
             "flex items-center gap-2 text-xs font-medium",
             saveStatus === "saved" && "text-green-700",
             saveStatus === "saving" && "text-primary",
-            saveStatus === "error" && "text-destructive"
+            saveStatus === "error" && "text-destructive",
+            saveStatus === "partial" && "text-warning"
           )}
         >
           {saveStatus === "saved" && <Check size={14} aria-hidden />}
           {saveStatus === "saving" && <Loader2 size={14} className="animate-spin" aria-hidden />}
-          {saveStatus === "error" && <AlertCircle size={14} aria-hidden />}
+          {(saveStatus === "error" || saveStatus === "partial") && <AlertCircle size={14} aria-hidden />}
           <span>{statusLabel}</span>
         </div>
       )}
       {locationHint && (
         <p className="text-xs text-muted" data-testid="save-status-location">
           {locationHint}
+        </p>
+      )}
+      {saveStatus === "partial" && (
+        <p className="text-xs text-muted" data-testid="save-status-partial">
+          {t("storage.location.partial")}
         </p>
       )}
       {saveStatus === "error" && saveError && (
