@@ -25,6 +25,7 @@ const USER_FACING_FILES = [
   "src/app/page.tsx",
   "src/app/preise/page.tsx",
   "src/app/wissen/page.tsx",
+  "src/components/wissen/wissen-hub-view.tsx",
   "src/app/layout.tsx",
   "src/components/layout/footer.tsx",
   "src/components/layout/logo.tsx",
@@ -108,7 +109,7 @@ describe("branding — Mein Wille", () => {
   it("wissen hub has categories, entry topics, search and scroll sections", () => {
     expect(WISSEN_CATEGORIES).toHaveLength(4);
     expect(WISSEN_ENTRY_TOPIC_IDS).toHaveLength(3);
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/app/wissen/page.tsx") + read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("Islamisches Wissenszentrum");
     expect(wissen).toContain("KnowledgeAreasOverview");
     expect(wissen).toContain("Worüber möchtest du mehr wissen?");

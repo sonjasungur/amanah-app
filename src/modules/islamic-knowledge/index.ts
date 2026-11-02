@@ -20,6 +20,7 @@ export {
   getPublishedArticles,
   getPublishedByArea,
   getRelatedPublished,
+  plannedTopics,
   searchPreparedTopics,
   searchPublished,
 } from "./publication";

@@ -1,7 +1,7 @@
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { labelForField } from "@/lib/ai/context";
 import { enforceAiSafety } from "@/lib/ai/safety";
-import { ruleBasedAIProvider } from "@/lib/ai/rule-based-ai-provider";
+import { extractFromFreeText } from "@/lib/ai/rule-based-extract";
 import { getQuestionById } from "./question-plan";
 import { buildPatchPreview } from "./patch-preview";
 import type { GuidedQuestion, ParseAnswerResponse, SuggestedUpdate } from "./types";
@@ -175,7 +175,7 @@ export async function parseGuidedAnswer(
   clarifications = ruleResult.clarifications;
 
   if (options?.useAiExtract && updates.length === 0) {
-    const extract = await ruleBasedAIProvider.extract(data, answer);
+    const extract = await extractFromFreeText(data, answer);
     for (const s of extract.suggestedUpdates) {
       updates.push({
         fieldPath: s.fieldPath,

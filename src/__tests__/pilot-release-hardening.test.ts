@@ -58,7 +58,7 @@ describe("public content hardening", () => {
   });
 
   it("public wissen page uses reviewed-only topic source", () => {
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/app/wissen/page.tsx") + read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("getPublicWissenTopics");
     expect(wissen).toContain("Wissensbereich in Vorbereitung");
   });

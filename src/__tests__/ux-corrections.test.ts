@@ -48,7 +48,7 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
   });
 
   it("wissen page has scroll-spy section ids and no saved topics", () => {
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("useWissenScrollSpy");
     expect(wissen).toContain("WISSEN_SECTION_ID");
     expect(wissen).toContain("WissenTopicRow");

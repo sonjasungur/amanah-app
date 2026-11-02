@@ -4,8 +4,9 @@ import {
   getCriticalMissing,
   getRecommendedNextStep,
 } from "@/lib/domain/validation";
-import { buildFamilyMessageContext, labelForField, moduleTitle } from "./context";
+import { buildFamilyMessageContext, moduleTitle } from "./context";
 import { answerKnowledgeQuestion } from "./knowledge-answer";
+import { extractFromFreeText } from "./rule-based-extract";
 import { DOMAIN_DISCLAIMER } from "./safety";
 import type {
   AmanahAIProvider,
@@ -84,68 +85,7 @@ export class RuleBasedAIProvider implements AmanahAIProvider {
   }
 
   async extract(data: AmanahOrdnerData, freeText: string): Promise<ExtractResult> {
-    const suggestions: ExtractResult["suggestedUpdates"] = [];
-    const clarificationNeeded: string[] = [];
-
-    const phoneMatch = freeText.match(/(?:\+49|0)\s*[\d\s\-/]{8,}/);
-    if (phoneMatch) {
-      suggestions.push({
-        fieldPath: "emergencyCard.emergencyContact1.phone",
-        value: phoneMatch[0].replace(/\s/g, ""),
-        confidence: "high",
-        label: labelForField("emergencyCard.emergencyContact1.phone"),
-      });
-    }
-
-    const relationPatterns = [
-      { re: /(?:meine|mein)\s+(?:schwester|bruder|ehefrau|ehemann|mutter|vater|sohn|tochter)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Angehörige" },
-      { re: /(?:schwester|bruder)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Geschwister" },
-      { re: /(?:kontakt|anrufen|informieren).*?([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Kontakt" },
-    ];
-
-    for (const { re, rel } of relationPatterns) {
-      const m = freeText.match(re);
-      if (m?.[1]) {
-        suggestions.push({
-          fieldPath: "emergencyCard.emergencyContact1.name",
-          value: m[1],
-          confidence: "medium",
-          label: labelForField("emergencyCard.emergencyContact1.name"),
-        });
-        if (!data.emergencyCard.emergencyContact1.relation) {
-          suggestions.push({
-            fieldPath: "emergencyCard.emergencyContact1.relation",
-            value: rel,
-            confidence: "low",
-            label: labelForField("emergencyCard.emergencyContact1.relation"),
-          });
-        }
-        break;
-      }
-    }
-
-    if (/bestatt|janazah|beerdig/i.test(freeText)) {
-      const fd = freeText.match(/bestatter\s+([^.,\n]+)/i);
-      if (fd?.[1]) {
-        suggestions.push({
-          fieldPath: "janazahWishes.preferredFuneralDirector",
-          value: fd[1].trim(),
-          confidence: "medium",
-          label: labelForField("janazahWishes.preferredFuneralDirector"),
-        });
-      }
-    }
-
-    if (suggestions.length === 0) {
-      clarificationNeeded.push("Welche Angabe möchtest du festhalten — Notfallkontakt, Janazah oder Familienwunsch?");
-    }
-
-    return {
-      suggestedUpdates: suggestions,
-      clarificationNeeded,
-      previewNote: "Vorschläge werden nicht automatisch gespeichert — bitte aktiv übernehmen.",
-      disclaimer: DOMAIN_DISCLAIMER,
-    };
+    return extractFromFreeText(data, freeText);
   }
 
   async familyMessage(data: AmanahOrdnerData, tone: FamilyMessageTone): Promise<FamilyMessageResult> {

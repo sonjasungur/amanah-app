@@ -28,6 +28,15 @@ Keine Fatwa, keine Rechtsberatung. Belege: **[geprüft]** = in dieser Sitzung au
 - 5 religiöse Einträge waren als `reviewed` markiert, ohne Beleg der Prüfung; einer davon ohne jede Quelle (`barzakh-forgiveness`), einer mit falscher Quelle (`erbe-deutschland` zitiert die Vorsorgevollmacht-Seite für Erbrecht). `entries.ts` setzt pauschal `lastReviewedAt: "2026-07-01"`.
 - Diese Markierungen werden **nicht** als Freigabe übernommen, nur als `legacy.claimedStatus` dokumentiert.
 
+### 1.2a Öffentliche Erreichbarkeit (Prüfung 02.11.2026, lokaler Build, nicht deployt)
+
+- **Artikel-URLs, Sitemap, Hub, Redaktion:** 0 von 44 Katalogartikeln veröffentlicht; ungeprüfte URLs und die Redaktion liefern 404, solange `AMANAH_INTERNAL_TOOLS` aus ist.
+- **Behoben (lokal):** Der Volltext der Entwürfe lag im öffentlich ladbaren JavaScript, weil `/wissen`, `RelatedKnowledge` und der Gesprächsablauf den Katalog oder `entries.ts` im Browsercode importierten. Der Server filtert jetzt; `src/__tests__/knowledge-client-bundle.test.ts` verhindert den Rückfall. **Der bereits ausgelieferte Stand kann diese Texte weiter enthalten;** Produktion wurde nicht geprüft.
+- **Offen, Owner-Entscheidung:** `reviewed` in älteren Daten ist weiter nicht belegt (§1.2), wirkt aber öffentlich:
+  - `/patientenverfuegung` zeigt vier als „Geprüft“ gekennzeichnete Artikel.
+  - `/api/knowledge/entries` liefert 12 Einträge als „Geprüfte Wissensbasis“, auch zu Janazah, Ghusl und Sadaqa Jariya. Darauf stützt sich auch `/api/ai/knowledge`.
+- **Offen:** Hadith-Übersetzungen aus `src/lib/knowledge/sources.ts` liegen im Browsercode und stimmen teils wörtlich mit Entwürfen überein. Es sind Quellendaten, keine Artikel; ihre Prüfung steht laut §1.3 und Dokument 05 aus.
+
 ### 1.3 Korrektheit der Qur'an- und Hadith-Referenzen
 
 Automatisierte Gegenprüfung (QuranEnc `german_bubenheim`, Hadith-Spiegel der sunnah.com-Nummerierung, URL-Abrufe), Details in Dokument 05:

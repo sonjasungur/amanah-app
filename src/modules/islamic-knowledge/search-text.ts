@@ -59,3 +59,34 @@ export function matchesQuery(query: string, texts: string[]): boolean {
   const haystack = normalizeSearchText(texts.join(" "));
   return terms.every((t) => termMatches(t, haystack));
 }
+
+export interface SearchablePublished {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  differingOpinions?: string;
+}
+
+export interface PreparedTopic {
+  id: string;
+  title: string;
+  areaTitle: string;
+}
+
+/** Full-text search in the given articles. The caller decides what may be searched: published ones only. */
+export function rankPublished<T extends SearchablePublished>(query: string, articles: T[]): T[] {
+  const terms = searchTerms(query);
+  if (terms.length === 0) return [];
+  return articles
+    .map((a) => {
+      const title = normalizeSearchText(a.title);
+      const text = normalizeSearchText(`${a.summary} ${a.body} ${a.differingOpinions ?? ""}`);
+      const score = terms.reduce((s, t) => s + (termMatches(t, title) ? 3 : 0) + (termMatches(t, text) ? 1 : 0), 0);
+      return { a, score, all: terms.every((t) => termMatches(t, title) || termMatches(t, text)) };
+    })
+    .filter((r) => r.all)
+    .sort((x, y) => y.score - x.score)
+    .map((r) => r.a);
+}
