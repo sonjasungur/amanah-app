@@ -64,7 +64,7 @@ export const janazahArticles: KnowledgeArticle[] = [
     content:
       "Muslime in Deutschland können in Deutschland beerdigt oder in die Heimat überführt werden. Beides hat rechtliche, finanzielle und familiäre Aspekte. Eine rechtzeitige Dokumentation der Wünsche entlastet die Familie.",
     sourceIds: ["fiqh-janazah-basics"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "janazah",
   },
 ];

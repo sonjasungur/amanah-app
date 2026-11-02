@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { KnowledgeArticle } from "@/lib/types";
 import { SourcesSection } from "@/components/knowledge/sources-section";
 import { ReviewStatusBadge } from "@/components/knowledge/review-status-badge";
-import { PrimarySourcesList } from "@/components/ui/primary-source-card";
+import { PrimarySourcesList } from "@/components/knowledge/primary-sources-list";
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, BookOpen, FileText, Scale, Target, Users } from "lucide-react";
 

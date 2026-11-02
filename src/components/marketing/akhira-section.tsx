@@ -1,9 +1,4 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { PrimarySourceCard } from "@/components/ui/primary-source-card";
-import { islamicSources } from "@/lib/knowledge/sources";
 import { COLORS } from "@/lib/design-tokens";
 import { ArrowRight, BookOpen, Heart, Users } from "lucide-react";
 
@@ -14,9 +9,6 @@ const AKHIRA_ITEMS = [
 ];
 
 export function AkhiraSection() {
-  const [sourceOpen, setSourceOpen] = useState(false);
-  const hadith = islamicSources["hadith-sadaqa-jariya"];
-
   return (
     <section
       className="py-16 md:py-20 text-white"
@@ -46,22 +38,6 @@ export function AkhiraSection() {
             </Link>
           ))}
         </div>
-        <button
-          type="button"
-          id="akhira-source-toggle"
-          onClick={() => setSourceOpen(!sourceOpen)}
-          className="text-sm font-semibold text-emerald hover:text-white transition-colors min-h-[44px] px-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald/50"
-          aria-expanded={sourceOpen}
-          aria-controls="akhira-source-panel"
-        >
-          {sourceOpen ? "Quelle ausblenden" : "Islamische Primärquelle anzeigen (Sahih Muslim 1631)"}
-        </button>
-        {sourceOpen && hadith && (
-          <div id="akhira-source-panel" role="region" aria-labelledby="akhira-source-toggle" className="mt-4">
-            <PrimarySourceCard source={hadith} defaultOpen />
-            <p className="text-sm text-white/65 mt-3">Sinngemäße Einordnung — keine Garantie religiöser Belohnung, keine Fatwa.</p>
-          </div>
-        )}
       </div>
     </section>
   );

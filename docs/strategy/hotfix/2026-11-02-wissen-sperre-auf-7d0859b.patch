@@ -1,0 +1,1096 @@
+diff --git a/src/app/akuter-todesfall/page.tsx b/src/app/akuter-todesfall/page.tsx
+index f665319..045a585 100644
+--- a/src/app/akuter-todesfall/page.tsx
++++ b/src/app/akuter-todesfall/page.tsx
+@@ -8,9 +8,9 @@ const steps = [
+   { num: 1, title: "Arzt / Totenschein", desc: "Hausarzt oder Notarzt kontaktieren. Totenschein ausstellen lassen." },
+   { num: 2, title: "Engste Angehörige informieren", desc: "Familie, Ehepartner, enge Verwandte sofort benachrichtigen." },
+   { num: 3, title: "Islamischen Bestatter oder Moschee kontaktieren", desc: "24/7 erreichbare islamische Bestatter oder die örtliche Moschee anrufen." },
+-  { num: 4, title: "Ghusl / Kafan organisieren", desc: "Totenwaschung und Leichentuch vorbereiten. Bestatter oder Moschee-Helfer." },
++  { num: 4, title: "Ghusl und Kafan ansprechen", desc: "Bestatter oder Moschee fragen, wer das übernimmt und was zu tun ist." },
+   { num: 5, title: "Janazah-Gebet vorbereiten", desc: "Moschee kontaktieren für Salāt al-Janāzah. Zeit und Ort abstimmen." },
+-  { num: 6, title: "Schnelle würdige islamische Bestattung prüfen", desc: "Unnötige Verzögerung vermeiden. Wünsche des Verstorbenen beachten." },
++  { num: 6, title: "Zeitpunkt der Bestattung klären", desc: "Mit Bestatter, Moschee und Friedhof abstimmen. Wünsche des Verstorbenen beachten." },
+   { num: 7, title: "Standesamt / Friedhof / Dokumente", desc: "Sterbeurkunde, Friedhofsgenehmigung, Bestattungsgenehmigung." },
+   { num: 8, title: "Schulden / Amanah / Familienwünsche prüfen", desc: "Offene Schulden, anvertraute Güter und dokumentierte Wünsche klären." },
+ ];
+diff --git a/src/app/api/ai/knowledge/route.ts b/src/app/api/ai/knowledge/route.ts
+index e8924f5..68f8dbd 100644
+--- a/src/app/api/ai/knowledge/route.ts
++++ b/src/app/api/ai/knowledge/route.ts
+@@ -1,17 +1,6 @@
+-import { handleAiRoute } from "@/lib/ai/api-handler";
+-import { getAmanahAIProvider } from "@/lib/ai/ai-provider";
+ import { NextResponse } from "next/server";
+ 
+-export async function POST(request: Request) {
+-  const body = await request.json().catch(() => ({}));
+-  const question = String(body.question || body.text || "").trim();
+-  if (!question) {
+-    return NextResponse.json({ error: "Frage erforderlich" }, { status: 400 });
+-  }
+-  return handleAiRoute(
+-    request,
+-    "knowledge",
+-    async () => getAmanahAIProvider().knowledge(question),
+-    body as Record<string, unknown>
+-  );
++/** Locked until a documented review exists: no statements on religious or legal topics. */
++export function POST() {
++  return NextResponse.json({ error: "Wissensauskunft noch nicht freigegeben." }, { status: 503 });
+ }
+diff --git a/src/app/api/ai/route.ts b/src/app/api/ai/route.ts
+index 5af3f41..68f8dbd 100644
+--- a/src/app/api/ai/route.ts
++++ b/src/app/api/ai/route.ts
+@@ -1,51 +1,6 @@
+ import { NextResponse } from "next/server";
+-import { getAmanahAIProvider } from "@/lib/ai/ai-provider";
+-import { getAiProviderName, isAiEnabled, requiresExternalAiConsent } from "@/lib/ai/config";
+-import { enforceAiSafety } from "@/lib/ai/safety";
+-import { checkRateLimit, logAiEvent } from "@/lib/ai/rate-limit";
+ 
+-export async function POST(request: Request) {
+-  try {
+-    if (!isAiEnabled()) {
+-      return NextResponse.json({ error: "KI deaktiviert" }, { status: 503 });
+-    }
+-
+-    const ip = request.headers.get("x-forwarded-for") || "local";
+-    const rate = checkRateLimit(`chat:${ip}`);
+-    if (!rate.allowed) {
+-      return NextResponse.json({ error: "Rate limit" }, { status: 429 });
+-    }
+-
+-    const body = await request.json();
+-    const { messages, context, consentGranted } = body as {
+-      messages: { role: string; content: string }[];
+-      context?: Record<string, unknown>;
+-      consentGranted?: boolean;
+-    };
+-
+-    if (!messages?.length) {
+-      return NextResponse.json({ error: "Messages required" }, { status: 400 });
+-    }
+-
+-    if (requiresExternalAiConsent() && consentGranted !== true) {
+-      return NextResponse.json({ error: "Consent required", requiresConsent: true }, { status: 403 });
+-    }
+-
+-    const last = messages[messages.length - 1]?.content || "";
+-    const safety = enforceAiSafety(last, "knowledge");
+-    if (!safety.allowed) {
+-      logAiEvent("chat", getAmanahAIProvider().name, true);
+-      return NextResponse.json({ response: safety.redirectMessage, provider: getAiProviderName(), blocked: true });
+-    }
+-
+-    const provider = getAmanahAIProvider();
+-    const response = provider.chat
+-      ? await provider.chat(messages, context)
+-      : "Chat nicht verfügbar — nutze die Assistent-Funktionen im Dashboard.";
+-    logAiEvent("chat", provider.name, true);
+-    return NextResponse.json({ response, provider: provider.name });
+-  } catch {
+-    logAiEvent("chat", getAiProviderName(), false, "chat error");
+-    return NextResponse.json({ error: "AI request failed" }, { status: 500 });
+-  }
++/** Locked until a documented review exists: no statements on religious or legal topics. */
++export function POST() {
++  return NextResponse.json({ error: "Wissensauskunft noch nicht freigegeben." }, { status: 503 });
+ }
+diff --git a/src/app/api/knowledge/entries/[id]/route.ts b/src/app/api/knowledge/entries/[id]/route.ts
+index 1dbe17d..bd62b4d 100644
+--- a/src/app/api/knowledge/entries/[id]/route.ts
++++ b/src/app/api/knowledge/entries/[id]/route.ts
+@@ -1,16 +1,6 @@
+ import { NextResponse } from "next/server";
+-import { getPublicEntry } from "@/lib/knowledge";
+ 
+-export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+-  const { id } = await context.params;
+-  const entry = getPublicEntry(id);
+-
+-  if (!entry) {
+-    return NextResponse.json({ error: "Eintrag nicht gefunden" }, { status: 404 });
+-  }
+-
+-  return NextResponse.json({
+-    entry,
+-    disclaimer: "Allgemeine Orientierung — fachliche Prüfung empfohlen.",
+-  });
++/** Locked until a documented review exists. */
++export function GET() {
++  return NextResponse.json({ error: "Noch nicht freigegeben" }, { status: 404 });
+ }
+diff --git a/src/app/api/knowledge/entries/route.ts b/src/app/api/knowledge/entries/route.ts
+index 0798974..bd62b4d 100644
+--- a/src/app/api/knowledge/entries/route.ts
++++ b/src/app/api/knowledge/entries/route.ts
+@@ -1,16 +1,6 @@
+ import { NextResponse } from "next/server";
+-import { listPublicEntries } from "@/lib/knowledge";
+ 
+-export async function GET(request: Request) {
+-  const { searchParams } = new URL(request.url);
+-  const language = (searchParams.get("language") || "de") as "de" | "en";
+-
+-  const entries = listPublicEntries(language);
+-
+-  return NextResponse.json({
+-    language,
+-    count: entries.length,
+-    entries,
+-    disclaimer: "Geprüfte Wissensbasis — allgemeine Orientierung, keine Rechts-/Medizin-/Fatwa-Beratung.",
+-  });
++/** Locked until a documented review exists. */
++export function GET() {
++  return NextResponse.json({ error: "Noch nicht freigegeben" }, { status: 404 });
+ }
+diff --git a/src/app/api/knowledge/search/route.ts b/src/app/api/knowledge/search/route.ts
+index 9312702..bd62b4d 100644
+--- a/src/app/api/knowledge/search/route.ts
++++ b/src/app/api/knowledge/search/route.ts
+@@ -1,30 +1,6 @@
+ import { NextResponse } from "next/server";
+-import { searchKnowledgeEntries } from "@/lib/knowledge";
+ 
+-export async function GET(request: Request) {
+-  const { searchParams } = new URL(request.url);
+-  const q = searchParams.get("q")?.trim();
+-  const language = (searchParams.get("language") || "de") as "de" | "en";
+-
+-  if (!q) {
+-    return NextResponse.json({ error: "Parameter q erforderlich" }, { status: 400 });
+-  }
+-
+-  const results = searchKnowledgeEntries(q, language).map((r) => ({
+-    id: r.entry.id,
+-    title: r.entry.title,
+-    category: r.entry.category,
+-    summary: r.entry.summary,
+-    sourceLabel: r.entry.sourceLabel,
+-    reviewedStatus: r.entry.reviewedStatus,
+-    score: r.score,
+-  }));
+-
+-  return NextResponse.json({
+-    query: q,
+-    language,
+-    count: results.length,
+-    results,
+-    disclaimer: "Allgemeine Orientierung — fachliche Prüfung empfohlen.",
+-  });
++/** Locked until a documented review exists. */
++export function GET() {
++  return NextResponse.json({ error: "Noch nicht freigegeben" }, { status: 404 });
+ }
+diff --git a/src/app/barzakh/page.tsx b/src/app/barzakh/page.tsx
+index 07fe42e..36ac651 100644
+--- a/src/app/barzakh/page.tsx
++++ b/src/app/barzakh/page.tsx
+@@ -1,47 +1,10 @@
+-import { barzakhArticles } from "@/lib/knowledge/barzakh";
+-import { SourcesSection } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Card, CardTitle } from "@/components/ui/card";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+   title: "Barzakh — Mein Wille",
+-  description: "Was ist Barzakh? Orientierung zu Sadaqa Jariya, Schulden und dem Leben nach dem Tod.",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function BarzakhPage() {
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Wissen & Orientierung</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Barzakh — der Zwischenzustand</h1>
+-        <p className="text-muted leading-relaxed">
+-          Nach dem Tod beginnt für jeden Menschen der Barzakh — die Phase bis zur Auferstehung. Was kann dir
+-          und deiner Familie in dieser Zeit noch nützen? Wie bereitest du dich vor?
+-        </p>
+-      </div>
+-
+-      <div className="mb-8 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/15 p-6 text-center">
+-        <p className="text-lg font-semibold text-primary mb-1">Allah entscheidet</p>
+-        <p className="text-sm text-muted leading-relaxed max-w-lg mx-auto">
+-          Kein Mensch kennt das genaue Schicksal im Barzakh. Die folgenden Inhalte dienen der Vorbereitung
+-          und Orientierung — nicht als Garantie. Nur Allah entscheidet über Barmherzigkeit und Vergeltung.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-6">
+-        {barzakhArticles.map((article) => (
+-          <Card key={article.id}>
+-            <CardTitle>{article.title}</CardTitle>
+-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
+-            <p className="text-muted leading-relaxed">{article.content}</p>
+-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
+-          </Card>
+-        ))}
+-      </div>
+-
+-      <div className="mt-10">
+-        <Disclaimer type="islamic" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Barzakh" />;
+ }
+diff --git a/src/app/islam-oder-kultur/page.tsx b/src/app/islam-oder-kultur/page.tsx
+index 72c65f8..ca111d5 100644
+--- a/src/app/islam-oder-kultur/page.tsx
++++ b/src/app/islam-oder-kultur/page.tsx
+@@ -1,75 +1,10 @@
+-import { cultureFilterCards } from "@/lib/knowledge/kulturfilter";
+-import { SourcesSection, ReviewBadge } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+   title: "Islam oder Kultur? — Mein Wille",
+-  description: "Unterscheide islamische Pflichten von kulturellen Gewohnheiten bei Janazah und Trauer.",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function IslamOderKulturPage() {
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Kulturfilter</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Islam oder Kultur?</h1>
+-        <p className="text-muted leading-relaxed mb-4">
+-          Viele muslimische Familien in Deutschland vermischen islamische Vorgaben mit kulturellen Traditionen —
+-          oft ohne es zu wissen. Der Kulturfilter hilft dir, beides zu trennen: Was ist islamisch belegt oder
+-          empfohlen? Was ist kulturelle Gewohnheit aus der Heimat?
+-        </p>
+-        <p className="text-muted leading-relaxed">
+-          Das Ziel ist nicht, Kultur abzuwerten, sondern Klarheit zu schaffen — damit du bewusst entscheiden
+-          kannst und deine Familie nicht unter finanziellen oder emotionalen Druck gerät.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-4">
+-        {cultureFilterCards.map((card) => (
+-          <details
+-            key={card.id}
+-            className="group rounded-2xl bg-card border border-primary/10 overflow-hidden open:shadow-sm open:border-primary/20 transition-all"
+-          >
+-            <summary className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 hover:bg-sand/50 transition-colors">
+-              <span className="font-semibold text-primary leading-snug">{card.question}</span>
+-              <span className="flex-shrink-0 text-accent text-xl group-open:rotate-180 transition-transform">▼</span>
+-            </summary>
+-            <div className="px-6 pb-6 space-y-4 border-t border-primary/5 pt-5">
+-              <div className="flex items-center gap-2 mb-2">
+-                <ReviewBadge status={card.reviewStatus} />
+-              </div>
+-
+-              <div className="rounded-xl bg-primary/5 p-4">
+-                <h3 className="text-sm font-semibold text-primary mb-1">Islamische Grundlage</h3>
+-                <p className="text-sm text-muted leading-relaxed">{card.islamicBasis}</p>
+-              </div>
+-
+-              <div className="rounded-xl bg-sand p-4">
+-                <h3 className="text-sm font-semibold text-primary mb-1">Kulturelle Praxis</h3>
+-                <p className="text-sm text-muted leading-relaxed">{card.culturalPractice}</p>
+-              </div>
+-
+-              <div className="rounded-xl bg-accent/10 border border-accent/20 p-4">
+-                <h3 className="text-sm font-semibold text-primary mb-1">Was du prüfen solltest</h3>
+-                <p className="text-sm text-muted leading-relaxed">{card.whatToCheck}</p>
+-              </div>
+-
+-              {card.opinionDifferences && (
+-                <p className="text-sm text-muted italic">
+-                  <span className="font-medium text-foreground not-italic">Meinungsunterschiede: </span>
+-                  {card.opinionDifferences}
+-                </p>
+-              )}
+-
+-              <SourcesSection sourceIds={card.sourceIds} reviewStatus={card.reviewStatus} />
+-            </div>
+-          </details>
+-        ))}
+-      </div>
+-
+-      <div className="mt-10">
+-        <Disclaimer type="islamic" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Islam oder Kultur?" />;
+ }
+diff --git a/src/app/janazah-kompass/page.tsx b/src/app/janazah-kompass/page.tsx
+index abcd47b..8fe5f7e 100644
+--- a/src/app/janazah-kompass/page.tsx
++++ b/src/app/janazah-kompass/page.tsx
+@@ -1,52 +1,10 @@
+-import Link from "next/link";
+-import { janazahArticles } from "@/lib/knowledge/janazah";
+-import { SourcesSection } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Button } from "@/components/ui/button";
+-import { Card, CardTitle } from "@/components/ui/card";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+-  title: "Janazah-Kompass — Mein Wille",
+-  description: "Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung in Deutschland.",
++  title: "Janazah — Mein Wille",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function JanazahKompassPage() {
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Wissen & Orientierung</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Janazah-Kompass</h1>
+-        <p className="text-muted leading-relaxed">
+-          Alles Wichtige zur islamischen Bestattung — von Ghusl und Kafan bis zur Beisetzung in Deutschland
+-          oder Überführung. Orientierung für dich und deine Familie.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-6">
+-        {janazahArticles.map((article) => (
+-          <Card key={article.id} className="hover:border-primary/20 transition-colors">
+-            <CardTitle>{article.title}</CardTitle>
+-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
+-            <p className="text-muted leading-relaxed">{article.content}</p>
+-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
+-          </Card>
+-        ))}
+-      </div>
+-
+-      <div className="mt-10 rounded-2xl bg-gradient-to-br from-primary/5 to-sand border border-primary/10 p-8 text-center">
+-        <h2 className="text-xl font-bold text-primary mb-2">Eigene Janazah-Wünsche dokumentieren</h2>
+-        <p className="text-sm text-muted mb-5 max-w-md mx-auto">
+-          Im Mein Wille kannst du deine Wünsche zu Ghusl, Kafan, Beisetzung und Familienbotschaft festhalten —
+-          damit deine Angehörigen im schwersten Moment Klarheit haben.
+-        </p>
+-        <Link href="/dashboard/janazah">
+-          <Button size="lg">Janazah-Modul im Ordner öffnen</Button>
+-        </Link>
+-      </div>
+-
+-      <div className="mt-8 space-y-4">
+-        <Disclaimer type="islamic" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Janazah" />;
+ }
+diff --git a/src/app/patientenverfuegung/page.tsx b/src/app/patientenverfuegung/page.tsx
+index 709d671..4f251e2 100644
+--- a/src/app/patientenverfuegung/page.tsx
++++ b/src/app/patientenverfuegung/page.tsx
+@@ -1,39 +1,10 @@
+-import { patientenverfuegungArticles } from "@/lib/knowledge/patientenverfuegung";
+-import { SourcesSection } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Card, CardTitle } from "@/components/ui/card";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+   title: "Patientenverfügung — Mein Wille",
+-  description: "Patientenverfügung, Vorsorgevollmacht und religiöse Wünsche für muslimische Familien.",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function PatientenverfuegungPage() {
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Medizinische Vorsorge</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Patientenverfügung</h1>
+-        <p className="text-muted leading-relaxed">
+-          Wenn du nicht mehr für dich sprechen kannst, braucht deine Familie Klarheit — medizinisch und
+-          religiös. Eine Patientenverfügung schützt dich und entlastet deine Angehörigen.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-6">
+-        {patientenverfuegungArticles.map((article) => (
+-          <Card key={article.id}>
+-            <CardTitle>{article.title}</CardTitle>
+-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
+-            <p className="text-muted leading-relaxed">{article.content}</p>
+-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
+-          </Card>
+-        ))}
+-      </div>
+-
+-      <div className="mt-10">
+-        <Disclaimer type="legal" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Patientenverfügung" />;
+ }
+diff --git a/src/app/sadaqa-jariya/page.tsx b/src/app/sadaqa-jariya/page.tsx
+index af37517..26d1c11 100644
+--- a/src/app/sadaqa-jariya/page.tsx
++++ b/src/app/sadaqa-jariya/page.tsx
+@@ -1,96 +1,10 @@
+-import Link from "next/link";
+-import { sadaqaJariyaArticles } from "@/lib/knowledge/sadaqa-jariya";
+-import { sadaqaProjects } from "@/lib/mock/sadaqa-projects";
+-import { SourcesSection } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Button } from "@/components/ui/button";
+-import { Card, CardTitle } from "@/components/ui/card";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+   title: "Sadaqa Jariya — Mein Wille",
+-  description: "Fortlaufende Wohltätigkeit für den Barzakh — Wissen und Projekte über Gemeinsam1 e.V.",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function SadaqaJariyaPage() {
+-  return (
+-    <div className="max-w-4xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Barzakh-Vorsorge</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Sadaqa Jariya</h1>
+-        <p className="text-muted leading-relaxed">
+-          Sadaqa Jariya ist eine Wohltat, deren Nutzen über den Tod hinausreicht. Bereite zu Lebzeiten vor,
+-          was dir und anderen auch im Barzakh nützen kann — im zulässigen Rahmen deiner Waṣiyya.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-6 mb-12">
+-        {sadaqaJariyaArticles.map((article) => (
+-          <Card key={article.id}>
+-            <CardTitle>{article.title}</CardTitle>
+-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
+-            <p className="text-muted leading-relaxed">{article.content}</p>
+-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
+-          </Card>
+-        ))}
+-      </div>
+-
+-      <div className="mb-8">
+-        <h2 className="text-2xl font-bold text-primary mb-2">Projekte über Gemeinsam1 e.V.</h2>
+-        <p className="text-muted text-sm mb-6">
+-          Ausgewählte Sadaqa-Jariya-Projekte — Spenden laufen direkt über den Verein, nicht über Mein Wille.
+-        </p>
+-
+-        <div className="grid sm:grid-cols-2 gap-5">
+-          {sadaqaProjects.map((project) => {
+-            const progress = Math.round((project.raisedAmount / project.targetAmount) * 100);
+-            return (
+-              <Card key={project.id} className="flex flex-col">
+-                <span className="inline-block self-start text-xs font-medium bg-accent/20 text-accent px-3 py-1 rounded-full mb-3">
+-                  {project.badge}
+-                </span>
+-                <CardTitle>{project.title}</CardTitle>
+-                <p className="text-xs text-muted mb-2">{project.category} · {project.sadaqaJariyaType}</p>
+-                <p className="text-sm text-muted leading-relaxed flex-1 mb-4">{project.description}</p>
+-                <div className="mb-3">
+-                  <div className="flex justify-between text-xs text-muted mb-1">
+-                    <span>{project.raisedAmount.toLocaleString("de-DE")} € gesammelt</span>
+-                    <span>{progress}% von {project.targetAmount.toLocaleString("de-DE")} €</span>
+-                  </div>
+-                  <div className="h-2 rounded-full bg-sand overflow-hidden">
+-                    <div
+-                      className="h-full rounded-full bg-primary transition-all"
+-                      style={{ width: `${progress}%` }}
+-                    />
+-                  </div>
+-                </div>
+-                <a href={project.link} target="_blank" rel="noopener noreferrer">
+-                  <Button variant="outline" size="sm" className="w-full">Projekt bei Gemeinsam1 ansehen</Button>
+-                </a>
+-              </Card>
+-            );
+-          })}
+-        </div>
+-      </div>
+-
+-      <div className="rounded-2xl bg-sand border border-accent/30 p-6 mb-10">
+-        <h3 className="font-semibold text-primary mb-2">Trennung: Mein Wille & Gemeinsam1</h3>
+-        <p className="text-sm text-muted leading-relaxed">
+-          Mein Wille ist ein digitales Vorsorgeprodukt zur Dokumentation deiner Wünsche und Pläne.
+-          Spenden und Projekte laufen ausschließlich über{" "}
+-          <a href="https://gemeinsam1.de" target="_blank" rel="noopener noreferrer" className="text-primary-light underline">
+-            Gemeinsam1 e.V.
+-          </a>{" "}
+-          — getrennt von Mein Wille. Wir verknüpfen nur, damit du deine Sadaqa-Jariya-Vorsorge planen kannst.
+-        </p>
+-      </div>
+-
+-      <Link href="/dashboard/sadaqa-jariya">
+-        <Button>Sadaqa-Jariya-Plan im Ordner</Button>
+-      </Link>
+-
+-      <div className="mt-8">
+-        <Disclaimer type="islamic" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Sadaqa Jariya" />;
+ }
+diff --git a/src/app/testament-erbe/page.tsx b/src/app/testament-erbe/page.tsx
+index 06ffab8..b9a4a57 100644
+--- a/src/app/testament-erbe/page.tsx
++++ b/src/app/testament-erbe/page.tsx
+@@ -1,53 +1,10 @@
+-import { testamentArticles } from "@/lib/knowledge/testament-erbe";
+-import { SourcesSection } from "@/components/knowledge/sources-section";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Card, CardTitle } from "@/components/ui/card";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+ export const metadata = {
+-  title: "Testament & Erbe — Mein Wille",
+-  description: "Islamisches Erbrecht: Farāʾiḍ, Waṣiyya und deutsches Recht für Muslime in Deutschland.",
++  title: "Testament und Erbe — Mein Wille",
++  robots: { index: false, follow: false },
+ };
+ 
+-export default function TestamentErbePage() {
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-12">
+-      <div className="mb-10">
+-        <p className="text-accent font-medium mb-2">Wissen & Orientierung</p>
+-        <h1 className="text-3xl font-bold text-primary mb-3">Testament & Erbe</h1>
+-        <p className="text-muted leading-relaxed">
+-          Im Islam ist Erbe keine bloße Formalität — es ist Amanah. Allah hat feste Erbanteile bestimmt,
+-          und du kannst einen begrenzten Teil frei verfügen.
+-        </p>
+-      </div>
+-
+-      <div className="mb-8 rounded-2xl bg-primary text-white p-6">
+-        <h2 className="text-xl font-bold mb-2">Farāʾiḍ und Waṣiyya — das Wichtigste</h2>
+-        <p className="text-white/90 text-sm leading-relaxed mb-3">
+-          <strong>Farāʾiḍ</strong> sind die festen Erbanteile aus dem Quran — für Ehepartner, Eltern, Söhne,
+-          Töchter und weitere Angehörige. Du kannst Pflicht-Erben nicht einfach ausschließen.
+-        </p>
+-        <p className="text-white/90 text-sm leading-relaxed">
+-          <strong>Waṣiyya</strong> ist der frei verfügbare Teil — klassisch maximal ein Drittel des Nachlasses.
+-          Damit kannst du Sadaqa Jariya, Wohltätigkeit oder Nicht-Pflicht-Erben bedenken. Mehr als ein Drittel
+-          erfordert die Zustimmung aller Erben.
+-        </p>
+-      </div>
+-
+-      <div className="space-y-6">
+-        {testamentArticles.map((article) => (
+-          <Card key={article.id}>
+-            <CardTitle>{article.title}</CardTitle>
+-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
+-            <p className="text-muted leading-relaxed">{article.content}</p>
+-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
+-          </Card>
+-        ))}
+-      </div>
+-
+-      <div className="mt-10 space-y-4">
+-        <Disclaimer type="islamic" />
+-        <Disclaimer type="legal" />
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Testament und Erbe" />;
+ }
+diff --git a/src/app/wissen/[slug]/page.tsx b/src/app/wissen/[slug]/page.tsx
+index d3ddbf4..a865df1 100644
+--- a/src/app/wissen/[slug]/page.tsx
++++ b/src/app/wissen/[slug]/page.tsx
+@@ -1,47 +1,6 @@
+-import Link from "next/link";
+ import { notFound } from "next/navigation";
+-import { wissenTopics } from "@/lib/knowledge/wissen-topics";
+-import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
+-import { RichArticleCard, WissenFormCta } from "@/components/knowledge/rich-article-card";
+-import { CHECK_LABELS } from "@/lib/design-tokens";
+-import { ArrowLeft } from "lucide-react";
+ 
+-export function generateStaticParams() {
+-  return wissenTopics.map((t) => ({ slug: t.slug }));
+-}
+-
+-const JANAZAH_CTA = "Janazah-Wünsche jetzt festhalten";
+-
+-export default async function WissenDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+-  const { slug } = await params;
+-  const article = wissenTopics.find((t) => t.slug === slug);
+-  if (!article) notFound();
+-
+-  const meta = WISSEN_META[article.id];
+-  const formLabel =
+-    slug === "janazah-wuensche"
+-      ? JANAZAH_CTA
+-      : article.details?.nextStepLabel ?? "In meinem Ordner festhalten";
+-
+-  return (
+-    <div className="max-w-3xl mx-auto px-4 py-8 md:py-12 pb-24">
+-      <nav className="sticky top-[57px] z-30 -mx-4 px-4 py-3 bg-background/95 backdrop-blur border-b border-border mb-6 md:static md:bg-transparent md:border-0 md:p-0 md:mb-6">
+-        <Link href="/wissen" className="text-sm font-semibold text-primary hover:underline flex items-center gap-1 min-h-[44px]">
+-          <ArrowLeft size={16} aria-hidden /> Zurück zu allen Themen
+-        </Link>
+-      </nav>
+-
+-      <RichArticleCard article={{ ...article, wissenMeta: meta }} />
+-
+-      {article.details?.nextStepHref && (
+-        <WissenFormCta href={article.details.nextStepHref} label={formLabel} />
+-      )}
+-
+-      <p className="mt-8 text-center">
+-        <Link href="/check" className="text-sm font-medium text-muted hover:text-primary underline-offset-4 hover:underline">
+-          {CHECK_LABELS.nav} starten
+-        </Link>
+-      </p>
+-    </div>
+-  );
++/** No topic is released: without a documented review there is nothing to show here. */
++export default function Page() {
++  notFound();
+ }
+diff --git a/src/app/wissen/page.tsx b/src/app/wissen/page.tsx
+index 041eb05..e120b2c 100644
+--- a/src/app/wissen/page.tsx
++++ b/src/app/wissen/page.tsx
+@@ -1,170 +1,10 @@
+-"use client";
++import { ContentInReview } from "@/components/knowledge/content-in-review";
+ 
+-import { useMemo, useState } from "react";
+-import Link from "next/link";
+-import { wissenTopics } from "@/lib/knowledge/wissen-topics";
+-import { WISSEN_META } from "@/lib/knowledge/wissen-meta";
+-import {
+-  WISSEN_CATEGORIES,
+-  WISSEN_ENTRY_TOPIC_IDS,
+-  WISSEN_SECTION_ID,
+-  categoryForTopicId,
+-  getUrgentTopicIds,
+-} from "@/lib/knowledge/wissen-hub";
+-import { WISSEN_CATEGORY_CONFIG } from "@/lib/knowledge/wissen-categories";
+-import type { KnowledgeArticle } from "@/lib/types";
+-import { PageHeader } from "@/components/marketing/marketing-ui";
+-import { WissenMobileFilter, WissenSidebar } from "@/components/wissen/wissen-sidebar";
+-import { WissenTopicRow } from "@/components/wissen/wissen-topic-row";
+-import { useWissenScrollSpy } from "@/components/wissen/use-wissen-scroll-spy";
+-import { Button } from "@/components/ui/button";
+-import { Disclaimer } from "@/components/ui/disclaimer";
+-import { Search } from "lucide-react";
+-import { BRAND } from "@/lib/brand";
++export const metadata = {
++  title: "Islamisches Wissen — Mein Wille",
++  robots: { index: false, follow: false },
++};
+ 
+-function enriched(): KnowledgeArticle[] {
+-  return wissenTopics.map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }));
+-}
+-
+-export default function WissenPage() {
+-  const [query, setQuery] = useState("");
+-  const topics = useMemo(() => enriched(), []);
+-  const isSearching = query.trim().length > 0;
+-  const { active, scrollToSection } = useWissenScrollSpy(!isSearching);
+-
+-  const filtered = useMemo(() => {
+-    const q = query.toLowerCase().trim();
+-    if (!q) return topics;
+-    return topics.filter(
+-      (t) => t.title.toLowerCase().includes(q) || t.summary.toLowerCase().includes(q)
+-    );
+-  }, [topics, query]);
+-
+-  const entryTopics = topics.filter((t) =>
+-    WISSEN_ENTRY_TOPIC_IDS.includes(t.id as (typeof WISSEN_ENTRY_TOPIC_IDS)[number])
+-  );
+-  const urgentTopics = topics.filter((t) => getUrgentTopicIds().includes(t.id));
+-
+-  const topicsByCategory = useMemo(() => {
+-    const map = Object.fromEntries(WISSEN_CATEGORIES.map((c) => [c, [] as KnowledgeArticle[]])) as Record<
+-      (typeof WISSEN_CATEGORIES)[number],
+-      KnowledgeArticle[]
+-    >;
+-    for (const t of topics) {
+-      map[categoryForTopicId(t.id)].push(t);
+-    }
+-    return map;
+-  }, [topics]);
+-
+-  return (
+-    <div className="bg-background min-h-screen pb-28">
+-      <div className="bg-card border-b border-border">
+-        <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+-          <PageHeader
+-            title="Wissen, das dir Entscheidungen leichter macht"
+-            description="Quellenbasierte Orientierung für islamische Vorsorge — von Notfall bis Akhira."
+-          />
+-          <div className="relative max-w-2xl">
+-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={22} aria-hidden />
+-            <input
+-              type="search"
+-              value={query}
+-              onChange={(e) => setQuery(e.target.value)}
+-              placeholder="Worüber möchtest du mehr wissen?"
+-              className="w-full pl-12 pr-5 py-4 rounded-2xl border-2 border-border bg-background text-foreground text-body-lg min-h-[56px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-emerald/30"
+-              aria-label="Wissen durchsuchen"
+-            />
+-          </div>
+-        </div>
+-      </div>
+-
+-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-10">
+-        {!isSearching && (
+-          <WissenMobileFilter active={active} onSelect={scrollToSection} />
+-        )}
+-
+-        <div className="grid lg:grid-cols-[220px_1fr] gap-8 lg:gap-10">
+-          {!isSearching && (
+-            <aside className="hidden lg:block">
+-              <div className="sticky top-24 rounded-2xl border border-border bg-card p-3">
+-                <WissenSidebar active={active} onSelect={scrollToSection} />
+-              </div>
+-            </aside>
+-          )}
+-
+-          <main className="min-w-0 space-y-12 scroll-mt-28">
+-            {isSearching ? (
+-              <section>
+-                <h2 className="text-section-title font-bold text-foreground mb-5">
+-                  Suchergebnisse ({filtered.length})
+-                </h2>
+-                <div className="space-y-3">
+-                  {filtered.map((a) => (
+-                    <WissenTopicRow key={a.id} article={a} />
+-                  ))}
+-                </div>
+-                {filtered.length === 0 && (
+-                  <p className="text-center text-muted py-12 text-body">
+-                    Kein Thema gefunden — Suche anpassen.
+-                  </p>
+-                )}
+-              </section>
+-            ) : (
+-              <>
+-                <section id={WISSEN_SECTION_ID.entry} className="scroll-mt-28">
+-                  <h2 className="text-section-title font-bold text-foreground mb-5">Für deinen Einstieg</h2>
+-                  <div className="space-y-3">
+-                    {entryTopics.map((a) => (
+-                      <WissenTopicRow key={a.id} article={a} />
+-                    ))}
+-                  </div>
+-                </section>
+-
+-                <section id={WISSEN_SECTION_ID.urgent} className="scroll-mt-28">
+-                  <h2 className="text-section-title font-bold text-foreground mb-5">Sofort wichtig</h2>
+-                  <div className="space-y-3">
+-                    {urgentTopics.map((a) => (
+-                      <WissenTopicRow key={a.id} article={a} compact />
+-                    ))}
+-                  </div>
+-                </section>
+-
+-                {WISSEN_CATEGORIES.map((catId) => (
+-                  <section
+-                    key={catId}
+-                    id={WISSEN_SECTION_ID[catId]}
+-                    className="scroll-mt-28"
+-                    aria-labelledby={`wissen-heading-${catId}`}
+-                  >
+-                    <h2
+-                      id={`wissen-heading-${catId}`}
+-                      className="text-section-title font-bold text-foreground mb-2"
+-                    >
+-                      {WISSEN_CATEGORY_CONFIG[catId].label}
+-                    </h2>
+-                    <p className="text-body text-muted mb-5">
+-                      {topicsByCategory[catId].length} Themen in dieser Kategorie
+-                    </p>
+-                    <div className="space-y-3">
+-                      {topicsByCategory[catId].map((a) => (
+-                        <WissenTopicRow key={a.id} article={a} />
+-                      ))}
+-                    </div>
+-                  </section>
+-                ))}
+-              </>
+-            )}
+-
+-            <div className="pt-4">
+-              <Link href="/check">
+-                <Button size="lg">{BRAND.ctaPrimary}</Button>
+-              </Link>
+-            </div>
+-
+-            <Disclaimer type="islamic" />
+-          </main>
+-        </div>
+-      </div>
+-    </div>
+-  );
++export default function Page() {
++  return <ContentInReview title="Islamisches Wissen" />;
+ }
+diff --git a/src/components/knowledge/content-in-review.tsx b/src/components/knowledge/content-in-review.tsx
+new file mode 100644
+index 0000000..d04498e
+--- /dev/null
++++ b/src/components/knowledge/content-in-review.tsx
+@@ -0,0 +1,19 @@
++import Link from "next/link";
++
++/** Shown instead of religious and legal statements until a documented review exists. No knowledge data here. */
++export function ContentInReview({ title }: { title: string }) {
++  return (
++    <div className="max-w-3xl mx-auto px-4 py-12">
++      <h1 className="text-3xl font-bold text-primary mb-3">{title}</h1>
++      <p className="text-muted leading-relaxed">
++        Inhalte zu diesem Thema erscheinen erst nach fachlicher Prüfung. Bei religiösen Fragen helfen Imam oder Gelehrte, bei
++        rechtlichen und medizinischen Fragen Anwalt, Notar oder Arzt.
++      </p>
++      <p className="mt-6">
++        <Link href="/dashboard" className="text-primary font-semibold hover:underline">
++          Eigene Wünsche im Ordner festhalten
++        </Link>
++      </p>
++    </div>
++  );
++}
+diff --git a/src/components/marketing/akhira-section.tsx b/src/components/marketing/akhira-section.tsx
+index 61b3fa5..9dfc237 100644
+--- a/src/components/marketing/akhira-section.tsx
++++ b/src/components/marketing/akhira-section.tsx
+@@ -1,9 +1,4 @@
+-"use client";
+-
+-import { useState } from "react";
+ import Link from "next/link";
+-import { PrimarySourceCard } from "@/components/ui/primary-source-card";
+-import { islamicSources } from "@/lib/knowledge/sources";
+ import { COLORS } from "@/lib/design-tokens";
+ import { ArrowRight, BookOpen, Heart, Users } from "lucide-react";
+ 
+@@ -14,9 +9,6 @@ const AKHIRA_ITEMS = [
+ ];
+ 
+ export function AkhiraSection() {
+-  const [sourceOpen, setSourceOpen] = useState(false);
+-  const hadith = islamicSources["hadith-sadaqa-jariya"];
+-
+   return (
+     <section
+       className="py-16 md:py-20 text-white"
+@@ -46,22 +38,6 @@ export function AkhiraSection() {
+             </Link>
+           ))}
+         </div>
+-        <button
+-          type="button"
+-          id="akhira-source-toggle"
+-          onClick={() => setSourceOpen(!sourceOpen)}
+-          className="text-sm font-semibold text-emerald hover:text-white transition-colors min-h-[44px] px-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald/50"
+-          aria-expanded={sourceOpen}
+-          aria-controls="akhira-source-panel"
+-        >
+-          {sourceOpen ? "Quelle ausblenden" : "Islamische Primärquelle anzeigen (Sahih Muslim 1631)"}
+-        </button>
+-        {sourceOpen && hadith && (
+-          <div id="akhira-source-panel" role="region" aria-labelledby="akhira-source-toggle" className="mt-4">
+-            <PrimarySourceCard source={hadith} defaultOpen />
+-            <p className="text-sm text-white/65 mt-3">Sinngemäße Einordnung — keine Garantie religiöser Belohnung, keine Fatwa.</p>
+-          </div>
+-        )}
+       </div>
+     </section>
+   );
+diff --git a/src/lib/ai/rule-based-ai-provider.ts b/src/lib/ai/rule-based-ai-provider.ts
+index 9645edb..54df514 100644
+--- a/src/lib/ai/rule-based-ai-provider.ts
++++ b/src/lib/ai/rule-based-ai-provider.ts
+@@ -4,8 +4,9 @@ import {
+   getCriticalMissing,
+   getRecommendedNextStep,
+ } from "@/lib/domain/validation";
+-import { buildFamilyMessageContext, labelForField, moduleTitle } from "./context";
++import { buildFamilyMessageContext, moduleTitle } from "./context";
+ import { answerKnowledgeQuestion } from "./knowledge-answer";
++import { extractFromFreeText } from "./rule-based-extract";
+ import { DOMAIN_DISCLAIMER } from "./safety";
+ import type {
+   AmanahAIProvider,
+@@ -84,68 +85,7 @@ export class RuleBasedAIProvider implements AmanahAIProvider {
+   }
+ 
+   async extract(data: AmanahOrdnerData, freeText: string): Promise<ExtractResult> {
+-    const suggestions: ExtractResult["suggestedUpdates"] = [];
+-    const clarificationNeeded: string[] = [];
+-
+-    const phoneMatch = freeText.match(/(?:\+49|0)\s*[\d\s\-/]{8,}/);
+-    if (phoneMatch) {
+-      suggestions.push({
+-        fieldPath: "emergencyCard.emergencyContact1.phone",
+-        value: phoneMatch[0].replace(/\s/g, ""),
+-        confidence: "high",
+-        label: labelForField("emergencyCard.emergencyContact1.phone"),
+-      });
+-    }
+-
+-    const relationPatterns = [
+-      { re: /(?:meine|mein)\s+(?:schwester|bruder|ehefrau|ehemann|mutter|vater|sohn|tochter)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Angehörige" },
+-      { re: /(?:schwester|bruder)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Geschwister" },
+-      { re: /(?:kontakt|anrufen|informieren).*?([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Kontakt" },
+-    ];
+-
+-    for (const { re, rel } of relationPatterns) {
+-      const m = freeText.match(re);
+-      if (m?.[1]) {
+-        suggestions.push({
+-          fieldPath: "emergencyCard.emergencyContact1.name",
+-          value: m[1],
+-          confidence: "medium",
+-          label: labelForField("emergencyCard.emergencyContact1.name"),
+-        });
+-        if (!data.emergencyCard.emergencyContact1.relation) {
+-          suggestions.push({
+-            fieldPath: "emergencyCard.emergencyContact1.relation",
+-            value: rel,
+-            confidence: "low",
+-            label: labelForField("emergencyCard.emergencyContact1.relation"),
+-          });
+-        }
+-        break;
+-      }
+-    }
+-
+-    if (/bestatt|janazah|beerdig/i.test(freeText)) {
+-      const fd = freeText.match(/bestatter\s+([^.,\n]+)/i);
+-      if (fd?.[1]) {
+-        suggestions.push({
+-          fieldPath: "janazahWishes.preferredFuneralDirector",
+-          value: fd[1].trim(),
+-          confidence: "medium",
+-          label: labelForField("janazahWishes.preferredFuneralDirector"),
+-        });
+-      }
+-    }
+-
+-    if (suggestions.length === 0) {
+-      clarificationNeeded.push("Welche Angabe möchtest du festhalten — Notfallkontakt, Janazah oder Familienwunsch?");
+-    }
+-
+-    return {
+-      suggestedUpdates: suggestions,
+-      clarificationNeeded,
+-      previewNote: "Vorschläge werden nicht automatisch gespeichert — bitte aktiv übernehmen.",
+-      disclaimer: DOMAIN_DISCLAIMER,
+-    };
++    return extractFromFreeText(data, freeText);
+   }
+ 
+   async familyMessage(data: AmanahOrdnerData, tone: FamilyMessageTone): Promise<FamilyMessageResult> {
+diff --git a/src/lib/ai/rule-based-extract.ts b/src/lib/ai/rule-based-extract.ts
+new file mode 100644
+index 0000000..f9d0738
+--- /dev/null
++++ b/src/lib/ai/rule-based-extract.ts
+@@ -0,0 +1,70 @@
++import type { AmanahOrdnerData } from "@/lib/domain/types";
++import { labelForField } from "./context";
++import { DOMAIN_DISCLAIMER } from "./safety";
++import type { ExtractResult } from "./types";
++
++/** Own file, because it runs in the browser: no knowledge texts here. */
++export async function extractFromFreeText(data: AmanahOrdnerData, freeText: string): Promise<ExtractResult> {
++  const suggestions: ExtractResult["suggestedUpdates"] = [];
++  const clarificationNeeded: string[] = [];
++
++  const phoneMatch = freeText.match(/(?:\+49|0)\s*[\d\s\-/]{8,}/);
++  if (phoneMatch) {
++    suggestions.push({
++      fieldPath: "emergencyCard.emergencyContact1.phone",
++      value: phoneMatch[0].replace(/\s/g, ""),
++      confidence: "high",
++      label: labelForField("emergencyCard.emergencyContact1.phone"),
++    });
++  }
++
++  const relationPatterns = [
++    { re: /(?:meine|mein)\s+(?:schwester|bruder|ehefrau|ehemann|mutter|vater|sohn|tochter)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Angehörige" },
++    { re: /(?:schwester|bruder)\s+([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Geschwister" },
++    { re: /(?:kontakt|anrufen|informieren).*?([A-ZÄÖÜ][a-zäöüß]+)/i, rel: "Kontakt" },
++  ];
++
++  for (const { re, rel } of relationPatterns) {
++    const m = freeText.match(re);
++    if (m?.[1]) {
++      suggestions.push({
++        fieldPath: "emergencyCard.emergencyContact1.name",
++        value: m[1],
++        confidence: "medium",
++        label: labelForField("emergencyCard.emergencyContact1.name"),
++      });
++      if (!data.emergencyCard.emergencyContact1.relation) {
++        suggestions.push({
++          fieldPath: "emergencyCard.emergencyContact1.relation",
++          value: rel,
++          confidence: "low",
++          label: labelForField("emergencyCard.emergencyContact1.relation"),
++        });
++      }
++      break;
++    }
++  }
++
++  if (/bestatt|janazah|beerdig/i.test(freeText)) {
++    const fd = freeText.match(/bestatter\s+([^.,\n]+)/i);
++    if (fd?.[1]) {
++      suggestions.push({
++        fieldPath: "janazahWishes.preferredFuneralDirector",
++        value: fd[1].trim(),
++        confidence: "medium",
++        label: labelForField("janazahWishes.preferredFuneralDirector"),
++      });
++    }
++  }
++
++  if (suggestions.length === 0) {
++    clarificationNeeded.push("Welche Angabe möchtest du festhalten — Notfallkontakt, Janazah oder Familienwunsch?");
++  }
++
++  return {
++    suggestedUpdates: suggestions,
++    clarificationNeeded,
++    previewNote: "Vorschläge werden nicht automatisch gespeichert — bitte aktiv übernehmen.",
++    disclaimer: DOMAIN_DISCLAIMER,
++  };
++}
+diff --git a/src/lib/guided-flow/answer-parser.ts b/src/lib/guided-flow/answer-parser.ts
+index bfef583..b9ae8e5 100644
+--- a/src/lib/guided-flow/answer-parser.ts
++++ b/src/lib/guided-flow/answer-parser.ts
+@@ -1,7 +1,7 @@
+ import type { AmanahOrdnerData } from "@/lib/domain/types";
+ import { labelForField } from "@/lib/ai/context";
+ import { enforceAiSafety } from "@/lib/ai/safety";
+-import { ruleBasedAIProvider } from "@/lib/ai/rule-based-ai-provider";
++import { extractFromFreeText } from "@/lib/ai/rule-based-extract";
+ import { getQuestionById } from "./question-plan";
+ import { buildPatchPreview } from "./patch-preview";
+ import type { GuidedQuestion, ParseAnswerResponse, SuggestedUpdate } from "./types";
+@@ -175,7 +175,7 @@ export async function parseGuidedAnswer(
+   clarifications = ruleResult.clarifications;
+ 
+   if (options?.useAiExtract && updates.length === 0) {
+-    const extract = await ruleBasedAIProvider.extract(data, answer);
++    const extract = await extractFromFreeText(data, answer);
+     for (const s of extract.suggestedUpdates) {
+       updates.push({
+         fieldPath: s.fieldPath,

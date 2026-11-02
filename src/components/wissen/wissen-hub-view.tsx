@@ -159,7 +159,7 @@ export function WissenHubView({ topics, publishedArticles, plannedTopics, areasO
             Islamisches Wissenszentrum
           </h2>
           <p className="text-muted mb-5 max-w-3xl">
-            Eine Sadaqa Jāriya: Alle religiösen Artikel bleiben kostenlos. Islamische Lehre und deutsches Recht werden getrennt erklärt.
+            Alle Artikel bleiben dauerhaft kostenlos. Islamische Lehre und deutsches Recht werden getrennt erklärt.
           </p>
           {areasOverview}
         </section>

@@ -28,15 +28,15 @@ describe("Islamic Sources", () => {
 });
 
 describe("Knowledge Base", () => {
-  it("returns only non-draft articles", () => {
+  it("returns only organisational help until a review is documented", () => {
     const articles = getAllPublishedArticles();
-    expect(articles.length).toBeGreaterThan(10);
-    expect(articles.every((a) => a.reviewStatus !== "draft")).toBe(true);
+    expect(articles.length).toBe(5);
+    expect(articles.every((a) => a.reviewStatus !== "reviewed")).toBe(true);
   });
 
-  it("searches knowledge by query", () => {
-    const results = searchKnowledge("janazah");
-    expect(results.length).toBeGreaterThan(0);
+  it("searches knowledge by query, without unreviewed religious entries", () => {
+    expect(searchKnowledge("notfallkontakte").length).toBeGreaterThan(0);
+    expect(searchKnowledge("janazah").filter((a) => /janazah/i.test(a.title))).toEqual([]);
   });
 
   it("all culture filter cards have sources", () => {

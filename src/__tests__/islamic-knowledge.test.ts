@@ -61,9 +61,9 @@ describe("knowledge catalog (migrated legacy content)", () => {
     expect(unknown).toEqual([]);
   });
 
-  it("publishes nothing yet — legacy 'reviewed' flags are not trusted", () => {
+  it("publishes nothing yet, and no legacy record claims a review any more", () => {
     expect(KNOWLEDGE_CATALOG.some((a) => a.status === "PUBLISHED" || a.status === "APPROVED")).toBe(false);
-    expect(KNOWLEDGE_CATALOG.some((a) => a.legacy?.claimedStatus === "reviewed")).toBe(true);
+    expect(KNOWLEDGE_CATALOG.some((a) => a.legacy?.claimedStatus === "reviewed")).toBe(false);
     expect(getPublishedArticles()).toEqual([]);
     expect(getAreaCoverage().every((c) => c.published === 0)).toBe(true);
   });

@@ -8,9 +8,9 @@ const steps = [
   { num: 1, title: "Arzt / Totenschein", desc: "Hausarzt oder Notarzt kontaktieren. Totenschein ausstellen lassen." },
   { num: 2, title: "Engste Angehörige informieren", desc: "Familie, Ehepartner, enge Verwandte sofort benachrichtigen." },
   { num: 3, title: "Islamischen Bestatter oder Moschee kontaktieren", desc: "24/7 erreichbare islamische Bestatter oder die örtliche Moschee anrufen." },
-  { num: 4, title: "Ghusl / Kafan organisieren", desc: "Totenwaschung und Leichentuch vorbereiten. Bestatter oder Moschee-Helfer." },
+  { num: 4, title: "Ghusl und Kafan ansprechen", desc: "Bestatter oder Moschee fragen, wer das übernimmt und was zu tun ist." },
   { num: 5, title: "Janazah-Gebet vorbereiten", desc: "Moschee kontaktieren für Salāt al-Janāzah. Zeit und Ort abstimmen." },
-  { num: 6, title: "Schnelle würdige islamische Bestattung prüfen", desc: "Unnötige Verzögerung vermeiden. Wünsche des Verstorbenen beachten." },
+  { num: 6, title: "Zeitpunkt der Bestattung klären", desc: "Mit Bestatter, Moschee und Friedhof abstimmen. Wünsche des Verstorbenen beachten." },
   { num: 7, title: "Standesamt / Friedhof / Dokumente", desc: "Sterbeurkunde, Friedhofsgenehmigung, Bestattungsgenehmigung." },
   { num: 8, title: "Schulden / Amanah / Familienwünsche prüfen", desc: "Offene Schulden, anvertraute Güter und dokumentierte Wünsche klären." },
 ];

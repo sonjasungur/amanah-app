@@ -1,6 +1,7 @@
+import { hasReviewEvidence, isProductionSafe } from "./safety";
 import type { KnowledgeEntry } from "./types";
 
-const REVIEWED = "2026-07-01";
+/** No documented review exists for any entry yet. Only organisational help is public meanwhile. */
 
 export const knowledgeEntriesDe: KnowledgeEntry[] = [
   {
@@ -12,11 +13,10 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Eine Notfallmappe bündelt wichtige Kontakte, Dokumenthinweise und Wünsche — zur Orientierung für Angehörige im Ernstfall.",
     content:
       "Eine Notfallmappe (Mein Wille) hilft Angehörigen, im Ernstfall schneller zu handeln. Typische Inhalte: Notfallkontakte, medizinische Hinweise, Vorsorgevollmacht/Patientenverfügung (Hinweise, nicht die Originale), Bestattungswünsche, Schuldenhinweise, digitaler Nachlass und ein Familienbrief. Mein Wille ersetzt keine Rechtsberatung und garantiert keine Vollständigkeit — fachliche Prüfung empfohlen.",
-    sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+    sourceLabel: "Mein Wille — Organisationsinformation",
+    reviewedStatus: "orientation",
     riskLevel: "low",
     tags: ["Notfallmappe", "Mein Wille", "Vorbereitung", "Familie"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-notfallkontakte",
@@ -26,12 +26,11 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     summary:
       "Benenne eine oder mehrere Vertrauenspersonen, die im Notfall zuerst informiert werden sollen.",
     content:
-      "Notfallkontakte sind Personen, die im Krankheits- oder Todesfall zuerst erreicht werden sollen — z. B. Ehepartner, Geschwister oder eine Vertrauensperson. Notiere Name, Telefonnummer und Beziehung. Ergänze optional eine zweite Kontaktperson. Mein Wille speichert diese Angaben zur Vorbereitung; rechtliche Vertretung regelt separat eine Vorsorgevollmacht — bitte Anwalt/Notar oder Beratungsstelle konsultieren.",
-    sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+      "Notfallkontakte sind Personen, die im Krankheits- oder Todesfall zuerst erreicht werden sollen — z. B. Ehepartner, Geschwister oder eine Vertrauensperson. Notiere Name, Telefonnummer und Beziehung. Ergänze optional eine zweite Kontaktperson. Mein Wille speichert diese Angaben zur Vorbereitung; wer dich rechtlich vertreten darf, ist damit nicht geregelt. Frage dazu Anwalt, Notar oder eine Beratungsstelle.",
+    sourceLabel: "Mein Wille — Organisationsinformation",
+    reviewedStatus: "orientation",
     riskLevel: "low",
     tags: ["Notfallkontakt", "Vertrauensperson", "Telefon", "Familie"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-dokumentenuebersicht",
@@ -42,11 +41,10 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Eine Übersicht hilft Angehörigen, relevante Unterlagen zu finden — ohne Passwörter oder sensible Zugangsdaten zu speichern.",
     content:
       "Eine Dokumentenübersicht listet, wo wichtige Unterlagen aufbewahrt werden: z. B. Ausweis, Versicherungen, Vorsorgevollmacht, Patientenverfügung, Testament, Mietvertrag, Kontounterlagen. In Mein Wille werden nur Hinweise dokumentiert — keine Passwörter. Originale und rechtliche Wirksamkeit müssen separat geprüft werden. Fachliche Prüfung durch Anwalt/Notar empfohlen.",
-    sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+    sourceLabel: "Mein Wille — Organisationsinformation",
+    reviewedStatus: "orientation",
     riskLevel: "low",
     tags: ["Dokumente", "Übersicht", "Aufbewahrung", "Vorsorge"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-vorsorgevollmacht-allgemein",
@@ -59,10 +57,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Mit einer Vorsorgevollmacht kannst du eine Person benennen, die in deinem Namen handeln darf, wenn du es selbst nicht mehr kannst — z. B. bei Behörden, Banken oder Verträgen. Form, Umfang und Wirksamkeit hängen vom deutschen Recht ab. Mein Wille hilft, deine Wünsche zu dokumentieren — ersetzt keine Rechtsberatung. Bitte Anwalt, Notar oder Bundesjustizministerium (Orientierung) konsultieren.",
     sourceLabel: "Bundesjustizministerium — Orientierung",
     sourceUrl: "https://www.bmjv.de/DE/themen/familie_und_partnerschaft/vorsorgevollmacht/vorsorgevollmacht_node.html",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Vorsorgevollmacht", "Krankheit", "Vertretung", "Recht"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-patientenverfuegung-allgemein",
@@ -75,10 +72,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Eine Patientenverfügung legt fest, welche medizinischen Maßnahmen du wünschen oder ablehnen möchtest, wenn du nicht mehr entscheidungsfähig bist. Sie dient der Orientierung für Ärzte und Angehörige. Mein Wille hilft, Wünsche vorzubereiten — keine medizinische Beratung. Individuelle Entscheidungen bitte mit Arzt/Fachperson besprechen. Allgemeine Informationen: Bundesgesundheitsministerium.",
     sourceLabel: "Bundesgesundheitsministerium — Orientierung",
     sourceUrl: "https://www.bundesgesundheitsministerium.de/themen/pflege/patientenverfuegung.html",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Patientenverfügung", "Medizin", "Wünsche", "Vorsorge"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-bestattungswuensche-allgemein",
@@ -90,10 +86,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     content:
       "Bestattungswünsche können Form der Beisetzung, gewünschten Bestatter, islamische Grundsätze, Kostenrahmen und Hinweise für die Familie umfassen. In Deutschland gelten zusätzlich rechtliche und organisatorische Regeln. Dokumentiere Wünsche in Mein Wille zur Orientierung — fachliche Prüfung mit Bestatter, Imam/Gelehrten und ggf. Anwalt empfohlen.",
     sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Bestattung", "Janazah", "Wünsche", "Bestatter"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-janazah-begriffe",
@@ -105,10 +100,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     content:
       "Janazah umfasst die Begleitung eines verstorbenen Muslims: rituelle Waschung (Ghusl), Leichentücher (Kafan), Janazah-Gebet (Salāt al-Janāzah) und Beisetzung. Details können je nach Meinung variieren. Mein Wille erklärt Begriffe nur allgemein — bei Detailfragen Imam/Gelehrte konsultieren, keine Fatwa.",
     sourceLabel: "Klassische Fiqh-Literatur — allgemeine Orientierung",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Janazah", "Bestattung", "Islam", "Begriffe"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-ghusl-kafan",
@@ -120,10 +114,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     content:
       "Ghusl (Totenwaschung) ist die rituelle Reinigung des Verstorbenen nach islamischer Tradition. Kafan sind die weißen Tücher, in die der Verstorbene gehüllt wird. Wer wäscht und wie viele Tücher — das kann Meinungsunterschiede haben. Moschee, Bestatter oder Imam/Gelehrte können bei der praktischen Umsetzung helfen. Keine verbindliche religiöse Entscheidung durch die App.",
     sourceLabel: "Klassische Fiqh-Literatur — allgemeine Orientierung",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Ghusl", "Kafan", "Janazah", "Totenwaschung"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-sadaqa-jariya",
@@ -135,10 +128,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     content:
       "Sadaqa Jariya (beständige Wohltätigkeit) kann z. B. Brunnen, Bildung, Moschee-Unterstützung oder andere Projekte umfassen, deren Nutzen anhält. Muslime planen manchmal Sadaqa Jariya als Teil ihrer Vorsorge. Mein Wille hilft, Wünsche zu dokumentieren — keine Fatwa und keine Garantie religiöser Bewertung. Detailfragen mit Imam/Gelehrten besprechen.",
     sourceLabel: "Hadith-Literatur — allgemeine Orientierung",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Sadaqa Jariya", "Wohltätigkeit", "Barzakh", "Spende"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-digitaler-nachlass",
@@ -150,10 +142,9 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     content:
       "Digitaler Nachlass betrifft E-Mail, Social Media, Cloud, Abos und Geräte. In Mein Wille werden nur Hinweise dokumentiert — keine Passwörter. Angehörige brauchen Orientierung, welche Konten existieren und was damit geschehen soll. Rechtliche Zugänge regeln gesonderte Vollmachten — Anwalt/Notar konsultieren.",
     sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+    reviewedStatus: "needs_review",
     riskLevel: "low",
     tags: ["Digitaler Nachlass", "Online", "Konten", "Hinweise"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-familiennachricht",
@@ -164,11 +155,10 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Ein Familienbrief oder eine Nachricht an Vertrauenspersonen erklärt deine wichtigsten Wünsche verständlich.",
     content:
       "Eine Familiennachricht oder ein Familienbrief kann Angehörige im schweren Moment orientieren: wer zuerst informiert werden soll, wichtige Wünsche zu Krankheit, Bestattung und Spiritualität. Mein Wille hilft beim Formulieren — Entwurf immer selbst prüfen lassen. Kein automatischer Versand, keine Rechtsberatung.",
-    sourceLabel: "Mein Wille — Orientierungshilfe",
-    reviewedStatus: "reviewed",
+    sourceLabel: "Mein Wille — Organisationsinformation",
+    reviewedStatus: "orientation",
     riskLevel: "low",
     tags: ["Familienbrief", "Vertrauensperson", "Nachricht", "Familie"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-app-grenzen",
@@ -179,11 +169,10 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
       "Mein Wille dient der Orientierung und Vorbereitung — keine Rechts-, Medizin- oder Fatwa-Beratung.",
     content:
       "Mein Wille und Vorsorge-Assistent helfen beim Ordnen, Formulieren und Erkennen offener Punkte. Sie ersetzen keinen Imam/Gelehrten, Arzt, Anwalt oder Notar. Keine Garantie auf Vollständigkeit oder rechtliche Wirksamkeit. Bei individuellen Fragen: Recht — Anwalt/Notar; Medizin — Arzt/Fachperson; Religion — Imam/Gelehrte.",
-    sourceLabel: "Mein Wille — Sicherheitshinweis",
-    reviewedStatus: "reviewed",
+    sourceLabel: "Mein Wille — Organisationsinformation",
+    reviewedStatus: "orientation",
     riskLevel: "low",
     tags: ["Disclaimer", "Grenzen", "Fachliche Prüfung", "Sicherheit"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-notfallmappe-checkliste",
@@ -197,7 +186,6 @@ export const knowledgeEntriesDe: KnowledgeEntry[] = [
     reviewedStatus: "draft",
     riskLevel: "low",
     tags: ["Checkliste", "Notfallmappe", "Vorbereitung"],
-    lastReviewedAt: REVIEWED,
   },
   {
     id: "kb-janazah-deutschland",
@@ -219,11 +207,11 @@ export function getAllEntries(): KnowledgeEntry[] {
 }
 
 export function getProductionEntries(): KnowledgeEntry[] {
-  return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");
+  return getAllEntries().filter(isProductionSafe);
 }
 
 export function getReviewedEntries(): KnowledgeEntry[] {
-  return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");
+  return getAllEntries().filter(hasReviewEvidence);
 }
 
 export function getEntriesNeedingReview(): KnowledgeEntry[] {

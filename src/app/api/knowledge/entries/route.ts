@@ -11,6 +11,6 @@ export async function GET(request: Request) {
     language,
     count: entries.length,
     entries,
-    disclaimer: "Geprüfte Wissensbasis — allgemeine Orientierung, keine Rechts-/Medizin-/Fatwa-Beratung.",
+    disclaimer: "Organisationsinformation, nicht fachlich geprüft — keine Rechts-, Medizin- oder Fatwa-Beratung.",
   });
 }

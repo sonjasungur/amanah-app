@@ -47,15 +47,20 @@ export function knowledgeRedirectMessage(level: KnowledgeSafetyLevel): string {
   }
 }
 
+export function hasReviewEvidence(entry: KnowledgeEntry): boolean {
+  const evidence = entry.reviewEvidence;
+  return entry.reviewedStatus === "reviewed" && Boolean(evidence?.reviewer && evidence.reviewedAt && evidence.document);
+}
+
+/** May be delivered publicly: documented review, or organisational help without religious or legal statements. */
 export function isProductionSafe(entry: KnowledgeEntry): boolean {
-  if (entry.reviewedStatus === "reviewed") return true;
-  if (entry.reviewedStatus === "draft" && entry.riskLevel === "low") return true;
-  return false;
+  return hasReviewEvidence(entry) || entry.reviewedStatus === "orientation";
 }
 
 export function reviewBadge(entry: KnowledgeEntry): string | undefined {
-  if (entry.reviewedStatus === "reviewed") return undefined;
+  if (hasReviewEvidence(entry)) return undefined;
+  if (entry.reviewedStatus === "orientation") return "Organisationsinformation, nicht fachlich geprüft";
   if (entry.reviewedStatus === "needs_review") return "In fachlicher Prüfung";
   if (entry.reviewedStatus === "draft") return "Entwurf — allgemeine Orientierung";
-  return undefined;
+  return "In fachlicher Prüfung";
 }

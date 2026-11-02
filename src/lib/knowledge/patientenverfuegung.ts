@@ -9,7 +9,7 @@ export const patientenverfuegungArticles: KnowledgeArticle[] = [
     content:
       "Wenn du nicht mehr entscheidungsfähig bist, braucht deine Familie Klarheit. Eine Patientenverfügung dokumentiert deine medizinischen Wünsche — z. B. Reanimation, Beatmung, künstliche Ernährung.",
     sourceIds: ["official-patientenverfuegung"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "patientenverfuegung",
   },
   {
@@ -20,7 +20,7 @@ export const patientenverfuegungArticles: KnowledgeArticle[] = [
     content:
       "Ohne Patientenverfügung und Vorsorgevollmacht kann im Krankenhaus nicht klar sein, wer entscheidet und welche religiösen Wünsche gelten. Dokumentiere medizinische UND religiöse Wünsche.",
     sourceIds: ["official-patientenverfuegung", "official-vorsorgevollmacht"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "patientenverfuegung",
   },
   {
@@ -31,7 +31,7 @@ export const patientenverfuegungArticles: KnowledgeArticle[] = [
     content:
       "Muslimische Patienten haben oft spezielle Wünsche: Imam-Besuch, Gebetszeiten, Schamgrenzen bei Pflege, Halal-Ernährung. Diese Wünsche sollten in der Patientenverfügung oder einem Begleitdokument stehen.",
     sourceIds: ["official-patientenverfuegung"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "patientenverfuegung",
   },
   {
@@ -42,7 +42,7 @@ export const patientenverfuegungArticles: KnowledgeArticle[] = [
     content:
       "Die Vorsorgevollmacht bestimmt, wer für dich handelt. Die Betreuungsverfügung legt fest, wer Betreuer werden soll (und wer nicht). Beides ergänzt die Patientenverfügung.",
     sourceIds: ["official-vorsorgevollmacht"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "testament",
   },
 ];

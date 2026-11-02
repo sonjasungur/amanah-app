@@ -117,10 +117,14 @@ if (mode === "public-pilot") {
   }
 
   const knowledgeEntries = read("src/lib/knowledge/entries.ts");
-  if (!knowledgeEntries.includes('return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");')) {
-    fail("Public knowledge filter is not strict reviewed-only");
+  const knowledgeSafety = read("src/lib/knowledge/safety.ts");
+  if (
+    !knowledgeEntries.includes("return getAllEntries().filter(isProductionSafe);") ||
+    !knowledgeSafety.includes('return hasReviewEvidence(entry) || entry.reviewedStatus === "orientation";')
+  ) {
+    fail("Public knowledge filter does not require a documented review");
   } else {
-    ok("Public knowledge filter is reviewed-only");
+    ok("Public knowledge filter requires a documented review");
   }
 
   const wissenPage = read("src/app/wissen/page.tsx");

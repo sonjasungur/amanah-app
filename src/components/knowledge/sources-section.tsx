@@ -1,4 +1,4 @@
-import { getSourcesByIds, getPrimarySourcesByIds } from "@/lib/knowledge/sources";
+import { getSourcesByIds, getPrimarySourcesByIds, QURAN_ATTRIBUTION } from "@/lib/knowledge/sources";
 import { SOURCE_SECTION_LABELS, SOURCE_SECTION_ORDER, auditCategoryForType } from "@/lib/knowledge/source-categories";
 import { PrimarySourceCard } from "@/components/ui/primary-source-card";
 import type { IslamicSource, ReviewStatus, SourceAuditCategory } from "@/lib/types";
@@ -72,7 +72,7 @@ export function SourcesSection({
         <div className="space-y-3">
           <h4 className="text-sm font-bold text-primary-dark">{SOURCE_SECTION_LABELS.SAHIH_PRIMARY}</h4>
           {primarySources.map((source) => (
-            <PrimarySourceCard key={source.id} source={source} defaultOpen={!defaultCollapsed && primarySources.length <= 2} />
+            <PrimarySourceCard key={source.id} quranAttribution={QURAN_ATTRIBUTION} source={source} defaultOpen={!defaultCollapsed && primarySources.length <= 2} />
           ))}
         </div>
       )}

@@ -52,9 +52,9 @@ describe("controlled public error pages", () => {
 });
 
 describe("public content hardening", () => {
-  it("production knowledge only includes reviewed entries", () => {
+  it("production knowledge requires a documented review", () => {
     const entries = read("src/lib/knowledge/entries.ts");
-    expect(entries).toContain('return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");');
+    expect(entries).toContain("return getAllEntries().filter(isProductionSafe);");
   });
 
   it("public wissen page uses reviewed-only topic source", () => {

@@ -2,6 +2,7 @@ import { DOMAIN_DISCLAIMER } from "@/lib/ai/safety";
 import { NO_SOURCE_MESSAGE, ORIENTATION_NOTE } from "./config";
 import { toCitation } from "./citations";
 import { retrieveKnowledgeSync } from "./retrieval";
+import { isProductionSafe } from "./safety";
 import {
   classifyKnowledgeSensitivity,
   isIndividualDecisionQuestion,
@@ -40,12 +41,13 @@ export function buildGroundedKnowledgeAnswer(
     };
   }
 
-  const results = retrieveKnowledgeSync(question, {
-    language: options?.language ?? "de",
-    productionOnly: true,
-  });
+  const language = options?.language ?? "de";
+  const results = retrieveKnowledgeSync(question, { language, productionOnly: true });
+  // A question about a locked topic gets no unrelated entry as its answer.
+  const bestOverall = retrieveKnowledgeSync(question, { language, productionOnly: false })[0];
+  const aboutLockedTopic = Boolean(bestOverall && !isProductionSafe(bestOverall.entry));
 
-  if (results.length === 0) {
+  if (results.length === 0 || aboutLockedTopic) {
     return {
       answer: `${NO_SOURCE_MESSAGE}\n\n${ORIENTATION_NOTE} Fachliche Prüfung empfohlen.`,
       citations: [],

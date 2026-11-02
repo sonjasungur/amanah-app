@@ -13,6 +13,10 @@ const FORBIDDEN = [
   "modules/islamic-knowledge/archive/",
   "lib/knowledge/wissen-topics.ts",
   "lib/knowledge/entries.ts",
+  "lib/knowledge/sources.ts",
+  "lib/knowledge/quran-verses.ts",
+  "lib/knowledge/kulturfilter.ts",
+  "lib/knowledge/data/",
   "lib/knowledge/janazah.ts",
   "lib/knowledge/barzakh.ts",
   "lib/knowledge/testament-erbe.ts",
@@ -35,10 +39,15 @@ function resolveImport(from: string, spec: string): string | null {
 }
 
 /** Type-only imports leave no code behind. Named imports where every name is a type do not count here: strictest reading. */
+const importCache = new Map<string, string[]>();
 function importsOf(file: string): string[] {
+  const cached = importCache.get(file);
+  if (cached) return cached;
   const code = readFileSync(file, "utf8");
   const specs = [...code.matchAll(/^\s*(?:import|export)\s+(?!type\b)[^;]*?from\s+"([^"]+)"/gm)].map((m) => m[1]);
-  return specs.map((s) => resolveImport(file, s)).filter((f): f is string => Boolean(f));
+  const imports = specs.map((s) => resolveImport(file, s)).filter((f): f is string => Boolean(f));
+  importCache.set(file, imports);
+  return imports;
 }
 
 function reachable(start: string): Map<string, string> {
@@ -72,5 +81,5 @@ describe("client bundle", () => {
         .map((f) => `${relative(SRC, client)} -> ${f}`),
     );
     expect(leaks).toEqual([]);
-  });
+  }, 30_000);
 });

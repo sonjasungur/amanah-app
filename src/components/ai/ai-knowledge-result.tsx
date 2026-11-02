@@ -44,7 +44,7 @@ export function AiKnowledgeResult({
                 <span className="block">{c.category} · {c.sourceLabel}</span>
                 <span className="block italic">{t("knowledge.orientation")}</span>
                 {c.reviewedStatus !== "reviewed" && (
-                  <span className="block text-warning">{t("knowledge.reviewStatus")}: {c.reviewedStatus}</span>
+                  <span className="block text-warning">{t("knowledge.reviewStatus")}: {c.reviewedStatus === "orientation" ? t("knowledge.orientation") : c.reviewedStatus}</span>
                 )}
               </li>
             ))}

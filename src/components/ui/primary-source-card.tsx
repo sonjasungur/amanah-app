@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import type { IslamicSource } from "@/lib/types";
-import { getPrimarySourcesByIds, QURAN_ATTRIBUTION } from "@/lib/knowledge/sources";
-import { groupedReferenceLabel } from "@/lib/knowledge/source-dedup";
 import { BookOpen, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 const TYPE_LABEL: Record<string, string> = {
@@ -16,10 +14,13 @@ export function PrimarySourceCard({
   source,
   defaultOpen = false,
   groupedRefs,
+  quranAttribution,
 }: {
   source: IslamicSource;
   defaultOpen?: boolean;
   groupedRefs?: string | null;
+  /** From the server: the verses themselves must stay out of browser code. */
+  quranAttribution?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   if (source.type !== "quran" && source.type !== "hadith") return null;
@@ -28,7 +29,7 @@ export function PrimarySourceCard({
   const paraphrase = source.isParaphrase !== false && source.type === "hadith";
   const translationFooter =
     source.type === "quran"
-      ? QURAN_ATTRIBUTION
+      ? quranAttribution
       : paraphrase
         ? "Sinngemäße deutsche Wiedergabe — keine lizenzierte Originalübersetzung."
         : "Übersetzung (sinngemäß wo nicht anders gekennzeichnet)";
@@ -97,34 +98,5 @@ export function PrimarySourceCard({
         </div>
       )}
     </article>
-  );
-}
-
-export function PrimarySourcesList({
-  sourceIds,
-  title = "Qur'an und authentische Sunnah",
-  defaultCollapsed = true,
-}: {
-  sourceIds: string[];
-  title?: string;
-  defaultCollapsed?: boolean;
-}) {
-  const sources = getPrimarySourcesByIds(sourceIds);
-  if (sources.length === 0) return null;
-  const groupedRefs = groupedReferenceLabel(getPrimarySourcesByIds(sourceIds));
-  const autoOpen = !defaultCollapsed && sources.length <= 2;
-
-  return (
-    <div className="space-y-3">
-      {title ? <h4 className="text-base font-bold text-primary-dark">{title}</h4> : null}
-      {sources.map((s) => (
-        <PrimarySourceCard
-          key={s.id}
-          source={s}
-          defaultOpen={autoOpen}
-          groupedRefs={s.sourceGroup ? groupedRefs : null}
-        />
-      ))}
-    </div>
   );
 }

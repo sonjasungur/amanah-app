@@ -21,6 +21,6 @@ export const KNOWLEDGE_TOP_K = Number(process.env.AMANAH_KNOWLEDGE_TOP_K || "3")
 export const KNOWLEDGE_MIN_SCORE = Number(process.env.AMANAH_KNOWLEDGE_MIN_SCORE || "2");
 
 export const NO_SOURCE_MESSAGE =
-  "Ich habe dazu in der geprüften Amanah-Wissensbasis noch keinen passenden Eintrag gefunden.";
+  "Dazu gibt es noch keinen fachlich freigegebenen Eintrag. Religiöse und rechtliche Inhalte erscheinen erst nach dokumentierter Prüfung.";
 
 export const ORIENTATION_NOTE = "Allgemeine Orientierung — keine Rechts-, Medizin- oder Fatwa-Beratung.";
