@@ -174,3 +174,60 @@ Datenbank und Volumes bleiben unberührt, die Route bleibt geschlossen. Ein Roll
 - `/opt/amanah-app` steht weiter sauber auf `7d0859b`, **ohne** das Patch. `docker compose up --build` ohne Patch würde die ungeprüften Inhalte zurückbringen. Nächster Bau nur mit Patch oder aus einem geprüften Release.
 - `amanah-app-app:latest` zeigt auf den Hotfix. Beide Tags und das Rollback-Image nicht entfernen, solange kein neues Release läuft.
 - Die Registrierung im Juli-Stand ist technisch weiter aktiv und ohne E-Mail-Bestätigung, aber von außen nicht erreichbar. Die Route darf erst nach einem Release wieder geöffnet werden.
+
+## 6. Vorschlag: Hotfix dauerhaft absichern (vorbereitet, nicht installiert)
+
+**Ziel:** Ein versehentliches `docker compose up --build` aus `/opt/amanah-app` (`7d0859b` ohne Patch) darf keine ungeprüften Inhalte zurückbringen. Heute würde es das.
+
+| Schutz | Umsetzung | Wirkung |
+|---|---|---|
+| Unveränderliche Referenz | [`deploy/production/docker-compose.pinned.yml`](../../deploy/production/docker-compose.pinned.yml) nennt das Image per Digest, nicht per Tag | `latest` spielt keine Rolle mehr; ein überschriebener Tag ändert nichts |
+| Kein Build möglich | Die Datei hat keinen `build`-Abschnitt und `pull_policy: never` | `--build` baut nichts; Trockenlauf bestätigt |
+| Alter Ordner kann nicht mehr starten | Compose-Datei und `.env.production` nach `/opt/amanah-prod/`; Quellordner bleibt unverändert | Der alte Befehl bricht sofort ab, auf jedem Commit |
+| Bilder schützen | Tags bleiben; zusätzlich `docker save` beider Images nach `/opt/amanah-prod/images/` mit `SHA256SUMS`, Dateirechte 400 | Auch ein `docker image prune -a` wäre durch `docker load` umkehrbar |
+| Kontrolle | [`scripts/verify-production-image.sh`](../../scripts/verify-production-image.sh), nur lesend | Meldet Abweichung bei Image, Health, Route, Rollback-Image und Sperre |
+| Netztrennung (Doku 29 §6) | Die Datei bindet die App nicht mehr an `gemeinsam1-prod_internal` | Nichts bei `gemeinsam1` nutzt die App; dort ändert sich nichts |
+
+**Bleibt möglich:** Wer absichtlich die Umgebung setzt oder mit `docker build` einen Container von Hand startet, wird nicht aufgehalten. Das Prüfskript zeigt es dann an. Der Schutz gilt gegen Versehen, nicht gegen Absicht.
+
+### Isoliert geprüft
+
+| Test | Ergebnis |
+|---|---|
+| Alter Befehl ohne `.env.production` | Abbruch: Datei nicht gefunden |
+| Alter Befehl ohne `--env-file`, mit `--build` | Abbruch: `DATABASE_URL` fehlt |
+| Gepinnte Datei mit `--build`, Trockenlauf | 0 Build-Schritte |
+| Digest auf dem Server | auflösbar; Testcontainer nutzt das erwartete Image, danach entfernt |
+| Trockenlauf gegen den Server | `amanah-postgres` bleibt laufen, nur `amanah-app` wird neu erstellt |
+| Compose-Hash Postgres | identisch mit dem laufenden Container (`4bf82a39…`) |
+| Prüfskript gegen die Produktion | alle 6 Punkte OK |
+| `src/__tests__/production-pin.test.ts` | sichert Digest, fehlenden Build, Volume und Netz |
+
+**Ein Trockenlauf deckte einen Fehler im ersten Entwurf auf:** Ohne `name: amanah_pg_prod` hätte Compose ein leeres Volume angelegt und Postgres neu erstellt, also Datenverlust. Deshalb ist die Hash-Prüfung unten Pflichtschritt.
+
+**NOT_RUN:** Die Umstellung selbst, ein echter Neustart, `docker save` auf dem Server.
+
+### Umstellung (nur nach gesonderter Owner-Freigabe)
+
+```bash
+# Abbruch, wenn etwas nicht passt
+sudo install -d -m 700 /opt/amanah-prod /opt/amanah-prod/images
+# docker-compose.pinned.yml dorthin kopieren
+cd /opt/amanah-prod
+cp -p /opt/amanah-app/.env.production .env.production
+DC="docker compose -f docker-compose.pinned.yml --env-file .env.production"
+# PFLICHT: muss mit dem laufenden Container übereinstimmen, sonst abbrechen
+$DC config --hash postgres
+docker inspect amanah-postgres --format '{{index .Config.Labels "com.docker.compose.config-hash"}}'
+$DC up --dry-run --no-deps -d app     # darf amanah-postgres nicht anfassen
+docker save amanah-app-app:wissenssperre-dda903c | gzip > images/hotfix.tar.gz
+docker save amanah-app-app:vor-wissenssperre | gzip > images/rollback.tar.gz
+(cd images && sha256sum *.tar.gz > SHA256SUMS && chmod 400 *)
+$DC up -d --no-deps app               # kurzer Ausfall nur bei Amanah
+scripts/verify-production-image.sh    # aus dem Repo-Stand
+rm /opt/amanah-app/.env.production    # erst nach erfolgreicher Prüfung
+```
+
+Keine Migration, kein `--remove-orphans` (der alte Container `amanah-migrate` bleibt liegen), keine Änderung an Caddy oder `gemeinsam1`. Speicher: rund 500 MB für die Archive; zuerst `df -h /` prüfen.
+
+**Rollback:** `.env.production` zurück nach `/opt/amanah-app`, dort wie bisher `docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml --env-file .env.production up -d --no-deps --no-build app`. Das Tag `latest` zeigt weiter auf den Hotfix, die App bleibt also gesperrt und hängt wieder im alten Netz. Die Route bleibt geschlossen.

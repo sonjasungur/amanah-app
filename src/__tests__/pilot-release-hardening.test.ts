@@ -123,6 +123,18 @@ describe("release validator modes", () => {
     expect(res.status).toBe(0);
   });
 
+  it("public-release mode stays blocked while a binding approval is missing", () => {
+    const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-release"], {
+      cwd: ROOT,
+      env: baseEnv,
+      encoding: "utf8",
+    });
+    expect(res.status).toBe(1);
+    for (const id of ["datenschutz", "recht", "religion", "medizin", "nutzungsrechte", "smartphone"]) {
+      expect(res.stderr).toContain(`Freigabe fehlt: ${id}`);
+    }
+  });
+
   it("public-pilot mode passes with complete legal operator details", () => {
     const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-pilot"], {
       cwd: ROOT,

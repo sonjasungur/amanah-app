@@ -1,0 +1,11 @@
+{
+  "_hinweis": "Verbindliche Voraussetzungen für jede öffentliche Freischaltung. Nur der Owner trägt Ergebnisse ein. Ein Agent setzt nichts auf freigegeben. Prüfer und Dokument müssen nachvollziehbar sein.",
+  "freigaben": [
+    { "id": "datenschutz", "bereich": "Datenschutzprüfung: Konto, Einwilligung, Verlauf, Löschprotokoll, Backup-Fristen, Texte in /datenschutz (Doku 38, 39)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" },
+    { "id": "recht", "bereich": "Rechtsprüfung: Vollmacht, Patientenverfügung, Testament-Hinweise, AGB, Widerruf, Modultexte (Doku 32, 36, 42)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" },
+    { "id": "religion", "bereich": "Religiöse Prüfung: Artikel, Hadith-Wortlaute und Einstufungen, religiöse Begriffe und Modultexte (Doku 40 §4, Doku 42)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" },
+    { "id": "medizin", "bereich": "Medizinische Prüfung: Inhalte zur Patientenverfügung (Doku 40 §4)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" },
+    { "id": "nutzungsrechte", "bereich": "Nutzungsrechte: Qur'an-Übersetzung, Hadith-Wiedergaben (Doku 23, 40)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" },
+    { "id": "smartphone", "bereich": "Abnahme auf echtem iPhone und Android (Doku 43)", "status": "offen", "pruefer": "", "datum": "", "dokument": "" }
+  ]
+}
