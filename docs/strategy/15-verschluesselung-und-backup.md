@@ -53,7 +53,7 @@ Altbestände im Klartext bleiben bis dahin lesbar und werden beim nächsten Spei
 - Auf dem Server liegen nur **öffentliche** age-Empfängerschlüssel; die Identity für den Restore liegt getrennt beim Betreiber.
 - `scripts/restore-postgres.sh` erkennt `.age` und benötigt `BACKUP_AGE_IDENTITY`.
 - Daten-KEKs sind nicht Teil des Backups → ein gestohlenes Backup enthält die Ordnerdaten nur als Ciphertext.
-- Löschkonzept: Backups enthalten gelöschte Konten bis zum Ablauf der Aufbewahrung → Frist mit DSB festlegen. Gilt auch für `amanah_data_versions`; zum Einspielen gelöschter Daten siehe [Doku 38](38-konto-speicherung-und-historie.md) §3.
+- Löschkonzept: Backups enthalten gelöschte Konten bis zum Ablauf der Aufbewahrung → Frist mit DSB festlegen. Gilt auch für `amanah_data_versions`; zum Einspielen gelöschter Daten siehe [Doku 38](38-konto-speicherung-und-historie.md) §3. Vorbereitetes, ausgeschaltetes Löschprotokoll: [Doku 39](39-loeschprotokoll-und-restore.md).
 
 ## 6. Tests [geprüft 2026-10-30]
 

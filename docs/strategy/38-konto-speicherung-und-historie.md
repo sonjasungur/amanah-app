@@ -39,6 +39,8 @@ Die Regel liegt serverseitig in `src/lib/server/folder-access.ts` und greift nur
 | Mehr als 500 Vermögenseinträge | neu abgelehnt (422); wer schon mehr hat, darf behalten und reduzieren |
 | Kostenloses Konto mit großem Browserstand | zählt nur, was wirklich im Konto gespeichert wird |
 
+**Warnung und voller Browserspeicher:** Über 80 % der Grenze warnt die Speicheranzeige. Ist der Browserspeicher voll, erscheint eine Meldung, und die Eingabe bleibt auf der geöffneten Seite. Auf kleinen Bildschirmen zeigt ein eigener Hinweis Speicherprobleme an, weil die Seitenleiste dort verborgen ist.
+
 **Verbleibende Lücke:** Wer lokal schon über 2 MiB gesammelt hat und das Konto neu anlegt, bekommt beim ersten Hochladen die Meldung, die Daten seien zu groß; sie bleiben im Browser.
 
 ## 3. Änderungshistorie
@@ -48,14 +50,15 @@ Vorbereitet, **aus** (`AMANAH_DATA_HISTORY`), nicht verlinkt. Logik: `src/lib/se
 | Thema | Umsetzung |
 |---|---|
 | Inhalt | Nur der frühere Wert der geänderten Bereiche, kein vollständiger Abzug bei jeder Änderung |
-| Bereiche | Was Menschen eingeben; kein Fortschritt, keine Navigation, keine Lesezeichen |
+| Bereiche | Was Menschen eingeben, dazu Vorsorge-Check und Lesezeichen; keine Navigation |
+| Tarif | **Owner-Entscheidung 02.11.2026:** Verlauf von Vermögensübersicht, Notfallkarte, Vorsorge-Check und Lesezeichen bleibt kostenlos, einschließlich Wiederherstellung im Rahmen der Speichergrenzen. Verlauf anderer Plus-Bereiche kann später Teil von Plus sein. Einsicht, Export und Löschen bleiben unabhängig vom Tarif möglich |
 | Schutz | Verschlüsselt wie der Ordner und an das Konto gebunden. Im Klartext liegen nur Konto-ID, laufende Nummer, Art, Größe und Datum |
 | Zugriff | Lesen, Wiederherstellen und Löschen sind je Konto begrenzt; eine fremde ID ergibt 404 und ändert nichts; eine kopierte Zeile lässt sich nicht lesen; schreibende Anfragen nur von gleicher Herkunft |
 | Passwörter, Schlüssel | Felder mit solchen Namen werden entfernt. **Grenze:** Freitext kann nicht gefiltert werden |
-| Anzeige | Die Liste zeigt Datum, Art und Bereiche; Inhalte nur für die geöffnete Version, als reiner Text. Antworten werden nicht zwischengespeichert. Feldnamen erscheinen noch technisch |
+| Anzeige | Die Liste zeigt Datum, Art und Bereiche; Inhalte nur für die geöffnete Version, als reiner Text. Antworten werden nicht zwischengespeichert. Felder tragen verständliche Bezeichnungen, technische Felder sind ausgeblendet |
 | Wiederherstellen | Zwei Schritte mit Ankreuzfeld; der Server verlangt `confirmed: true`, Einwilligung und bestätigte E-Mail. Der aktuelle Stand wird selbst eine Version. Ohne Plus nur kostenlose Bereiche |
 | Grenzen (vorläufig) | 90 Tage, höchstens 50 Versionen, höchstens 5 MiB je Konto. Eine einzelne Änderung über 5 MiB wird gar nicht aufbewahrt; Wiederherstellen setzt diesen Bereich dann nicht zurück |
-| Automatisches Löschen | Beim Schreiben, beim Export und täglich im Server (`src/instrumentation.ts`, beim Start und alle 24 Stunden, auch mit ausgeschaltetem Flag). Es löscht nur, es schaltet nichts frei. Das Log enthält nur die Anzahl |
+| Automatisches Löschen | Beim Schreiben, beim Export und täglich im Server (`src/instrumentation.ts`, beim Start und alle 24 Stunden, auch mit ausgeschaltetem Flag). Es löscht nur, es schaltet nichts frei. Das Log enthält nur Anzahl oder Fehlercode. Ist die Datenbank nicht erreichbar (`P1001`), folgt der nächste Versuch nach 15 Minuten statt erst am Folgetag |
 | Löschen durch Nutzer | Alles, oder eine Version samt älteren, damit die übrigen vollständig bleiben. Automatisch mit dem Ordner, dem Widerruf der Einwilligung und dem Konto |
 | Export | `dataHistory` ohne abgelaufene Versionen (Format `@2`), dazu `purchases`. Unlesbare Versionen erscheinen ohne Inhalt |
 | Schlüsselrotation | `scripts/reencrypt-amanah-data.mjs` erfasst auch die Versionen |
@@ -65,18 +68,18 @@ Vorbereitet, **aus** (`AMANAH_DATA_HISTORY`), nicht verlinkt. Logik: `src/lib/se
 - **Was Backups enthalten:** Der Datenbank-Dump umfasst alle Tabellen, auch `amanah_data_versions`. Der Inhalt bleibt verschlüsselt; die Datenschlüssel sind nicht Teil des Backups ([Doku 15](15-verschluesselung-und-backup.md) §5).
 - **Aufbewahrung:** Auf Staging standardmäßig 7 Tage (`BACKUP_KEEP_DAYS` in `scripts/staging-cron.sh`). **Für die Produktion nicht belegt:** Die Backupzeile dort habe ich nicht geprüft, weder Frist noch Verschlüsselung.
 - **Folge:** Gelöschte Versionen, Ordner und Konten bleiben bis zum Ablauf dieser Frist in alten Backups.
-- **Beim Einspielen eines Backups kommen gelöschte Daten zurück,** auch gelöschte Konten und widerrufene Ordner. Abgelaufene Versionen entfernt der Serverstart sofort wieder. Für Löschungen zwischen Backup und Einspielen gibt es **heute keinen Nachweis**, aus dem sie sich wiederholen ließen. Bis das geklärt ist:
+- **Beim Einspielen eines Backups kommen gelöschte Daten zurück,** auch gelöschte Konten und widerrufene Ordner. Abgelaufene Versionen entfernt der Serverstart sofort wieder.
+- **Löschprotokoll:** Lokal vorbereitet und ausgeschaltet, siehe [Doku 39](39-loeschprotokoll-und-restore.md). Solange es nicht aktiv ist, gilt:
   1. Ein Restore in die Produktion nur nach Owner-Entscheidung und Dokumentation.
   2. Nach dem Restore Löschanträge seit dem Backup-Datum aus Support und Unterlagen erneut ausführen.
   3. Betroffene Zeiträume festhalten.
-- **Zu entscheiden:** Soll ein minimales Löschprotokoll (nur Hash der Konto-ID und Datum) eingeführt werden, damit sich Löschungen nach einem Restore wiederholen lassen?
 
 ### Vor dem Einschalten nötig
 
 1. Datenschutzprüfung: Zweck, Fristen, Text in `/datenschutz` und im Einwilligungstext. Beides nennt die Historie noch nicht.
-2. Entscheidung, ob der Verlauf kostenlos oder Teil von Plus ist; heute steht er nicht in der Tarifmatrix. Ansehen ist für das eigene Konto offen, Wiederherstellen folgt den Schreibrechten.
-3. Lesbare Feldnamen in der Ansicht und ein Link aus den Einstellungen.
-4. Backup-Fristen in der Produktion belegen und festlegen.
+2. Ein Link aus den Einstellungen.
+3. Backup-Fristen in der Produktion belegen und festlegen.
+4. Entscheidung über das Löschprotokoll nach [Doku 39](39-loeschprotokoll-und-restore.md) §9.
 
 ## 4. Datenbank
 
