@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
-import { flattenForDisplay, sectionLabel } from "@/lib/history/display";
+import { sectionLabel, sectionRows } from "@/lib/history/display";
 import { cancelPendingSave, useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { Button } from "@/components/ui/button";
@@ -170,7 +170,7 @@ export function DataHistoryView() {
           <CardTitle className="text-base">Stand vor der Änderung vom {when(open.createdAt)}</CardTitle>
           {open.prior ? (
             Object.entries(open.prior).map(([section, value]) => {
-              const rows = flattenForDisplay(value);
+              const rows = sectionRows(section, value);
               return (
                 <section key={section} className="mt-4">
                   <h2 className="font-semibold text-sm">{sectionLabel(section)}</h2>

@@ -17,7 +17,7 @@ export const HISTORY_COALESCE_MS = 10 * 60 * 1000;
 const VERSION_KIND = "amanah-data-version";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** What people entered. Progress, navigation and bookkeeping fields are not history. */
+/** What people entered, including the check and bookmarks. Navigation and bookkeeping fields are not history. */
 export const HISTORY_SECTIONS = [
   "userProfile",
   "familyMembers",
@@ -39,6 +39,8 @@ export const HISTORY_SECTIONS = [
   "barzakhPlan",
   "sadaqaJariya",
   "familyMessage",
+  "checkProgress",
+  "knowledgeBookmarks",
 ] as const satisfies readonly (keyof AmanahOrdnerData)[];
 
 export type HistorySection = (typeof HISTORY_SECTIONS)[number];

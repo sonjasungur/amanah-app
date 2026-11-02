@@ -69,6 +69,15 @@ export const PLAN_FEATURES: PlanFeature[] = [
     note: "Dauerhaft kostenlos, auch bei Plus-Zwang (Owner 01.11.2026). Reine Bestandsaufnahme, kein Testament.",
   },
   {
+    id: "free_section_history",
+    title: "Verlauf von Vermögensübersicht, Notfallkarte, Vorsorge-Check und Lesezeichen",
+    tier: "free",
+    routes: ["/dashboard/verlauf"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Kostenlos mit Wiederherstellung (Owner 02.11.2026); bis zur Datenschutzfreigabe ausgeschaltet. Der Verlauf anderer Bereiche kann später zu Plus gehören; Einsicht, Export und Löschen bleiben immer frei.",
+  },
+  {
     id: "persistent_folder",
     title: "Dauerhaft nutzbarer persönlicher Vorsorgeordner (verschlüsselt im Konto)",
     tier: "plus",

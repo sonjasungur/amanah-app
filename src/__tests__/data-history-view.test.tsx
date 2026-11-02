@@ -2,7 +2,10 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DataHistoryView } from "@/components/history/data-history-view";
 import { defaultAmanahData } from "@/lib/domain/defaults";
-import { flattenForDisplay, sectionLabel } from "@/lib/history/display";
+import { featureForRoute, FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
+import { demoAmanahData } from "@/lib/domain/demo-data";
+import { fieldLabel, flattenForDisplay, isHiddenField, sectionLabel, sectionRows } from "@/lib/history/display";
+import { HISTORY_SECTIONS } from "@/lib/server/data-history";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 const VERSION = { id: "v1", changeType: "save", sections: ["emergencyCard"], createdAt: "2026-11-01T10:00:00.000Z" };
@@ -142,12 +145,44 @@ describe("history view", () => {
 });
 
 describe("display helpers", () => {
-  it("flatten nested values, skip empty fields and ids", () => {
-    expect(flattenForDisplay({ id: "x", a: "", b: "Text", c: [{ d: true }], e: null })).toEqual([{ path: "b", text: "Text" }, { path: "c 1 / d", text: "Ja" }]);
+  const leafKeys = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(leafKeys);
+    if (!value || typeof value !== "object") return [];
+    return Object.entries(value).flatMap(([key, v]) => [key, ...leafKeys(v)]);
+  };
+
+  it("has a readable label for every field of the data model", () => {
+    const sections = Object.values({ ...defaultAmanahData, ...demoAmanahData });
+    const unknown = [...new Set(sections.flatMap(leafKeys))].filter((key) => !isHiddenField(key) && fieldLabel(key) === "Weitere Angabe" && !/^[a-z0-9-]+$/.test(key));
+    expect(unknown).toEqual([]);
   });
 
-  it("never show technical names for unknown sections", () => {
+  it("flatten nested values into words, skipping empty fields and bookkeeping", () => {
+    expect(flattenForDisplay({ id: "x", name: "", allergies: "Pollen", emergencyContact1: { phone: "123" }, documents: [{ type: "bank", location: "Ordner" }], schemaVersion: 3 })).toEqual([
+      { path: "Allergien", text: "Pollen" },
+      { path: "Notfallkontakt 1 / Telefon", text: "123" },
+      { path: "Dokumente / Eintrag 1 / Art", text: "Bankkonto" },
+      { path: "Dokumente / Eintrag 1 / Ablageort", text: "Ordner" },
+    ]);
+  });
+
+  it("never show technical names for unknown fields or sections", () => {
     expect(sectionLabel("assets")).toBe("Vermögensübersicht");
     expect(sectionLabel("somethingNew")).toBe("Weitere Angaben");
+    expect(flattenForDisplay({ somethingNew: "x" })).toEqual([{ path: "Weitere Angabe", text: "x" }]);
+  });
+
+  it("show check answers as questions and bookmarks as a list", () => {
+    expect(sectionRows("checkProgress", { schemaVersion: 1, index: 1, phase: "questions", answers: { convert: true } })).toEqual([{ path: "Bist du konvertiert?", text: "Ja" }]);
+    expect(sectionRows("knowledgeBookmarks", ["artikel-a"])).toEqual([{ path: "Lesezeichen 1", text: "artikel-a" }]);
+  });
+});
+
+describe("the history of free sections stays free", () => {
+  it("covers all four free sections and has a free, unlockable route", () => {
+    for (const section of FREE_ACCOUNT_SECTIONS) expect(HISTORY_SECTIONS as readonly string[]).toContain(section);
+    const feature = featureForRoute("/dashboard/verlauf");
+    expect(feature?.tier).toBe("free");
+    expect(feature?.enforcement).toBe("never");
   });
 });
