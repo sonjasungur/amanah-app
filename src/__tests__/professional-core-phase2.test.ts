@@ -200,8 +200,8 @@ describe("settings page: structure", () => {
     expect(settings).toContain("resetAmanahStore");
   });
 
-  it("uses getActiveStorageLabel for storage display", () => {
-    expect(settings).toContain("getActiveStorageLabel");
+  it("uses the hydration-safe storage label for storage display", () => {
+    expect(settings).toContain("useActiveStorageLabel");
   });
 
   it("uses isAiUiEnabled gating", () => {

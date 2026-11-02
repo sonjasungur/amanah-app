@@ -100,6 +100,8 @@ test("emergency card, check and bookmarks reach the account and a second device"
     .toBe(1);
 
   // No article is published, so the bookmark button cannot be reached: the same write the button causes.
+  // This write bypasses the open page, so the page must have finished saving first.
+  await page.waitForTimeout(800);
   expect((await browserFetch(page, "PATCH", "/api/amanah", { knowledgeBookmarks: ["artikel-a"] })).status).toBe(200);
 
   const fresh = await browser.newContext({ baseURL });

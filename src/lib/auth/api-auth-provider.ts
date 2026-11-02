@@ -115,6 +115,11 @@ export class ApiAuthProvider implements AuthProvider {
 
 export const apiAuthProvider = new ApiAuthProvider();
 
+/** Id of the account in the session hint; never a proof of anything. */
+export function sessionUserId(): string | null {
+  return readSession()?.user.id ?? null;
+}
+
 /** True while a (local demo or API) session hint exists. The server stays authoritative. */
 export function hasAuthSession(): boolean {
   return readSession() !== null;

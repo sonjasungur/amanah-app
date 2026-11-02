@@ -1,9 +1,9 @@
 "use client";
 
 import { useAmanahStore, resetAmanahStore } from "@/lib/store/use-amanah-store";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { exportToJson, exportEmergencyFolder, importFromJson } from "@/lib/storage/amanah-storage";
 import { pickDataFields } from "@/lib/store/store-utils";
-import { getActiveStorageLabel } from "@/lib/storage/storage-config";
 import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import {
   openReadableEmergencyExport,
@@ -19,7 +19,7 @@ export function StorageControls() {
   const store = useAmanahStore();
   const { t } = useI18n();
   const fileRef = useRef<HTMLInputElement>(null);
-  const storageLabel = getActiveStorageLabel();
+  const storageLabel = useActiveStorageLabel();
   const isApiStorage = storageLabel === "api";
 
   const handleClearLocal = async () => {

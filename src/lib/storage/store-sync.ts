@@ -1,6 +1,6 @@
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
-import { hasAuthSession } from "@/lib/auth/api-auth-provider";
+import { hasAuthSession, sessionUserId } from "@/lib/auth/api-auth-provider";
 import { getStorageMode } from "@/lib/auth/config";
 import { FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
 import { pickDataFields } from "@/lib/store/store-utils";
@@ -91,6 +91,24 @@ export async function persistStoreChanges(): Promise<void> {
 }
 
 const KEEPALIVE_MAX_BYTES = 60_000;
+const UNSENT_KEY = "amanah-unsent-change";
+
+/** Whether this account left a page with a change the account may not have received. */
+function hasUnsentChange(): boolean {
+  try {
+    return localStorage.getItem(UNSENT_KEY) === sessionUserId();
+  } catch {
+    return false;
+  }
+}
+
+function clearUnsentChange(): void {
+  try {
+    localStorage.removeItem(UNSENT_KEY);
+  } catch {
+    // Nothing to clear without a storage.
+  }
+}
 
 /**
  * The page goes away with a change not yet sent. Without this the next load would show the older
@@ -100,6 +118,15 @@ export function saveBeforeLeaving(): void {
   if (!isRemotePersistenceActive()) return;
   const data = pickDataFields(useAmanahStore.getState());
   if (!hasMeaningfulLocalData(data)) return;
+  // The next page cannot know whether this request arrived, or arrived before it loads the account.
+  const userId = sessionUserId();
+  if (userId) {
+    try {
+      localStorage.setItem(UNSENT_KEY, userId);
+    } catch {
+      // Without a storage only the request below remains.
+    }
+  }
   const body = JSON.stringify(data);
   if (new TextEncoder().encode(body).length > KEEPALIVE_MAX_BYTES) {
     void persistStoreChanges();
@@ -122,6 +149,13 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
     const remoteData = await loadAmanahData();
     // Read only now: what was entered while the account data was loading must not be lost.
     const localData = pickDataFields(useAmanahStore.getState());
+    if (hasUnsentChange()) {
+      // The browser holds the newest state: it goes to the account, instead of the older account
+      // state replacing it. Sections this account may not write are not stored by the server.
+      await saveToAccount(localData);
+      clearUnsentChange();
+      return;
+    }
     const editedWhileLoading = (Object.keys(localData) as (keyof AmanahOrdnerData)[]).filter((key) => localData[key] !== atStart[key]);
     const withEdits = (base: AmanahOrdnerData): AmanahOrdnerData =>
       editedWhileLoading.reduce((data, key) => ({ ...data, [key]: localData[key] }), base);
@@ -145,9 +179,10 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
       const localCheckHasData =
         localCheck &&
         (localCheck.phase === "result" || localCheck.index > 0 || Object.keys(localCheck.answers ?? {}).length > 0);
-      const merged = withEdits(remoteCheckEmpty && localCheckHasData ? { ...remoteData, checkProgress: localCheck } : remoteData);
+      const takeLocalCheck = Boolean(remoteCheckEmpty && localCheckHasData);
+      const merged = withEdits(takeLocalCheck ? { ...remoteData, checkProgress: localCheck } : remoteData);
       useAmanahStore.getState().importData(merged);
-      if (editedWhileLoading.length > 0) await saveToAccount(merged);
+      if (takeLocalCheck || editedWhileLoading.length > 0) await saveToAccount(merged);
       return;
     }
 

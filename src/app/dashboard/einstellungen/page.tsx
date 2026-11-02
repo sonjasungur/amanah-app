@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { StorageControls } from "@/components/storage/storage-controls";
 import { AccountControls } from "@/components/storage/account-controls";
 import { ConsentControls } from "@/components/storage/consent-controls";
@@ -9,7 +10,6 @@ import { AiConsentBanner } from "@/components/ai/ai-consent-banner";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { resetAmanahStore } from "@/lib/store/use-amanah-store";
-import { getActiveStorageLabel } from "@/lib/storage/storage-config";
 import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import { isAiUiEnabled } from "@/lib/ai/config";
 import { useI18n } from "@/lib/i18n/context";
@@ -17,7 +17,7 @@ import { HardDrive, Cloud, Trash2, Shield } from "lucide-react";
 
 export default function EinstellungenPage() {
   const { t } = useI18n();
-  const storageLabel = getActiveStorageLabel();
+  const storageLabel = useActiveStorageLabel();
   const isApi = storageLabel === "api";
   const aiEnabled = isAiUiEnabled();
   const [confirmDelete, setConfirmDelete] = useState(false);

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { useAuth } from "@/lib/auth/context";
 import { getStorageMode } from "@/lib/auth/config";
-import { getActiveStorageLabel } from "@/lib/storage/storage-config";
 import { useI18n } from "@/lib/i18n/context";
 import { Shield, HardDrive, Cloud, Download } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -12,7 +12,7 @@ export function StorageModeBanner({ className }: { className?: string }) {
   const { session, authMode } = useAuth();
   const { t } = useI18n();
   const storageMode = getStorageMode();
-  const activeLabel = getActiveStorageLabel();
+  const activeLabel = useActiveStorageLabel();
 
   const isLocalOnly = activeLabel === "local";
   const isApi = activeLabel === "api";

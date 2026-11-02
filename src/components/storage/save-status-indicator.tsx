@@ -1,8 +1,9 @@
 "use client";
 
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { useI18n } from "@/lib/i18n/context";
-import { getStorageLocationLabel, flushPendingSave } from "@/lib/storage/store-sync";
+import { flushPendingSave } from "@/lib/storage/store-sync";
 import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
   const lastSaved = useAmanahStore((s) => s.lastSaved);
   const nearLimit = useAmanahStore((s) => s.saveNearLimit);
   const { t } = useI18n();
-  const storageLabel = getStorageLocationLabel();
+  const storageLabel = useActiveStorageLabel();
 
   const statusLabel =
     saveStatus === "saved"

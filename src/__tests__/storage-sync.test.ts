@@ -3,7 +3,7 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import { migrateRawData } from "@/lib/domain/migration";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
-import { hasMeaningfulLocalData, persistStoreChanges, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
+import { hasMeaningfulLocalData, persistStoreChanges, saveBeforeLeaving, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 vi.mock("@/lib/auth/config", () => ({
@@ -12,6 +12,7 @@ vi.mock("@/lib/auth/config", () => ({
 
 vi.mock("@/lib/auth/api-auth-provider", () => ({
   hasAuthSession: vi.fn(() => false),
+  sessionUserId: vi.fn(() => "user-1"),
 }));
 
 vi.mock("@/lib/storage/amanah-storage", () => ({
@@ -106,6 +107,55 @@ describe("store sync helpers", () => {
 });
 
 describe("syncStoreWithRemoteAfterAuth", () => {
+  const remoteMode = async () => {
+    const { getStorageMode } = await import("@/lib/auth/config");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
+    const storage = await import("@/lib/storage/amanah-storage");
+    vi.mocked(getStorageMode).mockReturnValue("api");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
+    vi.mocked(storage.saveAmanahData).mockClear();
+    vi.mocked(storage.saveAmanahData).mockResolvedValue({ notStored: [], nearLimit: false });
+    return storage;
+  };
+
+  it("after leaving with an unsent change, the newer browser state goes to the account, once", async () => {
+    const { loadAmanahData, saveAmanahData } = await remoteMode();
+    useAmanahStore.getState().updateField("emergencyCard", { ...defaultAmanahData.emergencyCard, name: "Neuer im Browser" });
+    useAmanahStore.setState({ saveStatus: "saving" });
+    saveBeforeLeaving();
+    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+
+    vi.mocked(loadAmanahData).mockResolvedValue({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Aelter im Konto" } });
+    await syncStoreWithRemoteAfterAuth();
+    expect(useAmanahStore.getState().emergencyCard.name).toBe("Neuer im Browser");
+    expect(vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0].emergencyCard.name).toBe("Neuer im Browser");
+    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+
+    await syncStoreWithRemoteAfterAuth();
+    expect(useAmanahStore.getState().emergencyCard.name).toBe("Aelter im Konto");
+  });
+
+  it("an unsent change of another account is not uploaded here", async () => {
+    const { loadAmanahData, saveAmanahData } = await remoteMode();
+    localStorage.setItem("amanah-unsent-change", "jemand-anderes");
+    vi.mocked(loadAmanahData).mockResolvedValueOnce({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Eigenes Konto" } });
+    await syncStoreWithRemoteAfterAuth();
+    expect(useAmanahStore.getState().emergencyCard.name).toBe("Eigenes Konto");
+    expect(saveAmanahData).not.toHaveBeenCalled();
+    localStorage.removeItem("amanah-unsent-change");
+  });
+
+  it("a failed upload keeps the change marked for the next load", async () => {
+    const { loadAmanahData, saveAmanahData } = await remoteMode();
+    localStorage.setItem("amanah-unsent-change", "user-1");
+    vi.mocked(saveAmanahData).mockRejectedValueOnce(new Error("offline"));
+    vi.mocked(loadAmanahData).mockResolvedValueOnce(defaultAmanahData);
+    await syncStoreWithRemoteAfterAuth();
+    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+    expect(useAmanahStore.getState().saveStatus).toBe("error");
+    localStorage.removeItem("amanah-unsent-change");
+  });
+
   it("keeps and saves what was entered while the account data was loading", async () => {
     const { getStorageMode } = await import("@/lib/auth/config");
     const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");

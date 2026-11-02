@@ -47,7 +47,7 @@ Die Regel liegt serverseitig in `src/lib/server/folder-access.ts` und greift nur
 
 **Eingaben während des Ladens:** Was eingegeben wird, während der Kontostand noch lädt, bleibt je Bereich erhalten und wird gespeichert.
 
-**Verlassen der Seite:** Änderungen gehen nach 400 ms ans Konto. Wird die Seite vorher geschlossen oder neu geladen, geht die offene Änderung sofort per `keepalive` hinaus. **Grenze:** Browser garantieren das nur bis etwa 64 KB. Größere Ordner werden zwar versucht, können aber verloren gehen; die Änderung bleibt dann bis zum nächsten Laden im Browser, und der ältere Kontostand kann sie überschreiben.
+**Verlassen der Seite:** Änderungen gehen nach 400 ms ans Konto. Wird die Seite vorher geschlossen oder neu geladen, geht die offene Änderung sofort per `keepalive` hinaus, und der Browser merkt sich das. Der nächste Seitenaufbau desselben Kontos lädt dann den Browserstand hoch, statt ihn durch den möglicherweise älteren Kontostand zu ersetzen. **Grenze:** Bis zum nächsten Laden kann die Änderung nur im Browser liegen, etwa bei großen Ordnern über 64 KB; ein zweites Gerät sieht sie dann noch nicht.
 
 **Verbleibende Lücke:** Wer lokal schon über 2 MiB gesammelt hat und das Konto neu anlegt, bekommt beim ersten Hochladen die Meldung, die Daten seien zu groß; sie bleiben im Browser.
 
