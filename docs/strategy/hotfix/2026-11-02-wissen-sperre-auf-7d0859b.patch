@@ -1,3 +1,191 @@
+diff --git a/src/__tests__/ai.test.ts b/src/__tests__/ai.test.ts
+index 10c0872..ed184ab 100644
+--- a/src/__tests__/ai.test.ts
++++ b/src/__tests__/ai.test.ts
+@@ -213,18 +213,9 @@ describe("AI API routes", () => {
+     expect(body.message).toBeTruthy();
+   });
+ 
+-  it("POST /api/ai/knowledge blocks legal questions", async () => {
+-    const res = await knowledgePOST(
+-      new Request("http://localhost/api/ai/knowledge", {
+-        method: "POST",
+-        headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify({ question: "Ist mein Testament rechtlich gültig?" }),
+-      })
+-    );
+-    expect(res.status).toBe(200);
+-    const body = await res.json();
+-    expect(body.blocked).toBe(true);
+-    expect(body.message).toContain("Fachperson");
++  it("POST /api/ai/knowledge stays locked until a documented review exists", async () => {
++    const { POST } = await import("@/app/api/ai/knowledge/route");
++    expect(POST().status).toBe(503);
+   });
+ 
+   it("requires consent when openai provider active", async () => {
+diff --git a/src/__tests__/branding.test.ts b/src/__tests__/branding.test.ts
+index bd6017b..9b454d0 100644
+--- a/src/__tests__/branding.test.ts
++++ b/src/__tests__/branding.test.ts
+@@ -97,15 +97,10 @@ describe("branding — Mein Wille", () => {
+     expect(preise).toContain("Noch nicht verfügbar");
+   });
+ 
+-  it("wissen hub has categories, entry topics, search and scroll sections", () => {
+-    expect(WISSEN_CATEGORIES).toHaveLength(4);
+-    expect(WISSEN_ENTRY_TOPIC_IDS).toHaveLength(3);
++  it("wissen hub shows only the review notice while nothing is released", () => {
+     const wissen = read("src/app/wissen/page.tsx");
+-    expect(wissen).toContain("Wissen, das dir Entscheidungen leichter macht");
+-    expect(wissen).toContain("Worüber möchtest du mehr wissen?");
+-    expect(wissen).toContain("Für deinen Einstieg");
+-    expect(wissen).toContain("WISSEN_SECTION_ID");
+-    expect(wissen).not.toContain("Gespeicherte Themen");
++    expect(wissen).toContain("ContentInReview");
++    expect(wissen).not.toContain("lib/knowledge");
+   });
+ 
+   it("brand review page shows three logo candidates", () => {
+diff --git a/src/__tests__/content-sources.test.ts b/src/__tests__/content-sources.test.ts
+index 1c7a740..032b48b 100644
+--- a/src/__tests__/content-sources.test.ts
++++ b/src/__tests__/content-sources.test.ts
+@@ -59,10 +59,11 @@ describe("content sources, tiles, and article structure", () => {
+     expect(read("src/lib/knowledge/quran-verses.ts")).toContain("Bubenheim");
+   });
+ 
+-  it("akhira section tiles and source disclosure are functional", () => {
++  it("akhira section has tiles and shows no unreviewed hadith", () => {
+     const akhira = read("src/components/marketing/akhira-section.tsx");
+-    expect(akhira).toContain("aria-expanded");
+-    expect(akhira).toContain("/wissen/sadaqa-jariya");
++    expect(akhira).toContain('href: "/sadaqa-jariya"');
++    expect(akhira).not.toMatch(/islamicSources|PrimarySourceCard/);
++    expect(akhira).not.toMatch(/href: "\/wissen\/[a-z]/);
+   });
+ 
+   it("audit document exists", () => {
+diff --git a/src/__tests__/knowledge.test.ts b/src/__tests__/knowledge.test.ts
+index 06a9817..8c3bf8a 100644
+--- a/src/__tests__/knowledge.test.ts
++++ b/src/__tests__/knowledge.test.ts
+@@ -98,36 +98,18 @@ describe("Grounded knowledge answer", () => {
+ });
+ 
+ describe("Knowledge API routes", () => {
+-  it("GET /api/knowledge/search", async () => {
+-    const res = await searchGET(new Request("http://localhost/api/knowledge/search?q=Notfallmappe"));
+-    expect(res.status).toBe(200);
+-    const body = await res.json();
+-    expect(body.count).toBeGreaterThan(0);
+-    expect(body.results[0].title).toBeTruthy();
++  it("GET /api/knowledge/search stays locked", async () => {
++    expect(searchGET().status).toBe(404);
+   });
+ 
+-  it("GET /api/knowledge/entries", async () => {
+-    const res = await entriesGET(new Request("http://localhost/api/knowledge/entries"));
+-    expect(res.status).toBe(200);
+-    const body = await res.json();
+-    expect(body.count).toBeGreaterThan(10);
++  it("GET /api/knowledge/entries stays locked", async () => {
++    expect(entriesGET().status).toBe(404);
+   });
+ 
+-  it("GET /api/knowledge/entries/[id]", async () => {
+-    const res = await entryGET(new Request("http://localhost/api/knowledge/entries/kb-sadaqa-jariya"), {
+-      params: Promise.resolve({ id: "kb-sadaqa-jariya" }),
+-    });
+-    expect(res.status).toBe(200);
+-    const body = await res.json();
+-    expect(body.entry.title).toContain("Sadaqa");
++  it("GET /api/knowledge/entries/[id] stays locked", async () => {
++    expect(entryGET().status).toBe(404);
+   });
+ 
+-  it("returns 404 for unknown entry", async () => {
+-    const res = await entryGET(new Request("http://localhost/api/knowledge/entries/missing"), {
+-      params: Promise.resolve({ id: "missing" }),
+-    });
+-    expect(res.status).toBe(404);
+-  });
+ });
+ 
+ describe("Knowledge AI integration", () => {
+@@ -137,18 +119,8 @@ describe("Knowledge AI integration", () => {
+     delete process.env.OPENAI_API_KEY;
+   });
+ 
+-  it("POST /api/ai/knowledge returns citations", async () => {
+-    const res = await knowledgePOST(
+-      new Request("http://localhost/api/ai/knowledge", {
+-        method: "POST",
+-        headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify({ question: "Was bedeutet Ghusl und Kafan?" }),
+-      })
+-    );
+-    expect(res.status).toBe(200);
+-    const body = await res.json();
+-    expect(body.citations?.length).toBeGreaterThan(0);
+-    expect(body.usedEntryIds?.length).toBeGreaterThan(0);
++  it("POST /api/ai/knowledge stays locked", async () => {
++    expect(knowledgePOST().status).toBe(503);
+   });
+ 
+   it("OpenAI path does not crash without key", async () => {
+diff --git a/src/__tests__/ux-corrections.test.ts b/src/__tests__/ux-corrections.test.ts
+index b39cf25..75bfa88 100644
+--- a/src/__tests__/ux-corrections.test.ts
++++ b/src/__tests__/ux-corrections.test.ts
+@@ -48,12 +48,9 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
+     expect(home).not.toMatch(/pct|Fortschritt.*%/);
+   });
+ 
+-  it("wissen page has scroll-spy section ids and no saved topics", () => {
++  it("wissen page shows only the review notice", () => {
+     const wissen = read("src/app/wissen/page.tsx");
+-    expect(wissen).toContain("useWissenScrollSpy");
+-    expect(wissen).toContain("WISSEN_SECTION_ID");
+-    expect(wissen).toContain("WissenTopicRow");
+-    expect(WISSEN_SIDEBAR_ITEMS.some((i) => i.label.includes("Gespeicherte"))).toBe(false);
++    expect(wissen).toContain("ContentInReview");
+     expect(wissen).not.toContain("Gespeicherte Themen");
+   });
+ 
+@@ -67,24 +64,16 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
+     }
+   });
+ 
+-  it("wissen detail puts knowledge before form CTA", () => {
+-    const detail = read("src/app/wissen/[slug]/page.tsx");
+-    const card = read("src/components/knowledge/rich-article-card.tsx");
+-    expect(card).toContain("In 30 Sekunden");
+-    expect(card).toContain("Qur'an und authentische Sunnah");
+-    expect(card).toContain("Was du mit deiner Familie klären solltest");
+-    expect(card).toContain("Was passiert, wenn es ungeklärt bleibt?");
+-    expect(detail.indexOf("RichArticleCard")).toBeLessThan(detail.indexOf("WissenFormCta"));
+-    expect(detail).not.toContain("Amanah-Check");
++  it("wissen detail never shows a topic while nothing is released", () => {
++    const page = read("src/app/wissen/[slug]/page.tsx");
++    expect(page).toContain("notFound()");
++    expect(page).not.toContain("lib/knowledge");
+   });
+ 
+-  it("janazah reference page includes unified hasten source", () => {
+-    const janazah = wissenTopics.find((t) => t.slug === "janazah-wuensche");
+-    expect(janazah?.sourceIds).toContain("hadith-janazah-hasten");
+-    expect(islamicSources["hadith-janazah-hasten"].reference).toMatch(/1315/);
+-    expect(islamicSources["hadith-janazah-hasten"].reference).toMatch(/944c/);
+-    const detail = read("src/app/wissen/[slug]/page.tsx");
+-    expect(detail).toContain("Janazah-Wünsche jetzt festhalten");
++  it("janazah page shows only the review notice", () => {
++    const page = read("src/app/janazah-kompass/page.tsx");
++    expect(page).toContain("ContentInReview");
++    expect(page).not.toContain("lib/knowledge");
+   });
+ 
+   it("linkButtonClassName helper avoids empty nested button links", () => {
 diff --git a/src/app/akuter-todesfall/page.tsx b/src/app/akuter-todesfall/page.tsx
 index f665319..045a585 100644
 --- a/src/app/akuter-todesfall/page.tsx
@@ -865,10 +1053,10 @@ index 0000000..d04498e
 +  );
 +}
 diff --git a/src/components/marketing/akhira-section.tsx b/src/components/marketing/akhira-section.tsx
-index 61b3fa5..9dfc237 100644
+index 61b3fa5..a5985a9 100644
 --- a/src/components/marketing/akhira-section.tsx
 +++ b/src/components/marketing/akhira-section.tsx
-@@ -1,9 +1,4 @@
+@@ -1,22 +1,14 @@
 -"use client";
 -
 -import { useState } from "react";
@@ -878,7 +1066,13 @@ index 61b3fa5..9dfc237 100644
  import { COLORS } from "@/lib/design-tokens";
  import { ArrowRight, BookOpen, Heart, Users } from "lucide-react";
  
-@@ -14,9 +9,6 @@ const AKHIRA_ITEMS = [
+ const AKHIRA_ITEMS = [
+-  { icon: Heart, title: "Sadaqa Jariya planen", text: "Halte fest, welche dauerhaften Spenden und Projekte du wünschst.", href: "/wissen/sadaqa-jariya" },
+-  { icon: BookOpen, title: "Wissen weitergeben", text: "Dokumentiere, welches nützliche Wissen deiner Familie helfen soll.", href: "/wissen/akhira-vorsorge" },
+-  { icon: Users, title: "Familie informieren", text: "Erkläre, welche Unterstützung und Bittgebete du dir vorstellst.", href: "/wissen/familiengespraech" },
++  { icon: Heart, title: "Sadaqa Jariya planen", text: "Halte fest, welche dauerhaften Spenden und Projekte du wünschst.", href: "/sadaqa-jariya" },
++  { icon: BookOpen, title: "Wissen weitergeben", text: "Dokumentiere, welches nützliche Wissen deiner Familie helfen soll.", href: "/wissen" },
++  { icon: Users, title: "Familie informieren", text: "Erkläre, welche Unterstützung und Bittgebete du dir vorstellst.", href: "/wissen" },
  ];
  
  export function AkhiraSection() {
