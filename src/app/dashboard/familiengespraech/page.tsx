@@ -1,5 +1,6 @@
 "use client";
 
+import { Textarea } from "@/components/ui/input";
 import { useState } from "react";
 import { FAMILIEN_GESPRAECH_TOPICS } from "@/lib/familiengespraech/topics";
 import { useFamilienGespraechStore } from "@/lib/familiengespraech/store";
@@ -105,7 +106,7 @@ export default function FamilienGespraechPage() {
                     <label htmlFor={`notes-${topic.id}`} className="text-sm font-medium text-primary block mb-2">
                       Eigene Notizen
                     </label>
-                    <textarea
+                    <Textarea
                       id={`notes-${topic.id}`}
                       value={progress.notes}
                       onChange={(e) => store.setNotes(topic.id, e.target.value)}

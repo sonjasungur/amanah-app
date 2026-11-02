@@ -136,6 +136,18 @@ test("the check continues after a reload and on another device", async ({ page, 
   await other.close();
 });
 
+test("a change right before leaving the page reaches the account", async ({ page }) => {
+  await register(page);
+  await page.goto("/dashboard/notfallkarte");
+  await expect(page.getByLabel("Name", { exact: true })).toBeVisible();
+  await page.getByLabel("Name", { exact: true }).fill("Schon gespeichert");
+  await expect.poll(async () => (await folder(page)).data.emergencyCard.name).toBe("Schon gespeichert");
+  await page.getByLabel("Name", { exact: true }).fill("Direkt vor dem Neuladen");
+  await page.reload();
+  await expect.poll(async () => (await folder(page)).data.emergencyCard.name).toBe("Direkt vor dem Neuladen");
+  await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Direkt vor dem Neuladen");
+});
+
 test("large folders: a warning near the limit, a clear refusal above it, and no input lost", async ({ page }) => {
   test.setTimeout(120_000);
   await register(page);

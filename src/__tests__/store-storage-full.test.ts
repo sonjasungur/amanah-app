@@ -1,5 +1,6 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { hasLongWord, LONG_WORD_CHARS } from "@/components/ui/input";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 const flush = async () => {
@@ -23,5 +24,15 @@ describe("browser storage is full", () => {
     expect(writes).toBeLessThanOrEqual(3);
     expect(useAmanahStore.getState().saveStatus).toBe("error");
     expect(useAmanahStore.getState().saveError).toContain("Speicher dieses Browsers ist voll");
+  });
+});
+
+describe("long word detection", () => {
+  it("finds only a run longer than any real word", () => {
+    expect(hasLongWord("x".repeat(LONG_WORD_CHARS))).toBe(true);
+    expect(hasLongWord("x".repeat(LONG_WORD_CHARS - 1))).toBe(false);
+    expect(hasLongWord("Erdnuss, ".repeat(100_000))).toBe(false);
+    expect(hasLongWord(`${"x".repeat(LONG_WORD_CHARS - 1)} ${"x".repeat(LONG_WORD_CHARS - 1)}`)).toBe(false);
+    expect(hasLongWord(`${"x".repeat(LONG_WORD_CHARS - 1)}\n${"y".repeat(LONG_WORD_CHARS)}`)).toBe(true);
   });
 });

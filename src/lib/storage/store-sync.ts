@@ -6,6 +6,7 @@ import { FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-storage";
+import { apiStorageProvider } from "./api-storage-provider";
 import { getActiveStorageLabel } from "./storage-config";
 
 export type StorageLocationLabel = "local" | "api" | "local-demo";
@@ -87,6 +88,24 @@ export async function persistStoreChanges(): Promise<void> {
       saveError: err instanceof Error ? err.message : "Speichern nicht möglich — erneut versuchen",
     });
   }
+}
+
+const KEEPALIVE_MAX_BYTES = 60_000;
+
+/**
+ * The page goes away with a change not yet sent. Without this the next load would show the older
+ * account state. Larger folders exceed what browsers finish for a leaving page: tried all the same.
+ */
+export function saveBeforeLeaving(): void {
+  if (!isRemotePersistenceActive()) return;
+  const data = pickDataFields(useAmanahStore.getState());
+  if (!hasMeaningfulLocalData(data)) return;
+  const body = JSON.stringify(data);
+  if (new TextEncoder().encode(body).length > KEEPALIVE_MAX_BYTES) {
+    void persistStoreChanges();
+    return;
+  }
+  apiStorageProvider.saveWhileLeaving(body);
 }
 
 export async function flushPendingSave(): Promise<void> {

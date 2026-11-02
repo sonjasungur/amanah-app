@@ -8,7 +8,7 @@ import { migrateRawData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
 import { STORAGE_KEY, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
-import { persistStoreChanges } from "@/lib/storage/store-sync";
+import { persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
 import { pickDataFields } from "@/lib/store/store-utils";
 
 const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
@@ -146,9 +146,23 @@ useAmanahStore.subscribe((state, prevState) => {
 
   if (saveDebounceTimer) clearTimeout(saveDebounceTimer);
   saveDebounceTimer = setTimeout(() => {
+    saveDebounceTimer = null;
     void persistStoreChanges();
   }, 400);
 });
+
+if (typeof window !== "undefined") {
+  const sendPendingSave = () => {
+    if (!saveDebounceTimer) return;
+    cancelPendingSave();
+    saveBeforeLeaving();
+  };
+  window.addEventListener("pagehide", sendPendingSave);
+  // Phones often close background tabs without a pagehide.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") sendPendingSave();
+  });
+}
 
 export async function resetAmanahStore(): Promise<void> {
   cancelPendingSave();

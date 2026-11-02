@@ -41,6 +41,10 @@ Die Regel liegt serverseitig in `src/lib/server/folder-access.ts` und greift nur
 
 **Warnung und voller Browserspeicher:** Über 80 % der Grenze warnt die Speicheranzeige. Ist der Browserspeicher voll, erscheint eine Meldung, und die Eingabe bleibt auf der geöffneten Seite. Auf kleinen Bildschirmen zeigt ein eigener Hinweis Speicherprobleme an, weil die Seitenleiste dort verborgen ist.
 
+**Sehr lange Eingaben:** Es gibt keine Zeichengrenze je Feld. Normaler Text bleibt bis 1,9 Millionen Zeichen flüssig (unter 1 s, auch im Mobilprofil). Nur ein einzelnes „Wort“ über 2.000 Zeichen brachte den Browser beim Umbrechen zum Stehen. Solche Felder brechen nicht mehr um und scrollen seitlich; abgeschnitten wird nichts. Test: `e2e/long-input.spec.ts`. **Grenze:** Gemessen im Chromium-Mobilprofil, nicht auf echten Geräten oder in Safari.
+
+**Verlassen der Seite:** Änderungen gehen nach 400 ms ans Konto. Wird die Seite vorher geschlossen oder neu geladen, geht die offene Änderung sofort per `keepalive` hinaus. **Grenze:** Browser garantieren das nur bis etwa 64 KB. Größere Ordner werden zwar versucht, können aber verloren gehen; die Änderung bleibt dann bis zum nächsten Laden im Browser, und der ältere Kontostand kann sie überschreiben.
+
 **Verbleibende Lücke:** Wer lokal schon über 2 MiB gesammelt hat und das Konto neu anlegt, bekommt beim ersten Hochladen die Meldung, die Daten seien zu groß; sie bleiben im Browser.
 
 ## 3. Änderungshistorie

@@ -39,6 +39,11 @@ export class ApiStorageProvider implements StorageProvider {
     return { notStored: Array.isArray(notStored) ? notStored : [], nearLimit: nearLimit === true };
   }
 
+  /** While a page goes away, browsers only finish small requests sent with keepalive. */
+  saveWhileLeaving(body: string): void {
+    void fetch("/api/amanah", { method: "PUT", headers: this.getHeaders(), body, keepalive: true }).catch(() => undefined);
+  }
+
   async clear(): Promise<void> {
     const res = await fetch("/api/amanah", {
       method: "DELETE",
