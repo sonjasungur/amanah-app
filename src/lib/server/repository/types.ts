@@ -42,6 +42,19 @@ export interface RepositorySession {
   expiresAt: string;
 }
 
+/** Metadata only: listing a version never returns its content. */
+export interface RepositoryDataVersion {
+  id: string;
+  changeType: string;
+  /** Empty when a version can no longer be read, e.g. after losing a key. */
+  sections: string[];
+  createdAt: string;
+}
+
+export interface RepositoryDataVersionExport extends RepositoryDataVersion {
+  prior: Record<string, unknown> | null;
+}
+
 export interface ServerRepository {
   registerUser(email: string, password: string, name: string): Promise<RepositoryUser | { error: string }>;
   authenticateUser(email: string, password: string): Promise<RepositoryUser | null>;
@@ -52,7 +65,17 @@ export interface ServerRepository {
   getAmanahData(userId: string): Promise<AmanahOrdnerData | null>;
   saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData>;
   patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData>;
+  /** Removes the folder and its whole history. */
   deleteAmanahData(userId: string): Promise<void>;
+  /** Newest first, without expired versions. */
+  listDataVersions(userId: string): Promise<RepositoryDataVersion[]>;
+  /** Everything stored in the history, for the account export (Art. 15/20 DSGVO). */
+  exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]>;
+  /** Only ever called on an explicit user action. Null when the version is not this user's or expired. */
+  restoreDataVersion(userId: string, versionId: string, allowedSections?: readonly string[]): Promise<AmanahOrdnerData | null>;
+  deleteDataVersions(userId: string): Promise<void>;
+  /** Removes versions past their retention for all accounts; returns how many. */
+  purgeExpiredDataVersions(now?: Date): Promise<number>;
   /** Removes the user, all sessions and all stored data (Art. 17 DSGVO). */
   deleteUser(userId: string): Promise<void>;
   findUserByEmail(email: string): Promise<RepositoryUser | null>;

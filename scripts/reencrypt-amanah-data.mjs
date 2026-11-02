@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Encrypts legacy plaintext rows in amanah_data and re-wraps rows to the active key.
+ * Encrypts legacy plaintext rows in amanah_data and amanah_data_versions and re-wraps rows to the active key.
  *
  * Default is a dry run (counts only). Writing requires BOTH:
  *   --apply   and   AMANAH_REENCRYPT_CONFIRM=yes
@@ -26,25 +26,29 @@ if (!keyring) {
   process.exit(2);
 }
 
-// Plain SQL via pg: only one table is touched, independent of the generated Prisma client.
+// Plain SQL via pg: only these tables are touched, independent of the generated Prisma client.
 const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5_000 });
 await client.connect();
 const counts = { encrypt_plaintext: 0, rewrap: 0, unchanged: 0, failed: 0 };
 try {
   const onlyUsers = process.env.AMANAH_REENCRYPT_USER_IDS?.split(",").map((s) => s.trim()).filter(Boolean);
-  const { rows } = onlyUsers?.length
-    ? await client.query("SELECT id, user_id, data FROM amanah_data WHERE user_id = ANY($1)", [onlyUsers])
-    : await client.query("SELECT id, user_id, data FROM amanah_data");
-  for (const row of rows) {
-    try {
-      const { action, value } = reencryptStoredValue(row.data, row.user_id, keyring);
-      counts[action] += 1;
-      if (apply && action !== "unchanged") {
-        await client.query("UPDATE amanah_data SET data = $1, updated_at = now() WHERE id = $2", [JSON.stringify(value), row.id]);
+  const { rows: [{ versions }] } = await client.query("SELECT to_regclass('amanah_data_versions') AS versions");
+  for (const table of versions ? ["amanah_data", "amanah_data_versions"] : ["amanah_data"]) {
+    const { rows } = onlyUsers?.length
+      ? await client.query(`SELECT id, user_id, data FROM ${table} WHERE user_id = ANY($1)`, [onlyUsers])
+      : await client.query(`SELECT id, user_id, data FROM ${table}`);
+    for (const row of rows) {
+      try {
+        const { action, value } = reencryptStoredValue(row.data, row.user_id, keyring);
+        counts[action] += 1;
+        if (apply && action !== "unchanged") {
+          const touch = table === "amanah_data" ? ", updated_at = now()" : "";
+          await client.query(`UPDATE ${table} SET data = $1${touch} WHERE id = $2`, [JSON.stringify(value), row.id]);
+        }
+      } catch {
+        counts.failed += 1;
+        console.error(`✗ row ${row.id}: could not be processed (wrong key or damaged data)`);
       }
-    } catch {
-      counts.failed += 1;
-      console.error(`✗ row ${row.id}: could not be processed (wrong key or damaged data)`);
     }
   }
   console.log(`${apply ? "applied" : "dry run"} · active key ${keyring.active} ·`, JSON.stringify(counts));

@@ -5,6 +5,8 @@ import type {
   AuthTokenPurpose,
   PurchaseStatus,
   RepositoryConsent,
+  RepositoryDataVersion,
+  RepositoryDataVersionExport,
   RepositoryPurchase,
   RepositorySession,
   RepositoryUser,
@@ -16,6 +18,17 @@ import {
 } from "../memory-store";
 import { hashPasswordServer, verifyPasswordServer } from "../crypto";
 import { openFromStorage, sealForStorage } from "../data-encryption";
+import {
+  isDataHistoryEnabled,
+  openVersion,
+  openVersionOrNull,
+  overlayVersions,
+  planHistoryWrite,
+  retentionCutoff,
+  sealVersion,
+  versionsToPrune,
+  type ChangeType,
+} from "../data-history";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -92,9 +105,85 @@ export class MemoryRepository implements ServerRepository {
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const saved = { ...normalized, lastSaved: new Date().toISOString() };
-    // Same storage boundary as Postgres: sealed when keys are configured.
-    getMemoryStore().amanahData.set(userId, sealForStorage(saved, userId) as AmanahOrdnerData);
+    this.writeFolder(userId, saved, "save");
     return saved;
+  }
+
+  private writeFolder(userId: string, saved: AmanahOrdnerData, changeType: ChangeType): void {
+    const store = getMemoryStore();
+    if (isDataHistoryEnabled()) this.recordVersion(userId, saved, changeType);
+    // Same storage boundary as Postgres: sealed when keys are configured.
+    store.amanahData.set(userId, sealForStorage(saved, userId) as AmanahOrdnerData);
+  }
+
+  private versionsOf(userId: string) {
+    return getMemoryStore().dataVersions.filter((v) => v.userId === userId).sort((a, b) => b.seq - a.seq);
+  }
+
+  private recordVersion(userId: string, after: AmanahOrdnerData, changeType: ChangeType): void {
+    const store = getMemoryStore();
+    const stored = store.amanahData.get(userId);
+    if (!stored) return;
+    let before: AmanahOrdnerData;
+    try {
+      before = normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(stored, userId));
+    } catch {
+      return;
+    }
+    const latest = this.versionsOf(userId)[0];
+    const plan = planHistoryWrite({
+      before,
+      after,
+      changeType,
+      latest: latest ? { row: latest, payload: openVersionOrNull(latest.data, userId, latest.seq) } : null,
+    });
+    if (plan.kind === "none") return;
+    const { stored: data, sizeBytes } = sealVersion(plan.payload, userId);
+    if (plan.kind === "extend") {
+      Object.assign(latest, { data, sizeBytes });
+    } else {
+      store.dataVersions.push({ id: crypto.randomUUID(), userId, seq: plan.seq, changeType, sizeBytes, data, createdAt: new Date() });
+    }
+    const prune = new Set(versionsToPrune(this.versionsOf(userId)));
+    store.dataVersions = store.dataVersions.filter((v) => !prune.has(v.id));
+  }
+
+  async listDataVersions(userId: string): Promise<RepositoryDataVersion[]> {
+    const cutoff = retentionCutoff();
+    return this.versionsOf(userId)
+      .filter((v) => v.createdAt >= cutoff)
+      .map((v) => toDataVersion(v, openVersionOrNull(v.data, userId, v.seq)?.sections ?? []));
+  }
+
+  async exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]> {
+    return this.versionsOf(userId).map((v) => {
+      const payload = openVersionOrNull(v.data, userId, v.seq);
+      return { ...toDataVersion(v, payload?.sections ?? []), prior: payload?.prior ?? null };
+    });
+  }
+
+  async restoreDataVersion(userId: string, versionId: string, allowedSections?: readonly string[]): Promise<AmanahOrdnerData | null> {
+    const versions = this.versionsOf(userId);
+    const target = versions.find((v) => v.id === versionId && v.createdAt >= retentionCutoff());
+    const current = await this.getAmanahData(userId);
+    if (!target || !current) return null;
+    const chain = versions.filter((v) => v.seq >= target.seq).map((v) => openVersion(v.data, userId, v.seq));
+    const saved = { ...normalizeData(overlayVersions(current, chain, allowedSections)), lastSaved: new Date().toISOString() };
+    this.writeFolder(userId, saved, "restore");
+    return saved;
+  }
+
+  async deleteDataVersions(userId: string): Promise<void> {
+    const store = getMemoryStore();
+    store.dataVersions = store.dataVersions.filter((v) => v.userId !== userId);
+  }
+
+  async purgeExpiredDataVersions(now: Date = new Date()): Promise<number> {
+    const store = getMemoryStore();
+    const cutoff = retentionCutoff(now);
+    const before = store.dataVersions.length;
+    store.dataVersions = store.dataVersions.filter((v) => v.createdAt >= cutoff);
+    return before - store.dataVersions.length;
   }
 
   async patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData> {
@@ -104,6 +193,7 @@ export class MemoryRepository implements ServerRepository {
 
   async deleteAmanahData(userId: string): Promise<void> {
     getMemoryStore().amanahData.delete(userId);
+    await this.deleteDataVersions(userId);
   }
 
   async deleteUser(userId: string): Promise<void> {
@@ -117,6 +207,7 @@ export class MemoryRepository implements ServerRepository {
     // Purchases are kept anonymised (possible retention duties).
     for (const p of store.purchases) if (p.userId === userId) p.userId = null;
     store.amanahData.delete(userId);
+    await this.deleteDataVersions(userId);
     store.users.delete(userId);
     if (user) store.usersByEmail.delete(user.email);
   }
@@ -222,3 +313,7 @@ function toConsent(c: RepositoryConsent & { userId: string }): RepositoryConsent
 }
 
 export const memoryRepository = new MemoryRepository();
+
+function toDataVersion(row: { id: string; changeType: string; createdAt: Date }, sections: string[]): RepositoryDataVersion {
+  return { id: row.id, changeType: row.changeType, sections, createdAt: row.createdAt.toISOString() };
+}

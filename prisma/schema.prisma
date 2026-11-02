@@ -20,6 +20,7 @@ model User {
   updatedAt       DateTime        @updatedAt @map("updated_at")
   sessions        Session[]
   amanahData      AmanahData?
+  dataVersions    AmanahDataVersion[]
   consents        ConsentRecord[]
   authTokens      AuthToken[]
   purchases       Purchase[]
@@ -49,6 +50,23 @@ model AmanahData {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("amanah_data")
+}
+
+/// Earlier values of changed sections, sealed like amanah_data. Written only with AMANAH_DATA_HISTORY=true.
+/// Section names and values stay inside `data`; retention rules: src/lib/server/data-history.ts.
+model AmanahDataVersion {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seq        Int
+  changeType String   @map("change_type")
+  sizeBytes  Int      @map("size_bytes")
+  data       Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, seq])
+  @@index([createdAt])
+  @@map("amanah_data_versions")
 }
 
 /// Proof of consent per purpose and text version (Art. 7 Abs. 1 DSGVO). Never pre-ticked.

@@ -16,10 +16,20 @@ export async function GET(request: Request) {
 
   const body = {
     exportedAt: new Date().toISOString(),
-    format: "amanah-account-export@1",
+    format: "amanah-account-export@2",
     account: { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt, emailVerifiedAt: user.emailVerifiedAt ?? null, emailVerificationLegacyAt: user.emailVerificationLegacyAt ?? null },
     amanahData: await repo.getAmanahData(userId),
     consents: await repo.listConsents(userId),
+    purchases: (await repo.listPurchases(userId)).map(({ productId, provider, providerRef, status, amountCents, currency, createdAt }) => ({
+      productId,
+      provider,
+      providerRef,
+      status,
+      amountCents,
+      currency,
+      createdAt,
+    })),
+    dataHistory: await repo.exportDataVersions(userId),
   };
 
   return new NextResponse(JSON.stringify(body, null, 2), {

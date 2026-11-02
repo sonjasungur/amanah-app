@@ -46,6 +46,17 @@ interface MemoryStoreState {
   authTokens: Map<string, StoredAuthToken>;
   purchases: import("./repository/types").RepositoryPurchase[];
   paymentEvents: Set<string>;
+  dataVersions: StoredDataVersion[];
+}
+
+export interface StoredDataVersion {
+  id: string;
+  userId: string;
+  seq: number;
+  changeType: string;
+  sizeBytes: number;
+  data: unknown;
+  createdAt: Date;
 }
 
 declare global {
@@ -62,6 +73,7 @@ function createStore(): MemoryStoreState {
     authTokens: new Map(),
     purchases: [],
     paymentEvents: new Set(),
+    dataVersions: [],
   };
 }
 

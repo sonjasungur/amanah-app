@@ -5,6 +5,17 @@ import { normalizeData } from "@/lib/domain/migration";
 import { prisma } from "../prisma";
 import { openFromStorage, sealForStorage } from "../data-encryption";
 import {
+  isDataHistoryEnabled,
+  openVersion,
+  openVersionOrNull,
+  overlayVersions,
+  planHistoryWrite,
+  retentionCutoff,
+  sealVersion,
+  versionsToPrune,
+  type ChangeType,
+} from "../data-history";
+import {
   generateSessionToken,
   hashPasswordServer,
   hashSessionToken,
@@ -15,6 +26,8 @@ import type {
   AuthTokenPurpose,
   PurchaseStatus,
   RepositoryConsent,
+  RepositoryDataVersion,
+  RepositoryDataVersionExport,
   RepositoryPurchase,
   RepositorySession,
   RepositoryUser,
@@ -104,21 +117,11 @@ export class PostgresRepository implements ServerRepository {
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const payload = { ...normalized, lastSaved: new Date().toISOString() };
-    const stored = sealForStorage(payload, userId) as object;
-
-    await prisma.amanahData.upsert({
-      where: { userId },
-      create: {
-        userId,
-        schemaVersion: SCHEMA_VERSION,
-        data: stored,
-      },
-      update: {
-        schemaVersion: SCHEMA_VERSION,
-        data: stored,
-      },
-    });
-
+    if (isDataHistoryEnabled()) {
+      await prisma.$transaction((tx) => writeWithHistory(tx, userId, payload, "save"));
+      return payload;
+    }
+    await upsertFolder(prisma, userId, payload);
     return payload;
   }
 
@@ -128,7 +131,50 @@ export class PostgresRepository implements ServerRepository {
   }
 
   async deleteAmanahData(userId: string): Promise<void> {
-    await prisma.amanahData.deleteMany({ where: { userId } });
+    await prisma.$transaction([
+      prisma.amanahDataVersion.deleteMany({ where: { userId } }),
+      prisma.amanahData.deleteMany({ where: { userId } }),
+    ]);
+  }
+
+  async listDataVersions(userId: string): Promise<RepositoryDataVersion[]> {
+    const rows = await prisma.amanahDataVersion.findMany({
+      where: { userId, createdAt: { gte: retentionCutoff() } },
+      orderBy: { seq: "desc" },
+    });
+    return rows.map((row) => toDataVersion(row, openVersionOrNull(row.data, userId, row.seq)?.sections ?? []));
+  }
+
+  async exportDataVersions(userId: string): Promise<RepositoryDataVersionExport[]> {
+    const rows = await prisma.amanahDataVersion.findMany({ where: { userId }, orderBy: { seq: "desc" } });
+    return rows.map((row) => {
+      const payload = openVersionOrNull(row.data, userId, row.seq);
+      return { ...toDataVersion(row, payload?.sections ?? []), prior: payload?.prior ?? null };
+    });
+  }
+
+  async restoreDataVersion(userId: string, versionId: string, allowedSections?: readonly string[]): Promise<AmanahOrdnerData | null> {
+    return prisma.$transaction(async (tx) => {
+      await lockFolder(tx, userId);
+      const target = await tx.amanahDataVersion.findFirst({ where: { id: versionId, userId, createdAt: { gte: retentionCutoff() } } });
+      const current = await tx.amanahData.findUnique({ where: { userId } });
+      if (!target || !current) return null;
+      const rows = await tx.amanahDataVersion.findMany({ where: { userId, seq: { gte: target.seq } }, orderBy: { seq: "desc" } });
+      const chain = rows.map((row) => openVersion(row.data, userId, row.seq));
+      const folder = normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId));
+      const payload = { ...normalizeData(overlayVersions(folder, chain, allowedSections)), lastSaved: new Date().toISOString() };
+      await writeWithHistory(tx, userId, payload, "restore");
+      return payload;
+    });
+  }
+
+  async deleteDataVersions(userId: string): Promise<void> {
+    await prisma.amanahDataVersion.deleteMany({ where: { userId } });
+  }
+
+  async purgeExpiredDataVersions(now: Date = new Date()): Promise<number> {
+    const { count } = await prisma.amanahDataVersion.deleteMany({ where: { createdAt: { lt: retentionCutoff(now) } } });
+    return count;
   }
 
   async findUserByEmail(email: string): Promise<RepositoryUser | null> {
@@ -215,6 +261,7 @@ export class PostgresRepository implements ServerRepository {
       prisma.session.deleteMany({ where: { userId } }),
       prisma.authToken.deleteMany({ where: { userId } }),
       prisma.consentRecord.deleteMany({ where: { userId } }),
+      prisma.amanahDataVersion.deleteMany({ where: { userId } }),
       prisma.amanahData.deleteMany({ where: { userId } }),
       prisma.user.deleteMany({ where: { id: userId } }),
     ]);
@@ -228,6 +275,61 @@ export class PostgresRepository implements ServerRepository {
       return false;
     }
   }
+}
+
+type FolderClient = Pick<typeof prisma, "amanahData">;
+
+async function upsertFolder(client: FolderClient, userId: string, payload: AmanahOrdnerData): Promise<void> {
+  const stored = sealForStorage(payload, userId) as object;
+  await client.amanahData.upsert({
+    where: { userId },
+    create: { userId, schemaVersion: SCHEMA_VERSION, data: stored },
+    update: { schemaVersion: SCHEMA_VERSION, data: stored },
+  });
+}
+
+/** Serialises writes of one account, also before its first row exists. Released with the transaction. */
+async function lockFolder(tx: Prisma.TransactionClient, userId: string): Promise<void> {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
+}
+
+async function writeWithHistory(tx: Prisma.TransactionClient, userId: string, payload: AmanahOrdnerData, changeType: ChangeType): Promise<void> {
+  await lockFolder(tx, userId);
+  const current = await tx.amanahData.findUnique({ where: { userId } });
+  let before: AmanahOrdnerData | null = null;
+  try {
+    before = current ? normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId)) : null;
+  } catch {
+    // An unreadable old row cannot become a version, but must not block saving (as without history).
+  }
+  if (before) {
+    const latestRow = await tx.amanahDataVersion.findFirst({ where: { userId }, orderBy: { seq: "desc" } });
+    const plan = planHistoryWrite({
+      before,
+      after: payload,
+      changeType,
+      latest: latestRow ? { row: latestRow, payload: openVersionOrNull(latestRow.data, userId, latestRow.seq) } : null,
+    });
+    if (plan.kind !== "none") {
+      const { stored, sizeBytes } = sealVersion(plan.payload, userId);
+      if (plan.kind === "extend") {
+        await tx.amanahDataVersion.update({ where: { id: plan.id }, data: { data: stored as object, sizeBytes } });
+      } else {
+        await tx.amanahDataVersion.create({ data: { userId, seq: plan.seq, changeType, sizeBytes, data: stored as object } });
+      }
+      const rows = await tx.amanahDataVersion.findMany({
+        where: { userId },
+        select: { id: true, seq: true, changeType: true, sizeBytes: true, createdAt: true },
+      });
+      const prune = versionsToPrune(rows);
+      if (prune.length) await tx.amanahDataVersion.deleteMany({ where: { userId, id: { in: prune } } });
+    }
+  }
+  await upsertFolder(tx, userId, payload);
+}
+
+function toDataVersion(row: { id: string; changeType: string; createdAt: Date }, sections: string[]): RepositoryDataVersion {
+  return { id: row.id, changeType: row.changeType, sections, createdAt: row.createdAt.toISOString() };
 }
 
 function toRepositoryUser(user: {
