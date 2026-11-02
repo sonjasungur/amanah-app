@@ -5,13 +5,36 @@ import type { ServerRepository } from "@/lib/server/repository/types";
 import { getAuthenticatedUserId, getServerRepository } from "@/lib/server/auth-utils";
 import { CONSENT_REQUIRED_RESPONSE, hasActiveConsent } from "@/lib/server/consent";
 import { folderWriteBlocked } from "@/lib/server/email-verification";
-import { folderWriteScope, freeSectionsOf, notStoredSections, readFolderBody } from "@/lib/server/folder-access";
+import {
+  folderSizeRejected,
+  folderWriteScope,
+  freeSectionsOf,
+  jsonBytes,
+  MAX_ASSETS,
+  MAX_FOLDER_BODY_BYTES,
+  notStoredSections,
+  readFolderBody,
+  tooManyAssets,
+} from "@/lib/server/folder-access";
 
 /** The client sends the whole folder: store what is free, leave the rest untouched and say what was not stored. */
 async function writeFreeSections(repo: ServerRepository, userId: string, body: Partial<AmanahOrdnerData>) {
-  const notStored = notStoredSections(await repo.getAmanahData(userId), body);
-  const saved = await repo.patchAmanahData(userId, freeSectionsOf(body));
+  const existing = await repo.getAmanahData(userId);
+  const free = freeSectionsOf(body);
+  // Only what would really be stored counts, not what stays in the browser.
+  const rejected = tooManyAssets(free.assets, existing) ?? folderSizeRejected(jsonBytes({ ...existing, ...free }), jsonBytes(existing));
+  if (rejected) return rejected;
+  const notStored = notStoredSections(existing, body);
+  const saved = await repo.patchAmanahData(userId, free);
   return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored });
+}
+
+/** Limits for a full write. The stored folder is read only when they could apply. */
+async function fullWriteRejected(repo: ServerRepository, userId: string, body: Partial<AmanahOrdnerData>, storedBytes: number) {
+  const mayExceed = storedBytes > MAX_FOLDER_BODY_BYTES || (Array.isArray(body.assets) && body.assets.length > MAX_ASSETS);
+  if (!mayExceed) return null;
+  const existing = await repo.getAmanahData(userId);
+  return tooManyAssets(body.assets, existing) ?? folderSizeRejected(storedBytes, jsonBytes(existing));
 }
 
 export async function GET(request: Request) {
@@ -40,7 +63,9 @@ export async function PUT(request: Request) {
     if (blocked) return blocked;
     const read = await readFolderBody(request);
     if ("response" in read) return read.response;
-    if ((await folderWriteScope(repo, userId)) === "free_sections") return writeFreeSections(repo, userId, read.body);
+    if ((await folderWriteScope(repo, userId)) === "free_sections") return await writeFreeSections(repo, userId, read.body);
+    const rejected = await fullWriteRejected(repo, userId, read.body, read.bytes);
+    if (rejected) return rejected;
     const saved = await repo.saveAmanahData(userId, read.body as AmanahOrdnerData);
     return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored: [] });
   } catch {
@@ -63,7 +88,10 @@ export async function PATCH(request: Request) {
     if (blocked) return blocked;
     const read = await readFolderBody(request);
     if ("response" in read) return read.response;
-    if ((await folderWriteScope(repo, userId)) === "free_sections") return writeFreeSections(repo, userId, read.body);
+    if ((await folderWriteScope(repo, userId)) === "free_sections") return await writeFreeSections(repo, userId, read.body);
+    const merged = read.bytes > MAX_FOLDER_BODY_BYTES ? { ...(await repo.getAmanahData(userId)), ...read.body } : read.body;
+    const rejected = await fullWriteRejected(repo, userId, read.body, jsonBytes(merged));
+    if (rejected) return rejected;
     const saved = await repo.patchAmanahData(userId, read.body);
     return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored: [] });
   } catch {

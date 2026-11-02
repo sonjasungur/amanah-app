@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE as amanahDELETE, GET as amanahGET, PATCH as amanahPATCH, PUT as amanahPUT } from "@/app/api/amanah/route";
 import { GET as exportGET } from "@/app/api/account/export/route";
+import { DELETE as accountDELETE } from "@/app/api/account/route";
+import { DELETE as consentDELETE } from "@/app/api/consent/route";
 import { GET as statusGET } from "@/app/api/billing/status/route";
 import { featureForRoute, FREE_ACCOUNT_SECTIONS, planFeature } from "@/lib/billing/plan-matrix";
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import { normalizeData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, AssetEntry } from "@/lib/domain/types";
 import { resetRateLimits } from "@/lib/ai/rate-limit";
-import { MAX_ASSETS, MAX_FOLDER_BODY_BYTES, notStoredSections } from "@/lib/server/folder-access";
+import { HARD_FOLDER_BODY_BYTES, MAX_ASSETS, notStoredSections } from "@/lib/server/folder-access";
 import { clearOutbox } from "@/lib/server/mailer";
+import { getMemoryStore } from "@/lib/server/memory-store";
 import { getServerRepository, resetServerRepository } from "@/lib/server/repository";
 import { keepLocalOnlySections } from "@/lib/storage/store-sync";
 import { sanitizeAssets } from "@/lib/testament/asset-labels";
@@ -57,7 +60,7 @@ describe("plan matrix", () => {
     expect(feature.tier).toBe("free");
     expect(feature.enforcement).toBe("never");
     expect(feature.note).toContain("Dauerhaft kostenlos");
-    expect(FREE_ACCOUNT_SECTIONS).toEqual(["assets"]);
+    expect([...FREE_ACCOUNT_SECTIONS].sort()).toEqual(["assets", "checkProgress", "emergencyCard", "knowledgeBookmarks"]);
     expect(planFeature("persistent_folder")?.tier).toBe("plus");
   });
 });
@@ -186,22 +189,238 @@ describe("tariff changes never remove anything", () => {
   });
 });
 
-describe("limits", () => {
-  it("rejects bodies over the limit with a clear error and keeps what is stored", async () => {
+describe("limits and large existing folders", () => {
+  const big = (mib: number) => "ä".repeat(Math.floor((mib * 1024 * 1024) / 2));
+  const letter = (familyLetter: string) => ({ ...defaultAmanahData, familyMessage: { ...defaultAmanahData.familyMessage, familyLetter } });
+
+  it("accepts new data up to the limit and rejects more with a clear error, keeping what is stored", async () => {
     const cookie = await registerVerified(BASE, newEmail(), "testpass1");
-    await put({ assets: [asset()] }, cookie);
-    const res = await put(JSON.stringify({ assets: [], filler: "x".repeat(MAX_FOLDER_BODY_BYTES) }), cookie);
+    await put(letter("klein"), cookie);
+    expect((await put(letter(big(1.9)), cookie)).status).toBe(200);
+    await put(letter("klein"), cookie);
+    const res = await put(letter(big(2.1)), cookie);
     expect(res.status).toBe(413);
-    expect((await res.json()).code).toBe("folder_too_large");
+    const body = await res.json();
+    expect(body.code).toBe("folder_too_large");
+    expect(body.error).toContain("in diesem Browser erhalten");
+    expect((await stored(cookie)).familyMessage.familyLetter).toBe("klein");
+  });
+
+  it("an account already above the limit keeps editing, shortening and adding a little, up to the hard limit", async () => {
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    const user = await userOf(email);
+    // Stored before the limit existed, as an old row would be.
+    const huge = big(10);
+    await getServerRepository().saveAmanahData(user.id, letter(huge));
+
+    const edited = await put(letter(`${huge} ergänzt`), cookie);
+    expect(edited.status).toBe(200);
+    expect((await stored(cookie)).familyMessage.familyLetter.endsWith("ergänzt")).toBe(true);
+
+    expect((await put({ ...letter(`${huge} ergänzt`), assets: [asset()] }, cookie)).status).toBe(200);
+    expect((await stored(cookie)).assets).toHaveLength(1);
+
+    expect((await put(letter(`${huge}${big(1)}`), cookie)).status).toBe(413);
+    expect((await stored(cookie)).familyMessage.familyLetter.length).toBe(huge.length + " ergänzt".length);
+
+    expect((await put(letter(big(3)), cookie)).status).toBe(200);
+    expect((await put(letter(big(3.5)), cookie)).status).toBe(413);
+    expect((await put(letter("kurz"), cookie)).status).toBe(200);
+    expect((await put(letter(big(3)), cookie)).status).toBe(413);
+  });
+
+  it("PATCH follows the same rule", async () => {
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    await getServerRepository().saveAmanahData((await userOf(email)).id, letter(big(4)));
+    expect((await amanahPATCH(write("PATCH", { assets: [asset()] }, cookie))).status).toBe(200);
+    expect((await amanahPATCH(write("PATCH", letter(big(4)), cookie))).status).toBe(200);
+    expect((await amanahPATCH(write("PATCH", letter(big(5)), cookie))).status).toBe(413);
+  });
+
+  it("nothing above the hard limit is read", async () => {
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    expect((await put(JSON.stringify({ filler: "x".repeat(HARD_FOLDER_BODY_BYTES + 1) }), cookie)).status).toBe(413);
+  });
+
+  it("a free account is limited by what is stored, not by what stays in its browser", async () => {
+    enforce();
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    const res = await put({ ...letter(big(6)), assets: [asset()] }, cookie);
+    expect(res.status).toBe(200);
+    expect((await res.json()).notStored).toEqual(["familyMessage"]);
     expect((await stored(cookie)).assets).toHaveLength(1);
   });
 
-  it("rejects too many entries and invalid bodies", async () => {
+  it("a free account above the limit from its Plus time can still save assets", async () => {
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    await getServerRepository().saveAmanahData((await userOf(email)).id, letter(big(4)));
+    enforce();
+    expect((await put({ assets: [asset()] }, cookie)).status).toBe(200);
+    expect((await stored(cookie)).familyMessage.familyLetter.length).toBe(big(4).length);
+  });
+
+  it("limits the number of asset entries, without locking anyone who already has more", async () => {
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    const many = (n: number) => Array.from({ length: n }, (_, i) => asset({ id: `a${i}` }));
+    expect((await put({ assets: many(MAX_ASSETS + 1) }, cookie)).status).toBe(422);
+    await getServerRepository().saveAmanahData((await userOf(email)).id, normalizeData({ assets: many(MAX_ASSETS + 5) }));
+    expect((await put({ assets: many(MAX_ASSETS + 2) }, cookie)).status).toBe(200);
+    expect((await put({ assets: many(MAX_ASSETS + 2) }, cookie)).status).toBe(200);
+    expect((await put({ assets: many(MAX_ASSETS + 3) }, cookie)).status).toBe(422);
+  });
+
+  it("rejects invalid bodies", async () => {
     const cookie = await registerVerified(BASE, newEmail(), "testpass1");
-    const many = Array.from({ length: MAX_ASSETS + 1 }, (_, i) => asset({ id: `a${i}` }));
-    expect((await put({ assets: many }, cookie)).status).toBe(422);
     expect((await put("not json", cookie)).status).toBe(400);
     expect((await put("[1,2]", cookie)).status).toBe(400);
+  });
+});
+
+/** The same checks for every tariff state and every free section. */
+const FREE_CHANGES: Record<string, Partial<AmanahOrdnerData>> = {
+  assets: { assets: [asset()] },
+  emergencyCard: { emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Amina Test", allergies: "Pollen" } },
+  checkProgress: { checkProgress: { ...defaultAmanahData.checkProgress, index: 3, answers: { q1: true } } },
+  knowledgeBookmarks: { knowledgeBookmarks: ["artikel-a", "artikel-b"] },
+};
+const PAID_CHANGE = { familyMessage: { ...defaultAmanahData.familyMessage, familyLetter: "Plus-Inhalt" } };
+
+async function accountIn(state: "free" | "plus" | "refunded") {
+  enforce();
+  const email = newEmail();
+  const cookie = await registerVerified(BASE, email, "testpass1");
+  if (state !== "free") {
+    const repo = getServerRepository();
+    const user = await userOf(email);
+    await repo.createPurchase({ userId: user.id, productId: "vorsorge_plus", provider: "sandbox", providerRef: `ref-${user.id}`, status: "paid", amountCents: 3900, currency: "eur" });
+    if (state === "refunded") await repo.transitionPurchase(`ref-${user.id}`, ["paid"], "refunded");
+  }
+  return cookie;
+}
+
+describe.each(["free", "plus", "refunded"] as const)("tariff state: %s", (state) => {
+  it.each(Object.keys(FREE_CHANGES))("%s is stored on the server, exported and survives a second device", async (section) => {
+    const cookie = await accountIn(state);
+    const res = await put({ ...defaultAmanahData, ...FREE_CHANGES[section] }, cookie);
+    expect(res.status).toBe(200);
+    expect((await res.json()).notStored).toEqual([]);
+
+    const onOtherDevice = (await stored(cookie)) as unknown as Record<string, unknown>;
+    const expected = normalizeData(FREE_CHANGES[section]) as unknown as Record<string, unknown>;
+    expect(onOtherDevice[section]).toEqual(expected[section]);
+
+    const exported = await (await exportGET(browserRequest(`${BASE}/api/account/export`, {}, cookie))).json();
+    expect(exported.amanahData[section]).toEqual(expected[section]);
+  });
+
+  it("free sections can be emptied again", async () => {
+    const cookie = await accountIn(state);
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.assets, ...FREE_CHANGES.emergencyCard, ...FREE_CHANGES.knowledgeBookmarks }, cookie);
+    await put({ ...defaultAmanahData }, cookie);
+    const data = await stored(cookie);
+    expect(data.assets).toEqual([]);
+    expect(data.emergencyCard.name).toBe("");
+    expect(data.knowledgeBookmarks).toEqual([]);
+  });
+
+  it(`paid sections ${state === "plus" ? "are" : "are not"} stored`, async () => {
+    const cookie = await accountIn(state);
+    const res = await put({ ...defaultAmanahData, ...PAID_CHANGE }, cookie);
+    const { notStored } = await res.json();
+    const letter = (await stored(cookie)).familyMessage.familyLetter;
+    if (state === "plus") {
+      expect(notStored).toEqual([]);
+      expect(letter).toBe("Plus-Inhalt");
+    } else {
+      expect(notStored).toEqual(["familyMessage"]);
+      expect(letter).toBe("");
+    }
+  });
+
+  it("withdrawing consent removes the server copy and blocks further saving", async () => {
+    const cookie = await accountIn(state);
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.emergencyCard }, cookie);
+    await consentDELETE(browserRequest(`${BASE}/api/consent`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ purpose: "sensitive_folder_storage" }) }, cookie));
+    expect((await stored(cookie)).emergencyCard.name).toBe("");
+    expect((await put({ ...defaultAmanahData, ...FREE_CHANGES.emergencyCard }, cookie)).status).toBe(403);
+  });
+
+  it("deleting the account removes everything", async () => {
+    const cookie = await accountIn(state);
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.assets }, cookie);
+    const res = await accountDELETE(browserRequest(`${BASE}/api/account`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: "testpass1" }) }, cookie));
+    expect(res.status).toBe(200);
+    expect(getMemoryStore().amanahData.size).toBe(0);
+    expect((await amanahGET(browserRequest(`${BASE}/api/amanah`, {}, cookie))).status).toBe(401);
+  });
+});
+
+describe("free data survives tariff changes", () => {
+  it("through purchase and refund", async () => {
+    enforce();
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    const repo = getServerRepository();
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.emergencyCard, ...FREE_CHANGES.knowledgeBookmarks, ...FREE_CHANGES.assets }, cookie);
+    const user = await userOf(email);
+    await repo.createPurchase({ userId: user.id, productId: "vorsorge_plus", provider: "sandbox", providerRef: `ref-${user.id}`, status: "paid", amountCents: 3900, currency: "eur" });
+    expect((await stored(cookie)).emergencyCard.name).toBe("Amina Test");
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.emergencyCard, ...FREE_CHANGES.knowledgeBookmarks, ...FREE_CHANGES.assets, ...PAID_CHANGE }, cookie);
+    await repo.transitionPurchase(`ref-${user.id}`, ["paid"], "refunded");
+    const data = await stored(cookie);
+    expect(data.emergencyCard.name).toBe("Amina Test");
+    expect(data.knowledgeBookmarks).toEqual(["artikel-a", "artikel-b"]);
+    expect(data.assets).toHaveLength(1);
+    expect(data.familyMessage.familyLetter).toBe("Plus-Inhalt");
+  });
+});
+
+describe("access between accounts", () => {
+  it("another account sees none of these sections", async () => {
+    enforce();
+    const owner = await registerVerified(BASE, newEmail(), "testpass1");
+    const other = await registerVerified(BASE, newEmail(), "testpass1");
+    await put({ ...defaultAmanahData, ...FREE_CHANGES.emergencyCard, ...FREE_CHANGES.assets }, owner);
+    const data = await stored(other);
+    expect(data.emergencyCard.name).toBe("");
+    expect(data.assets).toEqual([]);
+    expect((await amanahGET(browserRequest(`${BASE}/api/amanah`))).status).toBe(401);
+  });
+
+  it("drops unknown fields and wrong types from the emergency card", async () => {
+    enforce();
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    await put({ emergencyCard: { name: "Ok", allergies: 5, injected: "x", emergencyContact1: { name: "K", phone: {} } }, knowledgeBookmarks: ["a", 3], checkProgress: { index: "x" } }, cookie);
+    const data = await stored(cookie);
+    expect(data.emergencyCard.name).toBe("Ok");
+    expect(data.emergencyCard.allergies).toBe("");
+    expect(data.emergencyCard.emergencyContact1.phone).toBe("");
+    expect(JSON.stringify(data)).not.toContain("injected");
+    expect(data.knowledgeBookmarks).toEqual(["a"]);
+  });
+});
+
+describe("logs stay free of personal data", () => {
+  it("not on saving, rejecting, failing or exporting", async () => {
+    const spies = (["log", "info", "warn", "error", "debug"] as const).map((level) => vi.spyOn(console, level));
+    const secret = "SEHR-PERSOENLICHER-TEXT";
+    enforce();
+    const email = newEmail();
+    const cookie = await registerVerified(BASE, email, "testpass1");
+    await put({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, illnesses: secret } }, cookie);
+    await put(JSON.stringify({ emergencyCard: { illnesses: secret }, filler: "x".repeat(HARD_FOLDER_BODY_BYTES) }), cookie);
+    await put(`{"broken": "${secret}"`, cookie);
+    await exportGET(browserRequest(`${BASE}/api/account/export`, {}, cookie));
+    vi.spyOn(getServerRepository(), "patchAmanahData").mockRejectedValueOnce(new Error(`db failed ${secret}`));
+    expect((await put({ emergencyCard: { illnesses: secret } }, cookie)).status).toBe(500);
+    const logged = JSON.stringify(spies.flatMap((spy) => spy.mock.calls));
+    expect(logged).not.toContain(secret);
+    expect(logged).not.toContain(email);
+    spies.forEach((spy) => spy.mockRestore());
   });
 });
 
@@ -210,12 +429,18 @@ describe("helpers", () => {
     const existing = normalizeData({});
     expect(notStoredSections(existing, { ...existing, lastSaved: "2030-01-01" })).toEqual([]);
     expect(notStoredSections(null, { assets: [asset()] })).toEqual([]);
-    expect(notStoredSections(existing, { checkProgress: { ...existing.checkProgress, index: 3 }, selectedPath: "/x", knowledgeBookmarks: ["slug"] })).toEqual([]);
+    expect(notStoredSections(existing, { selectedPath: "/x", checkProgress: { ...existing.checkProgress, index: 3 }, knowledgeBookmarks: ["slug"] })).toEqual([]);
   });
 
   it("sanitizeAssets ignores everything that is no list", () => {
     expect(sanitizeAssets("x")).toEqual([]);
     expect(sanitizeAssets(null)).toEqual([]);
+  });
+
+  it("on login an empty free section takes the entries from this browser", () => {
+    const merged = keepLocalOnlySections(normalizeData({}), normalizeData({ assets: [asset()], knowledgeBookmarks: ["a"] }));
+    expect(merged.assets).toHaveLength(1);
+    expect(merged.knowledgeBookmarks).toEqual(["a"]);
   });
 
   it("on login the account wins for assets; what exists only in this browser survives", () => {
@@ -227,5 +452,44 @@ describe("helpers", () => {
     const merged = keepLocalOnlySections(remote, local);
     expect(merged.assets[0].description).toBe("Konto");
     expect(merged.familyMessage.familyLetter).toBe("Nur hier");
+  });
+});
+
+describe("login sync", () => {
+  it("keeps what is entered while the account data is loading", async () => {
+    let release: (value: Response) => void = () => {};
+    vi.stubEnv("NEXT_PUBLIC_STORAGE_MODE", "api");
+    vi.stubEnv("NEXT_PUBLIC_AUTH_MODE", "api");
+    localStorage.setItem("amanah-auth-session", JSON.stringify({ user: { id: "u", email: "a@test.invalid", name: "A" }, expiresAt: "2999-01-01T00:00:00Z" }));
+    const puts: string[] = [];
+    vi.stubGlobal("fetch", vi.fn((_url: string, init: RequestInit = {}) => {
+      if (init.method === "PUT") {
+        puts.push(init.body as string);
+        return Promise.resolve(new Response(JSON.stringify({ notStored: [] })));
+      }
+      return new Promise<Response>((resolve) => (release = resolve));
+    }));
+    const { useAmanahStore } = await import("@/lib/store/use-amanah-store");
+    const { syncStoreWithRemoteAfterAuth } = await import("@/lib/storage/store-sync");
+    useAmanahStore.setState({ ...structuredClone(defaultAmanahData) });
+
+    const sync = syncStoreWithRemoteAfterAuth();
+    await Promise.resolve();
+    useAmanahStore.setState({ checkProgress: { ...defaultAmanahData.checkProgress, index: 1, answers: { convert: true } } });
+    release(new Response(JSON.stringify({ data: normalizeData({ assets: [asset()] }), writeScope: "free_sections" })));
+    await sync;
+
+    expect(useAmanahStore.getState().checkProgress.answers).toEqual({ convert: true });
+    expect(useAmanahStore.getState().assets).toHaveLength(1);
+    expect(JSON.parse(puts[0]).checkProgress.answers).toEqual({ convert: true });
+    localStorage.removeItem("amanah-auth-session");
+    vi.unstubAllGlobals();
+  });
+});
+
+describe("store hydration", () => {
+  it("reports itself as hydrated, which the check relies on to write into the folder", async () => {
+    const { useAmanahStore } = await import("@/lib/store/use-amanah-store");
+    expect(useAmanahStore.persist.hasHydrated()).toBe(true);
   });
 });

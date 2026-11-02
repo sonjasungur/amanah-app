@@ -31,7 +31,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     routes: ["/wissen"],
     enforcement: "never",
     availableBeforeLaunch: true,
-    note: "Sadaqa Jariya: dauerhaft frei, ohne Registrierung, nie Teil eines Pakets.",
+    note: "Sadaqa Jariya: dauerhaft frei, ohne Registrierung, nie Teil eines Pakets. Lesezeichen lassen sich kostenlos im Konto speichern.",
   },
   {
     id: "inheritance_janazah_info",
@@ -48,6 +48,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     routes: ["/check"],
     enforcement: "never",
     availableBeforeLaunch: true,
+    note: "Fortschritt und Ergebnis lassen sich kostenlos im Konto speichern.",
   },
   {
     id: "vorsorge_start",
@@ -56,7 +57,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     routes: ["/dashboard", "/dashboard/notfallkarte"],
     enforcement: "never",
     availableBeforeLaunch: true,
-    note: "Übersicht und Notfallkarte; Ansicht aller Bereiche als Vorschau.",
+    note: "Übersicht und Notfallkarte (kostenlos auch im Konto gespeichert); Ansicht aller Bereiche als Vorschau.",
   },
   {
     id: "asset_overview",
@@ -130,7 +131,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
 ];
 
 /** Sections every account may save on the server, also without Plus and with enforcement on. */
-export const FREE_ACCOUNT_SECTIONS = ["assets"] as const;
+export const FREE_ACCOUNT_SECTIONS = ["assets", "emergencyCard", "checkProgress", "knowledgeBookmarks"] as const;
 
 /** Never paid, whatever the plan: data subject rights and account control. */
 export const ALWAYS_FREE_ACCOUNT_RIGHTS = [

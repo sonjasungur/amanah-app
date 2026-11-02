@@ -33,7 +33,17 @@ async function registerFreeAccount(page: Page): Promise<string> {
   return email;
 }
 
-const stored = async (page: Page) => (await (await page.context().request.get("/api/amanah")).json()) as { data: { assets: { description: string }[]; familyMessage: { familyLetter: string }; janazahWishes: { fullName: string } }; writeScope: string };
+/** A real same-origin request from the page, as the app itself sends it. */
+const browserFetch = (page: Page, method: string, url: string, data?: unknown) =>
+  page.evaluate(
+    async ({ method, url, data }) => {
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: data === undefined ? undefined : JSON.stringify(data) });
+      return { status: res.status, body: await res.json().catch(() => null) };
+    },
+    { method, url, data },
+  );
+
+const stored = async (page: Page) => (await (await page.context().request.get("/api/amanah")).json()) as { data: { assets: { description: string }[]; familyMessage: { familyLetter: string }; janazahWishes: { fullName: string }; emergencyCard: { name: string }; checkProgress: { answers: Record<string, boolean> } }; writeScope: string };
 
 test("a free account creates, edits, prints, deletes and exports assets in the account", async ({ page }) => {
   await registerFreeAccount(page);
@@ -68,6 +78,54 @@ test("a free account creates, edits, prints, deletes and exports assets in the a
   await expect.poll(async () => (await stored(page)).data.assets).toEqual([]);
 });
 
+test("emergency card, check and bookmarks reach the account and a second device", async ({ page, browser, baseURL }) => {
+  const email = await registerFreeAccount(page);
+
+  await page.goto("/dashboard/notfallkarte");
+  await expect(page.getByTestId("plus-area-notice")).toHaveCount(0);
+  await expect(async () => {
+    await page.getByLabel("Name", { exact: true }).fill("Amina Test");
+    await expect
+      .poll(async () => (await stored(page)).data.emergencyCard.name, { timeout: 2000 })
+      .toBe("Amina Test");
+  }).toPass();
+  await expect(page.getByTestId("save-status-partial")).toHaveCount(0);
+
+  await page.goto("/check");
+  await expect(page.getByTestId("check-loading")).toBeHidden({ timeout: 8000 });
+  await page.getByTestId("check-start").click();
+  await page.getByTestId("check-answer-yes").click();
+  await expect
+    .poll(async () => Object.keys((await stored(page)).data.checkProgress.answers).length, { timeout: 5000 })
+    .toBe(1);
+
+  // No article is published, so the bookmark button cannot be reached: the same write the button causes.
+  expect((await browserFetch(page, "PATCH", "/api/amanah", { knowledgeBookmarks: ["artikel-a"] })).status).toBe(200);
+
+  const fresh = await browser.newContext({ baseURL });
+  const other = await fresh.newPage();
+  await other.goto("/login");
+  await other.getByPlaceholder("name@beispiel.de").fill(email);
+  await other.getByPlaceholder("••••••••").fill(PASSWORD);
+  await other.getByRole("button", { name: "Anmelden" }).last().click();
+  await expect(other).toHaveURL(/\/dashboard/);
+  await other.goto("/dashboard/notfallkarte");
+  await expect(other.getByLabel("Name", { exact: true })).toHaveValue("Amina Test");
+  const local = await other.evaluate(() => localStorage.getItem("amanah-ordner-data") ?? "");
+  expect(local).toContain("artikel-a");
+  expect(JSON.parse(local).state.checkProgress.index).toBeGreaterThan(0);
+  await fresh.close();
+
+  const exported = await (await page.context().request.get("/api/account/export")).json();
+  expect(exported.amanahData.emergencyCard.name).toBe("Amina Test");
+  expect(exported.amanahData.knowledgeBookmarks).toEqual(["artikel-a"]);
+  expect(Object.keys(exported.amanahData.checkProgress.answers)).toHaveLength(1);
+
+  // A paid area stays closed.
+  const paid = await browserFetch(page, "PATCH", "/api/amanah", { familyMessage: { familyLetter: "Plus" } });
+  expect(paid.body.notStored).toEqual(["familyMessage"]);
+});
+
 test("other areas stay in the browser, are named as such, and the data survives a new login", async ({ page, browser, baseURL }) => {
   const email = await registerFreeAccount(page);
   await page.goto("/dashboard/vermoegen");
@@ -91,7 +149,7 @@ test("other areas stay in the browser, are named as such, and the data survives 
   await other.goto("/login");
   await other.getByPlaceholder("name@beispiel.de").fill(email);
   await other.getByPlaceholder("••••••••").fill(PASSWORD);
-  await other.getByRole("button", { name: "Anmelden" }).click();
+  await other.getByRole("button", { name: "Anmelden" }).last().click();
   await expect(other).toHaveURL(/\/dashboard/);
   await other.goto("/dashboard/vermoegen");
   await expect(other.getByTestId("asset-list")).toContainText("Depot");
