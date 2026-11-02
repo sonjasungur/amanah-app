@@ -1,53 +1,88 @@
-# Kostenlose Vermögensübersicht im Konto und Änderungshistorie (Stand 01.11.2026)
+# Kostenlose Kontofunktionen und Änderungshistorie (Stand 02.11.2026)
 
-**Für:** Owner und Datenschutzprüfung. **Stand:** lokal, nicht deployt. Plus-Zwang und Historie sind aus. Keine Rechtsprüfung; die Fristen und Grenzen sind Vorschläge.
+**Für:** Owner und Datenschutzprüfung. **Stand:** lokal, nicht deployt. Plus-Zwang und Historie sind aus. Datenschutzprüfung bleibt Pflicht. Keine Rechtsprüfung; die Fristen und Grenzen sind Vorschläge.
 
-## 1. Vermögensübersicht bei Plus-Zwang
+## 1. Kostenlose Kontofunktionen bei Plus-Zwang
 
-Die Regel liegt serverseitig in `src/lib/server/folder-access.ts` und greift nur mit `AMANAH_BILLING_ENFORCE=true`. Ohne diese Einstellung verhält sich das Speichern wie bisher.
+Die Regel liegt serverseitig in `src/lib/server/folder-access.ts` und greift nur mit `AMANAH_BILLING_ENFORCE=true`. Ohne diese Einstellung bleiben die Schreibrechte wie bisher.
+
+**Dauerhaft kostenlos im Konto (`FREE_ACCOUNT_SECTIONS`):** Vermögensübersicht, Notfallkarte, Vorsorge-Check, Lesezeichen im Wissensbereich.
 
 | Konto | Schreiben | Lesen, Export, Löschen |
 |---|---|---|
 | Plus gekauft, oder Konto älter als `AMANAH_PLUS_LAUNCH_AT` | alles | immer |
-| Ohne Plus | nur `assets` (`FREE_ACCOUNT_SECTIONS`) | immer, auch für Bereiche aus der Plus-Zeit |
+| Ohne Plus, auch nach Erstattung | nur die vier kostenlosen Bereiche | immer, auch für Bereiche aus der Plus-Zeit |
 
 - Einwilligung und bestätigte E-Mail bleiben Bedingung fürs Speichern im Konto.
-- Der Client lädt den ganzen Ordner hoch. Andere Bereiche werden dann nicht überschrieben und nicht gelöscht. Die Antwort nennt sie in `notStored`, die Oberfläche zeigt „Teilweise gespeichert“, und die Angaben bleiben im Browser. Beim Anmelden überschreibt das Konto sie nicht.
-- **Tarifwechsel:** Nach Erstattung oder Ablauf bleibt alles gespeichert und lesbar. Änderungen außerhalb der Übersicht werden nur nicht mehr angenommen. Vorhandene Daten werden weder migriert noch gelöscht.
-- **Grenzen, gelten immer:** 2 MiB je Speichervorgang (413), 500 Einträge in der Übersicht (422). Der gespeicherte Stand bleibt bei einer Ablehnung erhalten. Die Größe echter Datensätze wurde nicht geprüft, weil keine Produktionsdaten gelesen werden.
+- Der Client lädt den ganzen Ordner hoch. Andere Bereiche werden dann nicht überschrieben und nicht gelöscht. Die Antwort nennt sie in `notStored`, die Oberfläche zeigt „Teilweise gespeichert“, und die Angaben bleiben im Browser.
+- **Vorsorge-Check:** Der Fortschritt lag bisher nie im Ordner, auch nicht im lokalen Modus: Ein Fehler beim Laden des Stores verhinderte das Schreiben. Das ist behoben. Vor diesem Stand ausgefüllte Checks liegen weiter nur im `sessionStorage` des Tabs.
+- **Gerätewechsel:** Für kostenlose Bereiche gilt der Stand im Konto. Ist ein Bereich im Konto noch leer, werden die Einträge aus diesem Browser übernommen und hochgeladen. **Grenze:** Hat jemand einen Bereich auf Gerät A vollständig geleert und meldet sich auf Gerät B mit altem Browserstand an, kommen die alten Einträge von dort zurück.
+- **Tarifwechsel:** Kostenlos gespeicherte Daten bleiben durch Kauf und Erstattung unverändert. Plus-Bereiche bleiben nach einer Erstattung gespeichert und lesbar, Änderungen daran werden nur nicht mehr angenommen.
 
-**Zu entscheiden:** Notfallkarte und Vorsorge-Check sind im Tarifplan kostenlos, im Konto gespeichert würden sie bei Plus-Zwang aber nicht; sie blieben im Browser. Gleiches gilt für Lesezeichen. Eine Aufnahme in `FREE_ACCOUNT_SECTIONS` ist eine einzeilige Änderung.
+## 2. Datenmengen und bestehende Konten
 
-## 2. Änderungshistorie
+**Können vorhandene Datensätze größer als 2 MiB sein? Theoretisch ja, praktisch sehr unwahrscheinlich; gemessen ist es nicht.**
 
-Technisch vorbereitet, **aus** (`AMANAH_DATA_HISTORY`), ohne Oberfläche. Logik: `src/lib/server/data-history.ts`.
+- Bisher gab es serverseitig keine Grenze, und Textfelder sind unbegrenzt. Das Modell enthält keine Dateien, auch nicht bei Dokumenten: nur Titel, Ablageort und Notiz.
+- Messung synthetisch: Demo-Daten 6 KB. Stark gefüllt (200 Vermögenseinträge, 200 Dokumente mit je 2.000 Zeichen Notiz, 50.000 Zeichen Familienbrief) 0,65 MiB. 2 MiB entsprechen rund zwei Millionen Zeichen.
+- Größer werden kann ein Datensatz vor allem durch einen JSON-Import oder eingefügten Text. Der Browserspeicher begrenzt lokale Daten je nach Browser auf etwa 5 Millionen Zeichen.
+- **Echte Datensätze wurden nicht gelesen.** Der Owner kann die Größenklassen selbst abrufen: `DATABASE_URL=… node scripts/report-folder-sizes.mjs`. Das Skript arbeitet nur lesend und gibt nur Zahlen aus.
+
+**Regel seit dieser Runde:**
+
+| Fall | Ergebnis |
+|---|---|
+| Gespeicherte Menge bis 2 MiB | immer erlaubt |
+| Konto liegt schon darüber | Bearbeiten und Kürzen bleiben möglich; je Speichern bis zu 64 KiB Wachstum |
+| Gekürzt und später wieder über 2 MiB | abgelehnt (413), der gespeicherte Stand bleibt |
+| Über 16 MiB | wird nicht gelesen (413) |
+| Mehr als 500 Vermögenseinträge | neu abgelehnt (422); wer schon mehr hat, darf behalten und reduzieren |
+| Kostenloses Konto mit großem Browserstand | zählt nur, was wirklich im Konto gespeichert wird |
+
+**Verbleibende Lücke:** Wer lokal schon über 2 MiB gesammelt hat und das Konto neu anlegt, bekommt beim ersten Hochladen die Meldung, die Daten seien zu groß; sie bleiben im Browser.
+
+## 3. Änderungshistorie
+
+Vorbereitet, **aus** (`AMANAH_DATA_HISTORY`), nicht verlinkt. Logik: `src/lib/server/data-history.ts`; Oberfläche `/dashboard/verlauf`, die ohne Flag nur „noch nicht verfügbar“ zeigt.
 
 | Thema | Umsetzung |
 |---|---|
 | Inhalt | Nur der frühere Wert der geänderten Bereiche, kein vollständiger Abzug bei jeder Änderung |
 | Bereiche | Was Menschen eingeben; kein Fortschritt, keine Navigation, keine Lesezeichen |
-| Schutz | Verschlüsselt wie der Ordner und an das Konto gebunden. Im Klartext liegen nur Konto-ID, laufende Nummer, Art, Größe und Datum; die Namen der Bereiche sind verschlüsselt |
-| Zuordnung | Jede Abfrage ist auf das Konto begrenzt; eine fremde ID ergibt 404; eine kopierte Zeile lässt sich nicht lesen |
+| Schutz | Verschlüsselt wie der Ordner und an das Konto gebunden. Im Klartext liegen nur Konto-ID, laufende Nummer, Art, Größe und Datum |
+| Zugriff | Lesen, Wiederherstellen und Löschen sind je Konto begrenzt; eine fremde ID ergibt 404 und ändert nichts; eine kopierte Zeile lässt sich nicht lesen; schreibende Anfragen nur von gleicher Herkunft |
 | Passwörter, Schlüssel | Felder mit solchen Namen werden entfernt. **Grenze:** Freitext kann nicht gefiltert werden |
-| Anzeige | Die Liste zeigt nur Datum, Art und Bereiche, nie den Inhalt |
-| Wiederherstellen | Nur per POST mit `confirmed: true`, gleiche Herkunft, Einwilligung, bestätigte E-Mail. Der aktuelle Stand wird selbst eine Version, also umkehrbar. Ohne Plus nur freie Bereiche |
-| Zusammenfassen | Änderungen innerhalb von 10 Minuten zählen als eine Änderung |
-| Aufbewahrung (Vorschlag) | 90 Tage, höchstens 50 Versionen, höchstens 5 MiB je Konto. Ältere Versionen werden beim Schreiben entfernt und sind nach Fristablauf nicht mehr abrufbar |
-| Löschen | Einzeln alle Versionen; automatisch mit dem Ordner, mit dem Widerruf der Einwilligung und mit dem Konto |
-| Export | `dataHistory` im Kontoexport (Format `@2`), dazu neu `purchases`. Unlesbare Versionen erscheinen ohne Inhalt |
-| Schlüsselrotation | `scripts/reencrypt-amanah-data.mjs` erfasst jetzt auch die Versionen |
+| Anzeige | Die Liste zeigt Datum, Art und Bereiche; Inhalte nur für die geöffnete Version, als reiner Text. Antworten werden nicht zwischengespeichert. Feldnamen erscheinen noch technisch |
+| Wiederherstellen | Zwei Schritte mit Ankreuzfeld; der Server verlangt `confirmed: true`, Einwilligung und bestätigte E-Mail. Der aktuelle Stand wird selbst eine Version. Ohne Plus nur kostenlose Bereiche |
+| Grenzen (vorläufig) | 90 Tage, höchstens 50 Versionen, höchstens 5 MiB je Konto. Eine einzelne Änderung über 5 MiB wird gar nicht aufbewahrt; Wiederherstellen setzt diesen Bereich dann nicht zurück |
+| Automatisches Löschen | Beim Schreiben, beim Export und täglich im Server (`src/instrumentation.ts`, beim Start und alle 24 Stunden, auch mit ausgeschaltetem Flag). Es löscht nur, es schaltet nichts frei. Das Log enthält nur die Anzahl |
+| Löschen durch Nutzer | Alles, oder eine Version samt älteren, damit die übrigen vollständig bleiben. Automatisch mit dem Ordner, dem Widerruf der Einwilligung und dem Konto |
+| Export | `dataHistory` ohne abgelaufene Versionen (Format `@2`), dazu `purchases`. Unlesbare Versionen erscheinen ohne Inhalt |
+| Schlüsselrotation | `scripts/reencrypt-amanah-data.mjs` erfasst auch die Versionen |
 
-**Vor dem Einschalten nötig:**
-1. Datenschutzprüfung: Zweck, Frist, Text in `/datenschutz` und im Einwilligungstext. Die Seite nennt die Historie noch nicht, darf also erst danach aktiv werden.
-2. `scripts/purge-data-history.mjs` planen; ohne Planung bleiben abgelaufene Versionen inaktiver Konten bis zum nächsten Schreiben liegen. Bis dahin sind sie nicht abrufbar, im Kontoexport aber enthalten.
-3. Oberfläche mit Rückfrage vor dem Wiederherstellen.
-4. Backups: Gelöschte Versionen bleiben bis zum Ablauf der Backup-Aufbewahrung in alten Backups, wie der Ordner auch. Frist mit prüfen.
+### Backups und Wiederherstellung gelöschter Daten
 
-## 3. Datenbank
+- **Was Backups enthalten:** Der Datenbank-Dump umfasst alle Tabellen, auch `amanah_data_versions`. Der Inhalt bleibt verschlüsselt; die Datenschlüssel sind nicht Teil des Backups ([Doku 15](15-verschluesselung-und-backup.md) §5).
+- **Aufbewahrung:** Auf Staging standardmäßig 7 Tage (`BACKUP_KEEP_DAYS` in `scripts/staging-cron.sh`). **Für die Produktion nicht belegt:** Die Backupzeile dort habe ich nicht geprüft, weder Frist noch Verschlüsselung.
+- **Folge:** Gelöschte Versionen, Ordner und Konten bleiben bis zum Ablauf dieser Frist in alten Backups.
+- **Beim Einspielen eines Backups kommen gelöschte Daten zurück,** auch gelöschte Konten und widerrufene Ordner. Abgelaufene Versionen entfernt der Serverstart sofort wieder. Für Löschungen zwischen Backup und Einspielen gibt es **heute keinen Nachweis**, aus dem sie sich wiederholen ließen. Bis das geklärt ist:
+  1. Ein Restore in die Produktion nur nach Owner-Entscheidung und Dokumentation.
+  2. Nach dem Restore Löschanträge seit dem Backup-Datum aus Support und Unterlagen erneut ausführen.
+  3. Betroffene Zeiträume festhalten.
+- **Zu entscheiden:** Soll ein minimales Löschprotokoll (nur Hash der Konto-ID und Datum) eingeführt werden, damit sich Löschungen nach einem Restore wiederholen lassen?
 
-Migration `20261101190000_data_history`: eine neue, leere Tabelle `amanah_data_versions`, Fremdschlüssel mit Cascade auf `users`. Bestehende Tabellen und Zeilen bleiben unverändert. Geprüft auf Wegwerf-Postgres mit einem vorhandenen Datensatz; auf Staging und Produktion **nicht** angewendet.
+### Vor dem Einschalten nötig
 
-## 4. Testweg
+1. Datenschutzprüfung: Zweck, Fristen, Text in `/datenschutz` und im Einwilligungstext. Beides nennt die Historie noch nicht.
+2. Entscheidung, ob der Verlauf kostenlos oder Teil von Plus ist; heute steht er nicht in der Tarifmatrix. Ansehen ist für das eigene Konto offen, Wiederherstellen folgt den Schreibrechten.
+3. Lesbare Feldnamen in der Ansicht und ein Link aus den Einstellungen.
+4. Backup-Fristen in der Produktion belegen und festlegen.
+
+## 4. Datenbank
+
+Migration `20261101190000_data_history`: eine neue, leere Tabelle `amanah_data_versions`, Fremdschlüssel mit Cascade auf `users`. Bestehende Tabellen und Zeilen bleiben unverändert. Geprüft auf Wegwerf-Postgres mit einem vorhandenen Datensatz; auf Staging und Produktion **nicht** angewendet. In der aktuellen Runde kam keine neue Migration dazu.
+
+## 5. Testweg
 
 ```bash
 # Wegwerf-Postgres
@@ -57,4 +92,4 @@ DATABASE_URL=postgresql://test:testonly@127.0.0.1:5447/hist AMANAH_SERVER_STORAG
 DATABASE_URL=postgresql://test:testonly@127.0.0.1:5447/hist AMANAH_SERVER_STORAGE=postgres npx vitest run src/__tests__/postgres
 ```
 
-Browser mit echtem Konto: API-Build wie in [Doku 06](06-sicherheit-und-tests.md), dazu `AMANAH_BILLING_ENFORCE=true AMANAH_PLUS_LAUNCH_AT=2000-01-01T00:00:00Z FREE_ASSET_E2E=true` und `e2e/free-asset-account.spec.ts`. Danach wieder `npm run build:e2e`.
+Browser mit echtem Konto: API-Build wie in [Doku 06](06-sicherheit-und-tests.md), dazu `AMANAH_BILLING_ENFORCE=true AMANAH_PLUS_LAUNCH_AT=2000-01-01T00:00:00Z FREE_ASSET_E2E=true` und `e2e/free-asset-account.spec.ts` sowie mit `AMANAH_DATA_HISTORY=true DATA_HISTORY_E2E=true` `e2e/data-history.spec.ts`. Je Spec und Projekt einen eigenen Lauf starten: Die Registrierungsbremse erlaubt 5 Konten pro Minute. Danach wieder `npm run build:e2e`.

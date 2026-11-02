@@ -116,7 +116,7 @@ Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter
 | 2 | ZTR- und Verwahrhinweise | 0,5 | N |
 | **3** | Kanzlei-Prüfworkflow mit Persistenz, Rollen, verschlüsselter Übermittlung | 8–12 | A (Vertrag, § 49b BRAO, AVV) |
 | 3 | Mail bei Statuswechsel | 1–2 | setzt Mail-Abnahme voraus (Doku 30) |
-| 3 | Änderungshistorie: am 01.11. serverseitig vorbereitet und getestet, aus, ohne Oberfläche (Doku 38) | Oberfläche 1–2 | Datenschutz |
+| 3 | Änderungshistorie: serverseitig und mit Oberfläche vorbereitet und getestet, aus (Doku 38) | Feinschliff 0,5–1 | Datenschutz |
 | 3 | Testament-Tarif im Katalog | 2–3 | A (Bündelpreis offen) |
 | 3 | AGB-Seite, Bestellablauf | 1 | A |
 | **4** | Erinnerungen bei Lebensereignissen | 3–5 | A (keine Rechtsaussage) |
