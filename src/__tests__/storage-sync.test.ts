@@ -3,7 +3,7 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import { migrateRawData } from "@/lib/domain/migration";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
-import { hasMeaningfulLocalData, persistStoreChanges } from "@/lib/storage/store-sync";
+import { hasMeaningfulLocalData, persistStoreChanges, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 vi.mock("@/lib/auth/config", () => ({
@@ -17,6 +17,7 @@ vi.mock("@/lib/auth/api-auth-provider", () => ({
 vi.mock("@/lib/storage/amanah-storage", () => ({
   saveAmanahData: vi.fn(async () => undefined),
   loadAmanahData: vi.fn(async () => defaultAmanahData),
+  lastFolderWriteScope: vi.fn(() => "full"),
 }));
 
 describe("schema migration v1 to v2", () => {
@@ -101,5 +102,52 @@ describe("store sync helpers", () => {
     await persistStoreChanges();
     expect(useAmanahStore.getState().saveStatus).toBe("error");
     expect(useAmanahStore.getState().saveError).toContain("Server");
+  });
+});
+
+describe("syncStoreWithRemoteAfterAuth", () => {
+  it("keeps and saves what was entered while the account data was loading", async () => {
+    const { getStorageMode } = await import("@/lib/auth/config");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
+    const { loadAmanahData, saveAmanahData } = await import("@/lib/storage/amanah-storage");
+    vi.mocked(getStorageMode).mockReturnValue("api");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
+    vi.mocked(saveAmanahData).mockClear();
+    vi.mocked(saveAmanahData).mockResolvedValue({ notStored: [], nearLimit: false });
+
+    const remote = {
+      ...defaultAmanahData,
+      emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Vom Konto" },
+      janazahWishes: { ...defaultAmanahData.janazahWishes, fullName: "Vom Konto" },
+    };
+    let finishLoading: (data: typeof remote) => void = () => undefined;
+    vi.mocked(loadAmanahData).mockReturnValueOnce(new Promise((resolve) => (finishLoading = resolve)));
+
+    const sync = syncStoreWithRemoteAfterAuth();
+    useAmanahStore.getState().updateField("janazahWishes", { ...defaultAmanahData.janazahWishes, fullName: "Eben eingegeben" });
+    finishLoading(remote);
+    await sync;
+
+    const state = useAmanahStore.getState();
+    expect(state.janazahWishes.fullName).toBe("Eben eingegeben");
+    expect(state.emergencyCard.name).toBe("Vom Konto");
+    const saved = vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0];
+    expect(saved?.janazahWishes.fullName).toBe("Eben eingegeben");
+    expect(saved?.emergencyCard.name).toBe("Vom Konto");
+  });
+
+  it("without an edit the account state applies and nothing is written back", async () => {
+    const { getStorageMode } = await import("@/lib/auth/config");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
+    const { loadAmanahData, saveAmanahData } = await import("@/lib/storage/amanah-storage");
+    vi.mocked(getStorageMode).mockReturnValue("api");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
+    vi.mocked(saveAmanahData).mockClear();
+    vi.mocked(loadAmanahData).mockResolvedValueOnce({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Nur Konto" } });
+
+    await syncStoreWithRemoteAfterAuth();
+
+    expect(useAmanahStore.getState().emergencyCard.name).toBe("Nur Konto");
+    expect(saveAmanahData).not.toHaveBeenCalled();
   });
 });

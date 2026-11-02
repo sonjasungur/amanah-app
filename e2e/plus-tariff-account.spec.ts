@@ -148,6 +148,28 @@ test("a change right before leaving the page reaches the account", async ({ page
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Direkt vor dem Neuladen");
 });
 
+test("a change right before navigating away reaches the account, on both kinds of navigation", async ({ page }) => {
+  await register(page);
+  const name = () => page.getByLabel("Name", { exact: true });
+  await page.goto("/dashboard/notfallkarte");
+  await name().fill("Schon gespeichert");
+  await expect.poll(async () => (await folder(page)).data.emergencyCard.name).toBe("Schon gespeichert");
+
+  await name().fill("Vor dem Seitenwechsel");
+  await page.goto("/dashboard/vermoegen");
+  await expect.poll(async () => (await folder(page)).data.emergencyCard.name).toBe("Vor dem Seitenwechsel");
+
+  await page.goto("/dashboard/notfallkarte");
+  await expect(name()).toHaveValue("Vor dem Seitenwechsel");
+  await name().fill("Vor dem Link im Menü");
+  await page.evaluate(() => {
+    const link = document.querySelector<HTMLAnchorElement>('a[href="/wissen"]');
+    link?.click();
+  });
+  await expect(page).toHaveURL(/\/wissen/);
+  await expect.poll(async () => (await folder(page)).data.emergencyCard.name).toBe("Vor dem Link im Menü");
+});
+
 test("large folders: a warning near the limit, a clear refusal above it, and no input lost", async ({ page }) => {
   test.setTimeout(120_000);
   await register(page);

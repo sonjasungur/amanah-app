@@ -33,7 +33,7 @@ function writeSession(session: AuthSession | null): void {
 }
 
 class ApiError extends Error {
-  constructor(message: string, readonly code?: string) {
+  constructor(message: string, readonly code?: string, readonly status?: number) {
     super(message);
   }
 }
@@ -45,7 +45,7 @@ async function apiCall<T>(path: string, options?: RequestInit): Promise<T> {
   });
   const body = await res.json();
   if (!res.ok) {
-    throw new ApiError(body.error || "Anfrage fehlgeschlagen", body.code);
+    throw new ApiError(body.error || "Anfrage fehlgeschlagen", body.code, res.status);
   }
   return body as T;
 }
@@ -101,9 +101,14 @@ export class ApiAuthProvider implements AuthProvider {
       const result = await apiCall<{ session: AuthSession }>("/api/auth/me");
       writeSession(result.session);
       return result.session;
-    } catch {
-      writeSession(null);
-      return null;
+    } catch (error) {
+      // Only the server's answer ends a session. A request cut off by leaving the page, a network
+      // problem or a brief server error must not sign anyone out; the server stays authoritative.
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        writeSession(null);
+        return null;
+      }
+      return session;
     }
   }
 }

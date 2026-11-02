@@ -116,16 +116,20 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
   if (!isRemotePersistenceActive()) return;
 
   useAmanahStore.setState({ saveStatus: "saving", saveError: null });
+  const atStart = pickDataFields(useAmanahStore.getState());
 
   try {
     const remoteData = await loadAmanahData();
     // Read only now: what was entered while the account data was loading must not be lost.
     const localData = pickDataFields(useAmanahStore.getState());
+    const editedWhileLoading = (Object.keys(localData) as (keyof AmanahOrdnerData)[]).filter((key) => localData[key] !== atStart[key]);
+    const withEdits = (base: AmanahOrdnerData): AmanahOrdnerData =>
+      editedWhileLoading.reduce((data, key) => ({ ...data, [key]: localData[key] }), base);
     const remoteHasData = hasMeaningfulLocalData(remoteData);
     const localHasData = hasMeaningfulLocalData(localData);
 
     if (remoteHasData && lastFolderWriteScope() === "free_sections") {
-      const merged = keepLocalOnlySections(remoteData, localData);
+      const merged = withEdits(keepLocalOnlySections(remoteData, localData));
       useAmanahStore.getState().importData(merged);
       if (JSON.stringify(merged) !== JSON.stringify(remoteData)) await saveToAccount(merged);
       return;
@@ -141,11 +145,9 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
       const localCheckHasData =
         localCheck &&
         (localCheck.phase === "result" || localCheck.index > 0 || Object.keys(localCheck.answers ?? {}).length > 0);
-      if (remoteCheckEmpty && localCheckHasData) {
-        useAmanahStore.getState().importData({ ...remoteData, checkProgress: localCheck });
-      } else {
-        useAmanahStore.getState().importData(remoteData);
-      }
+      const merged = withEdits(remoteCheckEmpty && localCheckHasData ? { ...remoteData, checkProgress: localCheck } : remoteData);
+      useAmanahStore.getState().importData(merged);
+      if (editedWhileLoading.length > 0) await saveToAccount(merged);
       return;
     }
 
