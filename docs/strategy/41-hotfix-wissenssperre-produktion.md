@@ -2,7 +2,7 @@
 
 **Für:** Owner (Entscheidung), Betrieb (Umsetzung).
 
-**Stand:** Stufe 1 ist am 02.11.2026 um 15:08 Uhr nach Owner-Freigabe ausgeführt, die Route ist geschlossen. Stufe 2 (Hotfix) ist **nicht** in der Produktion eingespielt und braucht eine gesonderte Freigabe.
+**Stand:** Stufe 1 (02.11.2026, 15:08 Uhr) und Stufe 2 (02.11.2026, 15:25 Uhr) sind nach Owner-Freigabe ausgeführt. Die Route ist geschlossen, der Hotfix läuft. Deployment-Stand: §5.
 
 ## 1. Befund vor Stufe 1
 
@@ -119,7 +119,9 @@ Docker-Build beider Stände (`--target runner`), eigene Testdatenbank und eigene
 
 **Bestehender Fehler, nicht vom Hotfix:** React-Hydrationsmeldung #418 auf `/dashboard/*` und `/check`, in beiden Ständen identisch.
 
-**NOT_RUN:** Staging, echte Produktionskonfiguration, Test auf dem Server.
+**Test auf dem Staging-Server (02.11.2026):** Eigene Instanz neben dem bestehenden Staging, eigene Wegwerf-Datenbank im RAM, eigenes internes Netz, nur lokal erreichbar, Speicher und CPU begrenzt, danach vollständig entfernt. Vergleichsstand war das unveränderte Produktions-Image. Ergebnisse wie oben: alter Stand 23 URLs mit Inhalten, Hotfix 0; JavaScript 0 Treffer; APIs 404; KI 503. Bestandsdaten aus dem alten Stand sind nach dem Wechsel lesbar; Anmeldung, Speichern, Neuladen und Vorsorge-Check bestehen auf Desktop- und Mobilprofil. Rollback und erneuter Hotfix mit derselben Datenbank bestehen.
+
+**NOT_RUN:** echte Produktionskonfiguration (`.env.production` nicht gelesen), Echtgeräte, Bau des Images auf dem Server selbst.
 
 ### Risiko
 
@@ -130,28 +132,15 @@ Docker-Build beider Stände (`--target runner`), eigene Testdatenbank und eigene
 | Ausfall | kurz beim Containerwechsel; `gemeinsam1` nicht betroffen |
 | Unvollständig | Module hinter der Anmeldung nicht bereinigt; offene Registrierung bleibt |
 
-### Einspielen (nur nach gesonderter Freigabe)
-
-```bash
-cd /opt/amanah-app
-docker ps --filter name=^amanah-app$ --format '{{.Image}}'                # muss amanah-app-app sein
-docker tag amanah-app-app:latest amanah-app-app:vor-wissenssperre
-git apply --check <patch> && git apply <patch>
-docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml --env-file .env.production build app
-docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml --env-file .env.production up -d --no-deps app
-```
-
-`--no-deps` verhindert den Migrationslauf und jede Änderung an der Datenbank. Danach Prüfung der Pfade aus der Tabelle am Server über `127.0.0.1:3001`.
-
 ### Rollback
 
 ```bash
+cd /opt/amanah-app
 docker tag amanah-app-app:vor-wissenssperre amanah-app-app:latest
 docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml --env-file .env.production up -d --no-deps --no-build app
-git apply -R <patch>
 ```
 
-Datenbank und Volumes bleiben unberührt. **Vorher Stufe 1 sicherstellen:** Ein Rollback macht die ungeprüften Texte in der App wieder abrufbar.
+Datenbank und Volumes bleiben unberührt, die Route bleibt geschlossen. Ein Rollback macht die ungeprüften Texte in der App wieder abrufbar, intern über Docker-Netz und SSH.
 
 ## 4. Die beiden Datenverlust-Korrekturen
 
@@ -162,3 +151,26 @@ Datenbank und Volumes bleiben unberührt. **Vorher Stufe 1 sicherstellen:** Ein 
 - Der Juli-Stand hält die Sitzung noch anders (Token im Browser), die Korrekturen sind dort nicht unverändert übertragbar und bräuchten eigene Tests.
 - Mit Stufe 1 sind öffentliche Eingaben nicht mehr möglich, und die Produktion hat 0 Konten. Es besteht keine Dringlichkeit.
 - **Owner-Entscheidung 02.11.2026:** ausrollen mit dem nächsten regulären Release vom Feature-Branch, nicht als Rückportierung.
+
+## 5. Deployment-Stand (02.11.2026, 15:25 Uhr)
+
+| Punkt | Wert |
+|---|---|
+| Quellstand | `7d0859b` plus Patch `hotfix/2026-11-02-wissen-sperre-auf-7d0859b.patch` (`sha256` beginnt mit `dda903c204002258`) |
+| Image-Tags auf dem Server | `amanah-app-app:wissenssperre-dda903c`, `amanah-app-app:latest` |
+| Image-ID auf dem Server | `sha256:f7f29e2ac4ef5db126d3e280f0dc4c01b6108a713d51474fad151684e1858d75` |
+| Image-ID lokal beim Bau | `sha256:f30626cb3b064f413a358923ffec0bfcc7ff53967a84b2f817755d1dc3f8a23c`. Die Abweichung kommt vom anderen Image-Speicher des Servers |
+| Gleicher Inhalt belegt durch | Archiv `sha256:4b049f99c5b6878702f4ed1ed9b05f4ca5a3c51aca1f0a68a6040afa2a140d33` auf beiden Seiten; Hash der Dateisystem-Schichten `d16c1d90fc93cb8c` auf beiden Seiten |
+| Rollback-Image | `amanah-app-app:vor-wissenssperre`, `sha256:ec6e55a2bda27dc4e5bbab0031bea3e5df24044fba6bb20a347b7a3037dd4f8e` |
+| Build-Werte | `NEXT_PUBLIC_AUTH_MODE=api`, `NEXT_PUBLIC_STORAGE_MODE=api`, `NEXT_PUBLIC_SITE_URL` und `NEXT_PUBLIC_APP_URL` wie zuvor im Container |
+| Austausch | nur Container `amanah-app`, `--no-deps --no-build`; keine Migration, keine Änderung an Caddy oder `gemeinsam1` |
+
+**Nachprüfung am Container (ohne Schreibzugriff):** Health 200; 142 Textproben: 0 Treffer in 37 Dateien; 39 URLs: 0 mit ungeprüften Inhalten, 27 mit 404; `/api/ai` und `/api/ai/knowledge` 503; Dashboard verlangt Anmeldung; falsches Passwort und Speichern ohne Anmeldung 401; Vorsorge-Check bleibt nach Neuladen. Konten weiter 0, Schema unverändert (1 Migration, 4 Tabellen). `gemeinsam1` byte-gleich, Amanah-Host 0 Bytes.
+
+**Anmeldung, Dashboard und Speichern mit Konto** sind nicht am Produktionscontainer geprüft, weil dafür ein Konto angelegt werden müsste und die Produktion keines hat. Sie sind mit demselben Image gegen eine Wegwerf-Datenbank auf demselben Server bestanden.
+
+**Wichtig für künftige Arbeiten:**
+
+- `/opt/amanah-app` steht weiter sauber auf `7d0859b`, **ohne** das Patch. `docker compose up --build` ohne Patch würde die ungeprüften Inhalte zurückbringen. Nächster Bau nur mit Patch oder aus einem geprüften Release.
+- `amanah-app-app:latest` zeigt auf den Hotfix. Beide Tags und das Rollback-Image nicht entfernen, solange kein neues Release läuft.
+- Die Registrierung im Juli-Stand ist technisch weiter aktiv und ohne E-Mail-Bestätigung, aber von außen nicht erreichbar. Die Route darf erst nach einem Release wieder geöffnet werden.
