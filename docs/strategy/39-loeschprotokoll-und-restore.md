@@ -68,15 +68,29 @@ Neuen Schlüssel ergänzen und aktivieren: `AMANAH_DELETION_LEDGER_KEYS=alt:…,
 - Ein alter Schlüssel darf erst entfernt werden, wenn seine Einträge abgelaufen sind. Fehlt er vorher, verweigert die Anwendung den Start (`unknown_key`).
 - Ein endgültig verlorener Schlüssel ist wie ein verlorenes Protokoll zu behandeln (§7).
 
-## 7. Verlorenes oder beschädigtes Protokoll
+## 7. Notfallverfahren bei beschädigtem Protokoll
 
-Ohne Protokoll startet die Anwendung nicht, und ein Restore bricht ab. Das Verhalten ist gewollt: Lieber kein Betrieb als unbemerkt zurückgekehrte Daten.
+**Grundsatz:** Ohne verlässliches Protokoll startet die Anwendung nicht, und ein Restore bricht ab. Lieber kein Betrieb als unbemerkt zurückgekehrte Daten. Die laufende Datenbank bleibt von allen Schritten unberührt, solange kein Restore läuft. Sonst gilt: nichts löschen, Dateien zuerst unverändert sichern.
 
-1. Protokoll aus einer getrennten Sicherung wiederherstellen, falls vorhanden, und mit `node scripts/deletion-ledger.mjs verify` prüfen.
-2. Sonst Verlust dokumentieren und nach Owner-Entscheidung neu beginnen: `AMANAH_LEDGER_ACCEPT_LOSS=yes node scripts/deletion-ledger.mjs accept-loss`. Die defekte Datei wird beiseitegelegt und nicht gelöscht; sie ist danach gesondert zu entfernen.
-3. **Folge:** Alle älteren Backups gelten dann als nicht abgedeckt und werden abgelehnt. Löschungen vor dem Verlust lassen sich aus dem Protokoll nicht mehr wiederholen.
+**Erster Schritt immer:** Fehlercode lesen, ohne die Dateien zu verändern. Das Log des Servers nennt `[deletion-ledger] start refused: <Code>`; `node scripts/deletion-ledger.mjs status` prüft zusätzlich gegen die Datenbank, `verify` ohne Datenbank.
 
-**Nicht erkennbar:** Gehen Kopfdatensatz und Datenbankanker und das Protokoll zugleich verloren, sieht das aus wie ein Neubeginn. Die erstmalige Einrichtung und jeder Neubeginn sollten deshalb im Betriebstagebuch stehen.
+| Code oder Lage | Wahrscheinliche Ursache | Vorgehen |
+|---|---|---|
+| `ledger_tampered`, nur letzte Zeile unvollständig | Absturz oder Stromausfall beim Schreiben | `AMANAH_LEDGER_REPAIR=yes node scripts/deletion-ledger.mjs repair-tail`. Entfernt nur die halbe Zeile, deren Löschung nie ausgeführt wurde, und behält eine Kopie. Antwortet `repaired:false`, liegt ein anderer Schaden vor |
+| `head_missing`, oder `ledger_tampered` durch defekten Kopfdatensatz | Zweites Laufwerk ausgefallen oder Datei beschädigt | `AMANAH_LEDGER_REPAIR=yes node scripts/deletion-ledger.mjs rebuild-head`. Prüft das Protokoll und vergleicht mit dem Datenbankanker. **Nicht direkt nach einem Restore ohne Replay:** Der Anker ist dann alt und erkennt weniger |
+| `ledger_tampered`, Eintrag verändert | Beschädigung oder Manipulation | Als Sicherheitsvorfall behandeln. Getrennte Kopie zurückspielen und mit `verify` prüfen. Ohne passende Kopie: letzte Zeile der Tabelle |
+| `ledger_truncated` | Protokoll abgeschnitten oder alte Kopie eingespielt | Neuere Kopie suchen. Es fehlen Einträge, also nicht einfach `rebuild-head`; das verweigert der Anker ohnehin. Ohne Kopie: letzte Zeile der Tabelle |
+| `unknown_key` | Alter Schlüssel fehlt in der Konfiguration | Schlüssel wieder eintragen. Ist er endgültig weg: letzte Zeile der Tabelle |
+| `restore_pending` | Restore wurde abgebrochen oder läuft noch | Prüfen, dass kein Restore läuft, dann `restore-with-deletions.sh` mit demselben Backup erneut ausführen. **Nicht** einfach `unlock`: Die Datenbank kann halb eingespielt sein |
+| `config_invalid` | Einstellung fehlt oder ist falsch | Konfiguration korrigieren; am Protokoll ändert sich nichts |
+| Löschanträge enden mit 500 | Protokoll nicht schreibbar, etwa volle Platte oder falsche Rechte | Ursache beheben. Es wurde nichts gelöscht; der Antrag muss wiederholt werden. Scheiterte erst das Schreiben des Kopfdatensatzes, steht der Eintrag bereits im Protokoll und die Löschung wird beim nächsten Start nachgeholt |
+| `ledger_lost` oder kein anderer Weg | Protokoll verloren | Verlust dokumentieren, Owner entscheidet: `AMANAH_LEDGER_ACCEPT_LOSS=yes node scripts/deletion-ledger.mjs accept-loss` |
+
+**Folgen von `accept-loss`:** Alle älteren Backups gelten als nicht abgedeckt und werden abgelehnt. Löschungen vor dem Verlust lassen sich aus dem Protokoll nicht mehr wiederholen. Die defekte Datei wird beiseitegelegt und nicht gelöscht; sie enthält Pseudonyme und ist nach der Klärung gesondert zu entfernen. Das gilt auch für die `.damaged-…`-Kopien der Reparaturbefehle.
+
+**Getrennte Kopie:** Das Verfahren braucht eine regelmäßige Kopie des Protokolls außerhalb von Protokollordner, Datenbank-Backup und Schlüsselablage. Eine solche Kopie ist **noch nicht eingerichtet**; ihre Frist darf die Protokollfrist nicht überschreiten.
+
+**Nicht erkennbar:** Gehen Kopfdatensatz, Datenbankanker und Protokoll zugleich verloren, sieht das aus wie ein Neubeginn. Die erstmalige Einrichtung und jeder Neubeginn gehören deshalb ins Betriebstagebuch.
 
 ## 8. Datenschutzrisiken für die Prüfung
 
@@ -108,6 +122,6 @@ Ohne Protokoll startet die Anwendung nicht, und ein Restore bricht ab. Das Verha
 timeout -k 20 540 node scripts/testing/restore-drill.mjs > drill.log 2>&1
 ```
 
-Die Übung läuft nur gegen den Container `amanah-history-test-pg` und verweigert sonst die Arbeit. Sie nutzt echten Server, echten `pg_dump` und das echte Restore-Skript. Geprüft werden Löschungen nach dem Backup, Startsperre, roher Restore, Restore über das Skript, Wiederinbetriebnahme, zweiter Start, Schlüsselrotation, manipuliertes und verlorenes Protokoll.
+Die Übung läuft nur gegen den Container `amanah-history-test-pg` und verweigert sonst die Arbeit. Sie nutzt echten Server, echten `pg_dump` und das echte Restore-Skript. Geprüft werden Löschungen nach dem Backup, Startsperre, roher Restore, Restore über das Skript, Wiederinbetriebnahme, zweiter Start, Schlüsselrotation, manipuliertes und verlorenes Protokoll sowie die Notfälle aus §7: halbe Zeile, verlorener und defekter Kopfdatensatz, veränderter Eintrag mit getrennter Kopie, nicht schreibbares Protokoll und abgebrochener Restore.
 
-Nicht geprüft: Produktion und Staging, verschlüsselte `.age`-Backups im Zusammenspiel mit diesem Skript, Archivkopien, gleichzeitige Instanzen, Ausfall mitten im Restore außerhalb der gezeigten Fälle.
+Nicht geprüft: Produktion und Staging, verschlüsselte `.age`-Backups im Zusammenspiel mit diesem Skript, Archivkopien, gleichzeitige Instanzen, echte Stromausfälle und volle Platten (nachgestellt über abgeschnittene Dateien und Dateirechte).

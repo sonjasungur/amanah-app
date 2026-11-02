@@ -7,6 +7,8 @@
  *   lock | unlock                  restore lock; the application refuses to start while it is set
  *   replay --backup-taken-at=ISO   checks coverage and applies the deletions in one transaction
  *   purge                          removes entries past the retention
+ *   repair-tail                    removes half a last line after a crash; needs AMANAH_LEDGER_REPAIR=yes
+ *   rebuild-head                   new head for an intact ledger, checked by the anchor; needs AMANAH_LEDGER_REPAIR=yes
  *   accept-loss                    new epoch after a real loss; needs AMANAH_LEDGER_ACCEPT_LOSS=yes
  * Exit 0 = fine. Requires Node >= 22.18 / 24 (native TypeScript type stripping).
  */
@@ -22,6 +24,8 @@ const {
   lockForRestore,
   openLedger,
   purgeLedger,
+  rebuildHead,
+  repairTornTail,
   readLedgerConfig,
   replayDeletions,
   unlockAfterRestore,
@@ -51,6 +55,20 @@ async function main() {
   if (command === "lock") return lockForRestore(config);
   if (command === "unlock") return unlockAfterRestore(config);
   if (command === "purge") return console.log(JSON.stringify({ removed: purgeLedger(config) }));
+  if (command === "repair-tail" || command === "rebuild-head") {
+    if (process.env.AMANAH_LEDGER_REPAIR !== "yes") {
+      console.error(`✗ ${command} requires AMANAH_LEDGER_REPAIR=yes`);
+      process.exit(2);
+    }
+    return withDb(async (client) => {
+      const anchor = await readAnchor(client);
+      if (command === "rebuild-head") {
+        rebuildHead(config, anchor);
+        return console.log(JSON.stringify({ rebuilt: true }));
+      }
+      console.log(JSON.stringify({ repaired: repairTornTail(config, anchor) }));
+    });
+  }
   if (command === "accept-loss") {
     if (process.env.AMANAH_LEDGER_ACCEPT_LOSS !== "yes") {
       console.error("✗ accept-loss requires AMANAH_LEDGER_ACCEPT_LOSS=yes");

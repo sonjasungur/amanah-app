@@ -6,7 +6,7 @@
  */
 import { spawn, spawnSync as spawnSyncUnbounded } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, chmodSync, existsSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
@@ -256,6 +256,63 @@ try {
   tool(["unlock"], rotatedEnv);
   writeFileSync(ledgerFile, intact);
   check("restored ledger verifies again", tool(["verify"], rotatedEnv).status === 0);
+
+  console.log("--- scenario: emergency, half a line after a crash");
+  const headFile = join(work, "second-volume", "head.json");
+  const repairEnv = { ...rotatedEnv, AMANAH_LEDGER_REPAIR: "yes" };
+  const startsAndStops = async () => {
+    const running = await startApp(rotatedEnv);
+    await stopApp(running);
+    return Boolean(running);
+  };
+  appendFileSync(ledgerFile, '{"epoch":1,"seq":99,"at":"20');
+  check("half a line: application refuses to start", !(await startsAndStops()));
+  check("half a line: repair needs an explicit confirmation", tool(["repair-tail"], rotatedEnv).status === 2);
+  check("half a line: repair works", tool(["repair-tail"], repairEnv).status === 0);
+  check("half a line: ledger identical to before", readFileSync(ledgerFile, "utf8") === intact);
+  check("half a line: application starts again", await startsAndStops());
+  check("half a line: deletions stay effective", (await count("users", "id", ids.deleted)) === 0);
+
+  console.log("--- scenario: emergency, lost or damaged head");
+  rmSync(headFile);
+  check("lost head: application refuses to start", !(await startsAndStops()));
+  check("lost head: rebuild needs an explicit confirmation", tool(["rebuild-head"], rotatedEnv).status === 2);
+  check("lost head: rebuild works", tool(["rebuild-head"], repairEnv).status === 0);
+  check("lost head: application starts again", await startsAndStops());
+  writeFileSync(headFile, "kaputt");
+  check("damaged head: application refuses to start", !(await startsAndStops()));
+  check("damaged head: rebuild works", tool(["rebuild-head"], repairEnv).status === 0);
+  check("damaged head: application starts again", await startsAndStops());
+
+  console.log("--- scenario: emergency, changed entry and a separate copy");
+  const changedLines = intact.split("\n");
+  changedLines[2] = changedLines[2].replace(/"subject":"./, '"subject":"#');
+  const changed = changedLines.join("\n");
+  writeFileSync(ledgerFile, changed);
+  check("changed entry: application refuses to start", !(await startsAndStops()));
+  check("changed entry: repair and rebuild refuse it", tool(["repair-tail"], repairEnv).stdout.includes("false") && tool(["rebuild-head"], repairEnv).status !== 0);
+  check("changed entry: nothing was altered", readFileSync(ledgerFile, "utf8") === changed);
+  writeFileSync(ledgerFile, intact);
+  check("changed entry: the separate copy verifies", tool(["verify"], rotatedEnv).status === 0);
+  check("changed entry: application starts again", await startsAndStops());
+
+  console.log("--- scenario: emergency, ledger cannot be written");
+  app = await startApp(rotatedEnv);
+  const keepAgain = await login(keep.email);
+  chmodSync(ledgerFile, 0o400);
+  const blocked = await request("/api/amanah", "DELETE", keepAgain);
+  check("read-only ledger: deletion is refused", blocked.status === 500);
+  check("read-only ledger: nothing was deleted", (await count("amanah_data", "user_id", ids.keep)) === 1);
+  chmodSync(ledgerFile, 0o600);
+  await stopApp(app);
+
+  console.log("--- scenario: emergency, restore stopped halfway");
+  tool(["lock"], rotatedEnv);
+  check("stopped restore: application refuses to start", !(await startsAndStops()));
+  check("stopped restore: the script can simply run again", runRestore(beforeRotationDeletion, rotatedEnv).status === 0);
+  check("stopped restore: lock is gone", !existsSync(join(work, "ledger", "RESTORE_PENDING")));
+  check("stopped restore: deletions stay effective", (await count("users", "id", ids.deleted)) === 0);
+  check("stopped restore: application starts again", await startsAndStops());
 
   console.log("--- scenario: a lost ledger");
   renameSync(ledgerFile, `${ledgerFile}.lost`);

@@ -162,9 +162,11 @@ function writeDurably(path: string, content: string): void {
 }
 
 function appendDurably(path: string, line: string): void {
+  // A crash may have left the last entry complete but without its line end.
+  const complete = !existsSync(path) || readFileSync(path, "utf8").endsWith("\n");
   const fd = openSync(path, "a", 0o600);
   try {
-    writeSync(fd, line);
+    writeSync(fd, complete ? line : `\n${line}`);
     fsyncSync(fd);
   } finally {
     closeSync(fd);
@@ -320,6 +322,49 @@ export function purgeLedger(config: LedgerConfig, now: Date = new Date()): numbe
   writeDurably(ledgerPath(config), lines.map((e) => `${JSON.stringify(e)}\n`).join(""));
   writeHead(config, lines.at(-1)!);
   return removed;
+}
+
+/**
+ * A crash while writing can leave half a line at the end. That entry never took effect: the deletion
+ * only follows a complete entry. Removes just this tail and keeps a copy. Anything else stays an error,
+ * and the head must confirm what remains. Returns false when there is no such tail.
+ */
+export function repairTornTail(config: LedgerConfig, anchor: LedgerAnchor | null, now: Date = new Date()): boolean {
+  const path = ledgerPath(config);
+  const raw = readFileSync(path, "utf8");
+  const tail = raw.slice(raw.lastIndexOf("\n") + 1);
+  if (!tail) return false;
+  try {
+    JSON.parse(tail);
+    return false;
+  } catch {
+    // Half a line, as expected.
+  }
+  const copy = `${path}.damaged-${now.getTime()}`;
+  renameSync(path, copy);
+  writeDurably(path, raw.slice(0, raw.length - tail.length));
+  try {
+    verifyLedger(config, anchor);
+  } catch (error) {
+    renameSync(copy, path);
+    throw error;
+  }
+  return true;
+}
+
+/**
+ * The head is lost or damaged while the ledger is intact, for example with its volume. Only the
+ * database anchor can then reveal a cut-off ledger, so it is required.
+ */
+export function rebuildHead(config: LedgerConfig, anchor: LedgerAnchor | null, now: Date = new Date()): void {
+  if (!anchor) throw new LedgerError("head_missing");
+  const entries = parseEntries(config);
+  const last = entries.at(-1);
+  if (!last) throw new LedgerError("ledger_tampered");
+  if (anchor.epoch > last.epoch) throw new LedgerError("ledger_lost");
+  if (anchor.epoch === last.epoch && anchor.seq > last.seq) throw new LedgerError("ledger_truncated");
+  if (existsSync(config.headPath)) renameSync(config.headPath, `${config.headPath}.damaged-${now.getTime()}`);
+  writeHead(config, last);
 }
 
 /** Only on an explicit decision after a real loss. Backups older than this moment are then refused. */

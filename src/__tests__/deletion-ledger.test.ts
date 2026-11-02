@@ -1,6 +1,6 @@
-import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import { appendFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
-import { join } from "path";
+import { basename, dirname, join } from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE as accountDELETE } from "@/app/api/account/route";
 import { DELETE as amanahDELETE, PUT as amanahPUT } from "@/app/api/amanah/route";
@@ -20,7 +20,9 @@ import {
   pseudonymFor,
   purgeLedger,
   readLedgerConfig,
+  rebuildHead,
   recordDeletion,
+  repairTornTail,
   replayDeletions,
   unlockAfterRestore,
   verifyLedger,
@@ -365,5 +367,83 @@ describe("through the real routes", () => {
     writeFileSync(file(), "broken\n");
     const res = await amanahDELETE(browserRequest(`${BASE}/api/amanah`, { method: "DELETE" }, cookie));
     expect(res.status).toBe(500);
+  });
+});
+
+describe("emergency repairs", () => {
+  let cfg: LedgerConfig;
+  const ledger = () => join(cfg.dir, "deletions.jsonl");
+  const copies = (path: string, name: string) => readdirSync(path).filter((f) => f.startsWith(`${name}.damaged-`));
+
+  function withEntries() {
+    cfg = config();
+    openLedger(cfg);
+    recordDeletion(cfg, { kind: "folder_deleted", userId: "user-a" });
+    recordDeletion(cfg, { kind: "folder_deleted", userId: "user-b" });
+  }
+
+  it("half a last line stops the start, and the repair removes only that, keeping a copy", () => {
+    withEntries();
+    const whole = readFileSync(ledger(), "utf8");
+    appendFileSync(ledger(), '{"epoch":1,"seq":4,"at":"20');
+    expect(() => verifyLedger(cfg)).toThrow("ledger_tampered");
+    expect(repairTornTail(cfg, { epoch: 1, seq: 3 })).toBe(true);
+    expect(readFileSync(ledger(), "utf8")).toBe(whole);
+    expect(verifyLedger(cfg)).toHaveLength(3);
+    expect(copies(cfg.dir, "deletions.jsonl")).toHaveLength(1);
+  });
+
+  it("the repair touches nothing else: not an intact ledger, not a change in the middle", () => {
+    withEntries();
+    expect(repairTornTail(cfg, null)).toBe(false);
+    const lines = readFileSync(ledger(), "utf8").split("\n");
+    lines[1] = lines[1].replace(/"subject":"./, '"subject":"#');
+    const changed = lines.join("\n");
+    writeFileSync(ledger(), changed);
+    expect(repairTornTail(cfg, null)).toBe(false);
+    expect(readFileSync(ledger(), "utf8")).toBe(changed);
+    expect(() => verifyLedger(cfg)).toThrow("ledger_tampered");
+  });
+
+  it("the repair puts everything back when what remains does not fit the head", () => {
+    withEntries();
+    const lines = readFileSync(ledger(), "utf8").split("\n").filter(Boolean);
+    const cut = `${lines.slice(0, 2).join("\n")}\n{"half`;
+    writeFileSync(ledger(), cut);
+    expect(() => repairTornTail(cfg, null)).toThrow("ledger_truncated");
+    expect(readFileSync(ledger(), "utf8")).toBe(cut);
+  });
+
+  it("a complete last entry without line end stays valid when the next one follows", () => {
+    withEntries();
+    writeFileSync(ledger(), readFileSync(ledger(), "utf8").trimEnd());
+    recordDeletion(cfg, { kind: "folder_deleted", userId: "user-c" });
+    expect(verifyLedger(cfg)).toHaveLength(4);
+  });
+
+  it("a lost or damaged head is rebuilt from an intact ledger, checked by the anchor", () => {
+    withEntries();
+    rmSync(cfg.headPath);
+    expect(() => verifyLedger(cfg)).toThrow("head_missing");
+    expect(() => rebuildHead(cfg, null)).toThrow("head_missing");
+    rebuildHead(cfg, { epoch: 1, seq: 3 });
+    expect(verifyLedger(cfg)).toHaveLength(3);
+
+    writeFileSync(cfg.headPath, "kaputt");
+    expect(() => verifyLedger(cfg)).toThrow("ledger_tampered");
+    rebuildHead(cfg, { epoch: 1, seq: 2 });
+    expect(verifyLedger(cfg)).toHaveLength(3);
+    expect(copies(dirname(cfg.headPath), basename(cfg.headPath))).toHaveLength(1);
+  });
+
+  it("a new head cannot hide a cut-off or changed ledger", () => {
+    withEntries();
+    const whole = readFileSync(ledger(), "utf8");
+    rmSync(cfg.headPath);
+    writeFileSync(ledger(), whole.split("\n").slice(0, 2).join("\n") + "\n");
+    expect(() => rebuildHead(cfg, { epoch: 1, seq: 3 })).toThrow("ledger_truncated");
+    expect(existsSync(cfg.headPath)).toBe(false);
+    writeFileSync(ledger(), whole.replace(/"subject":"./, '"subject":"#'));
+    expect(() => rebuildHead(cfg, { epoch: 1, seq: 3 })).toThrow("ledger_tampered");
   });
 });
