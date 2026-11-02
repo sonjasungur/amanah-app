@@ -282,6 +282,14 @@ export class PostgresRepository implements ServerRepository {
     ]);
   }
 
+  async setDeletionLedgerAnchor(anchor: { epoch: number; seq: number }): Promise<void> {
+    await prisma.deletionLedgerAnchor.upsert({
+      where: { id: 1 },
+      create: { id: 1, ...anchor },
+      update: { ...anchor, updatedAt: new Date() },
+    });
+  }
+
   async checkConnection(): Promise<boolean> {
     try {
       await prisma.$queryRaw`SELECT 1`;

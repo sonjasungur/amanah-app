@@ -29,7 +29,7 @@ import {
   versionsToPrune,
   type VersionPayload,
 } from "@/lib/server/data-history";
-import { runHistoryPurge } from "@/lib/server/history-purge";
+import { failureCode, PURGE_RETRY_MS, runHistoryPurge } from "@/lib/server/history-purge";
 import { clearOutbox } from "@/lib/server/mailer";
 import type { ServerRepository } from "@/lib/server/repository/types";
 import { getMemoryStore } from "@/lib/server/memory-store";
@@ -103,7 +103,7 @@ describe("recording", () => {
     const cookie = await registerVerified(BASE, newEmail(), "testpass1");
     await put(withLetter("a"), cookie);
     await put(withLetter("a"), cookie);
-    await put({ ...withLetter("a"), selectedPath: "/x", knowledgeBookmarks: ["slug"] }, cookie);
+    await put({ ...withLetter("a"), selectedPath: "/x" }, cookie);
     expect(await list(cookie)).toEqual([]);
   });
 
@@ -173,6 +173,18 @@ describe("restoring", () => {
     const foreign = new Request(`${BASE}/api/amanah/history/${v.id}/restore`, { method: "POST", headers: { Origin: "https://evil.example", "Sec-Fetch-Site": "cross-site", Cookie: cookie, "Content-Type": "application/json" }, body: JSON.stringify({ confirmed: true }) });
     expect((await restorePOST(foreign, { params: Promise.resolve({ id: v.id }) })).status).toBe(403);
     expect(await letter(cookie)).toBe("drei");
+  });
+
+  it("a free account gets back check and bookmarks too", async () => {
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    await put({ ...withLetter("x"), knowledgeBookmarks: ["alt"], checkProgress: { ...defaultAmanahData.checkProgress, index: 1, answers: { convert: true } } }, cookie);
+    await put({ ...withLetter("x"), knowledgeBookmarks: ["neu"], checkProgress: { ...defaultAmanahData.checkProgress, index: 2, answers: { convert: false } } }, cookie);
+    vi.stubEnv("AMANAH_BILLING_ENFORCE", "true");
+    vi.stubEnv("AMANAH_PLUS_LAUNCH_AT", "2000-01-01T00:00:00Z");
+    const [v] = await list(cookie);
+    const { data } = await (await restore(v.id, cookie)).json();
+    expect(data.knowledgeBookmarks).toEqual(["alt"]);
+    expect(data.checkProgress.answers).toEqual({ convert: true });
   });
 
   it("a free account gets back only the free sections", async () => {
@@ -367,12 +379,20 @@ describe("automatic removal", () => {
     info.mockRestore();
   });
 
-  it("a failure is logged without details and does not throw", async () => {
+  it("a failure is logged without details, does not throw, and tries again once, not only tomorrow", async () => {
+    vi.useFakeTimers();
     const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const broken = { purgeExpiredDataVersions: () => Promise.reject(new Error("secret detail")) } as unknown as ServerRepository;
-    expect(await runHistoryPurge(broken)).toBe(0);
+    const purge = vi.fn().mockRejectedValueOnce(new Error("secret detail")).mockRejectedValueOnce(new Error("secret detail")).mockResolvedValue(0);
+    const broken = { purgeExpiredDataVersions: purge } as unknown as ServerRepository;
+    expect(await Promise.all([runHistoryPurge(broken), runHistoryPurge(broken)])).toEqual([0, 0]);
     expect(JSON.stringify(error.mock.calls)).not.toContain("secret detail");
+    expect(purge).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(PURGE_RETRY_MS);
+    expect(purge).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(PURGE_RETRY_MS * 10);
+    expect(purge).toHaveBeenCalledTimes(3);
     error.mockRestore();
+    vi.useRealTimers();
   });
 
   it("an expired version is not exported, even before the daily run", async () => {
@@ -429,7 +449,7 @@ describe("rules", () => {
   it("covers every section with content and leaves out bookkeeping", () => {
     const covered = new Set<string>(HISTORY_SECTIONS);
     const left = Object.keys(defaultAmanahData).filter((k) => !covered.has(k)).sort();
-    expect(left).toEqual(["checkProgress", "knowledgeBookmarks", "lastSaved", "reviewStatus", "schemaVersion", "selectedPath"]);
+    expect(left).toEqual(["lastSaved", "reviewStatus", "schemaVersion", "selectedPath"]);
   });
 
   it("moving through the questionnaire is no change", () => {
@@ -459,5 +479,14 @@ describe("rules", () => {
   it("reports the plaintext size of a version", () => {
     const payload: VersionPayload = { kind: "amanah-data-version", seq: 1, sections: [], prior: {} };
     expect(sealVersion(payload, "u", {} as NodeJS.ProcessEnv).sizeBytes).toBeGreaterThan(0);
+  });
+});
+
+describe("failure codes in logs", () => {
+  it("keep a code or class, never a message with details", () => {
+    expect(failureCode(Object.assign(new Error("postgres://user:secret@host"), { code: "P2021" }))).toBe("P2021");
+    expect(failureCode(new TypeError("postgres://user:secret@host"))).toBe("TypeError");
+    expect(failureCode(Object.assign(new Error("x"), { code: "postgres://user:secret@host" }))).toBe("Error");
+    expect(failureCode("text")).toBe("unknown");
   });
 });

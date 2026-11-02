@@ -198,3 +198,69 @@ describe.runIf(runIntegration)("Postgres: change history", () => {
     await repo.deleteUser(user.id);
   });
 });
+
+describe.runIf(runIntegration)("Postgres: deletion ledger replay", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
+  async function ledger() {
+    const { mkdtempSync } = await import("fs");
+    const { tmpdir } = await import("os");
+    const { join } = await import("path");
+    const mod = await import("@/lib/server/deletion-ledger");
+    const base = mkdtempSync(join(tmpdir(), "pgledger-"));
+    const config = mod.readLedgerConfig({
+      AMANAH_DELETION_LEDGER_DIR: join(base, "l"),
+      AMANAH_DELETION_LEDGER_HEAD: join(base, "h", "head.json"),
+      AMANAH_DELETION_LEDGER_KEYS: `a:${keyA}`,
+      AMANAH_BACKUP_MAX_RETENTION_DAYS: "30",
+    } as unknown as NodeJS.ProcessEnv);
+    return { mod, config };
+  }
+
+  function dbFor(prisma: Awaited<ReturnType<typeof setup>>["prisma"], only: string[]) {
+    return {
+      rows: async () => only.map((id) => ({ id })),
+      exec: (sql: string, params: unknown[]) => prisma.$executeRawUnsafe(sql, ...params),
+    };
+  }
+
+  it("removes what was deleted, repeats harmlessly, and keeps what came afterwards", async () => {
+    vi.stubEnv("AMANAH_DATA_HISTORY", "true");
+    const { mod, config } = await ledger();
+    const gone = await setup();
+    const folder = await setup();
+    const again = await setup();
+    const withdrawn = await setup();
+    const keep = await setup();
+    for (const a of [gone, folder, again, withdrawn, keep]) {
+      await a.repo.saveAmanahData(a.user.id, withLetter("alt"));
+      await a.repo.saveAmanahData(a.user.id, withLetter("mit Version"));
+      await a.repo.grantConsent(a.user.id, "sensitive_folder_storage", "v1");
+    }
+    const t = (ms: number) => new Date(Date.now() + ms);
+    mod.recordDeletion(config, { kind: "account_deleted", userId: gone.user.id }, t(60_000));
+    mod.recordDeletion(config, { kind: "folder_deleted", userId: folder.user.id }, t(60_000));
+    mod.recordDeletion(config, { kind: "consent_withdrawn", userId: withdrawn.user.id, purpose: "sensitive_folder_storage" }, t(60_000));
+    mod.recordDeletion(config, { kind: "folder_deleted", userId: withdrawn.user.id }, t(60_000));
+    // Deleted first and saved anew afterwards: the new folder must stay.
+    mod.recordDeletion(config, { kind: "folder_deleted", userId: again.user.id }, t(-60_000));
+
+    const entries = mod.verifyLedger(config);
+    const db = dbFor(gone.prisma, [gone, folder, again, withdrawn, keep].map((a) => a.user.id));
+    const first = await mod.replayDeletions(db, config, entries);
+    expect(first.accounts).toBe(1);
+    expect(first.folders).toBe(2);
+    expect(first.consents).toBe(1);
+    expect(await mod.replayDeletions(dbFor(gone.prisma, [folder, again, withdrawn, keep].map((a) => a.user.id)), config, entries)).toEqual({ accounts: 0, folders: 0, versions: 0, consents: 0 });
+
+    expect(await gone.repo.getUserById(gone.user.id)).toBeNull();
+    expect(await folder.repo.getAmanahData(folder.user.id)).toBeNull();
+    expect(await folder.prisma.amanahDataVersion.count({ where: { userId: folder.user.id } })).toBe(0);
+    expect(await withdrawn.repo.getAmanahData(withdrawn.user.id)).toBeNull();
+    expect((await withdrawn.repo.listConsents(withdrawn.user.id))[0].revokedAt).toBeTruthy();
+    expect((await again.repo.getAmanahData(again.user.id))?.familyMessage.familyLetter).toBe("mit Version");
+    expect((await keep.repo.getAmanahData(keep.user.id))?.familyMessage.familyLetter).toBe("mit Version");
+    expect((await keep.repo.listConsents(keep.user.id))[0].revokedAt).toBeNull();
+    for (const a of [folder, again, withdrawn, keep]) await a.repo.deleteUser(a.user.id);
+  });
+});

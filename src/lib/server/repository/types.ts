@@ -102,4 +102,6 @@ export interface ServerRepository {
   /** Stores a provider event id; returns false if it was already processed (idempotency). */
   recordPaymentEvent(eventId: string, provider: string, type: string, providerRef: string): Promise<boolean>;
   checkConnection?(): Promise<boolean>;
+  /** Only where a database survives the ledger's checks; see deletion-gate.ts. */
+  setDeletionLedgerAnchor?(anchor: { epoch: number; seq: number }): Promise<void>;
 }

@@ -69,6 +69,16 @@ model AmanahDataVersion {
   @@map("amanah_data_versions")
 }
 
+/// Last position of the deletion ledger seen by this database. Reveals a lost or cut-off ledger; holds no personal data.
+model DeletionLedgerAnchor {
+  id        Int      @id @default(1)
+  epoch     Int
+  seq       Int
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("deletion_ledger_anchor")
+}
+
 /// Proof of consent per purpose and text version (Art. 7 Abs. 1 DSGVO). Never pre-ticked.
 model ConsentRecord {
   id          String    @id @default(cuid())
