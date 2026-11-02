@@ -7,12 +7,20 @@ import { moduleConfigs } from "@/lib/modules/config";
 import { dashboardNavGroups, moreNavItems } from "@/lib/navigation/dashboard-nav";
 import { StorageControls } from "@/components/storage/storage-controls";
 import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
+import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { cn } from "@/lib/utils/cn";
 import { ChevronDown, ChevronUp, Settings } from "lucide-react";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** The sidebar is hidden on small screens, but a save problem must never stay unseen. */
+function MobileSaveProblem() {
+  const problem = useAmanahStore((s) => s.saveStatus === "error" || s.saveStatus === "partial" || s.saveNearLimit);
+  if (!problem) return null;
+  return <SaveStatusIndicator className="lg:hidden no-print sticky top-16 z-10 mb-4 rounded-xl border border-border bg-card p-3 shadow-sm" />;
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -130,7 +138,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <SaveStatusIndicator className="px-1" />
           <StorageControls />
         </aside>
-        <div className="lg:col-span-3">{children}</div>
+        <div className="lg:col-span-3">
+          <MobileSaveProblem />
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ export type SaveStatus = "idle" | "saving" | "saved" | "partial" | "error";
 export interface SaveResult {
   /** Sections the account did not store. */
   notStored?: string[];
+  /** The account is close to its size limit. */
+  nearLimit?: boolean;
 }
 
 export type FolderWriteScope = "full" | "free_sections";

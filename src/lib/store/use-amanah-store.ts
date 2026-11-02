@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist, createJSONStorage, type StateStorage } from "zustand/middleware";
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { migrateRawData } from "@/lib/domain/migration";
@@ -16,6 +16,7 @@ const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
 interface AmanahStore extends AmanahOrdnerData {
   saveStatus: SaveStatus;
   saveError: string | null;
+  saveNearLimit: boolean;
   updateField: <K extends keyof AmanahOrdnerData>(section: K, value: AmanahOrdnerData[K]) => void;
   updateNested: (section: string, field: string, value: unknown) => void;
   addDebtAmanah: (item: DebtAmanahItem) => void;
@@ -28,12 +29,41 @@ interface AmanahStore extends AmanahOrdnerData {
   loadDemoData: () => void;
 }
 
+/**
+ * A full browser storage must not take the page down with it: the input stays in the running
+ * page, and the person is told that it was not saved here.
+ */
+const STORAGE_FULL_MESSAGE = "Der Speicher dieses Browsers ist voll. Bitte kürze längere Texte oder sichere deine Daten als Export.";
+
+const guardedLocalStorage: StateStorage = {
+  getItem: (name) => localStorage.getItem(name),
+  removeItem: (name) => localStorage.removeItem(name),
+  setItem: (name, value) => {
+    try {
+      localStorage.setItem(name, value);
+    } catch {
+      queueMicrotask(() => {
+        // setState persists again: reporting the same failure twice would never end.
+        if (useAmanahStore.getState().saveError === STORAGE_FULL_MESSAGE) return;
+        useAmanahStore.setState({ saveStatus: "error", saveError: STORAGE_FULL_MESSAGE });
+      });
+    }
+  },
+};
+
+/** Throws without a browser storage, so that the server renders without persistence. */
+function browserStorage(): StateStorage {
+  void localStorage;
+  return guardedLocalStorage;
+}
+
 export const useAmanahStore = create<AmanahStore>()(
   persist(
     (set) => ({
       ...defaultAmanahData,
       saveStatus: "idle" as SaveStatus,
       saveError: null,
+      saveNearLimit: false,
       updateField: (section, value) =>
         set((state) => ({ ...state, [section]: value, saveStatus: "saving" as SaveStatus, saveError: null })),
       updateNested: (section, field, value) =>
@@ -80,7 +110,7 @@ export const useAmanahStore = create<AmanahStore>()(
     }),
     {
       name: STORAGE_KEY,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(browserStorage),
       partialize: (state) => pickDataFields(state),
       merge: (persisted, current) => {
         const migrated = migrateRawData((persisted ?? {}) as Record<string, unknown>);

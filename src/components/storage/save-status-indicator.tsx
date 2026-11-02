@@ -11,6 +11,7 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
   const saveStatus = useAmanahStore((s) => s.saveStatus);
   const saveError = useAmanahStore((s) => s.saveError);
   const lastSaved = useAmanahStore((s) => s.lastSaved);
+  const nearLimit = useAmanahStore((s) => s.saveNearLimit);
   const { t } = useI18n();
   const storageLabel = getStorageLocationLabel();
 
@@ -62,6 +63,11 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
       {saveStatus === "partial" && (
         <p className="text-xs text-muted" data-testid="save-status-partial">
           {t("storage.location.partial")}
+        </p>
+      )}
+      {nearLimit && saveStatus !== "error" && (
+        <p className="text-xs text-warning" data-testid="save-status-near-limit">
+          {t("storage.nearLimit")}
         </p>
       )}
       {saveStatus === "error" && saveError && (

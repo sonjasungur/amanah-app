@@ -493,3 +493,25 @@ describe("store hydration", () => {
     expect(useAmanahStore.persist.hasHydrated()).toBe(true);
   });
 });
+
+describe("size warnings and a full browser", () => {
+  it("warns before the limit is reached", async () => {
+    const cookie = await registerVerified(BASE, newEmail(), "testpass1");
+    const letter = (n: number) => ({ ...defaultAmanahData, familyMessage: { ...defaultAmanahData.familyMessage, familyLetter: "x".repeat(n) } });
+    expect((await (await put(letter(1000), cookie)).json()).nearLimit).toBe(false);
+    expect((await (await put(letter(1.8 * 1024 * 1024), cookie)).json()).nearLimit).toBe(true);
+  });
+
+  it("a full browser storage does not throw; it says that nothing was saved here", async () => {
+    const { useAmanahStore } = await import("@/lib/store/use-amanah-store");
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("full", "QuotaExceededError");
+    });
+    expect(() => useAmanahStore.getState().updateField("assets", [asset()])).not.toThrow();
+    await Promise.resolve();
+    expect(useAmanahStore.getState().saveStatus).toBe("error");
+    expect(useAmanahStore.getState().saveError).toContain("voll");
+    expect(useAmanahStore.getState().assets).toHaveLength(1);
+    setItem.mockRestore();
+  });
+});

@@ -24,6 +24,11 @@ export const HARD_FOLDER_BODY_BYTES = 16 * 1024 * 1024;
 export const OVERSIZE_GROWTH_BYTES = 64 * 1024;
 export const MAX_ASSETS = 500;
 
+/** Early enough to shorten something before a save is refused. */
+export function isNearFolderLimit(storedBytes: number): boolean {
+  return storedBytes > MAX_FOLDER_BODY_BYTES * 0.8;
+}
+
 /** Not worth a warning: bookkeeping and navigation. */
 const NOT_CONTENT = new Set(["schemaVersion", "lastSaved", "reviewStatus", "selectedPath"]);
 

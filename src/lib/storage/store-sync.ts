@@ -56,6 +56,7 @@ async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
   useAmanahStore.setState({
     saveStatus: result?.notStored?.length ? "partial" : "saved",
     saveError: null,
+    saveNearLimit: result?.nearLimit === true,
     lastSaved: new Date().toISOString(),
   });
 }

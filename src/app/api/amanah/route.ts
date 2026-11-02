@@ -9,6 +9,7 @@ import {
   folderSizeRejected,
   folderWriteScope,
   freeSectionsOf,
+  isNearFolderLimit,
   jsonBytes,
   MAX_ASSETS,
   MAX_FOLDER_BODY_BYTES,
@@ -22,11 +23,12 @@ async function writeFreeSections(repo: ServerRepository, userId: string, body: P
   const existing = await repo.getAmanahData(userId);
   const free = freeSectionsOf(body);
   // Only what would really be stored counts, not what stays in the browser.
-  const rejected = tooManyAssets(free.assets, existing) ?? folderSizeRejected(jsonBytes({ ...existing, ...free }), jsonBytes(existing));
+  const storedBytes = jsonBytes({ ...existing, ...free });
+  const rejected = tooManyAssets(free.assets, existing) ?? folderSizeRejected(storedBytes, jsonBytes(existing));
   if (rejected) return rejected;
   const notStored = notStoredSections(existing, body);
   const saved = await repo.patchAmanahData(userId, free);
-  return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored });
+  return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored, nearLimit: isNearFolderLimit(storedBytes) });
 }
 
 /** Limits for a full write. The stored folder is read only when they could apply. */
@@ -67,7 +69,7 @@ export async function PUT(request: Request) {
     const rejected = await fullWriteRejected(repo, userId, read.body, read.bytes);
     if (rejected) return rejected;
     const saved = await repo.saveAmanahData(userId, read.body as AmanahOrdnerData);
-    return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored: [] });
+    return NextResponse.json({ data: saved, lastSaved: saved.lastSaved, notStored: [], nearLimit: isNearFolderLimit(read.bytes) });
   } catch {
     return NextResponse.json({ error: "Speichern fehlgeschlagen." }, { status: 500 });
   }

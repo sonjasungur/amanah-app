@@ -35,8 +35,8 @@ export class ApiStorageProvider implements StorageProvider {
       throw new Error(error ?? "Die Daten sind zu groß zum Speichern.");
     }
     if (!res.ok) throw new Error("Speichern auf dem Server fehlgeschlagen.");
-    const { notStored } = (await res.json().catch(() => ({}))) as SaveResult;
-    return { notStored: Array.isArray(notStored) ? notStored : [] };
+    const { notStored, nearLimit } = (await res.json().catch(() => ({}))) as SaveResult;
+    return { notStored: Array.isArray(notStored) ? notStored : [], nearLimit: nearLimit === true };
   }
 
   async clear(): Promise<void> {
