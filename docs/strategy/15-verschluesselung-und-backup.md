@@ -40,7 +40,8 @@ Stand: 2026-10-30 · Implementiert auf `feat/vorsorge-testament-foundation` · *
 
 1. Neuen Schlüssel ergänzen: `AMANAH_DATA_KEYS=alt:…,neu:…`, `AMANAH_DATA_KEY_ACTIVE=neu`, App neu starten → neue Schreibvorgänge nutzen `neu`, alte Zeilen bleiben lesbar.
 2. Backup erstellen.
-3. Trockenlauf: `node scripts/reencrypt-amanah-data.mjs` (zählt Klartext-, Rotations- und unveränderte Zeilen; keine Inhalte).
+3. Das Skript erfasst seit dem 01.11.2026 auch `amanah_data_versions` (Doku 38), wenn die Tabelle vorhanden ist.
+   Trockenlauf: `node scripts/reencrypt-amanah-data.mjs` (zählt Klartext-, Rotations- und unveränderte Zeilen; keine Inhalte).
 4. Anwenden: `AMANAH_REENCRYPT_CONFIRM=yes node scripts/reencrypt-amanah-data.mjs --apply` – verschlüsselt Klartext-Altbestände und verpackt DEKs neu (Daten-Ciphertext bleibt).
 5. Erst wenn der Trockenlauf `rewrap: 0, encrypt_plaintext: 0` zeigt, den alten Schlüssel entfernen.
 

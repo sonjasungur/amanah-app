@@ -105,7 +105,7 @@ Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter
 | **0** | Entscheidungen: Name, Fachprüfer, Kanzleimodell (§ 7) | – | Owner, A |
 | **1** | Vollständiges Erbenmodell (Datenmodell, Oberfläche) | 5–8 | G, A |
 | 1 | Anzeige der Modellrechnung hinter dem Flag | 1–2 | G, A |
-| 1 | Vermögen strukturiert (`AssetEntry`-Oberfläche): am 01.11. lokal fertig, eigene Seite `/dashboard/vermoegen` mit einfachem Ausdruck, vorläufig kostenlos, als getrennte Anlage in der gesperrten Gesprächsunterlage | erledigt | A (Doku 36 A8) |
+| 1 | Vermögen strukturiert (`AssetEntry`-Oberfläche): am 01.11. lokal fertig, eigene Seite `/dashboard/vermoegen` mit einfachem Ausdruck, dauerhaft kostenlos, als getrennte Anlage in der gesperrten Gesprächsunterlage | erledigt | A (Doku 36 A8) |
 | 1 | Vermächtniswünsche (Prozent, Betrag, Gegenstand): am 01.11. lokal gebaut und gesperrt; bearbeitbar, als unverbindliche Wünsche gekennzeichnet; Drittel-Frage nur nach Gelehrtenprüfung, offene Punkte in Doku 36 B | erledigt, Freigabe offen | G, A |
 | 1 | Vollstrecker, Vormund (eine Person bzw. Ehegatten, Ausschluss, Kindbezug) | 2–3 | A |
 | 1 | Geführter Testament-Ablauf mit Eignungsfilter | 4–7 | A |
@@ -116,7 +116,7 @@ Reihenfolge nach Abhängigkeit. **Wer freigibt:** A Anwalt, N Notar, G Gelehrter
 | 2 | ZTR- und Verwahrhinweise | 0,5 | N |
 | **3** | Kanzlei-Prüfworkflow mit Persistenz, Rollen, verschlüsselter Übermittlung | 8–12 | A (Vertrag, § 49b BRAO, AVV) |
 | 3 | Mail bei Statuswechsel | 1–2 | setzt Mail-Abnahme voraus (Doku 30) |
-| 3 | Änderungshistorie | 3–4 | – |
+| 3 | Änderungshistorie: am 01.11. serverseitig vorbereitet und getestet, aus, ohne Oberfläche (Doku 38) | Oberfläche 1–2 | Datenschutz |
 | 3 | Testament-Tarif im Katalog | 2–3 | A (Bündelpreis offen) |
 | 3 | AGB-Seite, Bestellablauf | 1 | A |
 | **4** | Erinnerungen bei Lebensereignissen | 3–5 | A (keine Rechtsaussage) |
@@ -228,7 +228,7 @@ Zielwerte werden erst nach echten Pilotdaten festgelegt. Heute ist im Code keine
 |---|---|---|
 | Wissenszentrum (Struktur, Suche, Teilen, Prüfworkflow) | fertig | **nein:** 0 von 44 Einträgen veröffentlicht |
 | Zehn Startartikel | Entwürfe mit Prüfpaketen | **nein** |
-| Vermögensübersicht mit Ausdruck | fertig, vorläufig kostenlos | **nein:** Doku 36 A8 |
+| Vermögensübersicht mit Ausdruck | fertig, dauerhaft kostenlos auch im Konto (Doku 38) | **nein:** Doku 36 A8 |
 | Ampel „Erste Hinweise“ | seit 01.11. lokal abgeschaltet, neutrale Fragen als Ersatz | **nein:** Doku 36 A9 |
 | Vorsorge-Check | fertig | Texte nicht juristisch geprüft |
 | Vorsorge-Ordner, Janazah, Notfallkarte | fertig, verschlüsselt | Religiöse Inhalte nicht geprüft; Einwilligungstext „Entwurf“ |
