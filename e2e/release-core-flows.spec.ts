@@ -38,7 +38,7 @@ async function freshPage(browser: Browser, baseURL: string | undefined, contextO
 
 test("an account from registration to deletion", async ({ page, browser, baseURL, viewport, userAgent, isMobile, hasTouch }) => {
   const options = { viewport, userAgent, isMobile, hasTouch };
-  const email = `release-${Date.now()}-${Math.floor(Math.random() * 1e6)}@test.invalid`;
+  const email = `release-${Date.now()}-${Math.floor(Math.random() * 1e6)}@${process.env.E2E_EMAIL_DOMAIN ?? "test.invalid"}`;
   const folder = async (p: Page) => (await (await p.context().request.get("/api/amanah")).json()).data;
 
   await test.step("registration needs a confirmed address", async () => {

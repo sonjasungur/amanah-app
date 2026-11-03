@@ -68,6 +68,7 @@ export function AccountControls() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1"
+              autoFocus
               data-testid="account-delete-password"
             />
           </label>

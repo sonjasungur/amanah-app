@@ -31,7 +31,7 @@ test("public pages fit, also at 320 pixels, and the menu works", async ({ page }
 });
 
 test("the logged-in area: forms stay reachable, dialog and download work", async ({ page }) => {
-  const email = `mobile-${Date.now()}-${Math.floor(Math.random() * 1e6)}@test.invalid`;
+  const email = `mobile-${Date.now()}-${Math.floor(Math.random() * 1e6)}@${process.env.E2E_EMAIL_DOMAIN ?? "test.invalid"}`;
   await page.goto("/register");
   await page.getByPlaceholder("name@beispiel.de").fill(email);
   await page.getByPlaceholder("••••••••").fill("e2e-passwort-1");
