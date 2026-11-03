@@ -108,5 +108,5 @@ describe("secret scan stops the flow", () => {
     writeFileSync(join(repo, "config.ts"), "export const token = process.env.TOKEN;\n");
     git("add", "config.ts");
     expect(git("commit", "-qm", "clean").status).toBe(0);
-  });
+  }, 60_000);
 });

@@ -55,8 +55,11 @@ test.describe("Vorsorgeplan dashboard", () => {
   test("all care areas are reachable after expanding", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.getByTestId("dashboard-module-tiles")).toBeVisible();
-    await page.getByTestId("dashboard-all-areas-toggle").click();
-    await expect(page.getByTestId("dashboard-tile-janazah")).toBeVisible();
+    // A click before hydration does nothing: repeat it until the areas open.
+    await expect(async () => {
+      await page.getByTestId("dashboard-all-areas-toggle").click();
+      await expect(page.getByTestId("dashboard-tile-janazah")).toBeVisible({ timeout: 1_000 });
+    }).toPass();
   });
 });
 
