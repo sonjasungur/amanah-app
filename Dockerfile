@@ -52,6 +52,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY scripts/docker-entrypoint.sh ./docker-entrypoint.sh
 # Operator tool: key check and rotation with exactly this image.
 COPY scripts/reencrypt-amanah-data.mjs ./scripts/reencrypt-amanah-data.mjs
+COPY scripts/key-reference.mjs ./scripts/key-reference.mjs
 COPY src/lib/server/data-encryption.ts ./src/lib/server/data-encryption.ts
 
 RUN chmod +x ./docker-entrypoint.sh \

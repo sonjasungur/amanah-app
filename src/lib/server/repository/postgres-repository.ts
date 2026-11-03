@@ -3,7 +3,7 @@ import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { normalizeData } from "@/lib/domain/migration";
 import { prisma } from "../prisma";
-import { openFromStorage, sealForStorage } from "../data-encryption";
+import { assertKeyReferences, isKeyReferenceEnforced, openFromStorage, sealForStorage } from "../data-encryption";
 import {
   isDataHistoryEnabled,
   openVersion,
@@ -109,6 +109,7 @@ export class PostgresRepository implements ServerRepository {
   }
 
   async getAmanahData(userId: string): Promise<AmanahOrdnerData | null> {
+    await assertConfiguredKeys(prisma);
     const row = await prisma.amanahData.findUnique({ where: { userId } });
     if (!row) return null;
     return normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(row.data, userId));
@@ -322,8 +323,14 @@ async function lockFolder(tx: Prisma.TransactionClient, userId: string): Promise
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
 }
 
+/** Before any folder access: a wrong key must show even when this account holds nothing yet. */
+async function assertConfiguredKeys(client: Pick<typeof prisma, "dataKeyReference">): Promise<void> {
+  if (isKeyReferenceEnforced()) assertKeyReferences(await client.dataKeyReference.findMany());
+}
+
 /** Throws when the row exists but cannot be opened: no write path may continue past that. */
 async function readFolder(tx: Prisma.TransactionClient, userId: string): Promise<AmanahOrdnerData | null> {
+  await assertConfiguredKeys(tx);
   const current = await tx.amanahData.findUnique({ where: { userId } });
   return current ? normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId)) : null;
 }

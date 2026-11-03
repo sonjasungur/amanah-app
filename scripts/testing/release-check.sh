@@ -11,6 +11,8 @@ LOG="${LOG_DIR:-$(mktemp -d)}"; mkdir -p "$LOG"; SUMMARY="$LOG/summary.log"; : >
 CONTAINER=amanah-history-test-pg; DB_PORT=5447; PORT=3099
 DB="postgresql://test:testonly@127.0.0.1:$DB_PORT/hist"
 failed=0
+# One key for the whole run: every server shares this database and its key reference.
+DATA_KEY="$(openssl rand -base64 32)"
 
 cleanup() { server_stop; docker rm -f "$CONTAINER" >/dev/null 2>&1; echo "Logs: $LOG"; }
 trap cleanup EXIT
@@ -28,7 +30,7 @@ server_stop() { local p; p=$(ss -ltnp 2>/dev/null | grep ":$PORT " | grep -oE 'p
 
 api_env() {
   export AMANAH_PUBLIC_REGISTRATION_ENABLED=true AMANAH_SERVER_STORAGE=postgres DATABASE_URL="$DB"
-  export AMANAH_DATA_KEYS="t:$(openssl rand -base64 32)" AMANAH_DATA_KEY_ACTIVE=t SESSION_SECRET="$(openssl rand -hex 32)"
+  export AMANAH_DATA_KEYS="t:$DATA_KEY" AMANAH_DATA_KEY_ACTIVE=t SESSION_SECRET="$(openssl rand -hex 32)"
   export AMANAH_MAIL_TRANSPORT=outbox AMANAH_INTERNAL_TOOLS=true AMANAH_PUBLIC_BASE_URL="http://127.0.0.1:$PORT"
   export AMANAH_BILLING_MODE=sandbox AMANAH_SANDBOX_WEBHOOK_SECRET="$(openssl rand -hex 32)" AMANAH_DATA_HISTORY=true
 }
@@ -55,10 +57,12 @@ docker rm -f "$CONTAINER" >/dev/null 2>&1
 docker run -d --rm --name "$CONTAINER" -e POSTGRES_USER=test -e POSTGRES_PASSWORD=testonly -e POSTGRES_DB=hist --tmpfs /var/lib/postgresql/data -p "127.0.0.1:$DB_PORT:5432" postgres:16-alpine >/dev/null
 for _ in $(seq 1 30); do docker exec "$CONTAINER" pg_isready -U test -d hist >/dev/null 2>&1 && break; sleep 1; done; sleep 2
 
+step audit 180 npm audit
 step types 300 npx tsc --noEmit
 step lint 300 npx eslint
 step unit 600 npx vitest run
 step migrate 90 env DATABASE_URL="$DB" npx prisma migrate deploy
+step key-reference-init 60 env DATABASE_URL="$DB" AMANAH_DATA_KEYS="t:$DATA_KEY" AMANAH_DATA_KEY_ACTIVE=t AMANAH_KEY_REFERENCE_CONFIRM=yes node scripts/key-reference.mjs init
 step unit-postgres 400 env DATABASE_URL="$DB" AMANAH_SERVER_STORAGE=postgres npx vitest run src/__tests__/postgres
 step migrate-diff 90 env DATABASE_URL="$DB" npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
 step migration-rehearsal 200 scripts/testing/migration-rehearsal.sh

@@ -137,3 +137,14 @@ model PaymentEvent {
 
   @@map("payment_events")
 }
+
+/// One reference per key id, sealed with that key: proves the configured keys are the right ones, also
+/// without any folder data. Written only by scripts/key-reference.mjs, never by the app, never replaced.
+model DataKeyReference {
+  kid       String    @id
+  data      Json
+  createdAt DateTime  @default(now()) @map("created_at")
+  retiredAt DateTime? @map("retired_at")
+
+  @@map("data_key_references")
+}

@@ -8,6 +8,9 @@ import {
   parseKeyring,
   rewrapEnvelope,
   sealForStorage,
+  checkKeyReferences,
+  isKeyReferenceEnforced,
+  sealKeyReference,
 } from "@/lib/server/data-encryption";
 import { MemoryRepository } from "@/lib/server/repository/memory-repository";
 import { demoAmanahData } from "@/lib/domain/demo-data";
@@ -107,5 +110,34 @@ describe("memory repository stores ciphertext", () => {
     expect(isEncryptedEnvelope(raw)).toBe(true);
     expect(JSON.stringify(raw)).not.toContain("Ahmed Demo");
     expect((await repo.getAmanahData(user.id))?.userProfile.name).toBe("Ahmed Demo");
+  });
+});
+
+describe("key reference check", () => {
+  const keyA = Buffer.alloc(32, 21).toString("base64");
+  const required = (keys: string, active?: string) => ({ AMANAH_DATA_ENCRYPTION: "required", AMANAH_DATA_KEYS: keys, AMANAH_DATA_KEY_ACTIVE: active }) as unknown as NodeJS.ProcessEnv;
+  const row = (kid = "a", key = keyA) => ({ kid, retiredAt: null, data: sealKeyReference(kid, parseKeyring(required(`${kid}:${key}`, kid))!) });
+
+  it("reports each state", () => {
+    expect(checkKeyReferences([row()], required(`a:${keyA}`, "a")).status).toBe("ok");
+    expect(checkKeyReferences([], required(`a:${keyA}`, "a")).status).toBe("not_initialized");
+    expect(checkKeyReferences([row()], required("")).status).toBe("missing_key");
+    expect(checkKeyReferences([row()], required(`a:${Buffer.alloc(32, 22).toString("base64")}`, "a")).status).toBe("wrong_key");
+    expect(checkKeyReferences([{ ...row(), retiredAt: new Date() }, row("b")], required(`b:${keyA}`, "b")).status).toBe("ok");
+  });
+
+  it("a copied or altered reference does not count", () => {
+    const copied = { ...row("a"), kid: "b" };
+    expect(checkKeyReferences([copied], required(`a:${keyA},b:${keyA}`, "b")).status).toBe("wrong_key");
+    expect(checkKeyReferences([{ ...row(), data: { tampered: true } }], required(`a:${keyA}`, "a")).status).toBe("wrong_key");
+  });
+
+  it("optional mode without keys stays usable for local development", () => {
+    expect(checkKeyReferences([], { AMANAH_DATA_ENCRYPTION: "optional" } as unknown as NodeJS.ProcessEnv).status).toBe("ok");
+  });
+
+  it("is enforced everywhere except unit tests, and that exception cannot be set from outside a test", () => {
+    expect(isKeyReferenceEnforced({ NODE_ENV: "production", AMANAH_KEY_REFERENCE_IN_TESTS: "false" } as unknown as NodeJS.ProcessEnv)).toBe(true);
+    expect(isKeyReferenceEnforced({ NODE_ENV: "test" } as unknown as NodeJS.ProcessEnv)).toBe(false);
   });
 });

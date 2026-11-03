@@ -29,7 +29,8 @@ Geprüft nur anhand der Namen. Pflicht im Release, in `/opt/amanah-prod/.env.pro
 2. **Übertragen:** beide Images laden; `df -h /` kontrollieren.
 3. **Sichern:** verschlüsseltes Backup auslösen, Compose-Hash von Postgres mit dem Container vergleichen.
 4. **App stoppen,** nur `amanah-app`. `gemeinsam1` nicht berühren.
-5. **Migrieren:** `migrate deploy` mit dem Migrations-Image im Netz `amanah-app_amanah_internal`. Erwartet: 6 von 6. Fremde Dienste bleiben unberührt. Stoppen bei Fehler.
+5. **Migrieren:** `migrate deploy` mit dem Migrations-Image im Netz `amanah-app_amanah_internal`. Erwartet: 7 von 7. Fremde Dienste bleiben unberührt. Stoppen bei Fehler.
+5a. **Schlüsselreferenz anlegen, einmalig, vor dem ersten Start:** nach Schritt 6, mit der neuen Env: `AMANAH_RELEASE_IMAGE=<digest> docker compose -f docker-compose.release.yml --env-file .env.production run --rm --no-deps -T -e AMANAH_KEY_REFERENCE_CONFIRM=yes --entrypoint node app scripts/key-reference.mjs init`. Vorher belegt der Owner mit `check-data-key`, dass genau dieser Schlüssel gesichert ist: Beim allerersten Anlegen gibt es nichts, womit ein falscher Schlüssel zu erkennen wäre. Ohne Referenz bleibt der Ordnerzugriff gesperrt, und `rollback-app.sh` startet nicht.
 6. **Env und Stack wechseln:** `release/.env.production.next` wird zu `.env.production`, `docker-compose.release.yml` mit `AMANAH_RELEASE_IMAGE=<digest>`; Digest auch im Prüfskript eintragen. Alte Env und alten Stack in `config-vorher/` behalten.
 7. **Starten, nur über den geprüften Weg:** `rollback-app.sh` mit dem Release-Stack (Abschnitt Wiederherstellung) nach `/opt/amanah-prod/` installieren und mit `--apply` ausführen; Postgres muss weiterlaufen. Danach `docker-compose.pinned.yml` in `config-vorher/` verschieben, damit kein Direktstart des alten Images mehr bereitliegt.
 8. **Prüfen:** Health, `verify-production-image.sh`, `public-content-probe.py`, Konten und Daten, abgelehnte Anmeldung; `gemeinsam1` byte-gleich.
@@ -76,17 +77,33 @@ App stoppen, Datenbank aus dem Backup von Schritt 3 ersetzen, dann das **zum Sta
 
 ### Schlüsselfehler
 
-Falscher, fehlender oder entfernter Schlüssel: Die API lehnt Lesen und alle Schreibwege mit HTTP 503 und `code: folder_unreadable` ab, die Zeile bleibt unverändert. Der Browser zeigt den Hinweis statt leerer Formulare und speichert nichts. Serverlog: `[folder] rejected`, ohne Schlüssel und Inhalte.
+Falscher, fehlender oder entfernter Schlüssel: Die API lehnt Lesen und alle Schreibwege mit HTTP 503 und `code: folder_unreadable` ab, die Zeile bleibt unverändert. Der Browser zeigt den Hinweis statt leerer Formulare und speichert nichts. Serverlog: `[folder] rejected`, beim Start `[keys] folder access locked`, ohne Schlüssel und Inhalte.
 
-Nach jedem Env-Wechsel:
+**Schlüsselreferenz:** Die Tabelle `data_key_references` enthält je Schlüsselkennung einen mit diesem Schlüssel versiegelten Wert ohne Nutzerdaten. Damit fällt ein falscher Schlüssel **auch bei leerer Datenbank** auf, vor dem ersten Speichern. Die App schreibt die Tabelle nie, und kein Befehl ersetzt eine vorhandene Referenz: Schlägt die Prüfung fehl, ist die Konfiguration falsch, bis das Gegenteil belegt ist.
 
 ```bash
-docker compose -f docker-compose.release.yml --env-file .env.production run --rm --no-deps -T --entrypoint node app scripts/reencrypt-amanah-data.mjs
+C="docker compose -f docker-compose.release.yml --env-file .env.production run --rm --no-deps -T -e AMANAH_KEY_REFERENCE_CONFIRM=yes --entrypoint node app"
+$C scripts/key-reference.mjs check          # nach jedem Env-Wechsel; Exit 0 gültig, 1 ungültig, 2 nicht ausführbar
+$C scripts/reencrypt-amanah-data.mjs        # Trockenlauf: öffnet zusätzlich jede Zeile, schreibt nichts
 ```
 
-Der Trockenlauf öffnet jede Zeile und schreibt nichts; `failed` muss 0 sein. Beim Schlüsselwechsel bleibt der alte Schlüssel in `AMANAH_DATA_KEYS`, bis `--apply` alle Zeilen umgeschlüsselt hat. Parallele Speichervorgänge bleiben dabei erhalten: Geänderte Zeilen lässt das Werkzeug aus, meldet `changed_meanwhile` und wird erneut gestartet.
+| Status | Bedeutung |
+|---|---|
+| `ok` | Schlüssel passen |
+| `wrong_key` | Unter dieser Kennung liegt ein anderer Schlüssel |
+| `missing_key` | Ein referenzierter Schlüssel fehlt |
+| `not_initialized` | Diese Umgebung hat noch keine Referenz |
+| `active_key_without_reference` | Aktiver Schlüssel ohne Referenz, `add` fehlt |
+| `invalid_config` | `AMANAH_DATA_KEYS` ist nicht lesbar |
 
-**Grenze:** Mit einem falschen Schlüssel unter der aktiven Kennung kann eine **noch nicht vorhandene** Zeile angelegt und eine **Klartextzeile** verschlüsselt werden, weil dort nichts zu öffnen ist und der Server den Schlüssel nicht als falsch erkennen kann. Diese Zeilen lassen sich danach nur mit diesem Schlüssel lesen. Deshalb der Trockenlauf vor der Öffnung für Schreibzugriffe.
+**Kontrollierter Schlüsselwechsel:** neuen Schlüssel neben dem alten in `AMANAH_DATA_KEYS` eintragen, `AMANAH_DATA_KEY_ACTIVE` auf die neue Kennung, `key-reference.mjs add` (gelingt nur, wenn die alten Referenzen sich öffnen lassen), App über `rollback-app.sh --apply` neu starten, `reencrypt-amanah-data.mjs --apply` mit `AMANAH_REENCRYPT_CONFIRM=yes`, `key-reference.mjs retire <alt>` (gelingt nur, wenn keine Zeile ihn mehr nutzt), erst dann den alten Schlüssel entfernen. Parallele Speichervorgänge bleiben dabei erhalten: Geänderte Zeilen lässt das Werkzeug aus, meldet `changed_meanwhile` und wird erneut gestartet.
+
+**Nach einem Restore** gilt die Referenz des Backups: Sie passt zum Schlüssel dieses Stands. Enthält ein altes Backup noch keine, öffnet `init` zuerst alle verschlüsselten Zeilen und lehnt ab, wenn eine sich nicht öffnen lässt.
+
+**Grenzen:**
+- Beim allerersten `init` auf leerer Datenbank gibt es keinen Vergleichswert. Deshalb die Owner-Probe `check-data-key` vorher.
+- Geht der richtige Schlüssel endgültig verloren, gibt es bewusst keinen Befehl dafür. Das ist eine Owner-Entscheidung; die Referenz wird nicht automatisch ersetzt.
+- Der Schutz gilt für PostgreSQL; der Speicher-Modus für lokale Tests hat keine dauerhafte Referenz. Unit-Tests schalten die Prüfung außerhalb der eigenen Testdatei ab; das wirkt nur bei `NODE_ENV=test`.
 
 **Bewusste Ausnahme:** Einwilligungswiderruf und Kontolöschung löschen auch einen gerade nicht lesbaren Ordner, weil sie ausdrückliche Löschwünsche sind. „Amanah-Daten löschen“ wird dagegen abgelehnt.
 

@@ -64,6 +64,18 @@ echo "== 2 Migrationen 2 bis 6"
 for m in $(ls "$MIG" | grep -v lock | grep -v "$FIRST" | sort); do docker exec -i "$DB" psql -q -U test -d rbp -v ON_ERROR_STOP=1 < "$MIG/$m/migration.sql" >/dev/null || die "Migration $m"; done
 q "UPDATE users SET email_verified_at=now()" >/dev/null
 
+echo "== 2b Schluesselreferenz: noch nicht initialisiert"
+kr() { # key extra-args: the tool in the candidate image, on the database network
+  local key=$1; shift
+  docker run --rm --network "$N" --entrypoint node -e "DATABASE_URL=$URL" -e AMANAH_DATA_ENCRYPTION=required -e "AMANAH_DATA_KEYS=t:$key" -e AMANAH_DATA_KEY_ACTIVE=t -e AMANAH_KEY_REFERENCE_CONFIRM=yes "$NEW" scripts/key-reference.mjs "$@" 2>/dev/null </dev/null; echo "Exit $?"
+}
+ref_md5() { q "SELECT md5(string_agg(kid||data::text, ',' ORDER BY kid)) FROM data_key_references"; }
+echo "Pruefung: $(kr "$K" check | tr '\n' ' ')"
+echo "Init: $(kr "$K" init | tr '\n' ' ')"
+REFM=$(ref_md5); echo "Pruefung richtig: $(kr "$K" check | tr '\n' ' ')"
+echo "Pruefung falsch: $(kr "$WRONG" check | tr '\n' ' ')"
+echo "Init erneut, falscher Schluessel: $(kr "$WRONG" init | tr '\n' ' '); Referenz unveraendert: $([ "$(ref_md5)" = "$REFM" ] && echo ja || echo NEIN)"
+
 echo "== 3 Kandidat mit Schluessel"
 app "$NEW" "$K" || die "Kandidat startet nicht"
 login_; [ "$LOGIN" = 200 ] || die "Anmeldung Kandidat"
@@ -85,6 +97,19 @@ echo "Schreiben falscher Schluessel: HTTP $(echo '{"data":{}}' > "$F"; put_name 
 auth; echo "Teilaenderung: HTTP $(curl -s -m 15 -o /dev/null -w '%{http_code}' -X PATCH "${A[@]}" -H 'Content-Type: application/json' -d '{"emergencyCard":{"name":"Teil"}}' "$API/api/amanah"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
 echo "Ordner leeren: HTTP $(curl -s -m 15 -o /dev/null -w '%{http_code}' -X DELETE "${A[@]}" "$API/api/amanah"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
 echo "Antwortcode: $(curl -s -m 15 "${A[@]}" "$API/api/amanah" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("code","<keiner>"))')"
+
+echo "== 4a Leeres Konto, falscher Schluessel: vor dem ersten Speichern erkannt"
+EM2="rbp2-$(date +%s)@test.invalid"; app "$NEW" "$K" || die "Kandidat"
+curl -s -m 15 -o /dev/null -H "Origin: $API" -H 'Content-Type: application/json' -d "{\"email\":\"$EM2\",\"password\":\"$PW\",\"name\":\"Leer\"}" "$API/api/auth/register"
+q "UPDATE users SET email_verified_at=now() WHERE email='$EM2'" >/dev/null
+q "INSERT INTO consent_records (id,user_id,purpose,text_version) SELECT gen_random_uuid()::text,id,'sensitive_folder_storage','$V' FROM users WHERE email='$EM2'" >/dev/null
+app "$NEW" "$WRONG" || die "Kandidat falscher Schluessel"
+SAVE_EM=$EM; EM=$EM2; login_; echo "Anmeldung $LOGIN; Lesen: HTTP $(get_status "$F"), Code: $(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("code"))' "$F")"
+echo '{"data":{}}' > "$F"; echo "Erstes Speichern: HTTP $(put_name "$F" Erstes); Zeilen dieses Kontos: $(q "SELECT count(*) FROM amanah_data a JOIN users u ON u.id=a.user_id WHERE u.email='$EM2'")"
+echo "Referenz unveraendert: $([ "$(ref_md5)" = "$REFM" ] && echo ja || echo NEIN)"
+app "$NEW" "$K" || die "Kandidat"
+login_; get_status "$F" >/dev/null; echo "Richtiger Schluessel, erstes Speichern: HTTP $(put_name "$F" Erstes); Zeilen: $(q "SELECT count(*) FROM amanah_data a JOIN users u ON u.id=a.user_id WHERE u.email='$EM2'")"
+EM=$SAVE_EM; q "DELETE FROM users WHERE email='$EM2'" >/dev/null
 
 echo "== 4b Mit richtigem Schluessel nach dem Schreiben unter falschem"
 app "$NEW" "$K" || die "Kandidat"

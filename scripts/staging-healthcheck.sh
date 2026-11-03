@@ -42,6 +42,11 @@ if [[ -n "${BACKUP_DIR:-}" ]]; then
   [[ -n "$latest" ]] && ok "encrypted backup younger than ${BACKUP_MAX_AGE_HOURS:-26} h" || bad "no encrypted backup younger than ${BACKUP_MAX_AGE_HOURS:-26} h in $BACKUP_DIR"
 fi
 
+# KEY_CHECK_CONTAINER=amanah-staging-app: the configured keys still match this environment's reference.
+if [[ -n "${KEY_CHECK_CONTAINER:-}" ]]; then
+  if docker exec "$KEY_CHECK_CONTAINER" node scripts/key-reference.mjs check </dev/null >/dev/null 2>&1; then ok "key reference matches"; else bad "key reference check failed"; fi
+fi
+
 # A backup only counts once restore tests for the current owner recipients passed (stamps
 # written by staging-restore-test.sh). RESTORE_RECIPIENTS = current BACKUP_AGE_RECIPIENTS.
 #   RESTORE_STAMP        automatic test with the separate restore-check key (daily)

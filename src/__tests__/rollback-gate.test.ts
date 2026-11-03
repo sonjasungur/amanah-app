@@ -11,7 +11,7 @@ const dirs: string[] = [];
  * A docker that answers as told and writes down what it was asked. rows: encrypted rows per count,
  * in order. capable: exit of the look into the image. keyCheck: exit of the dry run in the image.
  */
-function run({ rows = ["0"], capable = 1, keyCheck = 0, args = [] as string[], imageMissing = false }) {
+function run({ rows = ["0"], capable = 1, keyCheck = 0, hasReferenceTool = false, referenceCheck = 0, args = [] as string[], imageMissing = false }) {
   const dir = mkdtempSync(join(tmpdir(), "rollback-gate-"));
   dirs.push(dir);
   const log = join(dir, "calls");
@@ -27,10 +27,11 @@ case "$1 $2" in
 esac
 case "$1" in
   exec) head -n1 ${counts}; if [ "$(wc -l < ${counts})" -gt 1 ]; then sed -i 1d ${counts}; fi ;;
-  run) exit ${capable} ;;
+  run) case "$*" in *"test -f scripts/key-reference.mjs"*) exit ${hasReferenceTool ? 0 : 1} ;; esac; exit ${capable} ;;
   compose)
     case "$*" in
       *"config --format json"*) echo '{"services":{"migrate":{"image":"other:1"},"app":{"image":"target-image:1"}}}' ;;
+      *"key-reference.mjs check"*) exit ${referenceCheck} ;;
       *" run "*) exit ${keyCheck} ;;
     esac ;;
 esac
@@ -99,6 +100,19 @@ describe("rollback-app.sh", () => {
     const result = run({ rows: ["0"], capable: 1, args: ["--apply"] });
     expect(result.status).toBe(0);
     expect(result.calls).toContain("up -d --no-deps --no-build app");
+  });
+
+  it("an image with the key reference and a reference that does not match: stops, also with an empty database", () => {
+    const result = run({ rows: ["0"], hasReferenceTool: true, referenceCheck: 1, args: ["--apply"] });
+    expect(result.status).toBe(1);
+    expect(result.out).toContain("Schluesselreferenz");
+    expect(changed(result.calls)).toBe(false);
+  });
+
+  it("an older image without the tool is not asked for it", () => {
+    const result = run({ rows: ["3"], capable: 0, hasReferenceTool: false });
+    expect(result.status).toBe(0);
+    expect(result.calls).not.toContain("key-reference.mjs check");
   });
 
   it("rows written between check and stop: the old app comes back, the old image does not start", () => {

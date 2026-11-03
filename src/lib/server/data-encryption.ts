@@ -189,6 +189,68 @@ export function openFromStorage<T = unknown>(stored: unknown, ownerId: string, e
   return decryptJson<T>(stored, ownerId, keyring);
 }
 
+const KEY_REFERENCE_OWNER = "data-key-reference";
+const KEY_REFERENCE_PURPOSE = "amanah-key-reference-v1";
+
+export interface KeyReferenceRow {
+  kid: string;
+  data: unknown;
+  retiredAt: unknown;
+}
+
+export type KeyReferenceStatus = "ok" | "invalid_config" | "missing_key" | "wrong_key" | "not_initialized" | "active_key_without_reference";
+
+/** The check needs no user data, so a wrong key shows before anything is saved with it. */
+export function sealKeyReference(kid: string, keyring: Keyring): EncryptedEnvelope {
+  return encryptJson({ purpose: KEY_REFERENCE_PURPOSE, kid, nonce: randomBytes(16).toString("base64") }, KEY_REFERENCE_OWNER, { active: kid, keys: keyring.keys });
+}
+
+function opensKeyReference(row: KeyReferenceRow, keyring: Keyring): boolean {
+  if (!isEncryptedEnvelope(row.data) || row.data.kid !== row.kid) return false;
+  try {
+    const payload = decryptJson<{ purpose?: string; kid?: string }>(row.data, KEY_REFERENCE_OWNER, keyring);
+    return payload.purpose === KEY_REFERENCE_PURPOSE && payload.kid === row.kid;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Compares the configured keys with the references of this environment. Reports only, never repairs:
+ * a failed check must not lead to a new reference. Retired references no longer need their key.
+ */
+export function checkKeyReferences(rows: readonly KeyReferenceRow[], env: NodeJS.ProcessEnv = process.env): { status: KeyReferenceStatus; kid?: string } {
+  let keyring: Keyring | null;
+  try {
+    keyring = parseKeyring(env);
+  } catch {
+    return { status: "invalid_config" };
+  }
+  const current = rows.filter((row) => !row.retiredAt);
+  if (!keyring) {
+    if (current[0]) return { status: "missing_key", kid: current[0].kid };
+    return isEncryptionRequired(env) ? { status: "missing_key" } : { status: "ok" };
+  }
+  if (rows.length === 0) return isEncryptionRequired(env) ? { status: "not_initialized" } : { status: "ok" };
+  for (const row of current) {
+    if (!keyring.keys.has(row.kid)) return { status: "missing_key", kid: row.kid };
+    if (!opensKeyReference(row, keyring)) return { status: "wrong_key", kid: row.kid };
+  }
+  if (!current.some((row) => row.kid === keyring.active)) return { status: "active_key_without_reference", kid: keyring.active };
+  return { status: "ok" };
+}
+
+/** Unit tests switch keys constantly and share one database; every real start enforces the check. */
+export function isKeyReferenceEnforced(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.NODE_ENV !== "test" || env.AMANAH_KEY_REFERENCE_IN_TESTS === "true";
+}
+
+export function assertKeyReferences(rows: readonly KeyReferenceRow[], env: NodeJS.ProcessEnv = process.env): void {
+  if (!isKeyReferenceEnforced(env)) return;
+  const { status, kid } = checkKeyReferences(rows, env);
+  if (status !== "ok") throw new DataEncryptionError(`Key reference check failed: ${status}${kid ? ` (key id '${kid}')` : ""}.`);
+}
+
 /** Generates a new base64 key for AMANAH_DATA_KEYS (for operators; never logged by the app). */
 export function generateDataKey(): string {
   return randomBytes(32).toString("base64");

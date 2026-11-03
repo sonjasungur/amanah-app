@@ -58,6 +58,13 @@ if [ "$ROWS" -gt 0 ]; then
     exit 1
   fi
 fi
+# Images that know the key reference refuse folder access without a valid one: find out now, not after the start.
+if docker run --rm --network none --entrypoint sh "$TARGET" -c 'test -f scripts/key-reference.mjs' >/dev/null 2>&1 </dev/null; then
+  if ! compose run --rm --no-deps -T --entrypoint node app scripts/key-reference.mjs check; then
+    echo "ABGEBROCHEN: Die Schluesselreferenz passt nicht zu dieser Konfiguration (docs/release/produktionsplan.md)."
+    exit 1
+  fi
+fi
 echo "ERLAUBT"
 [ "$APPLY" = 1 ] || exit 0
 

@@ -9,6 +9,8 @@ export async function register() {
       console.error(`[deletion-ledger] start refused: ${code}`);
       process.exit(1);
     }
+    const { logKeyReferenceAtStart } = await import("@/lib/server/key-reference-start");
+    await logKeyReferenceAtStart();
     const { startHistoryPurge } = await import("@/lib/server/history-purge");
     startHistoryPurge();
   }

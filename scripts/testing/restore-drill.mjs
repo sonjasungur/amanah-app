@@ -159,7 +159,9 @@ const ledgerFile = join(work, "ledger", "deletions.jsonl");
 
 try {
   console.log("--- scenario: accounts before the backup");
-  spawnSync("docker", ["exec", CONTAINER, "psql", "-q", "-U", "test", "-d", DB, "-c", "TRUNCATE users CASCADE; DELETE FROM deletion_ledger_anchor;"]);
+  spawnSync("docker", ["exec", CONTAINER, "psql", "-q", "-U", "test", "-d", DB, "-c", "TRUNCATE users CASCADE; DELETE FROM deletion_ledger_anchor; DELETE FROM data_key_references;"]);
+  // This drill brings its own key, so its environment gets its own reference.
+  spawnSync("node", ["scripts/key-reference.mjs", "init"], { env: { ...appEnv, AMANAH_KEY_REFERENCE_CONFIRM: "yes" } });
   let app = await startApp();
   check("application starts with the ledger on", Boolean(app));
   const keep = await account("keep");

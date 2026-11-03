@@ -120,6 +120,32 @@ test("no path writes over a folder that cannot be decrypted", async ({ page, bas
       });
     }
 
+    await test.step("wrong key and an account without any data: found before the first save", async () => {
+      const server = await startFaultServer(randomBytes(32).toString("base64"));
+      const fresh = `fault-new-${Date.now()}-${Math.floor(Math.random() * 1e6)}@test.invalid`;
+      const empty = await page.context().browser()!.newContext();
+      try {
+        // Created on the healthy server, without a folder row.
+        const registered = await empty.request.post("/api/auth/register", { headers: { Origin: baseURL! }, data: { email: fresh, password: PASSWORD, name: "Leer" } });
+        expect(registered.ok()).toBe(true);
+        await db.query("UPDATE users SET email_verified_at = now() WHERE email = $1", [fresh]);
+        const first = await empty.newPage();
+        await first.goto(`${FAULT}/login?returnUrl=${encodeURIComponent("/dashboard/dokumente")}`);
+        await first.getByPlaceholder("name@beispiel.de").fill(fresh);
+        await first.getByPlaceholder("••••••••").fill(PASSWORD);
+        await first.getByRole("button", { name: "Anmelden" }).last().click();
+        await expect(first.getByTestId("folder-problem")).toBeVisible();
+        await expect(first.locator(FIELD)).toHaveCount(0);
+        const put = await empty.request.put(`${FAULT}/api/amanah`, { headers: { Origin: FAULT, "Content-Type": "application/json" }, data: {} });
+        expect((await put.json()).code).toBe("folder_unreadable");
+        const { rows } = await db.query("SELECT count(*)::int AS n FROM amanah_data a JOIN users u ON u.id = a.user_id WHERE u.email = $1", [fresh]);
+        expect(rows[0].n).toBe(0);
+      } finally {
+        await empty.close();
+        await stopFaultServer(server);
+      }
+    });
+
     await test.step("right key again: unchanged data, regular saving", async () => {
       await page.goto("/dashboard/dokumente");
       await expect(page.locator(FIELD)).toHaveValue(VALUE);
