@@ -21,7 +21,8 @@ Ersetzt nicht die Freigaben in `freigaben.json`. Status: **erledigt**, **blockie
 | Schreiben mit falschem Schlüssel überschreibt Daten | behoben, Tests und Probe | Testnachweis |
 | Schlüsselreferenz je Umgebung | auf Staging angelegt; Produktion im Release-Schritt 6a | Produktionsplan |
 | App-Rollback nach Verschlüsselung | nur über `rollback-app.sh`, bricht bei ungeeignetem Image ab | Produktionsplan |
-| HTTPS-Zugang Staging | vorbereitet, geprüft; **blockiert: Hostname** | Doku 45 §4.1 |
+| HTTPS-Zugang Staging | aktiv, echtes Zertifikat, WebKit über HTTPS bestanden | Testnachweis |
+| Produktionsprüfung Routenzähler | **offen, Owner:** Fehlalarm seit Staging-Host, Korrektur im Repo, nicht installiert | Testnachweis |
 | Alarmkanal | vorbereitet; **blockiert: Kanalentscheidung** | Doku 45 §3 |
 | Betriebsprüfung automatisch | erledigt, ohne externen Alarm | Doku 45 §3 |
 | Migrationsprobe 1 auf 7 | erledigt | `migration-rehearsal.sh`, Server-Probelauf |

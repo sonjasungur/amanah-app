@@ -338,3 +338,25 @@ describe("staging-https.sh: the way back changes only the address", () => {
     }
   });
 });
+
+describe("staging-https.sh: the shared proxy", () => {
+  const script = readFileSync("scripts/staging-https.sh", "utf8");
+
+  it("never loads the container's stale file, which holds the closed production route", () => {
+    expect(script).not.toMatch(/caddy reload[^\n]*\/etc\/caddy\/Caddyfile/);
+    expect(script).toMatch(/caddy reload --config \/dev\/stdin --adapter caddyfile < "\$CADDYFILE"/);
+  });
+
+  it("checks the running configuration for the production route after every reload", () => {
+    expect(script).toMatch(/amanah-app:3000\|amanahordner/);
+  });
+
+  it("the production check keeps failing on anything but the staging host and upstream", () => {
+    const filter = readFileSync("scripts/verify-production-image.sh", "utf8").match(/\| (sed -e .*?\| grep -c amanah)\)/)![1];
+    const count = (config: string) => spawnSync("bash", ["-c", `${filter} || true`], { input: config, encoding: "utf8" }).stdout.trim();
+    expect(count('"amanah-test.mscisystems.com" "dial":"amanah-staging-app:3000"')).toBe("0");
+    expect(count('"amanahordner.de"')).toBe("1");
+    expect(count('"dial":"amanah-app:3000"')).toBe("1");
+    expect(count('"amanah-test.mscisystems.com" "dial":"amanah-app:3000"')).toBe("1");
+  });
+});

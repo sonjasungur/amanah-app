@@ -4,6 +4,36 @@
 
 **Image auf Staging:** `amanah-staging-app:b473cd5`, Image-ID `sha256:9410a8e607689561bdc4fdd7abe4d72432ba5d71107e88b6f8f9fead67121a15`, aus `git archive` gebaut. Schichten-Prüfsumme lokal und auf dem Server gleich (`99ebdcea…`). Staging: 7 von 7 Migrationen, Schlüsselreferenz angelegt.
 
+## HTTPS-Zugang, echter Host (03.11., 14:38 bis 14:50)
+
+`https://amanah-test.mscisystems.com`, vom Owner bestätigt. Zertifikat Let's Encrypt, Prüfung `ok`, gültig bis 01.02.2027.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Ohne Passwort, 12 Pfade einschließlich API, Export, Outbox, Dashboard, statischer Dateien | überall 401 |
+| Falsches Passwort | 401 |
+| Mit Passwort | 200 |
+| Interne Seiten | 404 |
+| Kopfzeilen | `noindex`, HSTS, CSP vorhanden |
+| **iPhone-WebKit, echter Host, echtes Zertifikat** | Kernablauf und schmale Ansichten, 3 von 3 |
+| Android, echter Host | 3 von 3 |
+| Kandidat und Konfiguration | Image-ID gleich, übrige Env-Zeilen gleich (Prüfsumme), nur die zwei Adresszeilen neu, Schlüsselreferenz `ok`, Health 0 FAIL |
+| `gemeinsam1` | 200, Caddy ohne Neustart, übrige Caddyfile unverändert |
+
+Echte Geräte: `NOT_RUN`. WebKit im Container ist eine Emulation.
+
+### Vorfall: Produktionsroute kurz in der laufenden Konfiguration
+
+**Von 14:38:43 bis 14:43:01 stand `amanahordner.de → amanah-app:3000` in der laufenden Caddy-Konfiguration; der Staging-Block fehlte in dieser Zeit.**
+
+- **Ursache:** `staging-https.sh enable` lud `/etc/caddy/Caddyfile`. Im Container ist das noch die Datei vom Juli mit der alten Route (anderer Inode, Doku 41 §2). Mein Fehler: Doku 41 beschreibt die Falle, der Reload im Skript beachtete sie nicht, und der frühere Test nutzte nur `caddy validate`.
+- **Erreichbar war nichts:** `amanahordner.de` hat kein DNS, `amanah-app` hängt nicht im Caddy-Netz (`bad address` aus dem Container), kein Zertifikat. App-Log im Zeitraum: 0 Zeilen, 0 Konten.
+- **Nebenwirkung:** Caddy versuchte in der Zeit erfolglos Zertifikate für die alte Domain (ACME, NXDOMAIN). Keine Versuche mehr seit 14:43.
+- **Behoben:** Host-Datei über `stdin` geladen. Das Skript lädt nun immer so und prüft danach die laufende Konfiguration auf die Produktionsroute; Regressionstest.
+- **Bleibt bestehen:** Der Container sieht weiter die alte Datei. **Ein Reload aus `/etc/caddy/Caddyfile` öffnet die Route wieder**, ebenso `scripts/install-shared-caddy.sh`. Nur der Weg über `stdin` ist zulässig.
+
+**Offen, Produktion nicht geändert:** `verify-production-image.sh` zählt jedes „amanah“ in der Konfiguration und meldet seit dem Staging-Host dauerhaft `FAIL proxy has no Amanah route` (lokales Alarmprotokoll, nichts extern). Die Korrektur liegt im Repo; sie lässt nur Staging-Host und Staging-Upstream zu. Ohne Installation verdeckt der Dauerzustand die Prüfung dieses Punkts. Trockenlauf auf dem Server: 0 FAIL bei diesem Punkt.
+
 ## Release-Check
 
 Befehl `scripts/testing/release-check.sh`, 13:34 bis 13:46 Uhr, auf `b473cd5`: **bestanden, kein Schritt fehlgeschlagen.** Danach änderten sich nur `staging-https.sh`, sein Test und Doku, nicht das Image.
@@ -26,7 +56,7 @@ Befehl `scripts/testing/release-check.sh`, 13:34 bis 13:46 Uhr, auf `b473cd5`: *
 | Secret-Scan Historie | keine Funde |
 | Staging, Android-Profil, auf dem echten Server | 3 von 3 |
 
-`NOT_RUN`: echte Geräte, echtes Zertifikat, echter Mailversand, WebKit über HTTPS auf diesem Kandidaten (zuletzt auf `8668188`; die Probe prüft hier Zugangsschutz und Adresse).
+`NOT_RUN`: echte Geräte, echter Mailversand.
 
 ### Fehler auf dem Weg zum grünen Lauf
 

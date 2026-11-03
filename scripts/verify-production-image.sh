@@ -14,7 +14,8 @@ check "container is healthy" "$(docker inspect amanah-app --format '{{.State.Hea
 check "health answers" "$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:3001/api/health)" "200"
 check "pinned image is present" "$(docker image inspect "$EXPECTED" --format '{{.Id}}' 2>/dev/null)" "$EXPECTED"
 check "rollback image is present" "$(docker image inspect "$ROLLBACK" --format '{{.Id}}' 2>/dev/null)" "$ROLLBACK"
-check "proxy has no Amanah route" "$(docker exec gemeinsam1-prod-caddy wget -qO- http://127.0.0.1:2019/config/ 2>/dev/null | grep -c amanah)" "0"
+# Only the staging host and its upstream may appear: any other mention of amanah counts as a route.
+check "proxy has no Amanah route" "$(docker exec gemeinsam1-prod-caddy wget -qO- http://127.0.0.1:2019/config/ 2>/dev/null | sed -e 's/amanah-test\.mscisystems\.com//g' -e 's/amanah-staging-app:3000//g' | grep -c amanah)" "0"
 check "app only on its own network" "$(docker inspect amanah-app --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' 2>/dev/null)" "amanah-app_amanah_internal "
 check "drafts stay locked" "$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://127.0.0.1:3001/api/knowledge/entries)" "404"
 check "database volume in place" "$(docker inspect amanah-postgres --format '{{range .Mounts}}{{.Name}}{{end}}' 2>/dev/null)" "amanah_pg_prod"

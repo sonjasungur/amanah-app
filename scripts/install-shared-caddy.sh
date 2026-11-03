@@ -32,6 +32,8 @@ else
   echo "Appended Amanah block to $CADDY_FILE"
 fi
 
+# WARNING: the running gemeinsam1 container still mounts an older file with the closed Amanah route
+# (doc 41 §2). Do not run this against it before the release: it would reopen that route.
 docker exec "$CONTAINER" caddy validate --config /etc/caddy/Caddyfile
 docker exec "$CONTAINER" caddy reload --config /etc/caddy/Caddyfile
 echo "Caddy validate + reload OK"

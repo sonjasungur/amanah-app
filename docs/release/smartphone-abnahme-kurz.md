@@ -4,7 +4,7 @@
 
 **Kandidat:** `b473cd5` auf Staging.
 
-**Testlink:** `https://<host>`, liegt erst nach der Einrichtung vor (Doku 45 §4.1).
+**Testlink:** `https://amanah-test.mscisystems.com`
 
 **Passwortabfrage des Browsers:** Benutzer und Passwort abrufen mit `ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access`. Nicht per Chat oder Mail weitergeben.
 
@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | 1 | Link öffnen, Passwortabfrage ausfüllen | Startseite erscheint | `NOT_RUN` | `NOT_RUN` |
 | 2 | Registrieren mit `test-<name>@staging.invalid` und eigenem Testpasswort | Hinweis „E-Mail prüfen“ | `NOT_RUN` | `NOT_RUN` |
-| 3 | Neuen Tab: `https://<host>/api/dev/outbox?to=test-<name>@staging.invalid`, den Link aus der Antwort kopieren und öffnen | Adresse bestätigt, Anmeldung möglich | `NOT_RUN` | `NOT_RUN` |
+| 3 | Neuen Tab: `https://amanah-test.mscisystems.com/api/dev/outbox?to=test-<name>@staging.invalid`, den Link aus der Antwort kopieren und öffnen | Adresse bestätigt, Anmeldung möglich | `NOT_RUN` | `NOT_RUN` |
 | 4 | Abmelden, wieder anmelden; falsches Passwort probieren | Fehlermeldung, dann Dashboard | `NOT_RUN` | `NOT_RUN` |
 | 5 | Notfallkarte ausfüllen, Seite sofort neu laden | Eingabe ist da | `NOT_RUN` | `NOT_RUN` |
 | 6 | Eingabe ändern, Tab schließen, neu öffnen | Eingabe ist da | `NOT_RUN` | `NOT_RUN` |

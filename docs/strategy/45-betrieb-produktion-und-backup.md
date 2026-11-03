@@ -106,19 +106,21 @@ Läuft mit `amanah-staging-app:b473cd5`, eigene Datenbank, eigene Netze, Port nu
 
 ### 4.1 HTTPS-Zugang für Telefone
 
-**Vorbereitet und geprüft, nicht aktiv: Es fehlt ein Hostname.** Eine vorhandene Test-Subdomain gibt es nicht: `amanahordner.de` ist nicht registriert, unter `gemeinsam1.com` und `mscisystems.com` existiert keine, und ein DNS-Zugang liegt dieser Umgebung nicht vor.
+**Aktiv seit 03.11.:** `https://amanah-test.mscisystems.com`, passwortgeschützt, Kandidat `b473cd5`, Zertifikat Let's Encrypt. Nachweis und Vorfall: [Testnachweis](../release/testnachweis-kandidat.md).
 
-**DNS, Stand 03.11.:** Kein Zugang für Agenten vorhanden, weder lokal noch auf dem Server; `mscisystems.com` liegt bei Namecheap (`dns1.registrar-servers.com`). Der Name `amanah-test` ist noch frei, es gibt keinen CAA-Eintrag, Ports 80 und 443 sind offen. Server-IP verifiziert: `167.233.152.17` (Schnittstelle `eth0`, SSH-Ziel, `gemeinsam1.com`).
+**Zugang:** `ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access`. Abschalten: `staging-https.sh disable`. Ein Caddy-Reload darf nur die Host-Datei über `stdin` laden; `/etc/caddy/Caddyfile` im Container enthält noch die alte Produktionsroute.
 
-**Der Name ist ein Vorschlag, bis der Owner ihn bestätigt.** Eintrag im Namecheap-Konto unter Domain List, Manage, Advanced DNS, Add New Record:
+**DNS:** Vom Owner bei Namecheap gesetzt; Agenten haben keinen Zugang. Server-IP verifiziert: `167.233.152.17` (Schnittstelle `eth0`, SSH-Ziel, `gemeinsam1.com`).
+
+Eintrag:
 
 | Type | Host | Value | TTL |
 |---|---|---|---|
 | A Record | `amanah-test` | `167.233.152.17` | Automatic |
 
-Kein AAAA-Eintrag nötig. Prüfen: `dig +short A amanah-test.mscisystems.com` muss `167.233.152.17` zeigen.
+Prüfen: `dig +short A amanah-test.mscisystems.com` muss `167.233.152.17` zeigen.
 
-**Vorgehen, sobald der DNS-Eintrag (A auf die Server-IP) steht:**
+**So wurde aktiviert:**
 
 ```bash
 ssh gemeinsam1-prod /opt/amanah-staging/scripts/staging-https.sh enable <host>

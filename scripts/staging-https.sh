@@ -54,6 +54,16 @@ $END
 B
 }
 
+# Always the host file, through stdin. The container's mount still shows an older file with the closed
+# production route (other inode, doc 41 §2): loading /etc/caddy/Caddyfile would reopen that route.
+caddy_reload_host_file() {
+  docker exec -i "$CADDY" caddy reload --config /dev/stdin --adapter caddyfile < "$CADDYFILE" >/dev/null 2>&1 || return 1
+  if docker exec "$CADDY" wget -qO- http://127.0.0.1:2019/config/ </dev/null 2>/dev/null | grep -qE 'amanah-app:3000|amanahordner'; then
+    echo "FAIL Produktionsroute in der laufenden Konfiguration"
+    return 1
+  fi
+}
+
 # Points staging at the public address. Remembers only these two lines: a copy of the whole file
 # would bring back everything else as it was then, such as the release.
 set_base_url() {
@@ -113,7 +123,7 @@ case "${1:-}" in
     cp -p "$CADDYFILE" "$ROOT/rollback/Caddyfile.vor-https"
     # A bind-mounted single file: write in place. A failed reload keeps the running configuration.
     cat "$new" > "$CADDYFILE"; rm -f "$new"
-    docker exec "$CADDY" caddy reload --adapter caddyfile --config /etc/caddy/Caddyfile </dev/null >/dev/null 2>&1 || { cat "$ROOT/rollback/Caddyfile.vor-https" > "$CADDYFILE"; echo "FAIL Reload, Datei zurueckgesetzt"; exit 1; }
+    caddy_reload_host_file || { cat "$ROOT/rollback/Caddyfile.vor-https" > "$CADDYFILE"; caddy_reload_host_file; echo "FAIL Reload, Datei zurueckgesetzt"; exit 1; }
     echo "Warte auf das Zertifikat ..."
     for _ in $(seq 1 30); do [ "$(curl -sS -o /dev/null -m 5 -w '%{http_code}' "https://$HOST/" 2>/dev/null || true)" = 401 ] && break; sleep 5; done
     check_access "https://$HOST"
@@ -124,7 +134,7 @@ case "${1:-}" in
   disable)
     if grep -qF "$BEGIN" "$CADDYFILE"; then
       new="$(mktemp)"; sed "/^$BEGIN\$/,/^$END\$/d" "$CADDYFILE" > "$new"; cat "$new" > "$CADDYFILE"; rm -f "$new"
-      docker exec "$CADDY" caddy reload --adapter caddyfile --config /etc/caddy/Caddyfile </dev/null >/dev/null 2>&1 && echo "OK   Block entfernt"
+      caddy_reload_host_file && echo "OK   Block entfernt"
     fi
     docker network disconnect "$NET" "$CADDY" </dev/null 2>/dev/null || true
     restore_base_url; app_up || exit 1; echo "OK   Staging wieder nur ueber 127.0.0.1"
