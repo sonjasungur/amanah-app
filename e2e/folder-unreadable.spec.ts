@@ -27,7 +27,8 @@ async function startFaultServer(keys: string): Promise<ChildProcess> {
 }
 
 async function stopFaultServer(server: ChildProcess) {
-  if (server.pid) process.kill(-server.pid, "SIGTERM");
+  // Not the graceful way: open connections of the test's browsers can keep it answering for long.
+  if (server.pid) process.kill(-server.pid, "SIGKILL");
   await expect.poll(async () => fetch(`${FAULT}/api/health`).then(() => true).catch(() => false), { timeout: 20_000 }).toBe(false);
 }
 
