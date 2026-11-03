@@ -1,4 +1,4 @@
-# Produktionsplan für das Release (Stand 03.11.2026, 14:05)
+# Produktionsplan für das Release (Stand 03.11.2026, 13:57)
 
 **Für:** Owner und Betrieb. **Gesperrt bis zur gesonderten Freigabe:** Merge, Produktionsrelease, Produktionsmigration, Route, Registrierung. Kandidat: `b473cd5`.
 
