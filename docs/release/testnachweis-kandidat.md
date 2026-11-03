@@ -1,4 +1,86 @@
-# Testnachweis Release-Kandidat `3d5110f` (03.11.2026)
+# Testnachweis Release-Kandidat `b473cd5` (03.11.2026)
+
+**Ein grüner Lauf ist hier keine Abnahme:** Echte Geräte, echter Mailversand und fachliche Freigaben fehlen. Die Gerätetests laufen auf diesem Kandidaten.
+
+**Image auf Staging:** `amanah-staging-app:b473cd5`, Image-ID `sha256:9410a8e607689561bdc4fdd7abe4d72432ba5d71107e88b6f8f9fead67121a15`, aus `git archive` gebaut. Schichten-Prüfsumme lokal und auf dem Server gleich (`99ebdcea…`). Staging: 7 von 7 Migrationen, Schlüsselreferenz angelegt.
+
+## Release-Check
+
+Befehl `scripts/testing/release-check.sh`, 13:34 bis 13:46 Uhr, auf `b473cd5`: **bestanden, kein Schritt fehlgeschlagen.** Danach änderten sich nur `staging-https.sh`, sein Test und Doku, nicht das Image.
+
+| Prüfung | Ergebnis |
+|---|---|
+| `npm audit` (alle Abhängigkeiten) | 0 Funde |
+| Typprüfung, ESLint | 0 Fehler (1 fremde Warnung in `docs/qa/`) |
+| Vitest | 898 bestanden, 40 übersprungen, 0 fehlgeschlagen |
+| PostgreSQL | 47 von 47 |
+| Migrations-Diff, Migrationsprobe | keine Differenz; 1 auf 7, Daten erhalten |
+| API-Regression Desktop / Mobil | 34 / 25 bestanden, Mobil 9 übersprungen |
+| Hydration, Konto, Verlauf, Plus | je Desktop und Mobil bestanden |
+| Kernablauf Konto bis Löschung | Desktop, Mobil, iPhone-WebKit, Android bestanden |
+| Schlüsselfehler im Browser | Desktop, Mobil bestanden |
+| Schmale Ansichten bis 320 px | iPhone-WebKit, Android bestanden |
+| Restore-Übung Löschprotokoll | 70 von 70 |
+| Standard-, Flags-, E2E-Build | Exit 0; Flags 8 bestanden |
+| Playwright gesamt, lokaler Modus | 297 bestanden, 95 übersprungen, 0 fehlgeschlagen |
+| Secret-Scan Historie | keine Funde |
+| Staging, Android-Profil, auf dem echten Server | 3 von 3 |
+
+`NOT_RUN`: echte Geräte, echtes Zertifikat, echter Mailversand, WebKit über HTTPS auf diesem Kandidaten (zuletzt auf `8668188`; die Probe prüft hier Zugangsschutz und Adresse).
+
+### Fehler auf dem Weg zum grünen Lauf
+
+Zwei Läufe davor schlugen fehl, keine Prüfung wurde dafür abgeschwächt.
+
+| Fund | Ursache | Behebung |
+|---|---|---|
+| `npm audit`: 16 mittlere Funde | Eine Meldung zu `minimatch` unter 11.0.1 im ESLint-Baum; Produktionsabhängigkeiten 0 Funde | Override auf `minimatch@^11` im Commit `521c65e`; ESLint-Ergebnis gleich, Regeln greifen. Grenze: Plugin-Regeln, die `minimatch` als Default-Export lesen, würden mit Glob-Optionen laut scheitern; dieses Projekt nutzt solche Optionen nicht |
+| WebKit: keine Mail beim Passwort-Reset | **Produktfehler:** Vor der Hydration Eingetipptes erreichte den React-State nicht, das Formular sendete eine leere Adresse und meldete Erfolg | Formulare lesen beim Absenden das Feld (`b473cd5`), auch Anmeldung, Registrierung, neues Passwort; Regressionstest |
+| Schlüsselfehler-Spec | Testaufbau: Server beendete sich nicht; fehlende Einwilligung im neuen Schritt | Spec korrigiert |
+| Commit-Hook stoppte `b473cd5` zunächst | Fehlalarm auf ein erfundenes Testpasswort | Test geändert, keine Ausnahme eingetragen |
+
+### Übersprungene Prüfungen und ihre Bedeutung
+
+| Gruppe | Anzahl | Grund | Lücke? |
+|---|---|---|---|
+| Vitest PostgreSQL | 39 | brauchen Datenbank | nein, eigener Lauf 47 von 47 |
+| Vitest Prüfpaket-Export | 1 | nur auf Anforderung | nein |
+| Playwright `phase2-failure-paths` | 50 | API-Modus | nein, API-Regression bestanden |
+| `security-session` | 14 | API-Modus; Teil nur Desktop | nein, API-Regression bestanden |
+| `plus-tariff-account` | 10 | API-Modus mit Plus | nein, eigener Lauf 5 + 5 |
+| `free-asset-account` | 6 | API-Modus mit Plus | nein, eigener Lauf 3 + 3 |
+| `legacy-email-verification` | 4 | Postgres; nur Desktop | nein, in Regression bestanden |
+| `data-history` | 4 | Verlauf aus | gesperrte Funktion; eigener Lauf 2 + 2 |
+| `release-core-flows`, `folder-unreadable` | je 2 | API-Modus | nein, eigener Lauf |
+| `navigation` | 3 | nur Desktop-Breite | nein, Desktop bestanden |
+| API-Regression Mobil | 9 | Serververhalten unabhängig vom Gerät | nein, Desktop bestanden |
+
+## Schlüsselreferenz
+
+Isolierte Probe auf dem Server (`rollback-encryption-probe.sh`), synthetisches Konto:
+
+| Lage | Ergebnis |
+|---|---|
+| Vor `init` | `not_initialized`, Exit 1 |
+| Richtiger / falscher Schlüssel, ohne Ordnerdaten | `ok` / `wrong_key` |
+| `init` erneut mit falschem Schlüssel | abgelehnt, Referenz unverändert |
+| **Konto ohne Daten, falscher Schlüssel** | Lesen 503, erstes Speichern 503, **0 Zeilen**, Referenz unverändert |
+| Danach richtiger Schlüssel | erstes Speichern 200, 1 Zeile |
+| Vorhandene Zeile, kein oder falscher Schlüssel | Lesen, Schreiben, Teiländerung, Leeren 503; Zeile unverändert |
+
+Automatisiert, eigene Wegwerf-Datenbank (`postgres-key-reference.test.ts`): fehlender Schlüssel, entfernte Kennung, kaputte Konfiguration, Klartextzeile wird nicht mit falschem Schlüssel versiegelt, `init` mit Daten nur bei passendem Schlüssel. **Kontrollierter Wechsel:** `add` nur bei öffnenden Referenzen, `retire` nur ohne Zeilen unter dem alten Schlüssel, danach läuft der neue allein; Entfernen ohne `retire` bleibt ein Fehler. Die App schreibt die Tabelle nirgends (Test über `src/lib` und `src/app`).
+
+**Staging, echter Lauf:** Wechsel ohne Referenz abgebrochen (`not_initialized`), `init` legte sie an und öffnete vorher alle 10 Zeilen, zweites `init` abgelehnt, Wechsel mit falschem Schlüssel abgebrochen, Referenz und Container unverändert, danach Wechsel: 10 Zeilen mit identischer Prüfsumme.
+
+**Grenzen:** Beim allerersten `init` gibt es keinen Vergleichswert, deshalb vorher `check-data-key`. Die Produktion ist nicht migriert und hat keine Referenz.
+
+## Fund beim HTTPS-Probelauf
+
+`staging-https.sh` stellte beim Abbau eine ganze alte Env-Kopie wieder her. Das setzte `AMANAH_RELEASE` zurück, der Neustart schlug fehl, das Skript meldete trotzdem OK, und die App behielt die Probe-Adresse. Sofort bemerkt, repariert, Skript merkt sich nur noch die beiden Adresszeilen und meldet Fehlschläge; Regressionstest, Probe erneut bestanden: 11 Prüfungen OK, danach Release und Adresse richtig (Env: gleiche Zeilen, andere Reihenfolge). Nur synthetische Staging-Daten betroffen, keine Zeile geändert.
+
+---
+
+# Älterer Testnachweis `3d5110f` (03.11.2026)
 
 **Ein grüner Lauf ist hier keine Abnahme:** Echte Geräte, echter Mailversand und fachliche Freigaben fehlen. Dieser Kandidat behebt den Datenverlust bei Schlüsselfehlern; die echten Gerätetests laufen auf ihm.
 

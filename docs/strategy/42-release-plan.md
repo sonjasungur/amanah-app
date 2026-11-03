@@ -1,6 +1,6 @@
 # Plan für das reguläre Release (Stand 02.11.2026)
 
-**Für:** Owner, Prüfer, Betrieb. **Stand 03.11.:** Kandidat `3d5110f` auf Staging geprüft: [Testnachweis](../release/testnachweis-kandidat.md), [Produktionsplan](../release/produktionsplan.md), [Checkliste](../release/RELEASE-CHECKLISTE.md). Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix, gepinnt und vom `gemeinsam1`-Netz getrennt ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
+**Für:** Owner, Prüfer, Betrieb. **Stand 03.11.:** Kandidat `b473cd5` auf Staging geprüft: [Testnachweis](../release/testnachweis-kandidat.md), [Produktionsplan](../release/produktionsplan.md), [Checkliste](../release/RELEASE-CHECKLISTE.md). Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix, gepinnt und vom `gemeinsam1`-Netz getrennt ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
 
 Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment und jede Veröffentlichung brauchen je eine eigene Owner-Freigabe.
 
@@ -34,7 +34,7 @@ Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment 
 
 Enthalten im Branch: keine Abmeldung bei abgebrochener Anfrage, Eingaben während des Ladens bleiben, offene Änderungen gehen beim Verlassen hinaus. Der nächste Seitenaufbau lädt offene Änderungen verlässlich hoch, auch große Ordner über 64 KB. Mehrere Runden auf beiden Profilen bestanden. Tests: `auth-session-hint`, `storage-sync`, `e2e/plus-tariff-account`.
 
-**Zum Release gehört eine Produktionsmigration:** Die Produktion hat 1 von 6 Migrationen. Bei 0 Konten ist das Risiko gering. Vorher Backup, Probelauf (§6), gesonderte Freigabe.
+**Zum Release gehört eine Produktionsmigration:** Die Produktion hat 1 von 7 Migrationen. Bei 0 Konten ist das Risiko gering. Vorher Backup, Probelauf (§6), gesonderte Freigabe.
 
 ## 3. Netztrennung
 

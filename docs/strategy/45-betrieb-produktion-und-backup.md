@@ -1,6 +1,6 @@
 # Betrieb: Produktion, Backup, Prüfung, Staging (Stand 03.11.2026, 10:23)
 
-**Für:** Betrieb und Owner. Keine Geheimnisse in diesem Dokument. Produktion: `7d0859b` mit Hotfix (Doku 41). Release-Kandidat: `3d5110f`, nur auf Staging.
+**Für:** Betrieb und Owner. Keine Geheimnisse in diesem Dokument. Produktion: `7d0859b` mit Hotfix (Doku 41). Release-Kandidat: `b473cd5`, nur auf Staging.
 
 ## 1. Produktion: Ablage
 
@@ -102,11 +102,21 @@ Bei Serverausfall meldet keiner dieser Wege etwas; dafür bräuchte es eine Prü
 
 ## 4. Staging
 
-Läuft mit `amanah-staging-app:3d5110f`, eigene Datenbank, eigene Netze, Port nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus. Migrationen 6 von 6. Zugang heute: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
+Läuft mit `amanah-staging-app:b473cd5`, eigene Datenbank, eigene Netze, Port nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus. Migrationen 7 von 7. Zugang heute: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
 
 ### 4.1 HTTPS-Zugang für Telefone
 
 **Vorbereitet und geprüft, nicht aktiv: Es fehlt ein Hostname.** Eine vorhandene Test-Subdomain gibt es nicht: `amanahordner.de` ist nicht registriert, unter `gemeinsam1.com` und `mscisystems.com` existiert keine, und ein DNS-Zugang liegt dieser Umgebung nicht vor.
+
+**DNS, Stand 03.11.:** Kein Zugang für Agenten vorhanden, weder lokal noch auf dem Server; `mscisystems.com` liegt bei Namecheap (`dns1.registrar-servers.com`). Der Name `amanah-test` ist noch frei, es gibt keinen CAA-Eintrag, Ports 80 und 443 sind offen. Server-IP verifiziert: `167.233.152.17` (Schnittstelle `eth0`, SSH-Ziel, `gemeinsam1.com`).
+
+**Der Name ist ein Vorschlag, bis der Owner ihn bestätigt.** Eintrag im Namecheap-Konto unter Domain List, Manage, Advanced DNS, Add New Record:
+
+| Type | Host | Value | TTL |
+|---|---|---|---|
+| A Record | `amanah-test` | `167.233.152.17` | Automatic |
+
+Kein AAAA-Eintrag nötig. Prüfen: `dig +short A amanah-test.mscisystems.com` muss `167.233.152.17` zeigen.
 
 **Vorgehen, sobald der DNS-Eintrag (A auf die Server-IP) steht:**
 
@@ -144,5 +154,5 @@ Betriebsprüfung danach 13 OK, Staging-Health 0 FAIL.
 | journald | 1,2 GB | systemweit, `journalctl --vacuum-size=300M` |
 | `amanah-app-app:vor-wissenssperre` | 712 MB (angezeigt) | Archiv liegt in `images/rollback.tar.gz` |
 | `amanah-staging-app:f9022d3` | 591 MB (angezeigt) | Früheres Staging-Image; `rollback-app.sh` lehnt es ab |
-| `amanah-staging-app:8668188` | 593 MB (angezeigt) | Früherer Kandidat; `rollback-app.sh` lehnt es ab, aus Git nachbaubar |
+| `amanah-staging-app:3d5110f` | 593 MB (angezeigt) | Vorheriger Kandidat, kennt die Schlüsselreferenz nicht |
 | ältere `gemeinsam1`-Images | mehrere GB | fremdes Projekt, nicht meine Entscheidung |

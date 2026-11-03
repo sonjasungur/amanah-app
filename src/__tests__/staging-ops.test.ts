@@ -1,4 +1,4 @@
-import { chmodSync, mkdtempSync, readFileSync, utimesSync, writeFileSync, existsSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, utimesSync, writeFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -313,5 +313,28 @@ describe("owner backup key and alert channel setup", () => {
     expect(calls).toContain("/opt/amanah-staging/scripts/staging-set-recipient.sh");
     expect(calls).toContain(PUB);
     expect(calls).not.toContain("AGE-SECRET-KEY");
+  });
+});
+
+describe("staging-https.sh: the way back changes only the address", () => {
+  it("keeps a release set while the access was on, and restores the two lines", () => {
+    const dir = mkdtempSync(join(tmpdir(), "https-env-"));
+    try {
+      mkdirSync(join(dir, "rollback"));
+      const env = join(dir, ".env.staging");
+      writeFileSync(env, "AMANAH_RELEASE=alt\nAMANAH_PUBLIC_BASE_URL=http://127.0.0.1:3201\nNEXT_PUBLIC_SITE_URL=http://127.0.0.1:3201\nANDERES=1\n");
+      const script = 'source <(sed -n "/^set_base_url() {/,/^app_up()/p" scripts/staging-https.sh | sed \'$d\'); set_base_url https://test.invalid; sed -i "s/^AMANAH_RELEASE=.*/AMANAH_RELEASE=neu/" "$ENVF"; set_base_url https://test2.invalid; restore_base_url';
+      const result = spawnSync("bash", ["-c", script], { encoding: "utf8", env: { ...process.env, ROOT: dir, ENVF: env } });
+      expect(result.status, result.stderr).toBe(0);
+      const after = readFileSync(env, "utf8");
+      expect(after).toContain("AMANAH_RELEASE=neu");
+      expect(after).toContain("AMANAH_PUBLIC_BASE_URL=http://127.0.0.1:3201");
+      expect(after).toContain("NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3201");
+      expect(after).toContain("ANDERES=1");
+      expect(after).not.toContain("test.invalid");
+      expect(existsSync(join(dir, "rollback/base-url.vor-https"))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -54,14 +54,21 @@ $END
 B
 }
 
-# Points staging at the public address; keeps the previous file once for the way back.
+# Points staging at the public address. Remembers only these two lines: a copy of the whole file
+# would bring back everything else as it was then, such as the release.
 set_base_url() {
-  [ -f "$ROOT/rollback/.env.staging.vor-https" ] || cp -p "$ENVF" "$ROOT/rollback/.env.staging.vor-https"
+  [ -f "$ROOT/rollback/base-url.vor-https" ] || grep -E '^(AMANAH_PUBLIC_BASE_URL|NEXT_PUBLIC_SITE_URL)=' "$ENVF" > "$ROOT/rollback/base-url.vor-https"
   grep -vE '^(AMANAH_PUBLIC_BASE_URL|NEXT_PUBLIC_SITE_URL)=' "$ENVF" > "$ENVF.new"
   printf 'AMANAH_PUBLIC_BASE_URL=%s\nNEXT_PUBLIC_SITE_URL=%s\n' "$1" "$1" >> "$ENVF.new"
   chmod --reference="$ENVF" "$ENVF.new"; mv "$ENVF.new" "$ENVF"
 }
-restore_base_url() { [ -f "$ROOT/rollback/.env.staging.vor-https" ] && cp -p "$ROOT/rollback/.env.staging.vor-https" "$ENVF"; }
+restore_base_url() {
+  [ -f "$ROOT/rollback/base-url.vor-https" ] || return 0
+  grep -vE '^(AMANAH_PUBLIC_BASE_URL|NEXT_PUBLIC_SITE_URL)=' "$ENVF" > "$ENVF.new"
+  cat "$ROOT/rollback/base-url.vor-https" >> "$ENVF.new"
+  chmod --reference="$ENVF" "$ENVF.new"; mv "$ENVF.new" "$ENVF"
+  rm -f "$ROOT/rollback/base-url.vor-https"
+}
 app_up() { compose up -d --no-deps app; for _ in $(seq 1 60); do [ "$(docker inspect amanah-staging-app --format '{{.State.Health.Status}}' </dev/null)" = healthy ] && return 0; sleep 2; done; echo "FAIL Staging-App wird nicht gesund"; return 1; }
 
 curl_auth() { # curl args; credentials through a config on stdin, never on the command line
@@ -120,7 +127,7 @@ case "${1:-}" in
       docker exec "$CADDY" caddy reload --adapter caddyfile --config /etc/caddy/Caddyfile </dev/null >/dev/null 2>&1 && echo "OK   Block entfernt"
     fi
     docker network disconnect "$NET" "$CADDY" </dev/null 2>/dev/null || true
-    restore_base_url; app_up; echo "OK   Staging wieder nur ueber 127.0.0.1"
+    restore_base_url; app_up || exit 1; echo "OK   Staging wieder nur ueber 127.0.0.1"
     ;;
   status)
     grep -A1 -F "$BEGIN" "$CADDYFILE" | tail -1 | cut -d' ' -f1 | grep . || echo "Kein HTTPS-Zugang eingetragen."
@@ -143,7 +150,7 @@ case "${1:-}" in
     ;;
   probe-down)
     docker rm -f "$PROBE_C" >/dev/null 2>&1 </dev/null || true
-    rm -f "$PROBE_F" "$ACCESS"; restore_base_url; app_up; echo "OK   Probe entfernt, Staging-Adresse wie vorher"
+    rm -f "$PROBE_F" "$ACCESS"; restore_base_url; app_up || exit 1; echo "OK   Probe entfernt, Staging-Adresse wie vorher"
     ;;
   *) sed -n 2,11p "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

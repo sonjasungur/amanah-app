@@ -19,11 +19,12 @@ Ersetzt nicht die Freigaben in `freigaben.json`. Status: **erledigt**, **blockie
 | Backup-Fristen, Altbestand | **blockiert, Owner**, Vorschlag da | `backup-aufbewahrung-vorschlag.md` |
 | Release-Env, KI aus, Stack | vorbereitet, unbenutzt; Adresse fehlt | Produktionsplan |
 | Schreiben mit falschem Schlüssel überschreibt Daten | behoben, Tests und Probe | Testnachweis |
+| Schlüsselreferenz je Umgebung | auf Staging angelegt; Produktion im Release-Schritt 6a | Produktionsplan |
 | App-Rollback nach Verschlüsselung | nur über `rollback-app.sh`, bricht bei ungeeignetem Image ab | Produktionsplan |
 | HTTPS-Zugang Staging | vorbereitet, geprüft; **blockiert: Hostname** | Doku 45 §4.1 |
 | Alarmkanal | vorbereitet; **blockiert: Kanalentscheidung** | Doku 45 §3 |
 | Betriebsprüfung automatisch | erledigt, ohne externen Alarm | Doku 45 §3 |
-| Migrationsprobe 1 auf 6 | erledigt | `migration-rehearsal.sh`, Server-Probelauf |
+| Migrationsprobe 1 auf 7 | erledigt | `migration-rehearsal.sh`, Server-Probelauf |
 | Staging auf Kandidat | erledigt | Doku 45 §4 |
 | Mobile Profile | erledigt | iPhone-WebKit, Android |
 | Smartphone-Abnahme echte Geräte | **NOT_RUN, blockiert:** Hostname, dann Geräte | `smartphone-abnahme-kurz.md` |
