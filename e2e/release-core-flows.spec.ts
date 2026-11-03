@@ -36,8 +36,8 @@ async function freshPage(browser: Browser, baseURL: string | undefined, contextO
   return context.newPage();
 }
 
-test("an account from registration to deletion", async ({ page, browser, baseURL, viewport, userAgent, isMobile, hasTouch }) => {
-  const options = { viewport, userAgent, isMobile, hasTouch };
+test("an account from registration to deletion", async ({ page, browser, baseURL, viewport, userAgent, ignoreHTTPSErrors, httpCredentials, isMobile, hasTouch }) => {
+  const options = { viewport, userAgent, isMobile, hasTouch, ignoreHTTPSErrors, httpCredentials };
   const email = `release-${Date.now()}-${Math.floor(Math.random() * 1e6)}@${process.env.E2E_EMAIL_DOMAIN ?? "test.invalid"}`;
   const folder = async (p: Page) => (await (await p.context().request.get("/api/amanah")).json()).data;
 
@@ -117,6 +117,8 @@ test("an account from registration to deletion", async ({ page, browser, baseURL
       await reset.getByTestId("account-delete-password").fill(NEW_PASSWORD);
       await reset.getByTestId("account-delete-confirm").click();
       await expect.poll(async () => (await reset.context().request.get("/api/amanah")).status()).toBe(401);
+      // The app leaves the settings by itself; navigating at the same moment would race with it.
+      await expect(reset).not.toHaveURL(/einstellungen/);
       await login(reset, email, NEW_PASSWORD);
       await expect(reset).toHaveURL(/\/login/);
     });

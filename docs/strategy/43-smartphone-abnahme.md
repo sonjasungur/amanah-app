@@ -4,7 +4,7 @@
 
 **Stand 03.11.2026: echte Geräte `NOT_RUN`.** Automatisiert bestanden sind iPhone-13-Profil (WebKit) und Pixel-7-Profil (Chromium): `playwright.mobile.config.ts`, Kernablauf, schmale Ansichten bis 320 px, Menü, Formulare, Dialog, Download. Emulation ersetzt keine Geräteabnahme: Echtes Safari, Bildschirmtastatur, Bildschirmleser und HTTPS deckt nur dieser Test ab.
 
-**Kurzablauf (rund 20 Minuten je Gerät):** Punkte 1, 4, 5, 8, 10, 12, 13, 16, 17, 18, 19. Die übrigen Punkte vor dem Release.
+**Kurzablauf:** [smartphone-abnahme-kurz.md](../release/smartphone-abnahme-kurz.md). Die übrigen Punkte vor dem Release. **HTTPS-Zugang:** Doku 45 §4.1; die Profile bestanden am 03.11. über geschütztes HTTPS mit sicheren Cookies, weiterhin Emulation.
 
 ## Vorbereitung durch den Betrieb
 

@@ -1,0 +1,91 @@
+# Production stack for the release. PREPARED, NOT INSTALLED: release and migration need their own
+# approval (docs/release/produktionsplan.md). Differences from docker-compose.pinned.yml: the image
+# comes from AMANAH_RELEASE_IMAGE and must be a digest, data encryption is mandatory, AI stays off.
+#
+#   docker compose -f docker-compose.release.yml --env-file release/.env.production.next config -q
+#
+name: amanah-app
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: amanah-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-amanah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:-amanah}
+    volumes:
+      - amanah_pg_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amanah_internal
+
+  app:
+    # No build section on purpose: this stack can only run the pinned image.
+    image: ${AMANAH_RELEASE_IMAGE:?Set AMANAH_RELEASE_IMAGE to an image digest}
+    pull_policy: never
+    container_name: amanah-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in env file}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in env file}
+      AUTH_SECRET: ${AUTH_SECRET:-${SESSION_SECRET}}
+      AMANAH_SERVER_STORAGE: ${AMANAH_SERVER_STORAGE:-postgres}
+      AMANAH_AI_ENABLED: ${AMANAH_AI_ENABLED:-false}
+      NEXT_PUBLIC_AMANAH_AI_ENABLED: ${NEXT_PUBLIC_AMANAH_AI_ENABLED:-false}
+      AMANAH_DATA_KEYS: ${AMANAH_DATA_KEYS:?Set AMANAH_DATA_KEYS}
+      AMANAH_DATA_KEY_ACTIVE: ${AMANAH_DATA_KEY_ACTIVE:?Set AMANAH_DATA_KEY_ACTIVE}
+      AMANAH_DATA_ENCRYPTION: ${AMANAH_DATA_ENCRYPTION:-required}
+      AMANAH_PUBLIC_BASE_URL: ${AMANAH_PUBLIC_BASE_URL:?Set AMANAH_PUBLIC_BASE_URL}
+      AMANAH_MAIL_TRANSPORT: ${AMANAH_MAIL_TRANSPORT:-disabled}
+      AMANAH_MAIL_API_KEY: ${AMANAH_MAIL_API_KEY:-}
+      AMANAH_MAIL_FROM: ${AMANAH_MAIL_FROM:-}
+      AMANAH_MAIL_FROM_NAME: ${AMANAH_MAIL_FROM_NAME:-}
+      AMANAH_LEGACY_VERIFICATION_GRACE_DAYS: ${AMANAH_LEGACY_VERIFICATION_GRACE_DAYS:-}
+      AMANAH_BILLING_MODE: ${AMANAH_BILLING_MODE:-disabled}
+      AMANAH_BILLING_ENFORCE: ${AMANAH_BILLING_ENFORCE:-false}
+      AMANAH_PLUS_LAUNCH_AT: ${AMANAH_PLUS_LAUNCH_AT:-}
+      AMANAH_PUBLIC_REGISTRATION_ENABLED: ${AMANAH_PUBLIC_REGISTRATION_ENABLED:-false}
+      NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED: ${NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED:-false}
+      AMANAH_AI_PROVIDER: ${AMANAH_AI_PROVIDER:-rules}
+      AMANAH_KNOWLEDGE_RETRIEVAL: ${AMANAH_KNOWLEDGE_RETRIEVAL:-keyword}
+      AMANAH_EMBEDDING_PROVIDER: ${AMANAH_EMBEDDING_PROVIDER:-none}
+      AMANAH_KNOWLEDGE_TOP_K: ${AMANAH_KNOWLEDGE_TOP_K:-3}
+      NEXT_PUBLIC_AUTH_MODE: ${NEXT_PUBLIC_AUTH_MODE:-api}
+      NEXT_PUBLIC_STORAGE_MODE: ${NEXT_PUBLIC_STORAGE_MODE:-api}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://amanah.example.com}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-${NEXT_PUBLIC_SITE_URL}}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      AI_PROVIDER: ${AI_PROVIDER:-rules}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    ports:
+      - "127.0.0.1:3001:3000"
+    networks:
+      - amanah_internal
+
+networks:
+  # The existing network; compose must not create another one.
+  amanah_internal:
+    name: amanah-app_amanah_internal
+    external: true
+
+volumes:
+  # The existing volume with the production data. Never let compose derive another name.
+  amanah_pg_prod:
+    name: amanah_pg_prod
+    external: true

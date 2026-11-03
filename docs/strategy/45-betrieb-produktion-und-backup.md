@@ -1,4 +1,4 @@
-# Betrieb: Produktion, Backup, Prüfung, Staging (Stand 03.11.2026)
+# Betrieb: Produktion, Backup, Prüfung, Staging (Stand 03.11.2026, 10:23)
 
 **Für:** Betrieb und Owner. Keine Geheimnisse in diesem Dokument. Produktion: `7d0859b` mit Hotfix (Doku 41). Release-Kandidat: `8668188`, nur auf Staging.
 
@@ -10,62 +10,138 @@
 | `/opt/amanah-prod/backups/` | verschlüsselte Backups | 700, Dateien 600 |
 | `/opt/amanah-prod/images/` | Archive von Hotfix- und Rollback-Image, `SHA256SUMS` | 400 |
 | `/opt/amanah-prod/config-vorher/` | frühere Konfiguration, Crontab, verschlüsselte Alt-Env | 700 |
+| `/opt/amanah-prod/release/` | **vorbereitete, unbenutzte** Release-Env und Kopie des Datenschlüssels (Produktionsplan) | 700, Dateien 600 |
 | `/opt/amanah-app/` | Quellstand `7d0859b`, **nur Backup-Altlast und Build-Sperre** | `.env.production` nur mit `POSTGRES_USER`, `POSTGRES_DB` |
 
 Der Quellordner startet nichts mehr. Die Altkopie `.env.production.backup.20260705-145025` ist verschlüsselt gesichert und entfernt; sie stand nie in Git und unter keinem öffentlichen Pfad. **Es gibt keinen Hinweis auf eine Offenlegung, daher keine Rotation.** Ob ihre Werte noch gelten, ist unbekannt; sie weicht von der aktiven Datei ab.
 
 ## 2. Backups
 
-**Vorher:** 126 unverschlüsselte Klartext-Dumps (`gzip`, Inhalt per Kopfzeile bestätigt), für alle lesbar, ohne `age`.
+**Vorher:** 126 unverschlüsselte Klartext-Dumps (`gzip`, Inhalt per Kopfzeile bestätigt), für alle lesbar.
 
-**Jetzt:** Cron `15 3 * * * /opt/amanah-prod/backup-encrypted.sh`, Log `/var/log/amanah-backup.log`.
+**Jetzt:** Cron `15 3 * * * /opt/amanah-prod/backup-encrypted.sh`, Log `/var/log/amanah-backup.log`. Verschlüsselung mit `age`, nur an öffentliche Empfänger aus `backup.env`. Ohne Empfänger oder bei falschem Format entsteht keine Datei. Der private Schlüssel liegt nicht auf dem Server. Keine automatische Löschung.
 
-- Verschlüsselung mit `age` im Container `amanah-prod-age:1`, Empfänger nur öffentlich in `backup.env`.
-- Schreibt nie unverschlüsselt: Ohne Empfänger oder bei falschem Format entsteht keine Datei.
-- **Der private Schlüssel liegt nicht auf dem Server.** Empfänger ist der vorhandene Owner-Schlüssel (Fingerprint `2cfae5a85d555db6`), dessen Funktion am 31.10.2026 belegt ist (`/opt/amanah-staging/state/owner-restore.ok`).
-- **Abweichung von Doku 29 §2.1:** Dort ist ein eigener Produktionsschlüssel vorgesehen. Agenten erzeugen keinen Owner-Schlüssel; bis der Owner einen liefert, nutzt die Produktion diesen. Wechsel: nur `backup.env` ändern.
-- Keine automatische Löschung; die Frist ist offen (Prüfpaket Datenschutz).
+### 2.1 Was womit geprüft wurde
 
-**Nachweis 03.11.2026, 07:48:**
+Empfänger-Fingerabdruck in `backup.env`: `2cfae5a85d555db6`, identisch mit dem Eintrag in `/opt/amanah-staging/state/owner-restore.ok`. Mit diesem Schlüssel hat der Owner am 31.10. ein **Staging**-Backup wiederhergestellt. Anzahl Empfänger: aus dem `age`-Kopf gezählt; `age` speichert nicht, wer sie sind.
 
-| Prüfung | Ergebnis |
-|---|---|
-| Format, ohne Schlüssel | `age-encryption.org/v1`, kein gzip, kein Klartext |
-| Isolierte Wiederherstellung | eigene Datenbank, internes Netz: Konten, Migrationen, Tabellen identisch mit Live (`0|1|…|4`) |
-| Altbestand | 126 Dateien im Archiv, alle Prüfsummen gleich, danach mit `shred` entfernt |
-| Cron-Bedingungen | Lauf mit leerer Umgebung erfolgreich; 1 Empfänger. **Erster echter Cron-Lauf steht aus: 04.11.2026, 03:15** |
+| Datei | Empfänger | Mit RAM-Schlüssel geprüft (03.11., danach vernichtet) | Mit Owner-Schlüssel |
+|---|---|---|---|
+| `amanah_amanah_20261103_074832` | 2 | **isolierte Wiederherstellung, identisch mit Live** | `NOT_RUN` |
+| `amanah_amanah_20261103_074755` | 2 | keine vollständige Probe, Prüflauf brach sicher ab | `NOT_RUN` |
+| `amanah_amanah_20261103_074910` | 1, nur Owner | nicht möglich; nur Format, Rechte, Größe | `NOT_RUN` |
+| `altbestand-klartext-20261103` | 2 | alle 126 Prüfsummen gleich | `NOT_RUN` |
+| `env-production-backup-20260705` | 2 | Vergleich gleich | `NOT_RUN` |
 
-**So wurde geprüft, ohne Schlüssel auf dem Server zu hinterlassen:** Ein Einmal-Schlüssel entstand nur im RAM (`/dev/shm`) und war zusätzlicher Empfänger der Prüfkopien. Er wurde nach der Probe vernichtet; diese Kopien kann seither nur noch der Owner lesen. Laufende Backups haben nur den Owner als Empfänger. Grenze: `shred` ist auf dem Server-Dateisystem nur bestmöglich.
+**Ehrliche Grenze:** Der RAM-Schlüssel belegt, dass Dump, Verschlüsselung und Wiederherstellung funktionieren. Er belegt nicht, dass der Owner-Schlüssel diese Dateien öffnet. **Keine Produktionsdatei wurde je mit dem dauerhaften Schlüssel entschlüsselt.** Der Beleg ist indirekt: gleicher Empfänger wie im Staging-Test. Da der RAM-Schlüssel vernichtet ist und die Klartexte entfernt sind, hängt alles allein am Owner-Schlüssel. Die Probe in 2.2 schließt diese Lücke.
 
-**Ein Dump im Altbestand** (`amanah_amanah_20260705_145211`) enthält 2 Kontozeilen; der Inhalt wurde nicht gelesen. Heute hat die Produktion 0 Konten. Siehe Prüfpaket Datenschutz.
+### 2.2 Wiederherstellungsprobe (Owner, rund 5 Minuten)
 
-### Wiederherstellung (Owner, auf dem eigenen Rechner)
+Auf dem eigenen Rechner im Repo, nötig sind nur `age` und `ssh`. Der private Schlüssel bleibt dort. Die Entschlüsselung läuft lokal; die Testdatenbank läuft auf dem Server ohne Netz und im RAM und wird danach entfernt. Ausgegeben werden nur Zahlen. Produktionsdaten werden nicht verändert.
 
 ```bash
-scp gemeinsam1-prod:/opt/amanah-prod/backups/<datei>.sql.gz.age .
-age -d -i <schlüsseldatei> <datei>.sql.gz.age | gunzip > restore.sql
+scripts/owner-production-backup.sh restore-probe --paste    # neuestes Backup; Schlüssel unsichtbar einfügen
+scripts/owner-production-backup.sh check-old --paste        # Altbestand und alte Env-Kopie, nur gezählt
+scripts/owner-production-backup.sh check-data-key --paste   # Kopie des Datenschlüssels, nur Prüfsummen
 ```
 
-Danach in eine **neue, isolierte** Datenbank einspielen und Tabellen, Migrationen und Konten vergleichen. Kein Agent braucht dafür den Schlüssel. **Offen: Probe durch den Owner mit einem Backup nach dem 03.11.**
+Erwartet: `Fertig: Probe bestanden.`, `OK Altbestand lesbar: 126 Dateien`, `OK Kopie des Datenschlüssels passt`. Danach steht auf dem Server `state-owner-restore.ok`.
 
-**Einspielen in die Produktion:** nur nach Owner-Entscheidung. App stoppen, Datenbank ersetzen, App starten. Ohne aktives Löschprotokoll kommen Löschungen zurück (Doku 39).
+Getestet mit Wegwerf-Schlüssel und Testordner: Probe bestanden, falscher Schlüssel und leere Eingabe scheitern ohne Vermerk, nichts bleibt zurück. **Die Probe des Owners selbst steht aus.**
 
-## 3. Automatische Prüfung
+### 2.3 Eigener Produktionsschlüssel (Owner)
 
-`/etc/cron.d/amanah-prod-check`, alle 15 Minuten, nur lesend: Image, Health, Route, Netz, Volume, Wissenssperre, Backup-Alter unter 26 h und Format, kein Klartext und keine Secret-Kopie im alten Ordner. Keine Reparaturen.
+Doku 29 sieht ihn vor, heute ist es der Owner-Schlüssel aus Staging. Nur der öffentliche Teil erreicht den Server. Das Skript gibt den privaten Schlüssel nie aus.
 
-- Verlauf: `/var/log/amanah-prod-check.log`; Zustandswechsel: `/var/log/amanah-prod-alerts.log`; logrotate wöchentlich, 4 Stände.
-- Getestet: Ein fehlendes Backup in einer Testumgebung erzeugt einen Alarm. Das Alarmlog enthält von 07:49 einen Fehlalarm und die Entwarnung: Das Suchmuster traf zunächst auch `.env.production.example`; korrigiert.
-- **Niemand wird benachrichtigt.** Externer Versand ist aus (Owner 01.11., Doku 30). Anschluss: `staging-alert.sh` als Vorbild, nach Freigabe.
+```bash
+scripts/owner-production-backup.sh create            # ~/amanah-keys/amanah-production-backup.key
+# Inhalt im Passwortmanager und offline sichern, nicht in Git oder einem Cloud-Ordner
+scripts/owner-production-backup.sh add-recipient     # ab jetzt beide Empfänger
+ssh gemeinsam1-prod /opt/amanah-prod/backup-encrypted.sh
+scripts/owner-production-backup.sh restore-probe ~/amanah-keys/amanah-production-backup.key
+```
+
+Erst wenn die Probe besteht, den alten Empfänger für **künftige** Backups entfernen:
+
+```bash
+ssh gemeinsam1-prod /opt/amanah-prod/set-backup-recipient.sh list
+ssh gemeinsam1-prod /opt/amanah-prod/set-backup-recipient.sh remove 2cfae5a85d555db6
+```
+
+**Den alten privaten Schlüssel nicht vernichten.** Alle bis dahin geschriebenen Dateien brauchen ihn weiter. Auch Staging nutzt ihn.
+
+### 2.4 Cron
+
+Server-Zeitzone `Europe/Berlin` (CET, NTP synchron). **Erster automatischer verschlüsselter Lauf: 04.11.2026, 03:15 CET. Stand 03.11.: ausstehend.** Diese Sitzung überwacht ihn nicht.
+
+```bash
+ssh gemeinsam1-prod /opt/amanah-prod/check-backup-cron.sh    # Exit 0 erledigt, 3 ausstehend, 1 Fehler
+```
+
+Unabhängig davon meldet die Betriebsprüfung ein fehlendes Backup ins lokale Alarmlog, sobald das letzte älter als 26 Stunden ist.
+
+### 2.5 Einspielen in die Produktion
+
+Nur nach Owner-Entscheidung; Wege und Grenzen im Produktionsplan. Die Skripte aus 2.2 können das nicht: Sie schreiben nie in die Produktion.
+
+## 3. Automatische Prüfung und Alarm
+
+`/etc/cron.d/amanah-prod-check`, alle 15 Minuten, nur lesend: Image, Health, Route, Netz, Volume, Wissenssperre, Backup-Alter und Format, kein Klartext, keine Secret-Kopie. Keine Reparaturen. Verlauf `/var/log/amanah-prod-check.log`, Zustandswechsel `/var/log/amanah-prod-alerts.log`, logrotate wöchentlich. Das Alarmlog enthält von 07:49 einen Fehlalarm mit Entwarnung (Suchmuster traf `.env.production.example`, korrigiert).
+
+**Niemand wird benachrichtigt.** Externer Versand ist aus, und es gibt keinen autorisierten Kanal; der Mailkanal aus Staging wurde am 01.11. abgeschaltet (Doku 30 §3a).
+
+**Vorbereitet:** `prod-check.sh` übergibt an denselben Dispatcher wie Staging (Wiederholung alle 24 h, Entwarnung, Wiederholversuch), aber nur mit `ALERT_EXTERNAL=true` in `/opt/amanah-prod/alert.env`. Die Datei existiert nicht; Vorlage `alert.env.example`. Getestet mit lokalem Empfänger: ohne Datei und mit Schalter aus nichts versendet; mit Schalter an Alarm und Entwarnung zugestellt. Keine Nachricht hat den Rechner verlassen.
+
+| Kanal | Vorteil | Fehlt |
+|---|---|---|
+| **Mail über Brevo-SMTP (empfohlen)** | Code und Vergleich vorhanden | Absender-Domain, eigener SMTP-Schlüssel, Empfänger, Freigabe |
+| Chat-Webhook | sofort einrichtbar, kein Domainbezug | eigener Kanal; Inhalte liegen bei dessen Anbieter |
+| ntfy | Push aufs Telefon | im Dispatcher vorgesehen, bisher abgeschaltet; Betrieb des Dienstes |
+
+Bei Serverausfall meldet keiner dieser Wege etwas; dafür bräuchte es eine Prüfung von außen.
 
 ## 4. Staging
 
-Läuft mit `amanah-staging-app:8668188`, eigene Datenbank `amanah_pg_staging`, eigene Netze, nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus, Plus-Zwang aus. Migrationen 6 von 6. Backup und Restore bestanden. Rollback-Image `f9022d3` und `rollback/.env.staging.vor-*` vorhanden; zurück nur mit Datenbank-Wiederherstellung.
+Läuft mit `amanah-staging-app:8668188`, eigene Datenbank, eigene Netze, Port nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus. Migrationen 6 von 6. Zugang heute: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
 
-**Zugang (Owner):** `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`. Keine Zugangsdaten nötig, Registrierung nur mit Adressen auf `@staging.invalid`, Bestätigungslink über `http://127.0.0.1:3201/api/dev/outbox?to=<adresse>`.
+### 4.1 HTTPS-Zugang für Telefone
 
-**Aktualisieren:** Image lokal bauen und übertragen (nicht auf dem Server, RAM und Platte), `AMANAH_RELEASE` setzen, Compose-Hash von Postgres vergleichen. Keinen Trockenlauf des ganzen Stacks: Er wartet endlos auf den Migrationsdienst.
+**Vorbereitet und geprüft, nicht aktiv: Es fehlt ein Hostname.** Eine vorhandene Test-Subdomain gibt es nicht: `amanahordner.de` ist nicht registriert, unter `gemeinsam1.com` und `mscisystems.com` existiert keine, und ein DNS-Zugang liegt dieser Umgebung nicht vor.
+
+**Vorgehen, sobald der DNS-Eintrag (A auf die Server-IP) steht:**
+
+```bash
+ssh gemeinsam1-prod /opt/amanah-staging/scripts/staging-https.sh enable <host>
+ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access    # Zugangsdaten nur so abrufen
+```
+
+Das Skript prüft erst DNS, legt das Passwort an und trägt den Block samt Passwortschutz in einem Schritt ein: keine ungeschützte Phase, keine Ausnahme für einzelne Pfade. Caddy wird nur neu geladen, nicht neu gestartet; bei einem Fehler bleibt die laufende Konfiguration. Danach prüft es Zugang und `gemeinsam1`. Zurück: `staging-https.sh disable`.
+
+**Wichtig:** Das ist eine Änderung am gemeinsamen Caddy von `gemeinsam1`. Sie ist durch den Auftrag vom 03.11. gedeckt, aber erst mit Hostname ausführbar. Der Hostname wird über Zertifikatslogs öffentlich sichtbar, nur nicht der Inhalt. Überschreibt ein `gemeinsam1`-Deployment die Caddy-Datei, fällt der Zugang weg; die Seite wird dadurch nicht offen.
+
+**Geprüft am 03.11. mit Wegwerf-Caddy** (eigenes Zertifikat, eigenes Passwort, entfernt): ohne und mit falschem Passwort überall 401, intern 404, `noindex`; Kernablauf und schmale Ansichten in iPhone-WebKit und Android bestanden, über HTTPS mit sicheren Cookies. Der Block ist gegen den echten Caddy gültig (`caddy validate`), dessen Datei blieb unverändert (Prüfsumme). Die Staging-App hängt seitdem zusätzlich am internen Netz `amanah_staging_proxy`, dem sonst niemand angehört. **Echter Lauf mit Let's-Encrypt-Zertifikat: `NOT_RUN`.** Ablauf für Geräte: [smartphone-abnahme-kurz.md](../release/smartphone-abnahme-kurz.md).
 
 ## 5. Plattenplatz
 
-`/` steht bei 87 %, die Staging-Prüfung warnt ab 85 % und ist deshalb dauerhaft rot. Große Amanah-Posten: `amanah-app-migrate:latest` (1,8 GB), Hotfix-Image, Rollback-Image, Staging-Images. Nicht entfernt, weil das eine Entscheidung ist. Ein Release braucht vorübergehend rund 1,5 GB zusätzlich für das Migrations-Image.
+| Zeitpunkt | Belegung | Frei |
+|---|---|---|
+| vor der Bereinigung, 03.11. 09:56 | 87 % | 4,8 GB |
+| nach der Bereinigung, 03.11. | **84 %** | **5,9 GB** |
+
+**Entfernt:** Image `amanah-app-migrate:latest` (angezeigt 1,81 GB) und der seit 17.07. beendete Einmal-Container `amanah-migrate` (Exit 0, keine Mounts), der es festhielt. **Tatsächlich gewonnen: 1,16 GB**, weil Schichten geteilt sind. Kein Volume, kein Backup berührt.
+
+Vorher geprüft: Das Image enthielt nur die Migration `20260705105925_init`, nichts Aktives verweist darauf (gepinnter Stack ohne Migrationsdienst, Wiederherstellung ohne Prisma). Nachbau aus `7d0859b` lokal: gleiche Migrationsprüfsumme, Prisma 6.19.3, gleicher Befehl; nicht byte-identisch, da Basis-Images sich ändern. Einziger Bezug: `docker-compose.prod.yml` im alten Quellordner, der ohnehin gesperrt ist.
+
+Betriebsprüfung danach 13 OK, Staging-Health 0 FAIL.
+
+**Das Ziel ist erreicht, aber knapp:** bis zur Grenze von 85 % bleiben rund 0,5 GB. Ein Migrations-Image fürs Release braucht vorübergehend 1,3 GB; das bleibt über 3 GB frei, löst aber den Staging-Alarm aus.
+
+**Weitere Möglichkeiten, nichts davon ausgeführt:**
+
+| Posten | Größe | Hinweis |
+|---|---|---|
+| Docker-Build-Cache | 13,3 GB, davon 9,6 GB freigebbar | größter Posten, vermutlich überwiegend `gemeinsam1`; nur mit dessen Zustimmung |
+| journald | 1,2 GB | systemweit, `journalctl --vacuum-size=300M` |
+| `amanah-app-app:vor-wissenssperre` | 712 MB (angezeigt) | Archiv liegt in `images/rollback.tar.gz` |
+| `amanah-staging-app:f9022d3` | 591 MB (angezeigt) | Staging-Rollback-Image |
+| ältere `gemeinsam1`-Images | mehrere GB | fremdes Projekt, nicht meine Entscheidung |

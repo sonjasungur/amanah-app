@@ -42,8 +42,21 @@ Befehl: `scripts/testing/release-check.sh`, 08:33 bis 08:49 Uhr, Wegwerf-Datenba
 | `phase2-behavior` | 2 | Der Test suchte einen Selektor, den es im Produkt nicht gibt, und lief deshalb nie | ja, Sprachwahl | Test auf die echte Sprachwahl umgestellt: Datei 22 von 22, kein Skip, Desktop und Mobil |
 | API-Regression Mobil | 9 | Serververhalten unabhängig vom Gerät | nein | Desktop bestanden |
 
+## Nachträge 03.11., 10:23 (nur Geänderten geprüft)
+
+| Prüfung | Ergebnis |
+|---|---|
+| iPhone-WebKit und Android über HTTPS mit Passwortschutz, Wegwerf-Caddy auf dem Server | Kernablauf bestanden, schmale Ansichten bestanden; sichere Cookies ohne Ausnahme |
+| Erster WebKit-Lauf | 1 fehlgeschlagen: Test navigierte gleichzeitig mit der App-Weiterleitung nach der Löschung; Test korrigiert, danach 2 × bestanden. Android danach nicht wiederholt |
+| Zugangsschutz | 7 Pfade ohne Passwort 401, falsches Passwort 401, mit Passwort 200, intern 404, `noindex` |
+| Rollback- und Verschlüsselungsprobe | durchgeführt, **zwei Befunde**, Produktionsplan |
+| Backup-Probe, Empfänger-, Cron-, Rollback-Skripte, Alarm-Haken | mit Wegwerf-Schlüssel und lokalem Empfänger bestanden, Doku 45 |
+| Typprüfung, ESLint der geänderten Tests, Vitest | 0 Fehler; 845 bestanden, 23 übersprungen |
+
+Kein Produktcode geändert. Der Playwright-Gesamtlauf wurde nicht wiederholt.
+
 ## Nicht abgedeckt
 
-Echter Mailversand, echte Geräte und Safari über HTTPS, Stripe, echte Produktionskonfiguration. Mobile Profile laufen auf HTTP mit `AMANAH_COOKIE_SECURE=false`, weil WebKit dort sichere Cookies ablehnt; Staging und Produktion nutzen sichere Cookies.
+Echter Mailversand, echte Geräte, Stripe, echte Produktionskonfiguration, Rollback im Browser. Im Release-Check laufen die Mobilprofile auf HTTP mit `AMANAH_COOKIE_SECURE=false`, weil WebKit dort sichere Cookies ablehnt; über HTTPS ohne Ausnahme siehe Nachträge.
 
 **Im Lauf gefundene und behobene Fehler:** Überlauf auf `/datenschutz` bei 320 px; Passwortfeld der Kontolöschung außerhalb des Sichtbereichs; Hydrationsfehler; verlorene Eingaben beim schnellen Neuladen; Regressions-Lücke `legacy-email-verification`.

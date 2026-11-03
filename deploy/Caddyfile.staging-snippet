@@ -1,3 +1,4 @@
+# Superseded by scripts/staging-https.sh, which installs a stricter block without the webhook exception.
 # Staging block for the shared Caddy (container gemeinsam1-prod-caddy) — PREPARED, NOT INSTALLED.
 # Changing the shared Caddy is a production change for gemeinsam1 and needs the owner's approval.
 # Prerequisites (docs 29 §4, variant B):

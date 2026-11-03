@@ -19,7 +19,7 @@
 1. Reicht die Einwilligung für Angaben zu Dritten (Familie, Vertrauenspersonen), oder ist eine weitere Grundlage nötig?
 2. Ist eine Datenschutz-Folgenabschätzung erforderlich?
 3. Darf das Löschprotokoll Pseudonyme über die Löschung hinaus aufbewahren, und wie ist das zu erklären?
-4. Welche Backup-Frist ist angemessen? Heute gibt es **keine automatische Löschung** verschlüsselter Backups in der Produktion.
+4. (Vorschlag: `../backup-aufbewahrung-vorschlag.md`) Welche Backup-Frist ist angemessen? Heute gibt es **keine automatische Löschung** verschlüsselter Backups in der Produktion.
 5. Wie ist mit dem verschlüsselten Altbestand zu verfahren? Ein Dump vom 05.07.2026 enthält 2 Kontozeilen; der Inhalt wurde nicht gelesen, ein Zusammenhang mit echten Personen ist nicht geklärt.
 6. Ist der frühere Zugang über den Host-Kopf bis zum 02.11.2026 bewertungsbedürftig (Doku 41 §1)? Heute 0 Konten; ob jemand zugegriffen hat, ist nicht feststellbar.
 7. Welche Aufbewahrungsfrist gilt für Kaufdaten nach Kontolöschung?
