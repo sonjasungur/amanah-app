@@ -422,14 +422,14 @@ describe("the shared proxy cannot quietly go back to the old file", () => {
   });
 
   it("the old installer refuses without the owner's release and never loads the container's file", () => {
-    const blocked = spawnSync("bash", ["scripts/install-shared-caddy.sh"], { encoding: "utf8", env: { PATH: process.env.PATH } as NodeJS.ProcessEnv });
+    const blocked = spawnSync("bash", ["scripts/install-shared-caddy.sh"], { encoding: "utf8", env: { ...process.env, AMANAH_PRODUCTION_ROUTE_RELEASED: "", CONFIRM_SHARED_RESTART: "" } });
     expect(blocked.status).toBe(1);
     expect(blocked.stderr).toContain("gesperrt");
     expect(install).not.toMatch(/--config \/etc\/caddy\/Caddyfile/);
   });
 
   it("the restart needs the owner's go, keeps the container and stops before it on a failed check", () => {
-    const blocked = spawnSync("bash", ["scripts/shared-caddy-restart.sh", "run"], { encoding: "utf8", env: { PATH: process.env.PATH } as NodeJS.ProcessEnv });
+    const blocked = spawnSync("bash", ["scripts/shared-caddy-restart.sh", "run"], { encoding: "utf8", env: { ...process.env, AMANAH_PRODUCTION_ROUTE_RELEASED: "", CONFIRM_SHARED_RESTART: "" } });
     expect(blocked.status).toBe(2);
     expect(restart).toContain("docker restart -t 5");
     expect(restart).not.toMatch(/^\s*docker compose/m);
