@@ -24,15 +24,49 @@ Echte Geräte: `NOT_RUN`. WebKit im Container ist eine Emulation.
 
 ### Vorfall: Produktionsroute kurz in der laufenden Konfiguration
 
-**Von 14:38:43 bis 14:43:01 stand `amanahordner.de → amanah-app:3000` in der laufenden Caddy-Konfiguration; der Staging-Block fehlte in dieser Zeit.**
+**Von 14:38:43 bis 14:43:01 (03.11.2026, MEZ, 4 min 18 s) stand `amanahordner.de → amanah-app:3000` in der laufenden Caddy-Konfiguration; der Staging-Block fehlte in dieser Zeit.** Beginn und Ende stehen im Caddy-Log als `load complete`, das Ende auch im Zeitstempel von `autosave.json`.
 
-- **Ursache:** `staging-https.sh enable` lud `/etc/caddy/Caddyfile`. Im Container ist das noch die Datei vom Juli mit der alten Route (anderer Inode, Doku 41 §2). Mein Fehler: Doku 41 beschreibt die Falle, der Reload im Skript beachtete sie nicht, und der frühere Test nutzte nur `caddy validate`.
-- **Erreichbar war nichts:** `amanahordner.de` hat kein DNS, `amanah-app` hängt nicht im Caddy-Netz (`bad address` aus dem Container), kein Zertifikat. App-Log im Zeitraum: 0 Zeilen, 0 Konten.
-- **Nebenwirkung:** Caddy versuchte in der Zeit erfolglos Zertifikate für die alte Domain (ACME, NXDOMAIN). Keine Versuche mehr seit 14:43.
-- **Behoben:** Host-Datei über `stdin` geladen. Das Skript lädt nun immer so und prüft danach die laufende Konfiguration auf die Produktionsroute; Regressionstest.
-- **Bleibt bestehen:** Der Container sieht weiter die alte Datei. **Ein Reload aus `/etc/caddy/Caddyfile` öffnet die Route wieder**, ebenso `scripts/install-shared-caddy.sh`. Nur der Weg über `stdin` ist zulässig.
+**Ursache:** `staging-https.sh enable` lud `/etc/caddy/Caddyfile`. Der Container sieht dort über einen Einzeldatei-Mount die Datei vom Juli mit der alten Route (Inode `281101`, Host `273390`, Doku 41 §2). Mein Fehler: Doku 41 beschreibt die Falle, der Reload im Skript beachtete sie nicht, und der frühere Test nutzte nur `caddy validate`.
 
-**Offen, Produktion nicht geändert:** `verify-production-image.sh` zählt jedes „amanah“ in der Konfiguration und meldet seit dem Staging-Host dauerhaft `FAIL proxy has no Amanah route` (lokales Alarmprotokoll, nichts extern). Die Korrektur liegt im Repo; sie lässt nur Staging-Host und Staging-Upstream zu. Ohne Installation verdeckt der Dauerzustand die Prüfung dieses Punkts. Trockenlauf auf dem Server: 0 FAIL bei diesem Punkt.
+**Warum die Route nach den Belegen nicht nutzbar war:**
+
+| Glied der Kette | Beleg |
+|---|---|
+| Name löst nicht auf | Let's Encrypt meldete im Fenster NXDOMAIN (Caddy-Log); 1.1.1.1 und 8.8.8.8 melden auch danach NXDOMAIN |
+| Kein Zertifikat | Caddy begann um 14:38:43 mit `obtaining certificate`, 4-mal `could not get certificate from issuer`; im Speicher liegt kein Zertifikat für die Domain |
+| Ohne Zertifikat kein HTTPS | Direkter Abruf über die Server-IP mit diesem Namen scheitert am TLS-Handshake; auf Port 80 antwortet Caddy nur mit einer Weiterleitung auf HTTPS (nach dem Fenster geprüft: 308) |
+| App vom Proxy getrennt | `prod-check` um 14:30, 14:41 und 14:45: `amanah-app` nur im eigenen Netz; aus dem Caddy-Container `bad address`; Port 3001 nur auf `127.0.0.1` |
+
+**Grenzen der Aussage:**
+
+- Das ist ein Schluss aus der technischen Kette, **keine Beobachtung, dass niemand es versucht hat.** Caddy schreibt kein Zugriffslog (`logs` nicht gesetzt). Verbindungsversuche an die Server-IP lassen sich weder belegen noch ausschließen.
+- Der HTTPS-Abruf und die Port-80-Antwort wurden erst nach dem Fenster geprüft, nicht währenddessen.
+- Das Netz wurde stichprobenartig geprüft, nicht lückenlos. Eine Änderung zwischen zwei Prüfungen ist nicht belegbar ausgeschlossen, das App-Startdatum (02.11.) und die Netzliste sprechen dagegen.
+- Im App-Log standen im Fenster 0 Zeilen, 0 Konten in der Datenbank. Beides stützt den Befund, belegt aber keinen fehlenden Zugriff: Dass die App jede Anfrage protokolliert, ist nicht belegt. **Die frühere Formulierung „Erreichbar war nichts“ war dafür zu stark.**
+
+**Nebenwirkungen:** Staging war im Fenster nicht erreichbar, sein Zertifikat kam um 14:43:07. Caddy stellte erfolglose Zertifikatsanfragen für die alte Domain, seit 14:43:01 keine mehr. Fremde Dienste: Der Reload lief ohne Neustart.
+
+**Behoben:** Host-Datei über `stdin` geladen; das Skript lädt nun immer so und prüft danach die laufende Konfiguration; Regressionstest.
+
+### Routenprüfung und Altdatei (03.11., nach dem Vorfall)
+
+Installiert: `verify-production-image.sh` und `caddy-route-policy.py` in `/opt/amanah-prod/`; alte Prüfung in `config-vorher/`. Die Regel liest die **laufende** Konfiguration strukturell und erlaubt nur den Staging-Host mit Passwort und Upstream. Nicht lesbar gilt als Fehler.
+
+Isolierte Proben (`scripts/caddy-route-probes.sh`, nur `caddy adapt` in Wegwerf-Containern ohne Netz, nichts geladen):
+
+| Probe | Ergebnis | Alter Filter |
+|---|---|---|
+| Gemeinsam1 mit geschütztem Staging / ohne Staging | akzeptiert | – |
+| Zusätzliche Produktionsroute, Weiterleitung der alten Domain | abgelehnt | erkannt |
+| Staging-Host auf Produktions-App | abgelehnt | erkannt |
+| Staging-Host auf fremde Adresse | abgelehnt | **OK gemeldet** |
+| Staging ohne Passwort | abgelehnt | **OK gemeldet** |
+| Fremder Host auf Staging-Upstream | abgelehnt | **OK gemeldet** |
+| Fremder Host auf Produktions-Port | abgelehnt | **OK gemeldet** |
+| Echte Altdatei aus dem Container | abgelehnt | erkannt |
+| Leere Antwort / Admin nicht erreichbar | Fehler | **OK gemeldet** |
+
+Neu: `FAIL proxy container sees the host file`, solange die Altdatei im Container liegt. Vorgehen und Stand: [Doku 45 §4.2](../strategy/45-betrieb-produktion-und-backup.md).
 
 ## Release-Check
 

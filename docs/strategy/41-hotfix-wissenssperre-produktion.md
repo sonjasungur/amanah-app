@@ -62,6 +62,8 @@ Vor dem Reload den Status von `api.gemeinsam1.com` notieren, damit „unverände
 
 **Ergebnis 02.11.2026, 15:08 Uhr:** Live-Konfiguration ohne Amanah; Amanah-Host auf allen geprüften Pfaden 200 mit 0 Bytes; `gemeinsam1.com`, `www` und `api` byte-genau wie vorher; keine Fehler im Caddy-Log; kein Neustart.
 
+> **Nachtrag 03.11.:** Dieser Befehl hat am 03.11. die Route unbeabsichtigt für gut vier Minuten geladen. Aktueller Stand und zulässige Wege: [Doku 45 §4.2](45-betrieb-produktion-und-backup.md).
+
 **Fehlerfall (Owner-Vorgabe):** Die Route wird nicht automatisch wieder geöffnet. Schlägt etwas fehl, zuerst die Host-Datei erneut laden. Ein Neustart von Caddy lädt ebenfalls die Host-Datei und bleibt sicher. Der folgende Befehl stellt die alte Route wieder her und ist **nur auf ausdrückliche Owner-Entscheidung** zu verwenden:
 
 ```bash

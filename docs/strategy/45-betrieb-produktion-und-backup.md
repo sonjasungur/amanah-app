@@ -108,7 +108,7 @@ Läuft mit `amanah-staging-app:b473cd5`, eigene Datenbank, eigene Netze, Port nu
 
 **Aktiv seit 03.11.:** `https://amanah-test.mscisystems.com`, passwortgeschützt, Kandidat `b473cd5`, Zertifikat Let's Encrypt. Nachweis und Vorfall: [Testnachweis](../release/testnachweis-kandidat.md).
 
-**Zugang:** `ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access`. Abschalten: `staging-https.sh disable`. Ein Caddy-Reload darf nur die Host-Datei über `stdin` laden; `/etc/caddy/Caddyfile` im Container enthält noch die alte Produktionsroute.
+**Zugang:** `ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access`. Abschalten: `staging-https.sh disable`. Ein Caddy-Reload darf nur die Host-Datei über `stdin` laden, siehe §4.2.
 
 **DNS:** Vom Owner bei Namecheap gesetzt; Agenten haben keinen Zugang. Server-IP verifiziert: `167.233.152.17` (Schnittstelle `eth0`, SSH-Ziel, `gemeinsam1.com`).
 
@@ -132,6 +132,30 @@ Das Skript prüft erst DNS, legt das Passwort an und trägt den Block samt Passw
 **Wichtig:** Das ist eine Änderung am gemeinsamen Caddy von `gemeinsam1`. Sie ist durch den Auftrag vom 03.11. gedeckt, aber erst mit Hostname ausführbar. Der Hostname wird über Zertifikatslogs öffentlich sichtbar, nur nicht der Inhalt. Überschreibt ein `gemeinsam1`-Deployment die Caddy-Datei, fällt der Zugang weg; die Seite wird dadurch nicht offen.
 
 **Geprüft am 03.11. mit Wegwerf-Caddy** (eigenes Zertifikat, eigenes Passwort, entfernt): ohne und mit falschem Passwort überall 401, intern 404, `noindex`; Kernablauf und schmale Ansichten in iPhone-WebKit und Android bestanden, über HTTPS mit sicheren Cookies. Der Block ist gegen den echten Caddy gültig (`caddy validate`), dessen Datei blieb unverändert (Prüfsumme). Die Staging-App hängt seitdem zusätzlich am internen Netz `amanah_staging_proxy`, dem sonst niemand angehört. **Echter Lauf mit Let's-Encrypt-Zertifikat: `NOT_RUN`.** Ablauf für Geräte: [smartphone-abnahme-kurz.md](../release/smartphone-abnahme-kurz.md).
+
+### 4.2 Gemeinsamer Caddy: eine Konfiguration für Reload und Start
+
+**Befund 03.11.:** Caddy startet mit `caddy run --config /etc/caddy/Caddyfile`, ohne `--resume`. Die Datei kommt als Einzeldatei-Mount aus `/opt/gemeinsam1/deploy/Caddyfile`. Der Host-Pfad wurde am 05.07. durch eine neue Datei ersetzt; der Container hängt seitdem an der alten mit der Produktionsroute.
+
+| Weg | Lädt |
+|---|---|
+| Neustart oder Neuerstellung | die Host-Datei unter dem aktuellen Pfad. Probe: Datei per `mv` ersetzt, `docker restart` übernimmt sie |
+| `caddy reload --config /etc/caddy/Caddyfile` | die Datei im Mount; **solange die Altdatei dort liegt, öffnet das die Route** |
+| `caddy reload --config /dev/stdin … < Host-Datei` | immer die Host-Datei, der zulässige Weg |
+| `scripts/install-shared-caddy.sh` | hängt die Produktionsroute an; verweigert nun ohne `AMANAH_PRODUCTION_ROUTE_RELEASED=yes`. Die ältere Kopie in `/opt/amanah-app/scripts/` ist bewusst unverändert und bleibt ungesperrt |
+| Gemeinsam1 `deploy-release.sh` | fasst Caddy nicht an (`--no-deps backend frontend`) |
+| Gemeinsam1 `deploy-production.sh` (Altweg) | Rsync kann die Host-Datei ersetzen: Staging-Block weg, Mount wieder alt; bei einer Neuerstellung von Caddy fehlt zudem das Staging-Netz. Keine Produktionsroute, aber die Prüfung schlägt an |
+
+**Einzige saubere Abhilfe:** ein Neustart. Ein Reload kann den Mount nicht ändern.
+
+```bash
+ssh gemeinsam1-prod /opt/amanah-staging/scripts/shared-caddy-restart.sh prepare    # nur prüfen und sichern
+ssh gemeinsam1-prod CONFIRM_SHARED_RESTART=yes /opt/amanah-staging/scripts/shared-caddy-restart.sh run    # nur nach Owner-Freigabe
+```
+
+**Stand:** Vorbereitet, Sicherung `/opt/amanah-staging/rollback/caddy-20261103-164007/`. **Neustart: `NOT_RUN`, Owner-Freigabe offen.** Bis dahin meldet `prod-check` zu Recht `FAIL proxy container sees the host file`.
+
+**Bleibt auch danach:** Der Einzeldatei-Mount besteht weiter. Wird die Host-Datei erneut per `mv` oder Rsync ersetzt, entsteht derselbe Zustand; die Prüfung meldet ihn binnen 15 Minuten, vorerst nur im lokalen Protokoll. Änderungen an der Datei nur an Ort und Stelle schreiben (`cat neu > Datei`). Ein Verzeichnis-Mount würde das beheben, verlangt aber eine Änderung an der Compose-Datei von Gemeinsam1 und eine Neuerstellung.
 
 ## 5. Plattenplatz
 

@@ -350,13 +350,89 @@ describe("staging-https.sh: the shared proxy", () => {
   it("checks the running configuration for the production route after every reload", () => {
     expect(script).toMatch(/amanah-app:3000\|amanahordner/);
   });
+});
 
-  it("the production check keeps failing on anything but the staging host and upstream", () => {
-    const filter = readFileSync("scripts/verify-production-image.sh", "utf8").match(/\| (sed -e .*?\| grep -c amanah)\)/)![1];
-    const count = (config: string) => spawnSync("bash", ["-c", `${filter} || true`], { input: config, encoding: "utf8" }).stdout.trim();
-    expect(count('"amanah-test.mscisystems.com" "dial":"amanah-staging-app:3000"')).toBe("0");
-    expect(count('"amanahordner.de"')).toBe("1");
-    expect(count('"dial":"amanah-app:3000"')).toBe("1");
-    expect(count('"amanah-test.mscisystems.com" "dial":"amanah-app:3000"')).toBe("1");
+describe("caddy-route-policy.py: what may run on the shared proxy", () => {
+  const policy = (config: unknown, ...denied: string[]) =>
+    spawnSync("python3", ["scripts/caddy-route-policy.py", ...denied], {
+      input: typeof config === "string" ? config : JSON.stringify(config),
+      encoding: "utf8",
+    });
+  const proxy = (dial: string) => ({ handler: "reverse_proxy", upstreams: [{ dial }] });
+  const auth = { handler: "authentication", providers: { http_basic: {} } };
+  const site = (host: string, ...routes: object[]) => ({
+    match: [{ host: [host] }],
+    handle: [{ handler: "subroute", routes }],
+    terminal: true,
+  });
+  const gemeinsam1 = site("gemeinsam1.com", { handle: [proxy("frontend:3000")] });
+  const staging = (dial = "amanah-staging-app:3000", ...before: object[]) =>
+    site("amanah-test.mscisystems.com", ...before, { handle: [proxy(dial)] });
+  const config = (...routes: object[]) => ({ apps: { http: { servers: { srv0: { routes } } } } });
+  const protectedStaging = staging(undefined, { handle: [auth] });
+
+  it("accepts gemeinsam1 with or without the protected staging route", () => {
+    expect(policy(config(gemeinsam1, protectedStaging)).stdout.trim()).toBe("ok");
+    expect(policy(config(gemeinsam1)).status).toBe(0);
+  });
+
+  it.each([
+    ["an added production route", config(gemeinsam1, protectedStaging, site("amanahordner.de", { handle: [proxy("amanah-app:3000")] })), "amanah-host"],
+    ["the staging host on the production app", config(staging("amanah-app:3000", { handle: [auth] })), "staging-wrong-upstream"],
+    ["the staging host on a foreign address", config(staging("10.0.0.5:3000", { handle: [auth] })), "staging-wrong-upstream"],
+    ["staging without a password", config(staging()), "staging-without-password"],
+    ["a password only for one path", config(staging(undefined, { match: [{ path: ["/x"] }], handle: [auth] })), "staging-without-password"],
+    ["another site's password", config(site("gemeinsam1.com", { handle: [auth] }), staging()), "staging-without-password"],
+    ["a foreign host on the staging upstream", config(site("offen.example.org", { handle: [proxy("amanah-staging-app:3000")] })), "foreign-host-to-amanah"],
+    ["a foreign host on the production port", config(site("offen.example.org", { handle: [proxy("host.docker.internal:3001")] })), "foreign-host-to-amanah"],
+    ["a route without host to the production app", config({ handle: [proxy("amanah-app:3000")] }), "foreign-host-to-amanah"],
+    ["a redirect to the old domain", config(site("gemeinsam1.com", { handle: [{ handler: "static_response", headers: { Location: ["https://amanahordner.de"] } }] })), "amanah-mention"],
+    ["a certificate policy for the old domain", { ...config(gemeinsam1), apps: { ...config(gemeinsam1).apps, tls: { automation: { policies: [{ subjects: ["amanahordner.de"] }] } } } }, "amanah-mention"],
+  ])("rejects %s", (_name, sample, reason) => {
+    const result = policy(sample);
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain(reason);
+  });
+
+  it("rejects a dial to a denied address, and names no configuration value", () => {
+    const result = policy(config(site("gemeinsam1.com", { handle: [proxy("172.18.0.9:3000")] })), "172.18.0.9");
+    expect(result.stdout.trim()).toBe("denied-address");
+  });
+
+  it.each([["empty input", ""], ["broken JSON", "{"], ["an empty object", {}], ["no routes", config()], ["null", "null"]])(
+    "fails closed on %s",
+    (_name, input) => {
+      const result = policy(input);
+      expect(result.status).toBe(1);
+      expect(result.stdout.trim()).toBe("config-unreadable");
+    },
+  );
+});
+
+describe("the shared proxy cannot quietly go back to the old file", () => {
+  const verify = readFileSync("scripts/verify-production-image.sh", "utf8");
+  const install = readFileSync("scripts/install-shared-caddy.sh", "utf8");
+  const restart = readFileSync("scripts/shared-caddy-restart.sh", "utf8");
+
+  it("the production check reads the running configuration and compares container, host file and running state", () => {
+    expect(verify).toMatch(/wget -qO- http:\/\/127\.0\.0\.1:2019\/config\//);
+    expect(verify).toContain('check "proxy container sees the host file"');
+    expect(verify).toContain('check "proxy runs the host file"');
+    expect(verify).toContain('[ -n "$adapted" ]');
+  });
+
+  it("the old installer refuses without the owner's release and never loads the container's file", () => {
+    const blocked = spawnSync("bash", ["scripts/install-shared-caddy.sh"], { encoding: "utf8", env: { PATH: process.env.PATH } as NodeJS.ProcessEnv });
+    expect(blocked.status).toBe(1);
+    expect(blocked.stderr).toContain("gesperrt");
+    expect(install).not.toMatch(/--config \/etc\/caddy\/Caddyfile/);
+  });
+
+  it("the restart needs the owner's go, keeps the container and stops before it on a failed check", () => {
+    const blocked = spawnSync("bash", ["scripts/shared-caddy-restart.sh", "run"], { encoding: "utf8", env: { PATH: process.env.PATH } as NodeJS.ProcessEnv });
+    expect(blocked.status).toBe(2);
+    expect(restart).toContain("docker restart -t 5");
+    expect(restart).not.toMatch(/^\s*docker compose/m);
+    expect(restart).toMatch(/config_checks\n\s+\[ "\$failed" = 0 \]/);
   });
 });

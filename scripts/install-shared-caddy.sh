@@ -2,6 +2,12 @@
 # Install Amanah block into Gemeinsam1 shared Caddy (non-destructive).
 set -euo pipefail
 
+# Appends the public production route. The route is closed until the owner releases production.
+if [[ "${AMANAH_PRODUCTION_ROUTE_RELEASED:-}" != "yes" ]]; then
+  echo "Abbruch: Die Produktionsroute ist gesperrt (docs/strategy/45). Nur nach Owner-Freigabe mit AMANAH_PRODUCTION_ROUTE_RELEASED=yes." >&2
+  exit 1
+fi
+
 AMANAH_ROOT="${AMANAH_ROOT:-/opt/amanah-app}"
 GEM_ROOT="${GEM_ROOT:-/opt/gemeinsam1}"
 CADDY_FILE="${GEM_ROOT}/deploy/Caddyfile"
@@ -32,8 +38,7 @@ else
   echo "Appended Amanah block to $CADDY_FILE"
 fi
 
-# WARNING: the running gemeinsam1 container still mounts an older file with the closed Amanah route
-# (doc 41 §2). Do not run this against it before the release: it would reopen that route.
-docker exec "$CONTAINER" caddy validate --config /etc/caddy/Caddyfile
-docker exec "$CONTAINER" caddy reload --config /etc/caddy/Caddyfile
+# Through stdin: the file inside the container can be older than the host file (docs/strategy/45 §4.2).
+docker exec -i "$CONTAINER" caddy validate --config /dev/stdin --adapter caddyfile < "$CADDY_FILE"
+docker exec -i "$CONTAINER" caddy reload --config /dev/stdin --adapter caddyfile < "$CADDY_FILE"
 echo "Caddy validate + reload OK"
