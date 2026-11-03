@@ -2,6 +2,8 @@
 
 **Für:** Owner oder beauftragte Testperson. Dauer rund 20 Minuten je Gerät. Vollständige Liste: Doku 43. **Echte Geräte: `NOT_RUN`.** Bestanden sind bisher nur Emulationen.
 
+**Kandidat:** `3d5110f` auf Staging.
+
 **Testlink:** `https://<host>`, liegt erst nach der Einrichtung vor (Doku 45 §4.1).
 
 **Passwortabfrage des Browsers:** Benutzer und Passwort abrufen mit `ssh gemeinsam1-prod cat /opt/amanah-staging/state/https-access`. Nicht per Chat oder Mail weitergeben.

@@ -32,7 +32,8 @@ encrypted_rows() {
   echo "$n"
 }
 
-TARGET="$(compose config --images app 2>/dev/null)"
+# As JSON: "config --images" lists the images of every service, whatever is asked for.
+TARGET="$(compose config --format json 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["services"]["app"]["image"])' 2>/dev/null)"
 [ -n "$TARGET" ] || { echo "UNBEKANNT: Compose nennt kein Ziel-Image."; exit 2; }
 docker image inspect "$TARGET" >/dev/null 2>&1 </dev/null || { echo "UNBEKANNT: Image fehlt auf diesem Host: $TARGET"; exit 2; }
 ROWS="$(encrypted_rows)" || { echo "UNBEKANNT: Zaehlung fehlgeschlagen. Kein Wechsel ohne Klaerung."; exit 2; }

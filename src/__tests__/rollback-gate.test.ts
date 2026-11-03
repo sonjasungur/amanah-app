@@ -30,7 +30,7 @@ case "$1" in
   run) exit ${capable} ;;
   compose)
     case "$*" in
-      *"config --images app"*) echo target-image:1 ;;
+      *"config --format json"*) echo '{"services":{"migrate":{"image":"other:1"},"app":{"image":"target-image:1"}}}' ;;
       *" run "*) exit ${keyCheck} ;;
     esac ;;
 esac

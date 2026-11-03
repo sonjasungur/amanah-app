@@ -1,6 +1,6 @@
-# Produktionsplan für das Release (Stand 03.11.2026, 10:23)
+# Produktionsplan für das Release (Stand 03.11.2026, 12:40)
 
-**Für:** Owner und Betrieb. **Gesperrt bis zur gesonderten Freigabe:** Merge, Produktionsrelease, Produktionsmigration, Route, Registrierung. Kandidat: `8668188`.
+**Für:** Owner und Betrieb. **Gesperrt bis zur gesonderten Freigabe:** Merge, Produktionsrelease, Produktionsmigration, Route, Registrierung. Kandidat: `3d5110f`.
 
 ## Vorbedingungen
 

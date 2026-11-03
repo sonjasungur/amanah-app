@@ -1,4 +1,77 @@
-# Testnachweis Release-Kandidat `8668188` (03.11.2026)
+# Testnachweis Release-Kandidat `3d5110f` (03.11.2026)
+
+**Ein grüner Lauf ist hier keine Abnahme:** Echte Geräte, echter Mailversand und fachliche Freigaben fehlen. Dieser Kandidat behebt den Datenverlust bei Schlüsselfehlern; die echten Gerätetests laufen auf ihm.
+
+**Image auf Staging:** `amanah-staging-app:3d5110f`, Image-ID `sha256:20a8854546f569c0fb54500b2eb20599e416f388f4889074304a9f5ddf65164b`, sauber aus `git archive` gebaut. Schichten-Prüfsumme lokal und auf dem Server gleich (`b548c42c…`). Keine neue Migration.
+
+## Release-Check
+
+Befehl `scripts/testing/release-check.sh`, 11:53 bis 12:12 Uhr, auf `b91972a`. **Der Lauf endete mit „FEHLGESCHLAGEN“**: zwei Schritte, beide durch Tests unter Last, nicht durch das Produkt. `3d5110f` ändert nur diese beiden Testdateien. Wiederholt wurden nur die zwei Schritte, nicht der Gesamtlauf.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Typprüfung, ESLint | 0 Fehler (1 fremde Warnung in `docs/qa/`) |
+| Vitest | Lauf 1: 1 Fehler, Zeitlimit im Test mit echtem Scanner. **Wiederholt auf `3d5110f`: 888 bestanden, 30 übersprungen** |
+| PostgreSQL | 37 von 37 |
+| Migrations-Diff, Migrationsprobe | keine Differenz; 1 auf 6, Daten erhalten |
+| API-Regression Desktop / Mobil | 34 / 25 bestanden, Mobil 9 übersprungen |
+| Hydration, Konto, Verlauf, Plus | je Desktop und Mobil bestanden |
+| Kernablauf Konto bis Löschung | Desktop, Mobil, iPhone-WebKit, Android bestanden |
+| **Schlüsselfehler im Browser** (`e2e/folder-unreadable.spec.ts`) | Desktop, Mobil bestanden |
+| Schmale Ansichten bis 320 px | iPhone-WebKit, Android bestanden |
+| Restore-Übung Löschprotokoll | bestanden |
+| Standard-, Flags-, E2E-Build | Exit 0; Flags 8 bestanden |
+| Playwright gesamt, lokaler Modus | Lauf 1: 1 Fehler, Klick vor der Hydration. **Wiederholt auf `3d5110f`: 297 bestanden, 95 übersprungen, 0 fehlgeschlagen** |
+| Secret-Scan Historie | keine Funde; der Fehlalarm aus `5e6a66a` steht mit Begründung in `.gitleaksignore` |
+| `npm audit` | `NOT_RUN` in dieser Runde; keine Abhängigkeit geändert |
+| Staging, Android-Profil | Kernablauf und schmale Ansichten bestanden, 3 von 3 |
+
+Echte Geräte: `NOT_RUN`. Echtes Zertifikat: `NOT_RUN`.
+
+## Nachweis unveränderter Daten
+
+Probe `scripts/testing/rollback-encryption-probe.sh` auf dem Server, isoliert, synthetisches Konto, Prüfsumme der Zeile vor und nach jedem Versuch.
+
+| Lage | Lesen | Vollständig schreiben | Teiländerung | Ordner leeren | Zeile unverändert |
+|---|---|---|---|---|---|
+| Kein Schlüssel | 503 | 503 | | | ja |
+| Falscher Schlüssel, gleiche Kennung | 503 | 503 | 503 | 503 | ja, Antwortcode `folder_unreadable` |
+| Danach richtiger Schlüssel | 200, alter Stand | | | | ja |
+
+Vor der Korrektur (Kandidat `8668188`): Schreiben 200, Zeile überschrieben, auch der richtige Schlüssel las sie nicht mehr.
+
+**Zusätzlich belegt:**
+- Automatisiert auch für einen entfernten Schlüssel, ein unbekanntes Format, Wiederherstellung einer Version, kostenlose Bereiche und Export; PostgreSQL mit und ohne Verlauf, ganze Zeile und Versionen identisch.
+- Parallele Teiländerungen verlieren nichts.
+- Echter Browser, zwei Server auf einer Datenbank: Hinweis statt leerer Formulare, kein Schreibversuch auch beim Schließen der Seite, Direktaufrufe 503, Zeile identisch. Danach richtiger Schlüssel: Wert da, Speichern funktioniert. Auch ein anderer Ladefehler sperrt das Speichern.
+- Serverlog und Antworten ohne Schlüssel und Inhalte.
+- Das Umschlüsselungswerkzeug meldet einen falschen Schlüssel. Sein bedingtes Update ist als gleichlautende SQL-Anweisung getestet, nicht in einem echten Wettlauf des Skripts.
+
+**Grenzen:** siehe Produktionsplan, „Grenze“ und „Bewusste Ausnahme“. Geprüft wurden keine echten Geräte im Fehlerfall.
+
+## Rollback-Sperre
+
+Echter Lauf auf Staging mit 9 verschlüsselten Zeilen, `rollback-app.sh --apply`:
+
+| Ziel | Ergebnis |
+|---|---|
+| `amanah-staging-app:8668188` (ohne Schreibschutz) | Exit 1, nichts geändert |
+| `amanah-staging-app:f9022d3` | Exit 1, nichts geändert |
+| `amanah-app-app:wissenssperre-dda903c` (heutiges Produktionsimage) | Exit 1, nichts geändert |
+| Image fehlt | Exit 2, nichts geändert |
+| `amanah-staging-app:3d5110f` | Trockenlauf 9 geöffnet, 0 Fehler; gewechselt, gesund, Zeilen-Prüfsumme identisch |
+
+Container-Image und Startzeit blieben bei den Abbrüchen gleich. Der Lauf deckte einen Fehler im Skript auf: Compose nannte alle Images statt nur der App. Das Skript brach dabei sicher ab und ermittelt das Ziel seither über JSON. Dieser Fix liegt nach `3d5110f`, nur im Skript, nicht im Image. Der Weg über die Produktion ist `NOT_RUN`: Das Skript ist dort nicht installiert, das ist Teil des Release-Schritts 7.
+
+**Umgehung:** Compose von Hand bleibt technisch möglich. Darum nennt der Plan nur noch diesen Weg, und Schritt 7 entfernt den alten Stack aus dem Startordner.
+
+## Secret-Scan
+
+`.githooks/pre-commit` und `pre-push` stoppen bei Fund, Scannerabbruch, fehlendem Scanner und fehlender Konfiguration. Getestet mit echtem gitleaks und echtem `git commit` im Wegwerf-Repository: Der Commit mit einem erfundenen Token entsteht nicht, ein sauberer schon. Der Push-Hook ist mit einem Stub-Scanner getestet; echte Pushes dieser Runde liefen über ihn. Korrigiert: `--all` ignorierte Funde in vorgemerkten Änderungen. Der Hook gilt je Klon und lässt sich mit `--no-verify` umgehen; die Prüfung in CI bleibt deshalb bestehen.
+
+---
+
+# Älterer Testnachweis `8668188` (03.11.2026)
 
 **Ein grüner Lauf ist hier keine Abnahme:** Echte Geräte, echter Mailversand und fachliche Freigaben fehlen.
 

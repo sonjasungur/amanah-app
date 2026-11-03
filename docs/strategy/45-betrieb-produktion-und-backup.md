@@ -1,6 +1,6 @@
 # Betrieb: Produktion, Backup, Prüfung, Staging (Stand 03.11.2026, 10:23)
 
-**Für:** Betrieb und Owner. Keine Geheimnisse in diesem Dokument. Produktion: `7d0859b` mit Hotfix (Doku 41). Release-Kandidat: `8668188`, nur auf Staging.
+**Für:** Betrieb und Owner. Keine Geheimnisse in diesem Dokument. Produktion: `7d0859b` mit Hotfix (Doku 41). Release-Kandidat: `3d5110f`, nur auf Staging.
 
 ## 1. Produktion: Ablage
 
@@ -102,7 +102,7 @@ Bei Serverausfall meldet keiner dieser Wege etwas; dafür bräuchte es eine Prü
 
 ## 4. Staging
 
-Läuft mit `amanah-staging-app:8668188`, eigene Datenbank, eigene Netze, Port nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus. Migrationen 6 von 6. Zugang heute: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
+Läuft mit `amanah-staging-app:3d5110f`, eigene Datenbank, eigene Netze, Port nur `127.0.0.1:3201`, nur synthetische Konten, Mail-Outbox, KI aus. Migrationen 6 von 6. Zugang heute: `ssh -N -L 3201:127.0.0.1:3201 gemeinsam1-prod`, dann `http://127.0.0.1:3201`.
 
 ### 4.1 HTTPS-Zugang für Telefone
 
@@ -143,5 +143,6 @@ Betriebsprüfung danach 13 OK, Staging-Health 0 FAIL.
 | Docker-Build-Cache | 13,3 GB, davon 9,6 GB freigebbar | größter Posten, vermutlich überwiegend `gemeinsam1`; nur mit dessen Zustimmung |
 | journald | 1,2 GB | systemweit, `journalctl --vacuum-size=300M` |
 | `amanah-app-app:vor-wissenssperre` | 712 MB (angezeigt) | Archiv liegt in `images/rollback.tar.gz` |
-| `amanah-staging-app:f9022d3` | 591 MB (angezeigt) | Staging-Rollback-Image |
+| `amanah-staging-app:f9022d3` | 591 MB (angezeigt) | Früheres Staging-Image; `rollback-app.sh` lehnt es ab |
+| `amanah-staging-app:8668188` | 593 MB (angezeigt) | Früherer Kandidat; `rollback-app.sh` lehnt es ab, aus Git nachbaubar |
 | ältere `gemeinsam1`-Images | mehrere GB | fremdes Projekt, nicht meine Entscheidung |
