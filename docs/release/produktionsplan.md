@@ -1,4 +1,4 @@
-# Produktionsplan für das Release (Stand 03.11.2026, 12:40)
+# Produktionsplan für das Release (Stand 03.11.2026, 12:26)
 
 **Für:** Owner und Betrieb. **Gesperrt bis zur gesonderten Freigabe:** Merge, Produktionsrelease, Produktionsmigration, Route, Registrierung. Kandidat: `3d5110f`.
 
