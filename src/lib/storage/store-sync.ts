@@ -8,6 +8,7 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-storage";
 import { apiStorageProvider } from "./api-storage-provider";
 import { getActiveStorageLabel } from "./storage-config";
+import { FolderUnreadableError } from "./types";
 
 export type StorageLocationLabel = "local" | "api" | "local-demo";
 
@@ -52,8 +53,27 @@ export function keepLocalOnlySections(remote: AmanahOrdnerData, local: AmanahOrd
   return merged as unknown as AmanahOrdnerData;
 }
 
+/** Whose folder was read in this session. Until then a save could replace what the account holds. */
+let folderReadFor: string | null = null;
+/** After a failed read: the state to compare with, so that what was typed since survives the next read. */
+let unreadBaseline: { userId: string | null; data: AmanahOrdnerData } | null = null;
+/** The last state both sides agreed on. */
+let accountState: AmanahOrdnerData | null = null;
+let runningSync: Promise<void> | null = null;
+
+function isAccountFolderKnown(): boolean {
+  return folderReadFor !== null && folderReadFor === sessionUserId();
+}
+
+function reportFolderUnreadable(error: FolderUnreadableError, baseline: AmanahOrdnerData): void {
+  folderReadFor = null;
+  unreadBaseline = { userId: sessionUserId(), data: baseline };
+  useAmanahStore.setState({ folderProblem: "unreadable", saveStatus: "error", saveError: error.message });
+}
+
 async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
   const result = await saveAmanahData(data);
+  accountState = data;
   useAmanahStore.setState({
     saveStatus: result?.notStored?.length ? "partial" : "saved",
     saveError: null,
@@ -63,6 +83,12 @@ async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
 }
 
 export async function persistStoreChanges(): Promise<void> {
+  if (isRemotePersistenceActive() && !isAccountFolderKnown()) {
+    // A read is running or has failed: never write over what is not known. Reading again keeps new input.
+    await (runningSync ?? syncStoreWithRemoteAfterAuth());
+    return;
+  }
+
   const state = useAmanahStore.getState();
   const data = pickDataFields(state);
 
@@ -83,6 +109,10 @@ export async function persistStoreChanges(): Promise<void> {
       lastSaved: new Date().toISOString(),
     });
   } catch (err) {
+    if (err instanceof FolderUnreadableError) {
+      reportFolderUnreadable(err, accountState ?? data);
+      return;
+    }
     useAmanahStore.setState({
       saveStatus: "error",
       saveError: err instanceof Error ? err.message : "Speichern nicht möglich — erneut versuchen",
@@ -115,7 +145,7 @@ function clearUnsentChange(): void {
  * account state. Larger folders exceed what browsers finish for a leaving page: tried all the same.
  */
 export function saveBeforeLeaving(): void {
-  if (!isRemotePersistenceActive()) return;
+  if (!isRemotePersistenceActive() || !isAccountFolderKnown()) return;
   const data = pickDataFields(useAmanahStore.getState());
   if (!hasMeaningfulLocalData(data)) return;
   // The next page cannot know whether this request arrived, or arrived before it loads the account.
@@ -139,14 +169,39 @@ export async function flushPendingSave(): Promise<void> {
   await persistStoreChanges();
 }
 
-export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
-  if (!isRemotePersistenceActive()) return;
+export function syncStoreWithRemoteAfterAuth(): Promise<void> {
+  if (!isRemotePersistenceActive()) return Promise.resolve();
+  const run = readAndMergeAccountFolder().finally(() => {
+    if (runningSync === run) runningSync = null;
+  });
+  runningSync = run;
+  return run;
+}
 
+async function readAndMergeAccountFolder(): Promise<void> {
+  folderReadFor = null;
   useAmanahStore.setState({ saveStatus: "saving", saveError: null });
-  const atStart = pickDataFields(useAmanahStore.getState());
+  const userId = sessionUserId();
+  const atStart = unreadBaseline?.userId === userId ? unreadBaseline.data : pickDataFields(useAmanahStore.getState());
+
+  let remoteData: AmanahOrdnerData;
+  try {
+    remoteData = await loadAmanahData();
+  } catch (err) {
+    if (err instanceof FolderUnreadableError) {
+      reportFolderUnreadable(err, atStart);
+      return;
+    }
+    unreadBaseline = { userId, data: atStart };
+    useAmanahStore.setState({ folderProblem: "load_failed", saveStatus: "error", saveError: "Daten konnten nicht vom Konto geladen werden." });
+    return;
+  }
+  folderReadFor = userId;
+  unreadBaseline = null;
+  accountState = remoteData;
+  useAmanahStore.setState({ folderProblem: null });
 
   try {
-    const remoteData = await loadAmanahData();
     // Read only now: what was entered while the account data was loading must not be lost.
     const localData = pickDataFields(useAmanahStore.getState());
     if (hasUnsentChange()) {
@@ -192,10 +247,14 @@ export async function syncStoreWithRemoteAfterAuth(): Promise<void> {
     }
 
     useAmanahStore.setState({ saveStatus: "idle", saveError: null });
-  } catch {
+  } catch (err) {
+    if (err instanceof FolderUnreadableError) {
+      reportFolderUnreadable(err, remoteData);
+      return;
+    }
     useAmanahStore.setState({
       saveStatus: "error",
-      saveError: "Daten konnten nicht vom Konto geladen werden.",
+      saveError: err instanceof Error ? err.message : "Speichern nicht möglich — erneut versuchen",
     });
   }
 }

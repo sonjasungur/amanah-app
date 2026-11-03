@@ -67,6 +67,8 @@ export interface ServerRepository {
   patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData>;
   /** Removes the folder and its whole history. */
   deleteAmanahData(userId: string): Promise<void>;
+  /** Throws DataEncryptionError when a stored folder exists but cannot be opened. */
+  assertFolderReadable(userId: string): Promise<void>;
   /** Newest first, without expired versions. */
   listDataVersions(userId: string): Promise<RepositoryDataVersion[]>;
   /** One version with its content, for its owner. Null when it is not this user's or expired. */

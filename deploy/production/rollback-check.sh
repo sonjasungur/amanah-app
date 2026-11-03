@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Read-only: may the app go back to an image without data encryption? Counts rows, reads no content.
-# Exit 0 allowed, 1 not allowed (encrypted rows exist), 2 unknown.
+# Read-only overview: may the app go back to an image without data encryption? Counts rows, reads no
+# content. Exit 0 allowed, 1 not allowed (encrypted rows exist), 2 unknown.
+# Changing the image goes through rollback-app.sh, which also checks the target image itself.
 #
 #   /opt/amanah-prod/rollback-check.sh
 set -u
@@ -10,7 +11,7 @@ n="$(docker exec "${CONTAINER:-amanah-postgres}" psql -X -At -U "${user:-amanah}
 [[ "$n" =~ ^[0-9]+$ ]] || { echo "UNBEKANNT: Zaehlung fehlgeschlagen. Kein Rollback ohne Klaerung."; exit 2; }
 echo "Verschluesselte Zeilen: $n"
 if [ "$n" -gt 0 ]; then
-  echo "NICHT ERLAUBT: Ein Image ohne Datenverschluesselung zeigt leere Ordner und speichert Klartext (docs/release/produktionsplan.md)."
+  echo "NICHT ERLAUBT: Ein Image ohne Datenverschluesselung zeigt leere Ordner und speichert Klartext. Weg: rollback-app.sh mit kompatiblem Image oder vollstaendiger Restore (docs/release/produktionsplan.md)."
   exit 1
 fi
-echo "ERLAUBT: Keine verschluesselten Zeilen."
+echo "ERLAUBT: Keine verschluesselten Zeilen. Wechsel nur ueber rollback-app.sh."

@@ -58,7 +58,7 @@ App-Änderungen dafür:
 
 | Fall | Vorgehen |
 |---|---|
-| Neue Version fehlerhaft, keine Migration | `AMANAH_RELEASE=<vorheriger SHA>`; Image neu bauen bzw. vorhandenes Tag starten: `up -d app`. Images tragen den Git-SHA (`amanah-staging-app:<sha>`). |
+| Neue Version fehlerhaft, keine Migration | `AMANAH_RELEASE=<vorheriger SHA>`, Start nur über `rollback-app.sh` ([Produktionsplan](../release/produktionsplan.md), Wiederherstellung): Staging enthält verschlüsselte Zeilen, ungeeignete Images werden abgelehnt. Images tragen den Git-SHA (`amanah-staging-app:<sha>`). |
 | Neue Version mit Migration | **Vor** jedem Deploy mit Migration ein Backup ziehen. Rückweg: App stoppen → DB aus diesem Backup in eine frische DB zurückspielen → vorherige Version starten. Prisma-Migrationen werden nicht „rückwärts“ ausgeführt. |
 | Schlüsselproblem | Alter Schlüssel bleibt in `AMANAH_DATA_KEYS`, bis `reencrypt-amanah-data.mjs` alle Datensätze umgeschlüsselt hat (Doku 15). Nie einen Schlüssel entfernen, der noch referenziert wird. |
 | Staging kompromittiert | Container stoppen, Volume löschen (nur synthetische Daten), alle Staging-Secrets neu erzeugen, Basic Auth wechseln. |

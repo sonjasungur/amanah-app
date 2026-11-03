@@ -5,6 +5,7 @@ import { CONSENT_REQUIRED_RESPONSE, hasActiveConsent } from "@/lib/server/consen
 import { isDataHistoryEnabled } from "@/lib/server/data-history";
 import { folderWriteBlocked } from "@/lib/server/email-verification";
 import { folderWriteScope } from "@/lib/server/folder-access";
+import { folderUnreadableResponse } from "@/lib/server/folder-unreadable";
 import { isSameOriginRequest } from "@/lib/server/session-cookie";
 
 /**
@@ -33,7 +34,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const data = await repo.restoreDataVersion(userId, id, scope === "free_sections" ? FREE_ACCOUNT_SECTIONS : undefined);
     if (!data) return NextResponse.json({ error: "Version nicht gefunden." }, { status: 404 });
     return NextResponse.json({ data, lastSaved: data.lastSaved, writeScope: scope });
-  } catch {
-    return NextResponse.json({ error: "Wiederherstellung fehlgeschlagen. Es wurde nichts geändert." }, { status: 500 });
+  } catch (error) {
+    return folderUnreadableResponse(error) ?? NextResponse.json({ error: "Wiederherstellung fehlgeschlagen. Es wurde nichts geändert." }, { status: 500 });
   }
 }

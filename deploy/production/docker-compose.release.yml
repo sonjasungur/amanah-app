@@ -4,6 +4,8 @@
 #
 #   docker compose -f docker-compose.release.yml --env-file release/.env.production.next config -q
 #
+# Change the running image only through rollback-app.sh: it stops an image that cannot handle the data.
+#
 name: amanah-app
 
 services:

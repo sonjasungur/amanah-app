@@ -117,17 +117,22 @@ export class PostgresRepository implements ServerRepository {
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const payload = { ...normalized, lastSaved: new Date().toISOString() };
-    if (isDataHistoryEnabled()) {
-      await prisma.$transaction((tx) => writeWithHistory(tx, userId, payload, "save"));
-      return payload;
-    }
-    await upsertFolder(prisma, userId, payload);
+    await prisma.$transaction(async (tx) => {
+      await lockFolder(tx, userId);
+      await writeFolder(tx, userId, payload, await readFolder(tx, userId), "save");
+    });
     return payload;
   }
 
   async patchAmanahData(userId: string, partial: Partial<AmanahOrdnerData>): Promise<AmanahOrdnerData> {
-    const existing = (await this.getAmanahData(userId)) ?? normalizeData({});
-    return this.saveAmanahData(userId, normalizeData({ ...existing, ...partial }));
+    // Under the lock: a parallel write cannot slip in between reading and merging.
+    return prisma.$transaction(async (tx) => {
+      await lockFolder(tx, userId);
+      const existing = await readFolder(tx, userId);
+      const payload = { ...normalizeData({ ...(existing ?? {}), ...partial }), lastSaved: new Date().toISOString() };
+      await writeFolder(tx, userId, payload, existing, "save");
+      return payload;
+    });
   }
 
   async deleteAmanahData(userId: string): Promise<void> {
@@ -135,6 +140,10 @@ export class PostgresRepository implements ServerRepository {
       prisma.amanahDataVersion.deleteMany({ where: { userId } }),
       prisma.amanahData.deleteMany({ where: { userId } }),
     ]);
+  }
+
+  async assertFolderReadable(userId: string): Promise<void> {
+    await this.getAmanahData(userId);
   }
 
   async listDataVersions(userId: string): Promise<RepositoryDataVersion[]> {
@@ -165,13 +174,12 @@ export class PostgresRepository implements ServerRepository {
     return prisma.$transaction(async (tx) => {
       await lockFolder(tx, userId);
       const target = await tx.amanahDataVersion.findFirst({ where: { id: versionId, userId, createdAt: { gte: retentionCutoff() } } });
-      const current = await tx.amanahData.findUnique({ where: { userId } });
-      if (!target || !current) return null;
+      const folder = await readFolder(tx, userId);
+      if (!target || !folder) return null;
       const rows = await tx.amanahDataVersion.findMany({ where: { userId, seq: { gte: target.seq } }, orderBy: { seq: "desc" } });
       const chain = rows.map((row) => openVersion(row.data, userId, row.seq));
-      const folder = normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId));
       const payload = { ...normalizeData(overlayVersions(folder, chain, allowedSections)), lastSaved: new Date().toISOString() };
-      await writeWithHistory(tx, userId, payload, "restore");
+      await writeFolder(tx, userId, payload, folder, "restore");
       return payload;
     });
   }
@@ -300,11 +308,9 @@ export class PostgresRepository implements ServerRepository {
   }
 }
 
-type FolderClient = Pick<typeof prisma, "amanahData">;
-
-async function upsertFolder(client: FolderClient, userId: string, payload: AmanahOrdnerData): Promise<void> {
+async function upsertFolder(tx: Prisma.TransactionClient, userId: string, payload: AmanahOrdnerData): Promise<void> {
   const stored = sealForStorage(payload, userId) as object;
-  await client.amanahData.upsert({
+  await tx.amanahData.upsert({
     where: { userId },
     create: { userId, schemaVersion: SCHEMA_VERSION, data: stored },
     update: { schemaVersion: SCHEMA_VERSION, data: stored },
@@ -316,16 +322,14 @@ async function lockFolder(tx: Prisma.TransactionClient, userId: string): Promise
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${userId}))`;
 }
 
-async function writeWithHistory(tx: Prisma.TransactionClient, userId: string, payload: AmanahOrdnerData, changeType: ChangeType): Promise<void> {
-  await lockFolder(tx, userId);
+/** Throws when the row exists but cannot be opened: no write path may continue past that. */
+async function readFolder(tx: Prisma.TransactionClient, userId: string): Promise<AmanahOrdnerData | null> {
   const current = await tx.amanahData.findUnique({ where: { userId } });
-  let before: AmanahOrdnerData | null = null;
-  try {
-    before = current ? normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId)) : null;
-  } catch {
-    // An unreadable old row cannot become a version, but must not block saving (as without history).
-  }
-  if (before) {
+  return current ? normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(current.data, userId)) : null;
+}
+
+async function writeFolder(tx: Prisma.TransactionClient, userId: string, payload: AmanahOrdnerData, before: AmanahOrdnerData | null, changeType: ChangeType): Promise<void> {
+  if (before && isDataHistoryEnabled()) {
     const latestRow = await tx.amanahDataVersion.findFirst({ where: { userId }, orderBy: { seq: "desc" } });
     const plan = planHistoryWrite({
       before,

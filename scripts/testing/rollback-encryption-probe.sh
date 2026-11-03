@@ -82,10 +82,13 @@ if curl -s -o /dev/null -m 3 "$API/"; then echo "Schreiben ohne Schluessel: HTTP
 app "$NEW" "$WRONG" || die "Kandidat falscher Schluessel"
 login_; echo "Anmeldung $LOGIN"; echo "falscher Schluessel: HTTP $(get_status "$F"), Klartext: $(grep -c NachMigration "$F"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
 echo "Schreiben falscher Schluessel: HTTP $(echo '{"data":{}}' > "$F"; put_name "$F" FalscherSchluessel), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
+auth; echo "Teilaenderung: HTTP $(curl -s -m 15 -o /dev/null -w '%{http_code}' -X PATCH "${A[@]}" -H 'Content-Type: application/json' -d '{"emergencyCard":{"name":"Teil"}}' "$API/api/amanah"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
+echo "Ordner leeren: HTTP $(curl -s -m 15 -o /dev/null -w '%{http_code}' -X DELETE "${A[@]}" "$API/api/amanah"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
+echo "Antwortcode: $(curl -s -m 15 "${A[@]}" "$API/api/amanah" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("code","<keiner>"))')"
 
 echo "== 4b Mit richtigem Schluessel nach dem Schreiben unter falschem"
 app "$NEW" "$K" || die "Kandidat"
-login_; echo "Lesen: HTTP $(get_status "$F"), Name: $(name_of "$F")"
+login_; echo "Lesen: HTTP $(get_status "$F"), Name: $(name_of "$F"), Zeile unveraendert: $([ "$(row_md5)" = "$REF" ] && echo ja || echo NEIN)"
 
 restore_ref # each following scenario starts from the same backup
 echo "== 5 Kandidat neu gestartet, gleicher Schluessel"

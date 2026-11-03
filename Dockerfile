@@ -50,6 +50,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY scripts/docker-entrypoint.sh ./docker-entrypoint.sh
+# Operator tool: key check and rotation with exactly this image.
+COPY scripts/reencrypt-amanah-data.mjs ./scripts/reencrypt-amanah-data.mjs
+COPY src/lib/server/data-encryption.ts ./src/lib/server/data-encryption.ts
 
 RUN chmod +x ./docker-entrypoint.sh \
   && chown -R nextjs:nodejs /app

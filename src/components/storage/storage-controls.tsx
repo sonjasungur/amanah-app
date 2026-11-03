@@ -21,6 +21,8 @@ export function StorageControls() {
   const fileRef = useRef<HTMLInputElement>(null);
   const storageLabel = useActiveStorageLabel();
   const isApiStorage = storageLabel === "api";
+  // Import, demo data and clearing would act on a folder that is not known right now.
+  if (store.folderProblem) return null;
 
   const handleClearLocal = async () => {
     if (confirm(t("storage.clearConfirm"))) {

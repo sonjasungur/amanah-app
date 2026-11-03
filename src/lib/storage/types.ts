@@ -12,7 +12,21 @@ export interface SaveResult {
 
 export type FolderWriteScope = "full" | "free_sections";
 
+/** Why the account's folder is not known in this browser. Nothing is saved until it is. */
+export type FolderProblem = "unreadable" | "load_failed";
+
 export const STORAGE_KEY = "amanah-ordner-data";
+
+/** Sent by the API when a stored folder exists but cannot be decrypted. */
+export const FOLDER_UNREADABLE_CODE = "folder_unreadable";
+
+/** The account holds data that cannot be read right now: nothing may be saved over it. */
+export class FolderUnreadableError extends Error {
+  constructor(message = "Deine gespeicherten Daten sind gerade nicht lesbar. Sie wurden nicht verändert.") {
+    super(message);
+    this.name = "FolderUnreadableError";
+  }
+}
 
 export interface StorageProvider {
   load(): Promise<AmanahOrdnerData | null>;

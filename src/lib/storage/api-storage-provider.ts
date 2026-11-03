@@ -1,7 +1,13 @@
 import { normalizeData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { hasAuthSession } from "@/lib/auth/api-auth-provider";
-import type { FolderWriteScope, SaveResult, StorageProvider } from "./types";
+import { FOLDER_UNREADABLE_CODE, FolderUnreadableError, type FolderWriteScope, type SaveResult, type StorageProvider } from "./types";
+
+async function throwIfFolderUnreadable(res: Response): Promise<void> {
+  if (res.status !== 503) return;
+  const { code, error } = (await res.clone().json().catch(() => ({}))) as { code?: string; error?: string };
+  if (code === FOLDER_UNREADABLE_CODE) throw new FolderUnreadableError(error);
+}
 
 export class ApiStorageProvider implements StorageProvider {
   private writeScope: FolderWriteScope = "full";
@@ -18,6 +24,7 @@ export class ApiStorageProvider implements StorageProvider {
   async load(): Promise<AmanahOrdnerData | null> {
     const res = await fetch("/api/amanah", { headers: this.getHeaders() });
     if (res.status === 401) return null;
+    await throwIfFolderUnreadable(res);
     if (!res.ok) throw new Error("Laden vom Server fehlgeschlagen.");
     const body = await res.json();
     this.writeScope = body.writeScope === "free_sections" ? "free_sections" : "full";
@@ -30,6 +37,7 @@ export class ApiStorageProvider implements StorageProvider {
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
+    await throwIfFolderUnreadable(res);
     if (res.status === 413 || res.status === 422) {
       const { error } = (await res.json().catch(() => ({}))) as { error?: string };
       throw new Error(error ?? "Die Daten sind zu groß zum Speichern.");
@@ -49,6 +57,7 @@ export class ApiStorageProvider implements StorageProvider {
       method: "DELETE",
       headers: this.getHeaders(),
     });
+    await throwIfFolderUnreadable(res);
     if (!res.ok) throw new Error("Löschen der Server-Daten fehlgeschlagen.");
   }
 }

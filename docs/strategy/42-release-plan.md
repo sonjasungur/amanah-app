@@ -71,7 +71,7 @@ Im Produktionsstand besteht der Fehler weiter und ist nicht sicherheitsrelevant;
 
 ## 6. Testablauf
 
-`scripts/testing/release-check.sh` führt alles aus, was bisher von Hand lief: Typen, Lint, Unit, PostgreSQL, Migrations-Diff, API-Regression, Hydration, Konto, Verlauf, Plus, Restore-Übung, alle Builds, Flags, Playwright, Secret-Scan. Jeder Schritt hat ein Timeout und ein Log; steht ein Log 5 Minuten still, wird der Prozessstatus festgehalten. Die Datenbank ist ein Wegwerf-Container im RAM.
+Commit und Push stoppen bei Secret-Fund oder Scannerfehler über `.githooks/` (einmal je Klon: `git config --local core.hooksPath .githooks`). `scripts/testing/release-check.sh` führt alles aus, was bisher von Hand lief: Typen, Lint, Unit, PostgreSQL, Migrations-Diff, API-Regression, Hydration, Konto, Verlauf, Plus, Restore-Übung, alle Builds, Flags, Playwright, Secret-Scan. Jeder Schritt hat ein Timeout und ein Log; steht ein Log 5 Minuten still, wird der Prozessstatus festgehalten. Die Datenbank ist ein Wegwerf-Container im RAM.
 
 **Migrations-Probelauf:** `scripts/testing/migration-rehearsal.sh` startet bei der einen Migration der Produktion, legt ein synthetisches Konto an und spielt alle 6 ein. Konto und Ordner bleiben, die Altkonto-Regel greift, das Schema passt. Keine der 5 Migrationen enthält zerstörende Befehle laut Stichwortsuche. Bestanden, lokal.
 

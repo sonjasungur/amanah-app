@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Scans exactly what this push sends. Stops on a finding and on any failure of the scan itself.
+# Active with: git config --local core.hooksPath .githooks
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ZERO='^0+$'
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [[ "$local_sha" =~ $ZERO ]] && continue # deleting a branch sends nothing
+  if [[ "$remote_sha" =~ $ZERO ]]; then
+    range="$local_sha --not --remotes"
+  else
+    range="$remote_sha..$local_sha"
+  fi
+  bash "$ROOT/scripts/security/check-secrets.sh" --range "$range"
+done

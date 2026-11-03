@@ -105,8 +105,13 @@ export class MemoryRepository implements ServerRepository {
   async saveAmanahData(userId: string, data: AmanahOrdnerData): Promise<AmanahOrdnerData> {
     const normalized = normalizeData(data);
     const saved = { ...normalized, lastSaved: new Date().toISOString() };
+    await this.assertFolderReadable(userId);
     this.writeFolder(userId, saved, "save");
     return saved;
+  }
+
+  async assertFolderReadable(userId: string): Promise<void> {
+    await this.getAmanahData(userId);
   }
 
   private writeFolder(userId: string, saved: AmanahOrdnerData, changeType: ChangeType): void {
@@ -124,12 +129,7 @@ export class MemoryRepository implements ServerRepository {
     const store = getMemoryStore();
     const stored = store.amanahData.get(userId);
     if (!stored) return;
-    let before: AmanahOrdnerData;
-    try {
-      before = normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(stored, userId));
-    } catch {
-      return;
-    }
+    const before = normalizeData(openFromStorage<Partial<AmanahOrdnerData>>(stored, userId));
     const latest = this.versionsOf(userId)[0];
     const plan = planHistoryWrite({
       before,

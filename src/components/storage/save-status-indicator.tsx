@@ -13,6 +13,7 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
   const saveError = useAmanahStore((s) => s.saveError);
   const lastSaved = useAmanahStore((s) => s.lastSaved);
   const nearLimit = useAmanahStore((s) => s.saveNearLimit);
+  const folderProblem = useAmanahStore((s) => s.folderProblem);
   const { t } = useI18n();
   const storageLabel = useActiveStorageLabel();
 
@@ -36,7 +37,7 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
         : t("storage.location.local")
       : null;
 
-  if (!statusLabel && saveStatus === "idle") return null;
+  if (folderProblem || (!statusLabel && saveStatus === "idle")) return null;
 
   return (
     <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator" aria-live="polite">

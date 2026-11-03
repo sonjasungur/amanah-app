@@ -6,7 +6,7 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { migrateRawData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
-import { STORAGE_KEY, type SaveStatus } from "@/lib/storage/types";
+import { STORAGE_KEY, type FolderProblem, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
 import { persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
 import { pickDataFields } from "@/lib/store/store-utils";
@@ -17,6 +17,7 @@ interface AmanahStore extends AmanahOrdnerData {
   saveStatus: SaveStatus;
   saveError: string | null;
   saveNearLimit: boolean;
+  folderProblem: FolderProblem | null;
   updateField: <K extends keyof AmanahOrdnerData>(section: K, value: AmanahOrdnerData[K]) => void;
   updateNested: (section: string, field: string, value: unknown) => void;
   addDebtAmanah: (item: DebtAmanahItem) => void;
@@ -64,6 +65,7 @@ export const useAmanahStore = create<AmanahStore>()(
       saveStatus: "idle" as SaveStatus,
       saveError: null,
       saveNearLimit: false,
+      folderProblem: null,
       updateField: (section, value) =>
         set((state) => ({ ...state, [section]: value, saveStatus: "saving" as SaveStatus, saveError: null })),
       updateNested: (section, field, value) =>

@@ -18,8 +18,8 @@ Ersetzt nicht die Freigaben in `freigaben.json`. Status: **erledigt**, **blockie
 | Eigener Produktionsschlüssel | **offen, Owner**, Skript bereit | Doku 45 §2.3 |
 | Backup-Fristen, Altbestand | **blockiert, Owner**, Vorschlag da | `backup-aufbewahrung-vorschlag.md` |
 | Release-Env, KI aus, Stack | vorbereitet, unbenutzt; Adresse fehlt | Produktionsplan |
-| Schreiben mit falschem Schlüssel überschreibt Daten | **offen, Produktfehler**, vor dem ersten echten Konto | Produktionsplan |
-| App-Rollback nach Verschlüsselung | nicht sicher, Prüfschritt `rollback-check.sh` | Produktionsplan |
+| Schreiben mit falschem Schlüssel überschreibt Daten | behoben, Tests und Probe | Testnachweis |
+| App-Rollback nach Verschlüsselung | nur über `rollback-app.sh`, bricht bei ungeeignetem Image ab | Produktionsplan |
 | HTTPS-Zugang Staging | vorbereitet, geprüft; **blockiert: Hostname** | Doku 45 §4.1 |
 | Alarmkanal | vorbereitet; **blockiert: Kanalentscheidung** | Doku 45 §3 |
 | Betriebsprüfung automatisch | erledigt, ohne externen Alarm | Doku 45 §3 |

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Stops the commit on a finding and on any failure of the scan itself.
+# Active with: git config --local core.hooksPath .githooks
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+bash "$ROOT/scripts/security/check-tracked-sensitive-files.sh"
+bash "$ROOT/scripts/security/check-secrets.sh" --staged

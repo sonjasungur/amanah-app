@@ -4,6 +4,7 @@ import { migrateRawData } from "@/lib/domain/migration";
 import { SCHEMA_VERSION } from "@/lib/domain/schema";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
 import { hasMeaningfulLocalData, persistStoreChanges, saveBeforeLeaving, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
+import { FolderUnreadableError } from "@/lib/storage/types";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 vi.mock("@/lib/auth/config", () => ({
@@ -218,5 +219,100 @@ describe("syncStoreWithRemoteAfterAuth", () => {
 
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Nur Konto");
     expect(saveAmanahData).not.toHaveBeenCalled();
+  });
+});
+
+describe("account folder that cannot be read", () => {
+  const remote = async () => {
+    const { getStorageMode } = await import("@/lib/auth/config");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
+    const storage = await import("@/lib/storage/amanah-storage");
+    vi.mocked(getStorageMode).mockReturnValue("api");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
+    vi.mocked(storage.saveAmanahData).mockReset();
+    vi.mocked(storage.saveAmanahData).mockResolvedValue({ notStored: [], nearLimit: false });
+    vi.mocked(storage.loadAmanahData).mockReset();
+    localStorage.removeItem("amanah-unsent-change");
+    useAmanahStore.setState({ ...defaultAmanahData, saveStatus: "idle", saveError: null, lastSaved: null, folderProblem: null });
+    return storage;
+  };
+  const type = (name: string) => useAmanahStore.getState().updateField("emergencyCard", { ...defaultAmanahData.emergencyCard, name });
+  const account = (name: string) => ({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name } });
+
+  it.each([
+    ["key problem", new FolderUnreadableError(), "unreadable"],
+    ["any other failed read", new Error("Laden vom Server fehlgeschlagen."), "load_failed"],
+  ])("%s: the empty state is not taken for a new folder and nothing is written", async (_name, failure, problem) => {
+    const { loadAmanahData, saveAmanahData } = await remote();
+    const fetchMock = vi.fn(async () => new Response("{}"));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.mocked(loadAmanahData).mockRejectedValue(failure);
+
+    await syncStoreWithRemoteAfterAuth();
+    expect(useAmanahStore.getState().folderProblem).toBe(problem);
+
+    type("Im Browser getippt");
+    await persistStoreChanges();
+    saveBeforeLeaving();
+    expect(saveAmanahData).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+    expect(useAmanahStore.getState().folderProblem).toBe(problem);
+    vi.unstubAllGlobals();
+  });
+
+  it("once readable again the account's data returns, with what was typed since on top, and saving resumes", async () => {
+    const { loadAmanahData, saveAmanahData } = await remote();
+    vi.mocked(loadAmanahData).mockRejectedValueOnce(new FolderUnreadableError());
+    await syncStoreWithRemoteAfterAuth();
+    useAmanahStore.getState().updateField("userProfile", { ...defaultAmanahData.userProfile, name: "Waehrenddessen" });
+
+    vi.mocked(loadAmanahData).mockResolvedValueOnce(account("Aus dem Konto"));
+    await syncStoreWithRemoteAfterAuth();
+    const state = useAmanahStore.getState();
+    expect(state.folderProblem).toBeNull();
+    expect(state.emergencyCard.name).toBe("Aus dem Konto");
+    expect(state.userProfile.name).toBe("Waehrenddessen");
+    expect(vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0].emergencyCard.name).toBe("Aus dem Konto");
+
+    type("Regulaer");
+    useAmanahStore.setState({ saveStatus: "saving" });
+    await persistStoreChanges();
+    expect(vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0].emergencyCard.name).toBe("Regulaer");
+    expect(useAmanahStore.getState().saveStatus).toBe("saved");
+  });
+
+  it("a save rejected for this reason stops automatic saving until a read succeeds", async () => {
+    const { loadAmanahData, saveAmanahData } = await remote();
+    vi.mocked(loadAmanahData).mockResolvedValueOnce(account("Aus dem Konto"));
+    await syncStoreWithRemoteAfterAuth();
+
+    vi.mocked(saveAmanahData).mockRejectedValueOnce(new FolderUnreadableError());
+    type("Abgelehnt");
+    await persistStoreChanges();
+    expect(useAmanahStore.getState().folderProblem).toBe("unreadable");
+    vi.mocked(saveAmanahData).mockClear();
+
+    vi.mocked(loadAmanahData).mockRejectedValue(new FolderUnreadableError());
+    type("Nochmal");
+    await persistStoreChanges();
+    saveBeforeLeaving();
+    expect(saveAmanahData).not.toHaveBeenCalled();
+    expect(useAmanahStore.getState().folderProblem).toBe("unreadable");
+  });
+
+  it("the API answer is recognised on load and on save, and other 503 answers stay plain failures", async () => {
+    const { ApiStorageProvider } = await import("@/lib/storage/api-storage-provider");
+    const { hasAuthSession } = await import("@/lib/auth/api-auth-provider");
+    vi.mocked(hasAuthSession).mockReturnValue(true);
+    const provider = new ApiStorageProvider();
+    const answer = () => new Response(JSON.stringify({ code: "folder_unreadable", error: "Nicht lesbar." }), { status: 503 });
+    vi.stubGlobal("fetch", vi.fn(async () => answer()));
+    await expect(provider.load()).rejects.toBeInstanceOf(FolderUnreadableError);
+    await expect(provider.save(defaultAmanahData)).rejects.toBeInstanceOf(FolderUnreadableError);
+    await expect(provider.clear()).rejects.toBeInstanceOf(FolderUnreadableError);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("gateway", { status: 503 })));
+    await expect(provider.load()).rejects.not.toBeInstanceOf(FolderUnreadableError);
+    vi.unstubAllGlobals();
   });
 });

@@ -100,6 +100,13 @@ export function isEncryptedEnvelope(value: unknown): value is EncryptedEnvelope 
   return Boolean(value && typeof value === "object" && (value as { $enc?: unknown }).$enc === ENVELOPE_FORMAT);
 }
 
+/** A sealed value in a format this version does not know is still sealed: never read it as plaintext. */
+function assertKnownFormat(value: unknown): void {
+  if (value && typeof value === "object" && "$enc" in value && !isEncryptedEnvelope(value)) {
+    throw new DataEncryptionError("Stored data has an unknown encryption format.");
+  }
+}
+
 export function encryptJson(value: unknown, ownerId: string, keyring: Keyring): EncryptedEnvelope {
   const kek = keyring.keys.get(keyring.active)!;
   const dek = randomBytes(32);
@@ -152,8 +159,11 @@ export function reencryptStoredValue(
   ownerId: string,
   keyring: Keyring
 ): { action: ReencryptAction; value: unknown } {
+  assertKnownFormat(stored);
   if (!isEncryptedEnvelope(stored)) return { action: "encrypt_plaintext", value: encryptJson(stored, ownerId, keyring) };
   if (stored.kid !== keyring.active) return { action: "rewrap", value: rewrapEnvelope(stored, ownerId, keyring) };
+  // Opened on purpose: a dry run then also proves that the configured key is the right one.
+  decryptJson(stored, ownerId, keyring);
   return { action: "unchanged", value: stored };
 }
 
@@ -161,7 +171,8 @@ export function reencryptStoredValue(
  * Storage boundary used by the repositories.
  * Writes are encrypted whenever keys are configured; without keys, writes fail if
  * encryption is required. Legacy plaintext rows are still readable and become
- * encrypted on the next write.
+ * encrypted on the next write. Every failure here is a DataEncryptionError: a row that
+ * cannot be opened is unreadable, never empty, and must not be written over.
  */
 export function sealForStorage(value: unknown, ownerId: string, env: NodeJS.ProcessEnv = process.env): unknown {
   const keyring = parseKeyring(env);
@@ -171,6 +182,7 @@ export function sealForStorage(value: unknown, ownerId: string, env: NodeJS.Proc
 }
 
 export function openFromStorage<T = unknown>(stored: unknown, ownerId: string, env: NodeJS.ProcessEnv = process.env): T {
+  assertKnownFormat(stored);
   if (!isEncryptedEnvelope(stored)) return stored as T;
   const keyring = parseKeyring(env);
   if (!keyring) throw new DataEncryptionError("Encrypted data found but AMANAH_DATA_KEYS is not set.");

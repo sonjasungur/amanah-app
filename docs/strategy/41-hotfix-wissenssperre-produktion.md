@@ -208,6 +208,8 @@ Datenbank und Volumes bleiben unberührt, die Route bleibt geschlossen. Ein Roll
 
 ### Rollback (Route bleibt geschlossen)
 
+> **Gilt nur vor dem Release.** Sobald verschlüsselte Zeilen existieren, ist dieser Weg gesperrt; jeder Imagewechsel läuft dann über `rollback-app.sh` ([Produktionsplan](../release/produktionsplan.md), Wiederherstellung).
+
 Zurück auf die bisherige Compose-Struktur; `latest` zeigt weiter auf den Hotfix, die Texte bleiben also gesperrt:
 
 ```bash

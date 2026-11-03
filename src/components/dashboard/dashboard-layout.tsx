@@ -18,7 +18,7 @@ function isActive(pathname: string, href: string): boolean {
 
 /** The sidebar is hidden on small screens, but a save problem must never stay unseen. */
 function MobileSaveProblem() {
-  const problem = useAmanahStore((s) => s.saveStatus === "error" || s.saveStatus === "partial" || s.saveNearLimit);
+  const problem = useAmanahStore((s) => !s.folderProblem && (s.saveStatus === "error" || s.saveStatus === "partial" || s.saveNearLimit));
   if (!problem) return null;
   return <SaveStatusIndicator className="lg:hidden no-print sticky top-16 z-10 mb-4 rounded-xl border border-border bg-card p-3 shadow-sm" />;
 }

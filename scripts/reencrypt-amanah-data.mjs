@@ -2,7 +2,8 @@
 /**
  * Encrypts legacy plaintext rows in amanah_data and amanah_data_versions and re-wraps rows to the active key.
  *
- * Default is a dry run (counts only). Writing requires BOTH:
+ * Default is a dry run (counts only), which also opens every row: run it after any key change.
+ * Writing requires BOTH:
  *   --apply   and   AMANAH_REENCRYPT_CONFIRM=yes
  * Never run against production without a backup and owner approval.
  * Optional: AMANAH_REENCRYPT_USER_IDS="id1,id2" limits the run to these users.
@@ -29,7 +30,7 @@ if (!keyring) {
 // Plain SQL via pg: only these tables are touched, independent of the generated Prisma client.
 const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5_000 });
 await client.connect();
-const counts = { encrypt_plaintext: 0, rewrap: 0, unchanged: 0, failed: 0 };
+const counts = { encrypt_plaintext: 0, rewrap: 0, unchanged: 0, failed: 0, changed_meanwhile: 0 };
 try {
   const onlyUsers = process.env.AMANAH_REENCRYPT_USER_IDS?.split(",").map((s) => s.trim()).filter(Boolean);
   const { rows: [{ versions }] } = await client.query("SELECT to_regclass('amanah_data_versions') AS versions");
@@ -40,11 +41,17 @@ try {
     for (const row of rows) {
       try {
         const { action, value } = reencryptStoredValue(row.data, row.user_id, keyring);
-        counts[action] += 1;
         if (apply && action !== "unchanged") {
           const touch = table === "amanah_data" ? ", updated_at = now()" : "";
-          await client.query(`UPDATE ${table} SET data = $1${touch} WHERE id = $2`, [JSON.stringify(value), row.id]);
+          // Only if the row still is what was read: a save made since then must survive this run.
+          const { rowCount } = await client.query(`UPDATE ${table} SET data = $1${touch} WHERE id = $2 AND data = $3::jsonb`, [JSON.stringify(value), row.id, JSON.stringify(row.data)]);
+          if (rowCount !== 1) {
+            counts.changed_meanwhile += 1;
+            console.error(`✗ row ${row.id}: changed during this run, left alone. Run again.`);
+            continue;
+          }
         }
+        counts[action] += 1;
       } catch {
         counts.failed += 1;
         console.error(`✗ row ${row.id}: could not be processed (wrong key or damaged data)`);
@@ -52,7 +59,7 @@ try {
     }
   }
   console.log(`${apply ? "applied" : "dry run"} · active key ${keyring.active} ·`, JSON.stringify(counts));
-  process.exitCode = counts.failed > 0 ? 1 : 0;
+  process.exitCode = counts.failed + counts.changed_meanwhile > 0 ? 1 : 0;
 } finally {
   await client.end();
 }

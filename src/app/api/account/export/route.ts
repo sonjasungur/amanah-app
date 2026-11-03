@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUserId, getServerRepository } from "@/lib/server/auth-utils";
+import { folderUnreadableResponse } from "@/lib/server/folder-unreadable";
 
 /** Art. 15 / 20 DSGVO: everything stored for the account, machine-readable. */
 export async function GET(request: Request) {
@@ -12,6 +13,15 @@ export async function GET(request: Request) {
   const user = await repo.getUserById(userId);
   if (!user) {
     return NextResponse.json({ error: "Benutzer nicht gefunden." }, { status: 404 });
+  }
+
+  try {
+    await repo.assertFolderReadable(userId);
+  } catch (error) {
+    // An export without the folder would look complete.
+    const unreadable = folderUnreadableResponse(error);
+    if (unreadable) return unreadable;
+    throw error;
   }
 
   const body = {

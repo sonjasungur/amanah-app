@@ -71,6 +71,7 @@ browser_spec free "$BILLING FREE_ASSET_E2E=true" "e2e/free-asset-account.spec.ts
 browser_spec history "$BILLING DATA_HISTORY_E2E=true" "e2e/data-history.spec.ts"
 browser_spec plus "$BILLING PLUS_TARIFF_E2E=true" "e2e/plus-tariff-account.spec.ts"
 browser_spec core "RELEASE_E2E=true" "e2e/release-core-flows.spec.ts"
+browser_spec keyfault "FOLDER_FAULT_E2E=true" "e2e/folder-unreadable.spec.ts"
 
 # Phone profiles, WebKit needs system libraries: runs in the official image, nothing on the host.
 mobile_project() {
