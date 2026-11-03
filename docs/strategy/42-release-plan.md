@@ -1,6 +1,6 @@
 # Plan für das reguläre Release (Stand 02.11.2026)
 
-**Für:** Owner, Prüfer, Betrieb. **Stand:** Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix, gepinnt und vom `gemeinsam1`-Netz getrennt ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
+**Für:** Owner, Prüfer, Betrieb. **Stand 03.11.:** Kandidat `8668188` auf Staging geprüft: [Testnachweis](../release/testnachweis-kandidat.md), [Produktionsplan](../release/produktionsplan.md), [Checkliste](../release/RELEASE-CHECKLISTE.md). Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix, gepinnt und vom `gemeinsam1`-Netz getrennt ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
 
 Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment und jede Veröffentlichung brauchen je eine eigene Owner-Freigabe.
 
@@ -13,7 +13,7 @@ Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment 
 | 3 | Netztrennung zu `gemeinsam1` | **in Produktion umgesetzt** (Doku 41 §6) | beim Release eigenes Proxy-Netz |
 | 4 | Ungeprüfte Modultexte | **lokal gesperrt** (Owner-Entscheidung) | Fachprüfung |
 | 5 | Hydrationsfehler #418 | **im Branch behoben** | Ausrollen |
-| 6 | Testablauf mit isolierter Datenbank | **vorbereitet** (`scripts/testing/release-check.sh`) | Lauf auf dem Staging-Server |
+| 6 | Testablauf mit isolierter Datenbank | **erledigt** (`scripts/testing/release-check.sh`, Staging, Probelauf) | wiederholen bei neuem Commit |
 | 7 | Smartphone-Abnahme | **vorbereitet** ([Doku 43](43-smartphone-abnahme.md)) | Durchführung durch den Owner |
 | 8 | Externe Freigaben verbindlich | **umgesetzt** (`docs/release/freigaben.json`) | Alle 6 Freigaben stehen aus |
 
@@ -75,7 +75,7 @@ Im Produktionsstand besteht der Fehler weiter und ist nicht sicherheitsrelevant;
 
 **Migrations-Probelauf:** `scripts/testing/migration-rehearsal.sh` startet bei der einen Migration der Produktion, legt ein synthetisches Konto an und spielt alle 6 ein. Konto und Ordner bleiben, die Altkonto-Regel greift, das Schema passt. Keine der 5 Migrationen enthält zerstörende Befehle laut Stichwortsuche. Bestanden, lokal.
 
-**Isolierte Staging-Prüfung, geplant, braucht Freigabe:**
+**Isolierte Staging-Prüfung, am 03.11.2026 durchgeführt (Ergebnis: Doku 45 §4, Produktionsplan):**
 
 1. `df -h /` auf dem Server; Build lokal, Übertragung mit Prüfsumme wie beim Hotfix.
 2. Eigene Instanz neben dem bestehenden Staging: eigener Name, eigene Datenbank im RAM, eigenes internes Netz, nur `127.0.0.1`, Speicher und CPU begrenzt.
@@ -84,7 +84,7 @@ Im Produktionsstand besteht der Fehler weiter und ist nicht sicherheitsrelevant;
 5. Rollback-Probe auf den Hotfix mit gesichertem Datenbankstand; Migrationen sind nicht automatisch umkehrbar, also Restore prüfen.
 6. Instanz vollständig entfernen; bestehendes Staging und seine Datenbank bleiben unberührt.
 
-**Nicht geklärt:** Der Stand des bestehenden Staging (`f9022d3`) wird nicht geändert. Ob es danach auf das Release gehoben wird, ist eine eigene Entscheidung.
+Das bestehende Staging läuft nach Owner-Auftrag vom 03.11. ebenfalls auf dem Kandidaten.
 
 ## 7. Smartphone
 

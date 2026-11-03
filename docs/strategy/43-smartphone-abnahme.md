@@ -2,7 +2,9 @@
 
 **Für:** Owner oder beauftragte Testperson, ohne technische Vorkenntnisse. **Voraussetzung:** Testumgebung mit synthetischen Daten; keine echten persönlichen Angaben eintragen. Zugang und Testadresse nennt der Betrieb.
 
-Automatisiert läuft bisher nur das Chromium-Mobilprofil. Echte Geräte, Safari und Tastaturen deckt nur dieser Test ab.
+**Stand 03.11.2026: echte Geräte `NOT_RUN`.** Automatisiert bestanden sind iPhone-13-Profil (WebKit) und Pixel-7-Profil (Chromium): `playwright.mobile.config.ts`, Kernablauf, schmale Ansichten bis 320 px, Menü, Formulare, Dialog, Download. Emulation ersetzt keine Geräteabnahme: Echtes Safari, Bildschirmtastatur, Bildschirmleser und HTTPS deckt nur dieser Test ab.
+
+**Kurzablauf (rund 20 Minuten je Gerät):** Punkte 1, 4, 5, 8, 10, 12, 13, 16, 17, 18, 19. Die übrigen Punkte vor dem Release.
 
 ## Vorbereitung durch den Betrieb
 

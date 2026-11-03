@@ -182,15 +182,15 @@ Datenbank und Volumes bleiben unberührt, die Route bleibt geschlossen. Ein Roll
 | Unveränderliche Referenz | [`deploy/production/docker-compose.pinned.yml`](../../deploy/production/docker-compose.pinned.yml), auf dem Server `/opt/amanah-prod/`, Image per Digest | `latest` spielt keine Rolle mehr |
 | Kein Build möglich | kein `build`-Abschnitt, `pull_policy: never` | `--build` baut nichts |
 | Alter Ordner startet nicht mehr | `/opt/amanah-app/.env.production` enthält nur noch `POSTGRES_USER` und `POSTGRES_DB` | Der alte Befehl bricht auf jedem Commit ab, weil `DATABASE_URL` fehlt |
-| Backups laufen weiter | Der Cron nutzt weiter `/opt/amanah-app/scripts/backup-postgres.sh`, das nur diese beiden Werte braucht | keine Änderung am Crontab; mit der reduzierten Datei geprüft |
+| Backups | Seit 03.11. verschlüsselt aus `/opt/amanah-prod`, siehe [Doku 45](45-betrieb-produktion-und-backup.md) | Crontab angepasst und geprüft |
 | Bilder geschützt | Tags bleiben; `images/hotfix.tar.gz` und `images/rollback.tar.gz` mit `SHA256SUMS`, Rechte 400 | nach `docker image prune -a` per `docker load` wiederherstellbar |
 | Konfiguration gesichert | `config-vorher/`: vollständige Env-Datei, alte Compose-Dateien, Netze | Rollback ohne Rekonstruktion |
-| Kontrolle | `/opt/amanah-prod/verify-production-image.sh`, nur lesend | Meldet Abweichungen, läuft aber nicht automatisch |
+| Kontrolle | `/opt/amanah-prod/verify-production-image.sh`, nur lesend | seit 03.11. alle 15 Minuten, Doku 45 §3 |
 | Netztrennung (Doku 29 §6) | App nur noch im Netz `amanah-app_amanah_internal` | Aus der App sind `gemeinsam1`-Dienste nicht mehr auflösbar |
 
 **Abweichung vom Entwurf:** Der Entwurf wollte `.env.production` im alten Ordner löschen. Die Vorprüfung zeigte, dass der nächtliche Backup-Cron sie braucht; die Backups wären still ausgefallen. Deshalb bleibt eine reduzierte Datei. Ein früherer Entwurf der Compose-Datei hätte außerdem ein leeres Volume angelegt; das fand ein Trockenlauf vor der Installation.
 
-**Bleibt möglich:** Wer absichtlich die Umgebung setzt oder einen Container von Hand startet, wird nicht aufgehalten. Der Schutz gilt gegen Versehen, nicht gegen Absicht. Auch `.env.production.backup.20260705-145025` im alten Ordner enthält noch vollständige Werte; wer sie gezielt angibt, umgeht die Sperre.
+**Bleibt möglich:** Wer absichtlich die Umgebung setzt oder einen Container von Hand startet, wird nicht aufgehalten. Der Schutz gilt gegen Versehen, nicht gegen Absicht. Die alte Secret-Kopie im Quellordner ist seit 03.11. entfernt.
 
 ### Nachprüfung
 

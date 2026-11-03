@@ -2,6 +2,8 @@
 
 **Für:** Owner und Betrieb. **Stand:** Der Code ist vorbereitet. Marke, Domain und Mailanbieter legt der Owner fest ([Doku 33](33-marken-und-domainvorrecherche.md), [Doku 34](34-namensfindung.md)); Agenten entscheiden hier nichts und nehmen keine Kontakte auf. Nichts davon ist aktiviert.
 
+**Stand 03.11.2026:** Abläufe mit Mail-Outbox bestanden, lokal und auf Staging. **Echter Versand `NOT_RUN`:** Es gibt keine autorisierte Testadresse, und externer Versand ist per Owner-Entscheidung aus. Entscheidungsvorlage: `docs/release/entscheidung-marke-domain-mail.md`.
+
 ## Was bereits funktioniert
 
 - Registrierung ohne Sitzung, Anmeldung erst nach bestätigter E-Mail (`email_unverified`), Bestätigungslink, Passwort zurücksetzen, neutrale Antworten.
