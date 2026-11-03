@@ -60,7 +60,7 @@ export function isProductionSafe(entry: KnowledgeEntry): boolean {
 export function reviewBadge(entry: KnowledgeEntry): string | undefined {
   if (hasReviewEvidence(entry)) return undefined;
   if (entry.reviewedStatus === "orientation") return "Organisationsinformation, nicht fachlich geprüft";
-  if (entry.reviewedStatus === "needs_review") return "In fachlicher Prüfung";
+  if (entry.reviewedStatus === "needs_review") return "Noch nicht fachlich geprüft";
   if (entry.reviewedStatus === "draft") return "Entwurf — allgemeine Orientierung";
-  return "In fachlicher Prüfung";
+  return "Noch nicht fachlich geprüft";
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { moduleText } from "@/lib/content/module-texts";
 import { useState } from "react";
 import Link from "next/link";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
@@ -96,8 +97,7 @@ function TestamentPrintView() {
           {new Date().toLocaleDateString("de-DE")}
         </p>
         <p className="text-xs text-muted mt-2">
-          {result ? INHERITANCE_HINT_NOTICE : INHERITANCE_POINTS_NOTICE} Dieses Blatt ist kein Testament: Ein eigenhändiges Testament muss vollständig
-          handschriftlich geschrieben und unterschrieben sein (§ 2247 BGB).
+          {result ? INHERITANCE_HINT_NOTICE : INHERITANCE_POINTS_NOTICE} Dieses Blatt ist kein Testament. {moduleText("testament-form-pdf")}
         </p>
       </div>
       <PrintSection title="Erbprofil">

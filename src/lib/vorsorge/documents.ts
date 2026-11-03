@@ -1,12 +1,13 @@
+import { moduleText } from "@/lib/content/module-texts";
 import type { DocumentEntry, DocumentStatus, DocumentType } from "@/lib/domain/types";
 
 /** Typical documents a family needs to find. The app stores locations, never files. */
 export const DOCUMENT_CHECKLIST: { type: DocumentType; title: string; hint: string }[] = [
   { type: "patientenverfuegung", title: "Patientenverfügung", hint: "Original und wer eine Kopie hat" },
-  { type: "vorsorgevollmacht", title: "Vorsorgevollmacht", hint: "Original wird für Bank und Behörden gebraucht" },
+  { type: "vorsorgevollmacht", title: "Vorsorgevollmacht", hint: moduleText("doc-vollmacht") },
   { type: "betreuungsverfuegung", title: "Betreuungsverfügung", hint: "" },
-  { type: "testament", title: "Testament", hint: "Eigenhändig oder notariell; ggf. amtliche Verwahrung" },
-  { type: "ausweis", title: "Personalausweis / Reisepass", hint: "Wird für Sterbeurkunde und Überführung gebraucht" },
+  { type: "testament", title: "Testament", hint: moduleText("doc-testament") },
+  { type: "ausweis", title: "Personalausweis / Reisepass", hint: moduleText("doc-ausweis") },
   { type: "versicherung", title: "Versicherungen", hint: "Lebens-, Sterbegeld-, Unfallversicherung" },
   { type: "bank", title: "Bankunterlagen", hint: "Konten, Daueraufträge, Vollmachten" },
   { type: "grundbuch", title: "Grundbuch / Immobilien", hint: "" },

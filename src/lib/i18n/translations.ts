@@ -1,3 +1,4 @@
+import { moduleText } from "@/lib/content/module-texts";
 export type Locale = "de" | "en" | "tr" | "ar" | "bs" | "sq";
 
 export const locales: Locale[] = ["de", "en", "tr", "ar", "bs", "sq"];
@@ -11,6 +12,11 @@ export const localeNames: Record<Locale, string> = {
   sq: "Shqip",
 };
 
+/**
+ * Languages other than German and English cover only general interface wording. No translation is
+ * reviewed: statements on faith, law or medicine stay out of them and fall back to German.
+ * See docs/release/sprachabdeckung.md.
+ */
 export const translations: Record<Locale, Record<string, string>> = {
   de: {
     "nav.home": "Startseite",
@@ -64,7 +70,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "Kritische offene Punkte",
     "dashboard.next": "Dein nächster Schritt",
     "sources.title": "Quellen & Hinweise",
-    "review.badge": "In fachlicher Prüfung",
+    "review.badge": "Noch nicht fachlich geprüft",
     "auth.login": "Anmelden",
     "auth.logout": "Abmelden",
     "auth.register": "Registrieren",
@@ -234,7 +240,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "janazah.section.beisetzung.title": "Beisetzung",
     "janazah.section.beisetzung.desc": "Friedhof, Grabfeld und Überführung — in Deutschland oder im Ausland.",
     "janazah.section.persoenlich.title": "Persönliche Wünsche",
-    "janazah.section.persoenlich.desc": "Nachrichten, Verpflichtungen und Spendenwünsche im zulässigen Rahmen.",
+    "janazah.section.persoenlich.desc": moduleText("janazah-donation-desc"),
     "janazah.field.fullName": "Gewünschter vollständiger Name",
     "janazah.field.birthDate": "Geburtsdatum",
     "janazah.field.birthDatePlaceholder": "TT.MM.JJJJ",
@@ -267,7 +273,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "janazah.field.messageToFamily": "Persönliche Nachricht an Angehörige",
     "janazah.field.obligationsNotes": "Hinweise zu offenen Verpflichtungen",
     "janazah.field.debtsAmanahNotes": "Hinweise zu Schulden, Amanah oder geliehenen Gegenständen",
-    "janazah.field.donationWishes": "Gewünschte Spenden oder Sadaqah (im zulässigen Rahmen)",
+    "janazah.field.donationWishes": moduleText("janazah-donation-field"),
     "janazah.field.culturalExclusions": "Kulturelle Dinge, die ich NICHT möchte",
     "janazah.field.additionalWishes": "Weitere freie Wünsche",
     "janazah.preview.title": "Vorschau deiner Janazah-Wünsche",
@@ -331,7 +337,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "Critical open items",
     "dashboard.next": "Recommended next step",
     "sources.title": "Sources & Notes",
-    "review.badge": "Under scholarly review",
+    "review.badge": "Not yet professionally reviewed",
     "auth.login": "Log in",
     "auth.logout": "Log out",
     "auth.register": "Register",
@@ -497,7 +503,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "janazah.section.beisetzung.title": "Burial",
     "janazah.section.beisetzung.desc": "Cemetery, burial plot and repatriation — in Germany or abroad.",
     "janazah.section.persoenlich.title": "Personal Wishes",
-    "janazah.section.persoenlich.desc": "Messages, obligations and donation wishes within permissible scope.",
+    "janazah.section.persoenlich.desc": moduleText("janazah-donation-desc", "en"),
     "janazah.field.fullName": "Full name as desired",
     "janazah.field.birthDate": "Date of birth",
     "janazah.field.birthDatePlaceholder": "DD.MM.YYYY",
@@ -530,7 +536,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "janazah.field.messageToFamily": "Personal message to family",
     "janazah.field.obligationsNotes": "Notes on outstanding obligations",
     "janazah.field.debtsAmanahNotes": "Notes on debts, Amanah or borrowed items",
-    "janazah.field.donationWishes": "Desired donations or Sadaqah (within permissible scope)",
+    "janazah.field.donationWishes": moduleText("janazah-donation-field", "en"),
     "janazah.field.culturalExclusions": "Cultural things I do NOT want",
     "janazah.field.additionalWishes": "Additional free wishes",
     "janazah.preview.title": "Preview of your Janazah wishes",
@@ -548,9 +554,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "Klasörüm",
     "nav.prices": "Fiyatlar",
     "nav.knowledge": "Bilgi",
-    "hero.title": "İslami olarak hazırlıklı — aileniz en zor anda karar vermek zorunda kalmadan önce.",
-    "hero.subtitle": "Hastalık, yaşam vasiyeti, cenaze, vasiyet, borçlar, Barzah ve Sadaka-i Cariye için Mein Wille oluşturun.",
-    "hero.claim": "Hastalık için. Cenaze için. Barzah için. Aileniz için.",
     "cta.check": "Ücretsiz Amanah Kontrolü başlat",
     "cta.create": "Mein Wille oluştur",
     "disclaimer.main": "Bu platform bir imam, alim, doktor, avukat veya noterin yerini tutmaz.",
@@ -582,7 +585,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "Kritik açık noktalar",
     "dashboard.next": "Önerilen sonraki adım",
     "sources.title": "Kaynaklar",
-    "review.badge": "İlmî inceleme altında",
     "auth.login": "Giriş",
     "auth.logout": "Çıkış",
     "auth.register": "Kayıt ol",
@@ -611,9 +613,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "مجلدي",
     "nav.prices": "الأسعار",
     "nav.knowledge": "المعرفة",
-    "hero.title": "مستعد إسلامياً — قبل أن يضطر أهلك للقرار في أصعب لحظة.",
-    "hero.subtitle": "أنشئ مجلد الأمانة للمرض والوصية الحية والجنازة والميراث.",
-    "hero.claim": "للمرض. للجنازة. للبرزخ. لعائلتك.",
     "cta.check": "ابدأ فحص الأمانة المجاني",
     "cta.create": "إنشاء مجلد الأمانة",
     "disclaimer.main": "هذه المنصة لا تحل محل الإمام أو العالم أو الطبيب أو المحامي.",
@@ -645,7 +644,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "نقاط حرجة مفتوحة",
     "dashboard.next": "الخطوة التالية الموصى بها",
     "sources.title": "المصادر",
-    "review.badge": "قيد المراجعة الشرعية",
     "auth.login": "تسجيل الدخول",
     "auth.logout": "تسجيل الخروج",
     "auth.register": "التسجيل",
@@ -674,9 +672,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "Moj folder",
     "nav.prices": "Cijene",
     "nav.knowledge": "Znanje",
-    "hero.title": "Islamski pripremljeni — prije nego što vaša porodica mora odlučiti.",
-    "hero.subtitle": "Kreirajte Mein Wille za bolest, dženazu, testament i druge pripreme.",
-    "hero.claim": "Za bolest. Za dženazu. Za barzah. Za porodicu.",
     "cta.check": "Pokreni besplatnu Amanah provjeru",
     "cta.create": "Kreiraj Mein Wille",
     "disclaimer.main": "Ova platforma ne zamjenjuje imama, učenjaka, doktora ili advokata.",
@@ -708,7 +703,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "Kritične otvorene stavke",
     "dashboard.next": "Preporučeni sljedeći korak",
     "sources.title": "Izvori",
-    "review.badge": "U naučnoj provjeri",
     "auth.login": "Prijava",
     "auth.logout": "Odjava",
     "auth.register": "Registracija",
@@ -737,9 +731,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "Dosja ime",
     "nav.prices": "Çmimet",
     "nav.knowledge": "Dituri",
-    "hero.title": "I përgatitur islamikisht — para se familja juaj të vendosë.",
-    "hero.subtitle": "Krijoni Mein Wille për sëmundje, xhenaze, testament dhe përgatitje të tjera.",
-    "hero.claim": "Për sëmundjen. Për xhenazen. Për barzahun. Për familjen.",
     "cta.check": "Fillo kontrollin falas Amanah",
     "cta.create": "Krijo Mein Wille",
     "disclaimer.main": "Kjo platformë nuk zëvendëson imamin, dijetarin, mjekun ose avokatin.",
@@ -771,7 +762,6 @@ export const translations: Record<Locale, Record<string, string>> = {
     "dashboard.critical": "Pikat kritike të hapura",
     "dashboard.next": "Hapi tjetër i rekomanduar",
     "sources.title": "Burimet",
-    "review.badge": "Në shqyrtim fetar",
     "auth.login": "Hyr",
     "auth.logout": "Dil",
     "auth.register": "Regjistrohu",

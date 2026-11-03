@@ -1,5 +1,6 @@
 "use client";
 
+import { moduleText } from "@/lib/content/module-texts";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -67,8 +68,7 @@ export function FullPrintView() {
         <h1 className="text-2xl font-bold text-primary">Vorsorge-Übersicht</h1>
         <p className="text-sm text-muted">Erstellt am {new Date().toLocaleDateString("de-DE")}</p>
         <p className="text-xs text-muted mt-2">
-          Diese Übersicht sammelt deine Angaben zum Nachschlagen. Sie hat keine rechtliche Wirkung und ersetzt keine Dokumente. Ein eigenhändiges
-          Testament muss vollständig von Hand geschrieben und unterschrieben sein (§ 2247 BGB). Vollmacht und Patientenverfügung brauchen eigene, unterschriebene Dokumente.
+          Diese Übersicht sammelt deine Angaben zum Nachschlagen. Sie hat keine rechtliche Wirkung und ersetzt keine Dokumente. {moduleText("testament-form-print")} {moduleText("vorsorge-documents-print")}
         </p>
       </div>
 
@@ -158,7 +158,7 @@ export function FullPrintView() {
 
       <PrintSection title="15. Hinweis">
         <p className="text-xs text-muted">
-          Diese Plattform ersetzt keinen Imam, Gelehrten, Arzt, Anwalt oder Notar. Allah entscheidet.
+          Diese Plattform ersetzt keinen Imam, Gelehrten, Arzt, Anwalt oder Notar.
           Diese Übersicht hilft nur bei bewusster Vorbereitung. Keine Garantie für Richtigkeit oder Vollständigkeit.
         </p>
       </PrintSection>

@@ -1,5 +1,6 @@
 "use client";
 
+import { moduleText } from "@/lib/content/module-texts";
 import { useState } from "react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import type { DebtAmanahItem } from "@/lib/types";
@@ -53,7 +54,7 @@ export default function SchuldenAmanahPage() {
     <div>
       <h1 className="text-2xl font-bold text-primary mb-2">Schulden & Amanah</h1>
       <p className="text-muted mb-6">
-        Ordne offene Rechte und Pflichten — Schulden, Amanah, Zakat und Versprechen, die vor dem Tod erledigt werden sollten.
+        {moduleText("schulden-intro")}
       </p>
       <Disclaimer className="mb-6" />
       <RelatedKnowledge

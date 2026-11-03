@@ -1,3 +1,4 @@
+import { moduleText } from "@/lib/content/module-texts";
 export interface ConversationQuestion {
   id: string;
   text: string;
@@ -63,7 +64,7 @@ export const FAMILIEN_GESPRAECH_TOPICS: ConversationTopic[] = [
     intro: "Offene Rechte und Amanah sollen nicht erst im Nachlass überraschend auftauchen.",
     questions: [
       { id: "sc-1", text: "Wer kennt bestehende Schulden, geliehene Dinge oder offene Verpflichtungen?" },
-      { id: "sc-2", text: "Gibt es Amanah, die zurückgegeben werden muss?" },
+      { id: "sc-2", text: moduleText("amanah-return-question") },
       { id: "sc-3", text: "Wo ist das schriftlich festgehalten?" },
       { id: "sc-4", text: "Wen soll die Familie dazu fragen, falls etwas unklar bleibt?" },
     ],

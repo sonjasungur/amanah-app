@@ -79,7 +79,7 @@ describe("complete printout", () => {
     expect(text).not.toContain("Mein Wille");
     expect(text).toContain("Vorsorge-Übersicht");
     expect(screen.getByTestId("full-print-page-notice").closest("thead")).not.toBeNull();
-    for (const label of ["(keine Patientenverfügung)", "(keine Vollmacht)", "(keine Betreuungsverfügung)", "(kein Testament)", "§ 2247 BGB"]) {
+    for (const label of ["(keine Patientenverfügung)", "(keine Vollmacht)", "(keine Betreuungsverfügung)", "(kein Testament)", "Formfragen klärt ein Anwalt oder Notar."]) {
       expect(text).toContain(label);
     }
     expect(text).not.toContain("Bevollmächtigte Person");

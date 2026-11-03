@@ -1,5 +1,6 @@
 "use client";
 
+import { moduleText } from "@/lib/content/module-texts";
 import { useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Lock, Printer } from "lucide-react";
@@ -120,7 +121,7 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
   return (
     <div className="space-y-4" data-testid="preparation-summary">
       <p className="rounded-lg border-2 border-warning bg-warning/10 p-3 text-sm font-semibold">
-        Gesprächsunterlage – kein Testament. Ein eigenhändiges Testament muss vollständig von Hand geschrieben und unterschrieben sein (§ 2247 BGB).
+        Gesprächsunterlage – kein Testament. {moduleText("testament-form-print")}
       </p>
 
       <Card>

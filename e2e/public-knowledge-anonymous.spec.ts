@@ -17,6 +17,13 @@ const UNREVIEWED = [
   "rituelle Reinigung des Verstorbenen",
   "Muslimische Patienten haben oft spezielle Wünsche",
   "beständige Wohltätigkeit",
+  // Locked module texts, docs/release/gesperrte-modultexte.md
+  "von Hand geschrieben und unterschrieben",
+  "zeitnahe Janazah",
+  "im zulässigen Rahmen",
+  "Das Gute, das nach dir bleibt",
+  "Allah entscheidet",
+  "bevor der Nachlass verteilt wird",
 ];
 const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/patientenverfuegung", "/janazah-kompass", "/barzakh", "/sadaqa-jariya", "/testament-erbe", "/islam-oder-kultur", "/konvertierte", "/sicherheit", "/partner", "/bestatter"];
 const DRAFT_URLS = ["/wissen/janazah-wuensche", "/wissen/ghusl-kafan", "/wissen/islam/was-ist-janazah", "/wissen/islam/ghusl-des-verstorbenen", "/wissen/islam/kafan-und-janazah-gebet", "/wissen/islam/sadaqa-jariya-und-vermaechtnisse", "/wissen/redaktion"];
