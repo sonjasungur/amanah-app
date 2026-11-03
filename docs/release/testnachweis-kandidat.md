@@ -21,7 +21,9 @@ Befehl: `scripts/testing/release-check.sh`, 08:33 bis 08:49 Uhr, Wegwerf-Datenba
 | `npm audit` | 0 Schwachstellen |
 | Inhaltsprüfung Staging | JavaScript 0 Treffer, 60 URLs ohne ungeprüfte Inhalte, KI 503 |
 
-**Bestanden auf Staging (Android-Profil):** Kernablauf, schmale Ansichten, 2 Backups mit Restore.
+**Staging (Android-Profil):** Kernablauf und schmale Ansichten bestanden. Restore-Prüfung zuerst FAIL (08:35), weil das Backup älter als die Migration war; mit neuem Backup bestanden (08:52). **Health-Job weiter FAIL:** nur Platte 87 % über der Grenze von 85 %.
+
+**Nach dem Gesamtlauf:** Nur die Testkorrektur `phase2-behavior`; kein Produktcode. Der Gesamtlauf wurde nicht wiederholt; die 95 sind sein Stand. Vitest erneut: 845 bestanden, 23 übersprungen, 0 fehlgeschlagen. Grenze des korrigierten Tests: Er belegt `lang=en` und die Schrittanzeige, keine vollständige Übersetzung.
 
 ## Übersprungene Tests
 
@@ -37,7 +39,7 @@ Befehl: `scripts/testing/release-check.sh`, 08:33 bis 08:49 Uhr, Wegwerf-Datenba
 | `data-history` | 4 | Verlauf aus | gesperrte Funktion | eigener Lauf: 2 + 2 |
 | `release-core-flows` | 2 | API-Modus | ja | eigener Lauf, 4 Profile |
 | `navigation` | 3 | nur Desktop-Breite, auf Mobil übersprungen | nein | Desktop bestanden |
-| `phase2-behavior` | 2 | Bedingung: Sprachumschalter im Modul | **ungeklärt** | keiner; Prüfpunkt 13 in Doku 43 deckt die Bedienung ab |
+| `phase2-behavior` | 2 | Der Test suchte einen Selektor, den es im Produkt nicht gibt, und lief deshalb nie | ja, Sprachwahl | Test auf die echte Sprachwahl umgestellt: Datei 22 von 22, kein Skip, Desktop und Mobil |
 | API-Regression Mobil | 9 | Serververhalten unabhängig vom Gerät | nein | Desktop bestanden |
 
 ## Nicht abgedeckt

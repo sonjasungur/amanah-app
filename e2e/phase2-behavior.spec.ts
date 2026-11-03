@@ -52,17 +52,13 @@ test.describe("English locale shows English text", () => {
   test("switching to English shows English step titles", async ({ page }) => {
     await page.goto("/dashboard/janazah?schritt=0");
     await page.waitForSelector('[data-testid="janazah-guided-flow"]');
-    const localeSwitcher = page
-      .locator('[data-testid="locale-switcher"], select[name="locale"]')
-      .first();
-    if ((await localeSwitcher.count()) > 0) {
-      await localeSwitcher.selectOption("en");
-      await expect(
-        page.locator('[data-testid="janazah-step-progress"]')
-      ).toContainText(/Step|Personal|Details/i);
-    } else {
-      test.skip();
-    }
+    const mobileNavToggle = page.getByTestId("site-mobile-nav-toggle");
+    if (await mobileNavToggle.isVisible()) await mobileNavToggle.click();
+    await page.locator("header select:visible").first().selectOption("en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(
+      page.locator('[data-testid="janazah-step-progress"]')
+    ).toContainText(/Step|Personal|Details/i);
   });
 });
 

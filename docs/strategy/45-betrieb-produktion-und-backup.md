@@ -33,7 +33,7 @@ Der Quellordner startet nichts mehr. Die Altkopie `.env.production.backup.202607
 | Format, ohne Schlüssel | `age-encryption.org/v1`, kein gzip, kein Klartext |
 | Isolierte Wiederherstellung | eigene Datenbank, internes Netz: Konten, Migrationen, Tabellen identisch mit Live (`0|1|…|4`) |
 | Altbestand | 126 Dateien im Archiv, alle Prüfsummen gleich, danach mit `shred` entfernt |
-| Cron-Bedingungen | Lauf mit leerer Umgebung erfolgreich; 1 Empfänger |
+| Cron-Bedingungen | Lauf mit leerer Umgebung erfolgreich; 1 Empfänger. **Erster echter Cron-Lauf steht aus: 04.11.2026, 03:15** |
 
 **So wurde geprüft, ohne Schlüssel auf dem Server zu hinterlassen:** Ein Einmal-Schlüssel entstand nur im RAM (`/dev/shm`) und war zusätzlicher Empfänger der Prüfkopien. Er wurde nach der Probe vernichtet; diese Kopien kann seither nur noch der Owner lesen. Laufende Backups haben nur den Owner als Empfänger. Grenze: `shred` ist auf dem Server-Dateisystem nur bestmöglich.
 
@@ -55,7 +55,7 @@ Danach in eine **neue, isolierte** Datenbank einspielen und Tabellen, Migratione
 `/etc/cron.d/amanah-prod-check`, alle 15 Minuten, nur lesend: Image, Health, Route, Netz, Volume, Wissenssperre, Backup-Alter unter 26 h und Format, kein Klartext und keine Secret-Kopie im alten Ordner. Keine Reparaturen.
 
 - Verlauf: `/var/log/amanah-prod-check.log`; Zustandswechsel: `/var/log/amanah-prod-alerts.log`; logrotate wöchentlich, 4 Stände.
-- Getestet: Ein fehlendes Backup erzeugt einen Alarm und später eine Entwarnung.
+- Getestet: Ein fehlendes Backup in einer Testumgebung erzeugt einen Alarm. Das Alarmlog enthält von 07:49 einen Fehlalarm und die Entwarnung: Das Suchmuster traf zunächst auch `.env.production.example`; korrigiert.
 - **Niemand wird benachrichtigt.** Externer Versand ist aus (Owner 01.11., Doku 30). Anschluss: `staging-alert.sh` als Vorbild, nach Freigabe.
 
 ## 4. Staging
