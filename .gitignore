@@ -15,6 +15,7 @@
 
 # Playwright generated artifacts
 /test-results/
+/test-results-mobile/
 /playwright-report/
 /blob-report/
 

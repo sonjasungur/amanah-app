@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function DatenschutzPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="max-w-3xl mx-auto px-4 py-12 break-words">
       <h1 className="text-3xl font-bold text-primary mb-3">Datenschutzerklärung</h1>
       <p className="text-muted mb-10">Stand: Juli 2026</p>
 

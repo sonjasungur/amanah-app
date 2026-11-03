@@ -8,7 +8,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/__tests__/setup.ts"],
-    exclude: ["**/node_modules/**", "**/e2e/**", "**/e2e-flags/**", "**/.next/**", "**/.next-e2e-flags/**"],
+    exclude: ["**/node_modules/**", "**/e2e/**", "**/e2e-flags/**", "**/e2e-mobile/**", "**/.next/**", "**/.next-e2e-flags/**"],
   },
   resolve: {
     alias: {
