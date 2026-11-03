@@ -68,8 +68,15 @@ if (blockers.length === 0) ok("Required env variable names are present in .env.p
 requireEnv("NEXT_PUBLIC_AUTH_MODE", "api");
 requireEnv("NEXT_PUBLIC_STORAGE_MODE", "api");
 requireEnv("AMANAH_SERVER_STORAGE", "postgres");
-requireEnv("AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
-requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+if (mode === "public-release" && process.env.AMANAH_PUBLIC_REGISTRATION_ENABLED === "true") {
+  // Registration needs confirmed e-mail addresses: without real mail nobody could get in.
+  if (["brevo", "postmark"].includes(process.env.AMANAH_MAIL_TRANSPORT ?? "")) ok("Registration has a real mail transport");
+  else fail("Registration needs a configured mail provider");
+  requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "true");
+} else {
+  requireEnv("AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+  requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+}
 requireEnv("AMANAH_AI_ENABLED", "false");
 requireEnv("NEXT_PUBLIC_AMANAH_AI_ENABLED", "false");
 

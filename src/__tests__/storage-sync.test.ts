@@ -135,6 +135,25 @@ describe("syncStoreWithRemoteAfterAuth", () => {
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Aelter im Konto");
   });
 
+  it("a folder too large for a leaving page is marked and arrives with the next load", async () => {
+    const { loadAmanahData, saveAmanahData } = await remoteMode();
+    const fetchMock = vi.fn(async () => new Response("{}"));
+    vi.stubGlobal("fetch", fetchMock);
+    const big = "x".repeat(70_000);
+    useAmanahStore.getState().updateField("emergencyCard", { ...defaultAmanahData.emergencyCard, name: "Gross", allergies: big });
+    useAmanahStore.setState({ saveStatus: "saving" });
+    saveBeforeLeaving();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+
+    vi.mocked(loadAmanahData).mockResolvedValueOnce(defaultAmanahData);
+    await syncStoreWithRemoteAfterAuth();
+    const last = vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0];
+    expect(last?.emergencyCard.allergies.length).toBe(big.length);
+    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
   it("an unsent change of another account is not uploaded here", async () => {
     const { loadAmanahData, saveAmanahData } = await remoteMode();
     localStorage.setItem("amanah-unsent-change", "jemand-anderes");

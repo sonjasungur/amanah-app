@@ -135,6 +135,18 @@ describe("release validator modes", () => {
     }
   });
 
+  it("public registration needs a real mail provider, also in a release", () => {
+    const run = (extra: Record<string, string>) =>
+      spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-release"], {
+        cwd: ROOT,
+        env: { ...baseEnv, AMANAH_PUBLIC_REGISTRATION_ENABLED: "true", NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED: "true", ...extra },
+        encoding: "utf8",
+      }).stderr;
+    expect(run({ AMANAH_MAIL_TRANSPORT: "disabled" })).toContain("Registration needs a configured mail provider");
+    expect(run({ AMANAH_MAIL_TRANSPORT: "outbox" })).toContain("Registration needs a configured mail provider");
+    expect(run({ AMANAH_MAIL_TRANSPORT: "brevo" })).not.toContain("Registration needs a configured mail provider");
+  });
+
   it("public-pilot mode passes with complete legal operator details", () => {
     const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-pilot"], {
       cwd: ROOT,

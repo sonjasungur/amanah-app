@@ -61,6 +61,7 @@ step unit 600 npx vitest run
 step migrate 90 env DATABASE_URL="$DB" npx prisma migrate deploy
 step unit-postgres 400 env DATABASE_URL="$DB" AMANAH_SERVER_STORAGE=postgres npx vitest run src/__tests__/postgres
 step migrate-diff 90 env DATABASE_URL="$DB" npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+step migration-rehearsal 200 scripts/testing/migration-rehearsal.sh
 
 step build-api 600 env NEXT_PUBLIC_AUTH_MODE=api NEXT_PUBLIC_STORAGE_MODE=api NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED=true NEXT_PUBLIC_AMANAH_AI_ENABLED=true npx next build
 BILLING="AMANAH_BILLING_ENFORCE=true AMANAH_PLUS_LAUNCH_AT=2000-01-01T00:00:00Z"

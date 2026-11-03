@@ -1,6 +1,6 @@
 # Plan für das reguläre Release (Stand 02.11.2026)
 
-**Für:** Owner, Prüfer, Betrieb. **Stand:** Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
+**Für:** Owner, Prüfer, Betrieb. **Stand:** Feature-Branch `feat/vorsorge-testament-foundation`; Produktion läuft auf `7d0859b` mit Hotfix, gepinnt und vom `gemeinsam1`-Netz getrennt ([Doku 41](41-hotfix-wissenssperre-produktion.md)), Route geschlossen, 0 Konten.
 
 Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment und jede Veröffentlichung brauchen je eine eigene Owner-Freigabe.
 
@@ -8,11 +8,11 @@ Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment 
 
 | # | Anforderung | Stand | Offen |
 |---|---|---|---|
-| 1 | Registrierung nur mit bestätigter E-Mail | **im Code fertig und getestet** | Mailversand, Absender, Domain |
+| 1 | Registrierung nur mit bestätigter E-Mail | **im Code fertig und getestet** | Mailversand, Absender, Domain ([Doku 44](44-domain-und-mail-aktivierung.md)) |
 | 2 | Datenverlust-Korrekturen | **im Branch** (`a42eda9`, `4bf33d8`) | Ausrollen mit dem Release |
-| 3 | Netztrennung zu `gemeinsam1` | **vorbereitet** (Doku 41 §6) | Freigabe, später eigenes Proxy-Netz |
-| 4 | Ungeprüfte Modultexte | **erfasst** (18 Stellen) | Entscheidung, Umsetzung, Prüfung |
-| 5 | Hydrationsfehler #418 | **lokal behoben** | Commit-Freigabe |
+| 3 | Netztrennung zu `gemeinsam1` | **in Produktion umgesetzt** (Doku 41 §6) | beim Release eigenes Proxy-Netz |
+| 4 | Ungeprüfte Modultexte | **lokal gesperrt** (Owner-Entscheidung) | Fachprüfung |
+| 5 | Hydrationsfehler #418 | **im Branch behoben** | Ausrollen |
 | 6 | Testablauf mit isolierter Datenbank | **vorbereitet** (`scripts/testing/release-check.sh`) | Lauf auf dem Staging-Server |
 | 7 | Smartphone-Abnahme | **vorbereitet** ([Doku 43](43-smartphone-abnahme.md)) | Durchführung durch den Owner |
 | 8 | Externe Freigaben verbindlich | **umgesetzt** (`docs/release/freigaben.json`) | Alle 6 Freigaben stehen aus |
@@ -32,13 +32,13 @@ Kein Punkt dieses Plans ist freigegeben. Commit, Staging, Migration, Deployment 
 
 ## 2. Datenverlust-Korrekturen
 
-Enthalten im Branch: keine Abmeldung bei abgebrochener Anfrage, Eingaben während des Ladens bleiben, offene Änderungen gehen beim Verlassen hinaus. Lokal, noch nicht committet: Der nächste Seitenaufbau lädt offene Änderungen verlässlich hoch. Tests: `auth-session-hint`, `storage-sync`, `e2e/plus-tariff-account`.
+Enthalten im Branch: keine Abmeldung bei abgebrochener Anfrage, Eingaben während des Ladens bleiben, offene Änderungen gehen beim Verlassen hinaus. Der nächste Seitenaufbau lädt offene Änderungen verlässlich hoch, auch große Ordner über 64 KB. Mehrere Runden auf beiden Profilen bestanden. Tests: `auth-session-hint`, `storage-sync`, `e2e/plus-tariff-account`.
 
-**Zum Release gehört eine Produktionsmigration:** Die Produktion hat 1 von 6 Migrationen. Alle 5 weiteren sind laut Doku additiv, einzeln prüfen. Bei 0 Konten ist das Risiko gering. Vorher Backup, Trockenlauf auf einer Kopie, gesonderte Freigabe.
+**Zum Release gehört eine Produktionsmigration:** Die Produktion hat 1 von 6 Migrationen. Bei 0 Konten ist das Risiko gering. Vorher Backup, Probelauf (§6), gesonderte Freigabe.
 
 ## 3. Netztrennung
 
-**Jetzt:** Die gepinnte Datei (Doku 41 §6) löst die App vom Netz `gemeinsam1-prod_internal`. Die Route ist geschlossen, nichts braucht die Verbindung.
+**Erledigt:** Die App hängt nur noch im eigenen Netz, `gemeinsam1`-Dienste sind aus ihr nicht auflösbar.
 
 **Beim Release mit öffentlicher Route:**
 1. Eigenes Netz `amanah_prod_proxy` anlegen, App und nur den Proxy anschließen. App erreicht dann weder Datenbank noch Backend von `gemeinsam1`.
@@ -47,33 +47,19 @@ Enthalten im Branch: keine Abmeldung bei abgebrochener Anfrage, Eingaben währen
 
 ## 4. Ungeprüfte Modultexte hinter der Anmeldung
 
-Erfasst durch Durchsicht des Codes, Stichprobe gegen die Dateien bestätigt. Keine Stelle liegt hinter einer Inhaltssperre.
+**Owner-Entscheidung 02.11.2026, lokal umgesetzt, nicht in Produktion:** Zentrale Sperre in `src/lib/content/module-texts.ts`. Sie enthält nur neutrale Texte und eine Freigabestufe, die Prüfer, Datum und Dokument verlangt. Die Originale liegen wortgetreu in [`docs/release/gesperrte-modultexte.md`](../release/gesperrte-modultexte.md), außerhalb von `src/`.
 
-**Klare Aussagen (10):**
-
-| Fundstelle | Aussage | Art |
+| Gruppe | Anzahl | Umgang |
 |---|---|---|
-| `src/app/dashboard/pdf/page.tsx:99` | eigenhändiges Testament vollständig handschriftlich | Recht |
-| `src/components/print/print-views.tsx:70` | von Hand geschrieben und unterschrieben, § 2247 BGB | Recht |
-| `src/components/print/print-views.tsx:71` | Vollmacht und Patientenverfügung brauchen eigene Dokumente | Recht |
-| `src/lib/vorsorge/documents.ts:6` | Original für Bank und Behörden | Recht |
-| `src/lib/vorsorge/documents.ts:8` | eigenhändig oder notariell, amtliche Verwahrung | Recht |
-| `src/lib/vorsorge/documents.ts:9` | für Sterbeurkunde und Überführung | Recht |
-| `src/lib/export/family-letter-template.ts:40` | „darf für mich entscheiden (Dokument liegt im Ordner)“, ohne Prüfung, ob es existiert | Recht |
-| `src/app/dashboard/schulden-amanah/page.tsx:56` | Zakat und Versprechen, die vor dem Tod erledigt werden sollten | Religion |
-| `src/lib/export/family-letter-template.ts:48` | islamische Grundsätze, zeitnahe Janazah, Ghusl und Kafan | Religion |
-| `src/lib/export/family-letter-template.ts:53` | fachlich klären, bevor der Nachlass verteilt wird | Religion, Recht |
+| Klare Aussagen | 10, dazu die Fundstelle in `testament/vorbereitung` | gesperrt, neutral ersetzt |
+| Grenzfälle | 8, jeweils einzeln begründet im Archiv | vorsorglich alle gesperrt |
+| Neutrale Organisationshinweise | | sichtbar, ohne Prüfbehauptung |
 
-**Grenzfälle (8):** `translations.ts:237`, `:270` („im zulässigen Rahmen“), `print-views.tsx:161` („Allah entscheidet“), `vollmacht/page.tsx:10`, `betreuung/page.tsx:10`, `sadaqa-jariya/page.tsx:10`, `question-plan.ts:182`, `familiengespraech/topics.ts:66`.
+Der Hinweis „kein Testament“ und „keine rechtliche Wirkung“ bleibt: Er ist eine Schutzaussage über das Produkt. Die Abläufe bleiben vollständig: Der Familienbrief enthält Platzhalter statt Überzeugungen, die Dokumentenliste behält Hinweise. Test: `src/__tests__/module-text-lock.test.ts`.
 
-**Nicht vollständig durchgesehen:** `module-form.tsx`, `consent-gate.tsx`, `use-guided-flow.ts`, `answer-parser.ts` (nur Stichworte), `storage-controls.tsx`, gesperrte Inhalte, andere Sprachen als Deutsch und Englisch. Vorlage an Prüfer erst nach vollständiger Durchsicht.
+**Noch nicht bewertet:** Inhalte in `demo-data.ts`, Sprachen außer Deutsch und Englisch; `module-form.tsx`, `consent-gate.tsx`, `use-guided-flow.ts`, `answer-parser.ts`, `storage-controls.tsx` nur per Stichwortsuche.
 
-**Vorschlag:**
-- Die 10 klaren Aussagen neutral formulieren oder hinter einen Schalter `modulfachtexte` legen, Standard aus. Beispiel: „Formvorschriften mit Anwalt oder Notar klären“.
-- Die Vorlage für den Familienbrief nennt religiöse Wünsche als Vorgabe; dort Platzhalter statt vorformulierter Überzeugungen.
-- § 2247 BGB im Ausdruck fachlich prüfen lassen und bis dahin neutral halten.
-
-**Nicht umgesetzt:** Das ändert Inhalte, die Nutzer sehen, und braucht deine Entscheidung. Aufwand gering.
+**Zum Release:** Die Produktion enthält die Originaltexte noch; sie sind dort nur nach Anmeldung sichtbar, und die Route ist geschlossen. Sie verschwinden mit dem Release.
 
 ## 5. Hydrationsfehler #418: behoben
 
@@ -87,7 +73,18 @@ Im Produktionsstand besteht der Fehler weiter und ist nicht sicherheitsrelevant;
 
 `scripts/testing/release-check.sh` führt alles aus, was bisher von Hand lief: Typen, Lint, Unit, PostgreSQL, Migrations-Diff, API-Regression, Hydration, Konto, Verlauf, Plus, Restore-Übung, alle Builds, Flags, Playwright, Secret-Scan. Jeder Schritt hat ein Timeout und ein Log; steht ein Log 5 Minuten still, wird der Prozessstatus festgehalten. Die Datenbank ist ein Wegwerf-Container im RAM.
 
-**Auf dem Staging-Server (nach Freigabe):** wie beim Hotfix-Test eine eigene Instanz neben dem bestehenden Staging, eigene Datenbank, eigenes Netz, nur lokal erreichbar. Danach Migration von 1 auf 6 auf einer Kopie mit synthetischen Daten. Keine Produktions- oder Staging-Daten.
+**Migrations-Probelauf:** `scripts/testing/migration-rehearsal.sh` startet bei der einen Migration der Produktion, legt ein synthetisches Konto an und spielt alle 6 ein. Konto und Ordner bleiben, die Altkonto-Regel greift, das Schema passt. Keine der 5 Migrationen enthält zerstörende Befehle laut Stichwortsuche. Bestanden, lokal.
+
+**Isolierte Staging-Prüfung, geplant, braucht Freigabe:**
+
+1. `df -h /` auf dem Server; Build lokal, Übertragung mit Prüfsumme wie beim Hotfix.
+2. Eigene Instanz neben dem bestehenden Staging: eigener Name, eigene Datenbank im RAM, eigenes internes Netz, nur `127.0.0.1`, Speicher und CPU begrenzt.
+3. Schema mit den Migrationen des Juli-Stands anlegen, synthetische Konten, dann `prisma migrate deploy` des Releases.
+4. Über SSH-Tunnel: Wissenssperre mit Textproben, Modultext-Sperre, Registrierung mit Outbox, Plus-Sandbox, Konto, Reload und Verlassen, Löschen, Export.
+5. Rollback-Probe auf den Hotfix mit gesichertem Datenbankstand; Migrationen sind nicht automatisch umkehrbar, also Restore prüfen.
+6. Instanz vollständig entfernen; bestehendes Staging und seine Datenbank bleiben unberührt.
+
+**Nicht geklärt:** Der Stand des bestehenden Staging (`f9022d3`) wird nicht geändert. Ob es danach auf das Release gehoben wird, ist eine eigene Entscheidung.
 
 ## 7. Smartphone
 
@@ -101,10 +98,9 @@ Siehe [Doku 43](43-smartphone-abnahme.md).
 
 ## Vorgeschlagene Reihenfolge
 
-1. Owner: Commit dieses Stands, Absicherung Doku 41 §6.
-2. Owner: Entscheidung zu §4, danach neutral formulieren.
-3. Prüfer beauftragen (Doku 40 §4, §4 oben), Domain und Mail (§1).
-4. Release-Prüfung und Staging-Lauf (§6).
-5. Smartphone-Abnahme (§7).
-6. Migration und Deployment, jeweils mit Freigabe.
-7. Route und Registrierung zuletzt, jeweils mit Freigabe.
+1. Owner: Commit des lokalen Stands.
+2. Owner: Prüfer beauftragen (Doku 40 §4, `gesperrte-modultexte.md`).
+3. Owner: Marke, Domain, Mailanbieter ([Doku 44](44-domain-und-mail-aktivierung.md)). Agenten legen nichts davon fest.
+4. Staging-Prüfung (§6), Smartphone-Abnahme (§7).
+5. Migration und Deployment, jeweils mit Freigabe; neuer Digest in der gepinnten Datei.
+6. Route und Registrierung zuletzt, jeweils mit Freigabe.

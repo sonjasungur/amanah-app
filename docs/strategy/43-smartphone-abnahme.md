@@ -4,6 +4,17 @@
 
 Automatisiert läuft bisher nur das Chromium-Mobilprofil. Echte Geräte, Safari und Tastaturen deckt nur dieser Test ab.
 
+## Vorbereitung durch den Betrieb
+
+Echte Telefone erreichen keine nur lokal gebundene Instanz, und Safari verlangt für sichere Cookies HTTPS. Vor dem Termin muss deshalb eines geklärt sein:
+
+| Weg | Voraussetzung | Einschränkung |
+|---|---|---|
+| Staging mit Domain, HTTPS und Basic Auth (Doku 29 §4.3) | Domain vom Owner, eigene Freigabe für Proxy-Änderung | am realistischsten, öffnet aber einen Zugang |
+| Privates Netz (etwa WireGuard) zum Testrechner | Einrichtung auf den Geräten, eigene Freigabe | kein öffentlicher Zugang, Zertifikat muss vertraut werden |
+
+**Nicht verwenden:** die alte Route, `gemeinsam1.com` als Umweg und Produktionsdaten. Für den Termin: Instanz mit Mail-Outbox oder fest vereinbartem Testpostfach, je Gerät ein synthetisches Testkonto, Stand und Digest im Ergebnis notieren.
+
 ## Geräte
 
 | Gerät | Browser | Modell und Version | Datum | Prüfer |

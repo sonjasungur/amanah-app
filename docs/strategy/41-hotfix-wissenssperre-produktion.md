@@ -2,7 +2,7 @@
 
 **Für:** Owner (Entscheidung), Betrieb (Umsetzung).
 
-**Stand:** Stufe 1 (02.11.2026, 15:08 Uhr) und Stufe 2 (02.11.2026, 15:25 Uhr) sind nach Owner-Freigabe ausgeführt. Die Route ist geschlossen, der Hotfix läuft. Deployment-Stand: §5.
+**Stand:** Stufe 1 (02.11.2026, 15:08 Uhr) und Stufe 2 (02.11.2026, 15:25 Uhr) sind nach Owner-Freigabe ausgeführt. Die Route ist geschlossen, der Hotfix läuft. Deployment-Stand: §5. Die Absicherung ist am 02.11.2026 um 16:55 Uhr nach Owner-Freigabe installiert: §6.
 
 ## 1. Befund vor Stufe 1
 
@@ -175,59 +175,49 @@ Datenbank und Volumes bleiben unberührt, die Route bleibt geschlossen. Ein Roll
 - `amanah-app-app:latest` zeigt auf den Hotfix. Beide Tags und das Rollback-Image nicht entfernen, solange kein neues Release läuft.
 - Die Registrierung im Juli-Stand ist technisch weiter aktiv und ohne E-Mail-Bestätigung, aber von außen nicht erreichbar. Die Route darf erst nach einem Release wieder geöffnet werden.
 
-## 6. Vorschlag: Hotfix dauerhaft absichern (vorbereitet, nicht installiert)
-
-**Ziel:** Ein versehentliches `docker compose up --build` aus `/opt/amanah-app` (`7d0859b` ohne Patch) darf keine ungeprüften Inhalte zurückbringen. Heute würde es das.
+## 6. Absicherung des Hotfixes (installiert 02.11.2026, 16:55 Uhr)
 
 | Schutz | Umsetzung | Wirkung |
 |---|---|---|
-| Unveränderliche Referenz | [`deploy/production/docker-compose.pinned.yml`](../../deploy/production/docker-compose.pinned.yml) nennt das Image per Digest, nicht per Tag | `latest` spielt keine Rolle mehr; ein überschriebener Tag ändert nichts |
-| Kein Build möglich | Die Datei hat keinen `build`-Abschnitt und `pull_policy: never` | `--build` baut nichts; Trockenlauf bestätigt |
-| Alter Ordner kann nicht mehr starten | Compose-Datei und `.env.production` nach `/opt/amanah-prod/`; Quellordner bleibt unverändert | Der alte Befehl bricht sofort ab, auf jedem Commit |
-| Bilder schützen | Tags bleiben; zusätzlich `docker save` beider Images nach `/opt/amanah-prod/images/` mit `SHA256SUMS`, Dateirechte 400 | Auch ein `docker image prune -a` wäre durch `docker load` umkehrbar |
-| Kontrolle | [`scripts/verify-production-image.sh`](../../scripts/verify-production-image.sh), nur lesend | Meldet Abweichung bei Image, Health, Route, Rollback-Image und Sperre |
-| Netztrennung (Doku 29 §6) | Die Datei bindet die App nicht mehr an `gemeinsam1-prod_internal` | Nichts bei `gemeinsam1` nutzt die App; dort ändert sich nichts |
+| Unveränderliche Referenz | [`deploy/production/docker-compose.pinned.yml`](../../deploy/production/docker-compose.pinned.yml), auf dem Server `/opt/amanah-prod/`, Image per Digest | `latest` spielt keine Rolle mehr |
+| Kein Build möglich | kein `build`-Abschnitt, `pull_policy: never` | `--build` baut nichts |
+| Alter Ordner startet nicht mehr | `/opt/amanah-app/.env.production` enthält nur noch `POSTGRES_USER` und `POSTGRES_DB` | Der alte Befehl bricht auf jedem Commit ab, weil `DATABASE_URL` fehlt |
+| Backups laufen weiter | Der Cron nutzt weiter `/opt/amanah-app/scripts/backup-postgres.sh`, das nur diese beiden Werte braucht | keine Änderung am Crontab; mit der reduzierten Datei geprüft |
+| Bilder geschützt | Tags bleiben; `images/hotfix.tar.gz` und `images/rollback.tar.gz` mit `SHA256SUMS`, Rechte 400 | nach `docker image prune -a` per `docker load` wiederherstellbar |
+| Konfiguration gesichert | `config-vorher/`: vollständige Env-Datei, alte Compose-Dateien, Netze | Rollback ohne Rekonstruktion |
+| Kontrolle | `/opt/amanah-prod/verify-production-image.sh`, nur lesend | Meldet Abweichungen, läuft aber nicht automatisch |
+| Netztrennung (Doku 29 §6) | App nur noch im Netz `amanah-app_amanah_internal` | Aus der App sind `gemeinsam1`-Dienste nicht mehr auflösbar |
 
-**Bleibt möglich:** Wer absichtlich die Umgebung setzt oder mit `docker build` einen Container von Hand startet, wird nicht aufgehalten. Das Prüfskript zeigt es dann an. Der Schutz gilt gegen Versehen, nicht gegen Absicht.
+**Abweichung vom Entwurf:** Der Entwurf wollte `.env.production` im alten Ordner löschen. Die Vorprüfung zeigte, dass der nächtliche Backup-Cron sie braucht; die Backups wären still ausgefallen. Deshalb bleibt eine reduzierte Datei. Ein früherer Entwurf der Compose-Datei hätte außerdem ein leeres Volume angelegt; das fand ein Trockenlauf vor der Installation.
 
-### Isoliert geprüft
+**Bleibt möglich:** Wer absichtlich die Umgebung setzt oder einen Container von Hand startet, wird nicht aufgehalten. Der Schutz gilt gegen Versehen, nicht gegen Absicht. Auch `.env.production.backup.20260705-145025` im alten Ordner enthält noch vollständige Werte; wer sie gezielt angibt, umgeht die Sperre.
 
-| Test | Ergebnis |
+### Nachprüfung
+
+| Prüfung | Ergebnis |
 |---|---|
-| Alter Befehl ohne `.env.production` | Abbruch: Datei nicht gefunden |
-| Alter Befehl ohne `--env-file`, mit `--build` | Abbruch: `DATABASE_URL` fehlt |
-| Gepinnte Datei mit `--build`, Trockenlauf | 0 Build-Schritte |
-| Digest auf dem Server | auflösbar; Testcontainer nutzt das erwartete Image, danach entfernt |
-| Trockenlauf gegen den Server | `amanah-postgres` bleibt laufen, nur `amanah-app` wird neu erstellt |
-| Compose-Hash Postgres | identisch mit dem laufenden Container (`4bf82a39…`) |
-| Prüfskript gegen die Produktion | alle 6 Punkte OK |
-| `src/__tests__/production-pin.test.ts` | sichert Digest, fehlenden Build, Volume und Netz |
+| Referenz und ID | `amanah-app-app@sha256:f7f29e2a…`, ID identisch, keine Neustarts |
+| Health, Prüfskript | 200, healthy, 6 von 6 OK |
+| 142 Textproben, 39 URLs, KI | 0 Treffer; 27 × 404; 503 |
+| Datenbank-Verbindung | `postgres` erreichbar; falsches Passwort 401 |
+| Volume | `amanah_pg_prod`, erstellt 05.07., 47 MB, Postgres-Container seit 05.07. unverändert |
+| Daten | 0 Konten, 1 Migration, 4 Tabellen; kein neues Volume |
+| `gemeinsam1` | Container-IDs gleich; Antworten byte-gleich |
+| Alter Weg | Beide Varianten mit `--build` brechen ab |
+| Backup | vor und nach der Umstellung erstellt, 4 Tabellen; Crontab unverändert |
 
-**Ein Trockenlauf deckte einen Fehler im ersten Entwurf auf:** Ohne `name: amanah_pg_prod` hätte Compose ein leeres Volume angelegt und Postgres neu erstellt, also Datenverlust. Deshalb ist die Hash-Prüfung unten Pflichtschritt.
+### Rollback (Route bleibt geschlossen)
 
-**NOT_RUN:** Die Umstellung selbst, ein echter Neustart, `docker save` auf dem Server.
-
-### Umstellung (nur nach gesonderter Owner-Freigabe)
+Zurück auf die bisherige Compose-Struktur; `latest` zeigt weiter auf den Hotfix, die Texte bleiben also gesperrt:
 
 ```bash
-# Abbruch, wenn etwas nicht passt
-sudo install -d -m 700 /opt/amanah-prod /opt/amanah-prod/images
-# docker-compose.pinned.yml dorthin kopieren
-cd /opt/amanah-prod
-cp -p /opt/amanah-app/.env.production .env.production
-DC="docker compose -f docker-compose.pinned.yml --env-file .env.production"
-# PFLICHT: muss mit dem laufenden Container übereinstimmen, sonst abbrechen
-$DC config --hash postgres
-docker inspect amanah-postgres --format '{{index .Config.Labels "com.docker.compose.config-hash"}}'
-$DC up --dry-run --no-deps -d app     # darf amanah-postgres nicht anfassen
-docker save amanah-app-app:wissenssperre-dda903c | gzip > images/hotfix.tar.gz
-docker save amanah-app-app:vor-wissenssperre | gzip > images/rollback.tar.gz
-(cd images && sha256sum *.tar.gz > SHA256SUMS && chmod 400 *)
-$DC up -d --no-deps app               # kurzer Ausfall nur bei Amanah
-scripts/verify-production-image.sh    # aus dem Repo-Stand
-rm /opt/amanah-app/.env.production    # erst nach erfolgreicher Prüfung
+cd /opt/amanah-app
+docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml \
+  --env-file /opt/amanah-prod/config-vorher/.env.production up -d --no-deps --no-build app
 ```
 
-Keine Migration, kein `--remove-orphans` (der alte Container `amanah-migrate` bleibt liegen), keine Änderung an Caddy oder `gemeinsam1`. Speicher: rund 500 MB für die Archive; zuerst `df -h /` prüfen.
+Im Trockenlauf bleibt `amanah-postgres` laufen, und nur die App wird neu erstellt. Die App hängt danach wieder im `gemeinsam1`-Netz. Fehlt ein Image: `docker load < /opt/amanah-prod/images/<datei>`, vorher `sha256sum -c SHA256SUMS`.
 
-**Rollback:** `.env.production` zurück nach `/opt/amanah-app`, dort wie bisher `docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml --env-file .env.production up -d --no-deps --no-build app`. Das Tag `latest` zeigt weiter auf den Hotfix, die App bleibt also gesperrt und hängt wieder im alten Netz. Die Route bleibt geschlossen.
+### Künftige Änderungen
+
+Aus `/opt/amanah-prod`: `docker compose -f docker-compose.pinned.yml --env-file .env.production …`. Vor jedem `up` den Compose-Hash von Postgres mit dem laufenden Container vergleichen (`config --hash postgres`). Ein neues Release braucht einen neuen Digest in dieser Datei.
