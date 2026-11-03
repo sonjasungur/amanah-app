@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/layout/logo";
 import { useAuth } from "@/lib/auth/context";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/config";
+import { typedValue } from "@/lib/utils/form-input";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -65,10 +66,12 @@ export function ForgotPasswordForm() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const typed = typedValue(e.currentTarget, 'input[type="email"]');
+    setEmail(typed);
     setBusy(true);
-    const { body } = await postJson("/api/auth/password-reset/request", { email });
+    const { body } = await postJson("/api/auth/password-reset/request", { email: typed });
     setMessage(body.message ?? body.error ?? "Bitte prüfe dein Postfach.");
     setBusy(false);
   };
@@ -100,11 +103,14 @@ export function ResetPasswordForm() {
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== repeat) return setResult({ ok: false, text: "Die Passwörter stimmen nicht überein." });
+    const [first, second] = [...e.currentTarget.querySelectorAll<HTMLInputElement>('input[type="password"]')].map((input) => input.value);
+    setPassword(first);
+    setRepeat(second);
+    if (first !== second) return setResult({ ok: false, text: "Die Passwörter stimmen nicht überein." });
     setBusy(true);
-    const { ok, body } = await postJson("/api/auth/password-reset/confirm", { token, password });
+    const { ok, body } = await postJson("/api/auth/password-reset/confirm", { token, password: first });
     setResult({ ok, text: body.message ?? body.error ?? "" });
     setBusy(false);
   };

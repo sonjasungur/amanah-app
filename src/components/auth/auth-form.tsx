@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 import { useI18n } from "@/lib/i18n/context";
+import { typedValue } from "@/lib/utils/form-input";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -42,15 +43,23 @@ export function AuthForm({ mode }: AuthFormProps) {
     setResent(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const typed = {
+      email: typedValue(e.currentTarget, 'input[type="email"]'),
+      password: typedValue(e.currentTarget, 'input[type="password"]'),
+      name: mode === "register" ? typedValue(e.currentTarget, 'input:not([type="email"]):not([type="password"])') : name,
+    };
+    setEmail(typed.email);
+    setPassword(typed.password);
+    setName(typed.name);
     setError("");
     setLoading(true);
 
     const result =
       mode === "login"
-        ? await login({ email, password })
-        : await register({ email, password, name });
+        ? await login({ email: typed.email, password: typed.password })
+        : await register(typed);
 
     setLoading(false);
     if ("pendingVerification" in result && result.pendingVerification) {

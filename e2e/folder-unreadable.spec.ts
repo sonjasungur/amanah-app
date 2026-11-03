@@ -137,6 +137,10 @@ test("no path writes over a folder that cannot be decrypted", async ({ page, bas
         await first.getByRole("button", { name: "Anmelden" }).last().click();
         await expect(first.getByTestId("folder-problem")).toBeVisible();
         await expect(first.locator(FIELD)).toHaveCount(0);
+        // Consent touches no folder data: without it the write would stop earlier, for another reason.
+        const { definitions } = (await (await empty.request.get(`${FAULT}/api/consent`)).json()) as { definitions: { sensitive_folder_storage: { version: string } } };
+        const consent = await empty.request.post(`${FAULT}/api/consent`, { headers: { Origin: FAULT }, data: { purpose: "sensitive_folder_storage", version: definitions.sensitive_folder_storage.version, confirmed: true } });
+        expect(consent.status()).toBe(201);
         const put = await empty.request.put(`${FAULT}/api/amanah`, { headers: { Origin: FAULT, "Content-Type": "application/json" }, data: {} });
         expect((await put.json()).code).toBe("folder_unreadable");
         const { rows } = await db.query("SELECT count(*)::int AS n FROM amanah_data a JOIN users u ON u.id = a.user_id WHERE u.email = $1", [fresh]);
