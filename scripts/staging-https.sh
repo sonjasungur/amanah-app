@@ -75,7 +75,7 @@ check_access() { # base-url, extra curl args...
     code="$(curl -sS -o /dev/null -m 15 -w '%{http_code}' "$@" "$base$p" || true)"
     if [ "$code" = 401 ]; then echo "OK   ohne Passwort 401: $p"; else echo "FAIL ohne Passwort $code: $p"; failed=1; fi
   done
-  code="$(curl -sS -o /dev/null -m 15 -w '%{http_code}' -u tester:falsch "$@" "$base/" || true)"
+  code="$(printf 'user = "tester:falsch"\n' | curl -sS -K - -o /dev/null -m 15 -w '%{http_code}' "$@" "$base/" || true)"
   if [ "$code" = 401 ]; then echo "OK   falsches Passwort 401"; else echo "FAIL falsches Passwort $code"; failed=1; fi
   code="$(curl_auth -o /dev/null -m 15 -w '%{http_code}' "$@" "$base/api/health" || true)"
   if [ "$code" = 200 ]; then echo "OK   mit Passwort 200"; else echo "FAIL mit Passwort $code"; failed=1; fi
