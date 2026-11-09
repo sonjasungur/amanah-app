@@ -96,6 +96,28 @@ for (const file of requiredFiles) {
   else fail(`${file} missing`);
 }
 
+// The public production route stays closed: nothing in the repository may be able to open it by accident.
+function checkProductionRouteLock() {
+  const read = (file) => (existsSync(join(root, file)) ? readFileSync(join(root, file), "utf8") : "");
+  const active = (text) => text.split("\n").filter((line) => line.trim() && !line.trim().startsWith("#")).join("\n");
+
+  const installer = active(read("scripts/install-shared-caddy.sh"));
+  const installerLocked = /^exit 1$/m.test(installer) && !/docker|caddy +reload|>>|\bcp\b|\bif\b|\$\{?[A-Z_]/.test(installer);
+  if (installerLocked) pass("Shared proxy installer is permanently locked");
+  else fail("scripts/install-shared-caddy.sh must abort unconditionally and change nothing");
+
+  if (active(read("deploy/Caddyfile.shared-snippet")) === "") pass("Shared proxy snippet holds no route");
+  else fail("deploy/Caddyfile.shared-snippet must not hold a route");
+
+  const overlay = active(read("docker-compose.prod.nocaddy.yml"));
+  if (/shared_proxy|gemeinsam1|external:|^\s*networks:/m.test(overlay)) fail("docker-compose.prod.nocaddy.yml must not attach the app to the shared proxy network");
+  else pass("Shared-server overlay keeps the app off the proxy network");
+  if ((overlay.match(/^\s+- "[^"]+"/gm) ?? []).every((port) => port.includes("127.0.0.1:"))) pass("Shared-server overlay publishes no public port");
+  else fail("docker-compose.prod.nocaddy.yml must bind ports to 127.0.0.1 only");
+}
+
+checkProductionRouteLock();
+
 if (existsSync(join(root, "prisma/schema.prisma"))) {
   pass("Prisma schema present");
 } else {

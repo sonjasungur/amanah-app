@@ -179,16 +179,9 @@ git pull --ff-only "$DEPLOY_REMOTE" main
 ./scripts/backup-postgres.sh              # test backup
 ```
 
-Public HTTPS: add `deploy/Caddyfile.shared-snippet` to your existing Caddy and set DNS for your Amanah domain.
+`deploy-shared-server.sh` refuses to run while `amanah-app` is the pinned container from `/opt/amanah-prod`. The app stays on its internal network and on `127.0.0.1:3001`.
 
-```bash
-# After DNS A record amanahordner.de → server IP:
-./scripts/set-production-site-url.sh https://amanahordner.de
-./scripts/install-shared-caddy.sh
-docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml \
-  --env-file .env.production up -d --build
-BASE_URL=https://amanahordner.de ./scripts/prod-smoke-test.sh
-```
+**GESPERRT: public production route.** `scripts/install-shared-caddy.sh` is permanently disabled and `deploy/Caddyfile.shared-snippet` holds no route, with no switch to turn them back on. Do not add a route for the production domain to the shared proxy by hand. Opening it needs a new, reviewed change and the owner's release.
 
 ### DNS (required before public HTTPS)
 
