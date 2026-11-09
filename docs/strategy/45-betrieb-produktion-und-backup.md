@@ -142,7 +142,7 @@ Das Skript prüft erst DNS, legt das Passwort an und trägt den Block samt Passw
 | Neustart oder Neuerstellung | die Host-Datei unter dem aktuellen Pfad. Probe: Datei per `mv` ersetzt, `docker restart` übernimmt sie |
 | `caddy reload --config /etc/caddy/Caddyfile` | die Datei im Mount; **solange die Altdatei dort liegt, öffnet das die Route** |
 | `caddy reload --config /dev/stdin … < Host-Datei` | immer die Host-Datei, der zulässige Weg |
-| `scripts/install-shared-caddy.sh` | hängt die Produktionsroute an; verweigert nun ohne `AMANAH_PRODUCTION_ROUTE_RELEASED=yes`. Die ältere Kopie in `/opt/amanah-app/scripts/` ist bewusst unverändert und bleibt ungesperrt |
+| `scripts/install-shared-caddy.sh` | **Dauerhaft gesperrt (09.11.):** bricht immer ab, ohne Schalter, ändert nichts. `deploy/Caddyfile.shared-snippet` enthält keine Route. `docker-compose.prod.nocaddy.yml` verbindet die App nicht mit dem Proxy-Netz, `deploy-shared-server.sh` verweigert den Lauf, solange der festgenagelte Container läuft. Prüfung: `src/__tests__/production-route-lock.test.ts`, `release-check.mjs` |
 | Gemeinsam1 `deploy-release.sh` | fasst Caddy nicht an (`--no-deps backend frontend`) |
 | Gemeinsam1 `deploy-production.sh` (Altweg) | Rsync kann die Host-Datei ersetzen: Staging-Block weg, Mount wieder alt; bei einer Neuerstellung von Caddy fehlt zudem das Staging-Netz. Keine Produktionsroute, aber die Prüfung schlägt an |
 

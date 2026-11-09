@@ -271,7 +271,7 @@ Hinweise:
 
 ## 6. Separater Befund: Amanah-Produktion im gemeinsam1-Netz (nichts geändert)
 
-- `amanah-app` (Produktion) hängt über `docker-compose.prod.nocaddy.yml` (`SHARED_PROXY_NETWORK`, Standard `gemeinsam1-prod_internal`) im selben Netz wie `gemeinsam1-prod-db`, -backend und -frontend.
+- **Stand bis 09.11., überholt** (das Overlay verbindet die App seither nicht mehr mit dem Proxy-Netz): `amanah-app` (Produktion) hängt über `docker-compose.prod.nocaddy.yml` (`SHARED_PROXY_NETWORK`, Standard `gemeinsam1-prod_internal`) im selben Netz wie `gemeinsam1-prod-db`, -backend und -frontend.
 - Risiko mittel bis niedrig.
 - Abhilfe (Produktionsänderung, nur nach Freigabe): eigenes Netz `amanah_prod_proxy` analog zu B1 beim nächsten geplanten Produktions-Deploy.
 

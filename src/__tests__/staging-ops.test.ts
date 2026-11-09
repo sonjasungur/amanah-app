@@ -421,11 +421,11 @@ describe("the shared proxy cannot quietly go back to the old file", () => {
     expect(verify).toContain('[ -n "$adapted" ]');
   });
 
-  it("the old installer refuses without the owner's release and never loads the container's file", () => {
-    const blocked = spawnSync("bash", ["scripts/install-shared-caddy.sh"], { encoding: "utf8", env: { ...process.env, AMANAH_PRODUCTION_ROUTE_RELEASED: "", CONFIRM_SHARED_RESTART: "" } });
+  it("the old installer always refuses, even with the former release variable, and never loads anything", () => {
+    const blocked = spawnSync("bash", ["scripts/install-shared-caddy.sh"], { encoding: "utf8", env: { ...process.env, AMANAH_PRODUCTION_ROUTE_RELEASED: "yes" } });
     expect(blocked.status).toBe(1);
-    expect(blocked.stderr).toContain("gesperrt");
-    expect(install).not.toMatch(/--config \/etc\/caddy\/Caddyfile/);
+    expect(blocked.stderr).toContain("GESPERRT");
+    expect(install).not.toMatch(/docker|caddy +reload|AMANAH_PRODUCTION_ROUTE_RELEASED/);
   });
 
   it("the restart needs the owner's go, keeps the container and stops before it on a failed check", () => {

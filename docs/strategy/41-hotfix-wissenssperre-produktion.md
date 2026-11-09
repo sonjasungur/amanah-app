@@ -66,11 +66,7 @@ Vor dem Reload den Status von `api.gemeinsam1.com` notieren, damit „unverände
 
 **Fehlerfall (Owner-Vorgabe):** Die Route wird nicht automatisch wieder geöffnet. Schlägt etwas fehl, zuerst die Host-Datei erneut laden. Ein Neustart von Caddy lädt ebenfalls die Host-Datei und bleibt sicher. Der folgende Befehl stellt die alte Route wieder her und ist **nur auf ausdrückliche Owner-Entscheidung** zu verwenden:
 
-```bash
-docker exec gemeinsam1-prod-caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
-```
-
-Das funktioniert nur, solange der Container nicht neu gestartet wurde.
+**GESPERRT (09.11.):** Der frühere Befehl, der hier stand, lud die Datei im Container und ist entfernt. Zulässig ist nur der Weg über die Host-Datei aus [Doku 45 §4.2](45-betrieb-produktion-und-backup.md).
 
 **Bleibt zu beachten:** Die Host-Datei darf die Amanah-Zeilen nicht wieder erhalten, bevor die App geprüfte Inhalte liefert. Der Container sieht bis zum nächsten Neustart weiter die alte Datei; das ist ohne Reload dieser Datei wirkungslos.
 
@@ -220,7 +216,7 @@ docker compose -f docker-compose.prod.yml -f docker-compose.prod.nocaddy.yml \
   --env-file /opt/amanah-prod/config-vorher/.env.production up -d --no-deps --no-build app
 ```
 
-Im Trockenlauf bleibt `amanah-postgres` laufen, und nur die App wird neu erstellt. Die App hängt danach wieder im `gemeinsam1`-Netz. Fehlt ein Image: `docker load < /opt/amanah-prod/images/<datei>`, vorher `sha256sum -c SHA256SUMS`.
+Im Trockenlauf vom 02.11. blieb `amanah-postgres` laufen, und nur die App wurde neu erstellt. Seit dem 09.11. hängt die App dabei nicht mehr im `gemeinsam1`-Netz: `docker-compose.prod.nocaddy.yml` verbindet sie nicht mehr mit dem Proxy. Fehlt ein Image: `docker load < /opt/amanah-prod/images/<datei>`, vorher `sha256sum -c SHA256SUMS`.
 
 ### Künftige Änderungen
 
