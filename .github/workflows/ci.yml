@@ -52,7 +52,7 @@ jobs:
   e2e:
     name: Playwright E2E – desktop and mobile
     needs: quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -97,7 +97,7 @@ jobs:
   e2e-failure-paths:
     name: Playwright E2E – phase2 failure paths (mocked API)
     needs: quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout
