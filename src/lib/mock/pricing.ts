@@ -4,28 +4,28 @@ import type { PricingPlan } from "@/lib/types";
 export const pricingPlans: PricingPlan[] = [
   {
     id: "free-check",
-    name: "Amanah-Check",
+    name: "Vorsorge-Check",
     price: "0 €",
     features: ["Persönliche Auswertung", "Ein nächster Schritt", "Ohne Konto, ohne KI"],
     category: "free",
   },
   {
     id: "basic-pdf",
-    name: "Mein Wille Basic",
+    name: "Amanah – Mein Wille Basic",
     price: "29 €",
     features: ["Notfallkarte", "Janazah-Wünsche", "Familienbrief", "PDF-Export"],
     category: "one_time",
   },
   {
     id: "complete",
-    name: "Mein Wille Komplett",
+    name: "Amanah – Mein Wille Komplett",
     price: "79 €",
     features: ["Alle Vorsorgebereiche", "Vollständiger PDF-Ordner", "JSON-Export", "Erbprofil mit ersten Hinweisen"],
     category: "one_time",
   },
   {
     id: "family",
-    name: "Mein Wille Familie",
+    name: "Amanah – Mein Wille Familie",
     price: "99 €",
     features: ["Maximal zwei Erwachsenenprofile", "Familienbrief", "Gemeinsame Notfallübersicht"],
     category: "one_time",

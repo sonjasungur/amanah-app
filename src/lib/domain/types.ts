@@ -325,7 +325,7 @@ export interface TestamentPreparation {
   currentStep: number;
 }
 
-/** Versioned Amanah-Check progress stored in the same folder state. */
+/** Versioned Vorsorge-Check progress stored in the same folder state. */
 export interface CheckProgress {
   schemaVersion: number;
   index: number;

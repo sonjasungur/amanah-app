@@ -62,7 +62,7 @@ const STEPS = [
   {
     step: "1",
     title: "Prüfen",
-    text: "Der kostenlose Amanah-Check zeigt in wenigen Minuten, was noch fehlt.",
+    text: "Der kostenlose Vorsorge-Check zeigt in wenigen Minuten, was noch fehlt.",
     icon: ClipboardCheck,
   },
   {
@@ -89,7 +89,7 @@ const AREAS = [
 ] as const;
 
 const PRICING_TEASER = [
-  { name: "Amanah-Check", price: "0 €", note: "Kostenlos, ohne Konto — mit Wissen und Vorsorge-Einstieg", highlighted: false },
+  { name: "Vorsorge-Check", price: "0 €", note: "Kostenlos, ohne Konto — mit Wissen und Vorsorge-Einstieg", highlighted: false },
   { name: "Vorsorge Plus", price: formatPrice(getTestPriceCents()), note: "Einmalig — vollständiger Vorsorgeordner, kein Abo", highlighted: true },
 ];
 
@@ -209,7 +209,7 @@ export default function HomePage() {
       <section id="so-funktioniert" className="py-14 md:py-18 bg-accent-soft border-y border-border scroll-mt-24">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
-            title="So funktioniert Mein Wille"
+            title="So funktioniert Amanah – Mein Wille"
             description="Du musst nicht alles heute erledigen. Der erste Überblick dauert nur wenige Minuten."
             accent={COLORS.primary}
           />
@@ -270,9 +270,9 @@ export default function HomePage() {
                 description={p.note}
                 features={[]}
                 highlighted={p.highlighted}
-                statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}
+                statusNote={p.name === "Vorsorge-Check" ? undefined : "In Vorbereitung"}
                 cta={
-                  p.name === "Amanah-Check" ? (
+                  p.name === "Vorsorge-Check" ? (
                     <Link href="/check">
                       <Button className="w-full" variant="primary">
                         {BRAND.ctaPrimary}

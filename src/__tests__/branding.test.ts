@@ -37,16 +37,16 @@ const USER_FACING_FILES = [
   "src/components/print/print-views.tsx",
 ];
 
-describe("branding — Mein Wille", () => {
+describe("branding — Amanah – Mein Wille", () => {
   it("exports brand constants", () => {
-    expect(BRAND.name).toBe("Mein Wille");
+    expect(BRAND.name).toBe("Amanah – Mein Wille");
     expect(BRAND.subtitle).toBe("Islamische Vorsorge für Notfall, Janazah und Akhira");
     expect(BRAND.claim).toBe("Ich entscheide heute, was später wichtig ist.");
     expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
     expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
-    expect(BRAND.ctaPrimary).toBe("Kostenlosen Amanah-Check starten");
-    expect(BRAND.metadataTitle).toBe("Mein Wille – Islamische Vorsorge");
+    expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
+    expect(BRAND.metadataTitle).toBe("Amanah – Mein Wille | Islamische Vorsorge");
     expect(BRAND.themeColor).toBe("#071A16");
   });
 
@@ -98,7 +98,7 @@ describe("branding — Mein Wille", () => {
 
   it("homepage teaser shows the free offer and Vorsorge Plus, no paid purchase button", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Amanah-Check"');
+    expect(home).toContain('name: "Vorsorge-Check"');
     expect(home).toContain('name: "Vorsorge Plus"');
     expect(home).toContain("price: formatPrice(getTestPriceCents())");
     expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
@@ -127,10 +127,10 @@ describe("branding — Mein Wille", () => {
     expect(PROVISIONAL_LOGO_VARIANT).toBe("A");
   });
 
-  it("manifest uses Mein Wille and new theme color", () => {
+  it("manifest uses Amanah – Mein Wille and new theme color", () => {
     const manifest = JSON.parse(read("public/manifest.json"));
-    expect(manifest.name).toBe("Mein Wille – Islamische Vorsorge");
-    expect(manifest.short_name).toBe("Mein Wille");
+    expect(manifest.name).toBe("Amanah – Mein Wille | Islamische Vorsorge");
+    expect(manifest.short_name).toBe("Amanah");
     expect(manifest.theme_color).toBe("#071A16");
   });
 

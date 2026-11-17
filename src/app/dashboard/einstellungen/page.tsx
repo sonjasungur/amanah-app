@@ -72,7 +72,7 @@ export default function EinstellungenPage() {
         </p>
       </Card>
 
-      <Card className="border-2 border-border/80 shadow-sm">
+      <Card className="border-2 border-border/80 shadow-sm scroll-mt-24" data-testid="settings-export">
         <CardTitle className="text-card-title text-primary-dark mb-3">{t("settings.dataExport.title")}</CardTitle>
         <StorageControls />
       </Card>

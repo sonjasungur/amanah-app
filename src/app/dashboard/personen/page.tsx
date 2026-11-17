@@ -6,7 +6,6 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import type { FamilyMember, FamilyRelationType, FamilyRole } from "@/lib/domain/types";
 
 const RELATIONS: Record<FamilyRelationType, string> = {
@@ -57,7 +56,6 @@ export default function PersonenPage() {
           <h1 className="text-2xl font-bold text-primary mb-2">Familie & Vertrauenspersonen</h1>
           <p className="text-muted max-w-2xl">Wer gehört zu deiner Familie, und wer soll im Ernstfall angerufen werden?</p>
         </div>
-        <SaveStatusIndicator />
       </header>
 
       <Card>

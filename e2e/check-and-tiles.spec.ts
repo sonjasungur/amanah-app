@@ -12,9 +12,9 @@ const WISSEN_SLUGS = [
 ];
 
 test.describe("Homepage guided path", () => {
-  test("primary CTA starts the Amanah-Check", async ({ page }) => {
+  test("primary CTA starts the Vorsorge-Check", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /Kostenlosen Amanah-Check starten/i }).first().click();
+    await page.getByRole("link", { name: /Kostenlosen Vorsorge-Check starten/i }).first().click();
     await expect(page).toHaveURL(/\/check$/);
   });
 

@@ -115,10 +115,10 @@ describe("professional core phase 1 — check persistence", () => {
 
 describe("professional core phase 1 — dashboard greeting and next step", () => {
   it("never greets with dort", () => {
-    expect(getDashboardGreeting("")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Mein Wille");
+    expect(getDashboardGreeting("")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Amanah – Mein Wille");
     expect(getDashboardGreeting("Amina")).toBe("Willkommen, Amina");
     expect(getDashboardGreeting("Amina")).not.toMatch(/dort/i);
   });
@@ -230,7 +230,7 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
 describe("professional core phase 1 — pricing teaser and checkout safety", () => {
   it("homepage teaser and /preise show the owner-confirmed split: free + Vorsorge Plus (39 € test price)", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Amanah-Check"');
+    expect(home).toContain('name: "Vorsorge-Check"');
     expect(home).toContain('price: "0 €"');
     expect(home).toContain('name: "Vorsorge Plus"');
     const preise = read("src/app/preise/page.tsx");
@@ -242,7 +242,7 @@ describe("professional core phase 1 — pricing teaser and checkout safety", () 
 
   it("keeps paid teaser cards in preparation without active buy CTA", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}');
+    expect(home).toContain('statusNote={p.name === "Vorsorge-Check" ? undefined : "In Vorbereitung"}');
     expect(home).not.toContain("Details");
     expect(home).not.toContain("Kaufen");
     expect(home).not.toContain("Checkout");

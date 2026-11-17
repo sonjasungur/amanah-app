@@ -10,7 +10,6 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { isTestamentPreparationEnabled } from "@/lib/flags/testament-preparation";
 import { PART_LABELS, PREPARATION_STEPS, isStepRelevant, readStepValue, writeStepValue } from "@/lib/testament/steps";
 import { buildLawyerQuestions } from "@/lib/testament/lawyer-questions";
@@ -54,7 +53,6 @@ export default function TestamentVorbereitungPage() {
           <h1 className="text-2xl font-bold text-primary mb-1">Testament vorbereiten</h1>
           <p className="text-sm text-muted">Vorbereitung für das Gespräch mit Anwalt oder Notar. Hier entsteht kein Testament.</p>
         </div>
-        <SaveStatusIndicator />
       </header>
 
       <div className="no-print">
@@ -179,7 +177,7 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
 
       <Card>
         <CardTitle className="text-base">5. Rechtlich freigegebene Dokumente</CardTitle>
-        <p className="text-sm text-muted">Keine. Mein Wille erstellt keine Testamente und prüft keine Rechtslage.</p>
+        <p className="text-sm text-muted">Keine. Amanah – Mein Wille erstellt keine Testamente und prüft keine Rechtslage.</p>
       </Card>
 
       {/* Printed on its own page: what exists is not connected to who should receive it. */}

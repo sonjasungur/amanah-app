@@ -31,14 +31,14 @@ export function getProducts(env: NodeJS.ProcessEnv = process.env): Product[] {
   return [
     {
       id: "vorsorge_basis",
-      name: "Mein Wille Basis",
+      name: "Amanah – Mein Wille Basis",
       testPriceCents: null,
       available: true,
       features: featuresByTier("free").map((f) => f.title),
     },
     {
       id: "vorsorge_plus",
-      name: "Mein Wille Vorsorge Plus",
+      name: "Amanah – Mein Wille Vorsorge Plus",
       testPriceCents: getTestPriceCents(env),
       available: true,
       features: featuresByTier("plus").map((f) => f.title),

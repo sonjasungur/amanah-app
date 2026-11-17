@@ -3,8 +3,8 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
-  title: "Datenschutz — Mein Wille",
-  description: "Datenschutzerklärung für Mein Wille — lokale und serverseitige Speicherung, KI, Export und Löschung.",
+  title: "Datenschutz — Amanah – Mein Wille",
+  description: "Datenschutzerklärung für Amanah – Mein Wille — lokale und serverseitige Speicherung, KI, Export und Löschung.",
 };
 
 export default function DatenschutzPage() {
@@ -61,7 +61,7 @@ export default function DatenschutzPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Speicherung nur für dein angemeldetes Konto.</li>
-            <li>„Amanah-Daten löschen“ entfernt nur Vorsorgedaten — nicht dein Benutzerkonto.</li>
+            <li>„Vorsorgedaten löschen“ entfernt nur Vorsorgedaten — nicht dein Benutzerkonto.</li>
             <li>Unter „Einstellungen → Mein Konto“ kannst du alle Kontodaten herunterladen und dein Konto mit allen Angaben vollständig löschen.</li>
             <li>Die Anmeldung erfolgt über ein technisch notwendiges Sitzungs-Cookie (HttpOnly), das beim Abmelden gelöscht wird.</li>
             <li>Session-Token werden gehasht gespeichert, keine Klartext-Passwörter in der Datenbank.</li>
@@ -71,7 +71,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">5. Keine Passwort-Speicherung für private Konten</h2>
           <p className="leading-relaxed">
-            Mein Wille speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
+            Amanah – Mein Wille speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
             persönlichen Konten (E-Mail, Banking, Social Media). Im Modul „Digitaler Nachlass“ dokumentierst du
             nur Hinweise, wo Zugangsdaten sicher aufbewahrt werden — nicht die Passwörter selbst.
           </p>
@@ -108,7 +108,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">9. Cookies & Analytics</h2>
           <p className="leading-relaxed">
-            Mein Wille verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
+            Amanah – Mein Wille verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
             Technisch notwendige Speicherung im Browser (Local Storage) ist für die Funktion erforderlich.
           </p>
         </section>

@@ -104,7 +104,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Card>
           <CardTitle>Registrierung derzeit nicht geöffnet</CardTitle>
           <p className="text-sm text-muted mt-3 mb-6">
-            Der kostenlose Amanah-Check benötigt kein Konto. Öffentliche Serverkonten sind derzeit nicht freigeschaltet.
+            Der kostenlose Vorsorge-Check benötigt kein Konto. Öffentliche Serverkonten sind derzeit nicht freigeschaltet.
           </p>
           <Link href="/check" className="text-primary font-semibold hover:underline">
             Kostenlosen Check starten
@@ -120,7 +120,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <Card>
         <CardTitle>{mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</CardTitle>
         <p className="text-sm text-muted mt-2 mb-6">
-          {authMode === "api" ? t("auth.mode.apiHint") : t("auth.mode.localHint")}
+          {authMode === "api" ? null : t("auth.mode.localHint")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

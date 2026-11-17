@@ -11,7 +11,7 @@ import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 
 export const metadata = {
   title: `Preise — ${BRAND.name}`,
-  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vorsorge Plus als Einmalkauf in Vorbereitung — Mein Wille.",
+  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vorsorge Plus als Einmalkauf in Vorbereitung — Amanah – Mein Wille.",
 };
 
 /** Derived from the plan matrix and catalog, so the page cannot drift from what the code enforces. */
@@ -82,7 +82,7 @@ export default function PreisePage() {
       <section className="mt-12 rounded-2xl border-2 border-emerald/30 bg-accent-soft p-6 md:p-8">
         <h2 className="text-section-title font-bold text-foreground mb-3">Bereit für deine Vorsorge?</h2>
         <p className="text-body text-muted mb-6 max-w-2xl">
-          Starte kostenlos mit dem Amanah-Check. Ein Konto ist dafür nicht nötig.
+          Starte kostenlos mit dem Vorsorge-Check. Ein Konto ist dafür nicht nötig.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Link href="/check" className={linkButtonClassName({ size: "lg", className: "w-full sm:w-auto font-bold" })}>

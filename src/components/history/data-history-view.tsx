@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
 import { sectionLabel, sectionRows } from "@/lib/history/display";
@@ -123,7 +124,7 @@ export function DataHistoryView() {
   if (load === "loading") return <p className="text-muted" role="status">Verlauf wird geladen …</p>;
   if (load !== "ready") {
     const text = {
-      unavailable: "Der Verlauf ist noch nicht verfügbar.",
+      unavailable: "Der Verlauf ist auf dieser Umgebung nicht eingeschaltet. Deine Angaben sind davon nicht betroffen und bleiben gespeichert.",
       signed_out: "Bitte melde dich an, um deinen Verlauf zu sehen.",
       failed: "Der Verlauf konnte nicht geladen werden.",
     }[load];
@@ -131,6 +132,9 @@ export function DataHistoryView() {
       <Card className="max-w-2xl" data-testid="history-unavailable">
         <CardTitle>Verlauf</CardTitle>
         <p className="text-sm text-muted">{text}</p>
+        <Link href="/dashboard" className="mt-3 inline-block text-sm text-primary font-semibold hover:underline" data-testid="history-back">
+          ← Zurück zum Vorsorgeplan
+        </Link>
       </Card>
     );
   }

@@ -46,7 +46,7 @@ test.describe("Vorsorgeplan dashboard", () => {
     await page.goto("/dashboard");
     const greeting = page.getByTestId("dashboard-greeting");
     await expect(greeting).toBeVisible();
-    await expect(greeting).toHaveText("Willkommen bei Mein Wille");
+    await expect(greeting).toHaveText("Willkommen bei Amanah – Mein Wille");
     await expect(greeting).not.toContainText("dort");
     await expect(page.getByTestId("dashboard-next-step")).toBeVisible();
     await expect(page.getByTestId("dashboard-next-step-cta")).toBeVisible();
@@ -80,12 +80,12 @@ test.describe("Mobile UX and CTAs", () => {
 
   test("check CTA is the homepage primary action", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /Kostenlosen Amanah-Check starten/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Kostenlosen Vorsorge-Check starten/i }).first()).toBeVisible();
   });
 
   test("pricing page shows check and login CTAs", async ({ page }) => {
     await page.goto("/preise");
-    await expect(page.getByRole("link", { name: /Amanah-Check starten/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Vorsorge-Check starten/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Anmelden/i }).first()).toBeVisible();
   });
 

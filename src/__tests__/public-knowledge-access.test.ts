@@ -70,7 +70,7 @@ describe("knowledge APIs without an account", () => {
     for (const e of body.entries) {
       expect(e.reviewedStatus).toBe("orientation");
       expect(e.reviewBadge).toBe("Organisationsinformation, nicht fachlich geprüft");
-      expect(e.sourceLabel).toBe("Mein Wille — Organisationsinformation");
+      expect(e.sourceLabel).toBe("Amanah – Mein Wille — Organisationsinformation");
     }
     expect(body.disclaimer).toContain("nicht fachlich geprüft");
   });

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { featureForRoute } from "@/lib/billing/plan-matrix";
-import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 
 /**
  * Hint on every dashboard area that the plan matrix assigns to Vorsorge Plus. Informational only:
@@ -14,21 +13,17 @@ export function PlusAreaNotice() {
   if (!feature || feature.tier !== "plus") return null;
   return (
     <aside
-      className="no-print mb-6 rounded-xl border border-border bg-accent-soft p-4 text-sm"
+      className="no-print mb-4 text-xs text-muted"
       data-testid="plus-area-notice"
       data-feature={feature.id}
       aria-label="Hinweis zu Vorsorge Plus"
     >
-      <p className="font-semibold text-foreground">
-        Dieser Bereich gehört künftig zu Vorsorge Plus ({formatPrice(getTestPriceCents())} einmalig, kein Abo).
-      </p>
-      <p className="text-muted mt-1">
-        Vorsorge Plus ist in Vorbereitung. Du kannst diesen Bereich derzeit ohne Einschränkung nutzen. Funktionen, die
-        dein Konto schon vor der Einführung von Vorsorge Plus nutzen konnte, bleiben dir erhalten.
-      </p>
-      <Link href="/preise" className="mt-2 inline-block text-primary font-semibold hover:underline">
-        Was gehört zu Vorsorge Plus?
+      {/* No price while the package cannot be bought; the price page states it. */}
+      Diesen Bereich nutzt du derzeit ohne Einschränkung. Er gehört später zum Paket Vorsorge Plus;{" "}
+      <Link href="/preise" className="text-primary hover:underline">
+        mehr dazu
       </Link>
+      .
     </aside>
   );
 }

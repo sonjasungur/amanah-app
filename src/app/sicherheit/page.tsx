@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
 
 export const metadata = {
-  title: "Sicherheit — Mein Wille",
-  description: "Sicherheitshinweise für Mein Wille — Speicherung, Export, KI und Beta-Status.",
+  title: "Sicherheit — Amanah – Mein Wille",
+  description: "Sicherheitshinweise für Amanah – Mein Wille — Speicherung, Export, KI und Beta-Status.",
 };
 
 export default function SicherheitPage() {
@@ -17,7 +17,7 @@ export default function SicherheitPage() {
           <h2 className="text-xl font-semibold text-primary mb-3">Beta-Hinweis</h2>
           <div className="rounded-xl bg-sand border border-accent/20 p-5">
             <p className="leading-relaxed">
-              Mein Wille befindet sich in aktiver Entwicklung. Funktionen werden schrittweise gehärtet.
+              Amanah – Mein Wille befindet sich in aktiver Entwicklung. Funktionen werden schrittweise gehärtet.
               Für verbindliche Entscheidungen ist eine <strong className="text-foreground">fachliche Prüfung</strong>{" "}
               durch Anwalt, Notar, Arzt oder qualifizierte Gelehrte empfohlen.
             </p>
@@ -46,7 +46,7 @@ export default function SicherheitPage() {
           <h3 className="font-semibold text-foreground mb-2">API / Postgres</h3>
           <p className="leading-relaxed">
             Im Server-Modus werden Daten über die API gespeichert (Memory oder Postgres).
-            Mit „Amanah-Daten löschen“ werden nur deine Vorsorgedaten entfernt — dein Benutzerkonto bleibt bestehen.
+            Mit „Vorsorgedaten löschen“ werden nur deine Vorsorgedaten entfernt — dein Benutzerkonto bleibt bestehen.
           </p>
         </section>
 
@@ -72,7 +72,7 @@ export default function SicherheitPage() {
           <h2 className="text-xl font-semibold text-primary mb-3">Deine Kontrolle</h2>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Daten exportieren (JSON, lesbare Notfallmappe)</li>
-            <li>Lokale Daten zurücksetzen oder Server-Amanah-Daten löschen</li>
+            <li>Lokale Daten zurücksetzen oder Vorsorgedaten im Konto löschen</li>
             <li>KI-Einwilligung widerrufen</li>
           </ul>
           <p className="mt-4">

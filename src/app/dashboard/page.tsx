@@ -8,7 +8,6 @@ import { getDashboardGreeting } from "@/lib/plan/greeting";
 import { getPlanNextStep, getPrioritizedPlanItems } from "@/lib/plan/next-step";
 import { ProgressBar } from "@/components/dashboard/progress-bar";
 import { ModuleTiles } from "@/components/dashboard/module-tiles";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
@@ -41,7 +40,6 @@ export default function DashboardPage() {
             </h1>
             <p className="text-sm text-muted mt-2">Mein Vorsorgeplan</p>
           </div>
-          <SaveStatusIndicator className="shrink-0" />
         </div>
         <p className="text-body text-muted mb-5 max-w-xl leading-relaxed">
           {overallPercent >= 70

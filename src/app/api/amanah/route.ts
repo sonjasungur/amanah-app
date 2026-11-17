@@ -120,7 +120,7 @@ export async function DELETE(request: Request) {
     await repo.deleteAmanahData(userId);
     return NextResponse.json({
       success: true,
-      message: "Amanah-Daten gelöscht. Dein Benutzerkonto bleibt bestehen.",
+      message: "Vorsorgedaten gelöscht. Dein Benutzerkonto bleibt bestehen.",
     });
   } catch (error) {
     return folderUnreadableResponse(error) ?? NextResponse.json({ error: "Löschen fehlgeschlagen." }, { status: 500 });

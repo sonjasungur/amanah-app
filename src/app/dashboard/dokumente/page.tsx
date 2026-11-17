@@ -4,7 +4,6 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input, Label, Select } from "@/components/ui/input";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS, documentSummary, upsertDocument } from "@/lib/vorsorge/documents";
 import type { DocumentStatus } from "@/lib/domain/types";
 
@@ -23,10 +22,9 @@ export default function DokumentePage() {
         <div>
           <h1 className="text-2xl font-bold text-primary mb-2">Wichtige Dokumente</h1>
           <p className="text-muted max-w-2xl">
-            Halte fest, ob ein Dokument vorhanden ist und wo das Original liegt. Mein Wille speichert keine Dateien.
+            Halte fest, ob ein Dokument vorhanden ist und wo das Original liegt. Amanah – Mein Wille speichert keine Dateien.
           </p>
         </div>
-        <SaveStatusIndicator />
       </header>
       <p className="text-sm" data-testid="documents-summary">
         {summary.available} von {summary.total} vorhanden · {summary.missing} fehlen · {summary.review} prüfen

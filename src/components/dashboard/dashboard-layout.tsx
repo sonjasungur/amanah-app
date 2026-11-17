@@ -5,23 +5,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { moduleConfigs } from "@/lib/modules/config";
 import { dashboardNavGroups, moreNavItems } from "@/lib/navigation/dashboard-nav";
-import { StorageControls } from "@/components/storage/storage-controls";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
-import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { cn } from "@/lib/utils/cn";
-import { ChevronDown, ChevronUp, Settings } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, Settings } from "lucide-react";
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** The sidebar is hidden on small screens, but a save problem must never stay unseen. */
-function MobileSaveProblem() {
-  const problem = useAmanahStore((s) => !s.folderProblem && (s.saveStatus === "error" || s.saveStatus === "partial" || s.saveNearLimit));
-  if (!problem) return null;
-  return <SaveStatusIndicator className="lg:hidden no-print sticky top-16 z-10 mb-4 rounded-xl border border-border bg-card p-3 shadow-sm" />;
-}
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -135,11 +126,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <nav className="rounded-2xl bg-card border border-primary/10 p-4 space-y-4 max-h-[80vh] overflow-y-auto" aria-label="Vorsorgeplan-Navigation">
             {navContent}
           </nav>
-          <SaveStatusIndicator className="px-1" />
-          <StorageControls />
+          <Link
+            href="/dashboard/einstellungen#export-sicherung"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-muted hover:text-primary"
+            data-testid="nav-export-link"
+          >
+            <Download size={15} aria-hidden /> Export &amp; Sicherung
+          </Link>
         </aside>
         <div className="lg:col-span-3">
-          <MobileSaveProblem />
           {children}
         </div>
       </div>

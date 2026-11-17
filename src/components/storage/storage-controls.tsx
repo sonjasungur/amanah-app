@@ -4,16 +4,15 @@ import { useAmanahStore, resetAmanahStore } from "@/lib/store/use-amanah-store";
 import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { exportToJson, exportEmergencyFolder, importFromJson } from "@/lib/storage/amanah-storage";
 import { pickDataFields } from "@/lib/store/store-utils";
-import { hasAuthSession } from "@/lib/auth/api-auth-provider";
 import {
   openReadableEmergencyExport,
   downloadReadableEmergencyMarkdown,
 } from "@/lib/export/readable-emergency-export";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, linkButtonClassName } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n/context";
 import { useRef } from "react";
-import { Save, Trash2, Download, Upload, FlaskConical, Heart, FileText } from "lucide-react";
+import { Trash2, Download, Upload, FlaskConical, Heart, FileText, Printer } from "lucide-react";
 
 export function StorageControls() {
   const store = useAmanahStore();
@@ -27,25 +26,6 @@ export function StorageControls() {
   const handleClearLocal = async () => {
     if (confirm(t("storage.clearConfirm"))) {
       await resetAmanahStore();
-    }
-  };
-
-  const handleDeleteServerData = async () => {
-    if (!confirm(t("storage.deleteServerConfirm"))) return;
-        if (!hasAuthSession()) {
-      alert(t("storage.deleteServerNoAuth"));
-      return;
-    }
-    try {
-      const res = await fetch("/api/amanah", {
-        method: "DELETE",
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "Fehler");
-      await resetAmanahStore();
-      alert(body.message || t("storage.deleteServerSuccess"));
-    } catch (e) {
-      alert(e instanceof Error ? e.message : t("storage.deleteServerFailed"));
     }
   };
 
@@ -91,42 +71,46 @@ export function StorageControls() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  // Export and backup in one place. Deleting account data has its own card in the settings; demo
+  // data and resetting the browser copy exist only in the local demo mode.
   return (
-    <div className="rounded-2xl bg-sand border border-primary/10 p-4 space-y-3">
-      <SaveStatusIndicator />
-      <p className="text-sm text-muted flex items-center gap-2">
-        <Save size={16} />
-        {isApiStorage ? t("auth.storage.api") : t("storage.notice")}
-      </p>
-      <p className="text-xs text-warning">{t("storage.warning")}</p>
+    <div className="space-y-4" id="export-sicherung" data-testid="storage-controls">
       <p className="text-xs text-muted">{t("export.keepSafe")}</p>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" onClick={handleExport}>
-          <Download size={14} className="mr-1" /> {t("storage.export")}
-        </Button>
-        <Button size="sm" variant="outline" onClick={handleEmergencyExport}>
-          <Heart size={14} className="mr-1" /> {t("storage.emergencyExport")}
-        </Button>
-        <Button size="sm" variant="outline" onClick={handleReadableExport}>
+        <Button size="sm" onClick={handleReadableExport} data-testid="export-readable">
           <FileText size={14} className="mr-1" /> {t("export.readableBtn")}
         </Button>
-        <Button size="sm" variant="ghost" onClick={handleMarkdownExport}>
-          {t("export.markdownBtn")}
+        <Button size="sm" variant="outline" onClick={handleExport} data-testid="export-backup">
+          <Download size={14} className="mr-1" /> {t("storage.export")}
         </Button>
-        <Button size="sm" variant="outline" onClick={() => fileRef.current?.click()}>
+      </div>
+      <details className="text-sm" data-testid="export-more">
+        <summary className="cursor-pointer text-primary hover:underline w-fit">{t("storage.moreFormats")}</summary>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <Button size="sm" variant="outline" onClick={handleEmergencyExport}>
+            <Heart size={14} className="mr-1" /> {t("storage.emergencyExport")}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleMarkdownExport}>
+            {t("export.markdownBtn")}
+          </Button>
+          <Link href="/dashboard/pdf" className={linkButtonClassName({ size: "sm", variant: "outline" })}>
+            <Printer size={14} className="mr-1" /> {t("storage.printPdf")}
+          </Link>
+        </div>
+      </details>
+      <div className="border-t border-border/60 pt-3 flex flex-wrap gap-2">
+        <Button size="sm" variant="ghost" onClick={() => fileRef.current?.click()}>
           <Upload size={14} className="mr-1" /> {t("storage.import")}
         </Button>
-        <Button size="sm" variant="outline" onClick={handleLoadDemo}>
-          <FlaskConical size={14} className="mr-1" /> {t("storage.loadDemo")}
-        </Button>
-        {isApiStorage ? (
-          <Button size="sm" variant="danger" onClick={handleDeleteServerData}>
-            <Trash2 size={14} className="mr-1" /> {t("storage.deleteServer")}
-          </Button>
-        ) : (
-          <Button size="sm" variant="danger" onClick={handleClearLocal}>
-            <Trash2 size={14} className="mr-1" /> {t("storage.resetLocal")}
-          </Button>
+        {!isApiStorage && (
+          <>
+            <Button size="sm" variant="ghost" onClick={handleLoadDemo}>
+              <FlaskConical size={14} className="mr-1" /> {t("storage.loadDemo")}
+            </Button>
+            <Button size="sm" variant="danger" onClick={handleClearLocal}>
+              <Trash2 size={14} className="mr-1" /> {t("storage.resetLocal")}
+            </Button>
+          </>
         )}
         <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
       </div>

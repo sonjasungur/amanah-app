@@ -44,7 +44,8 @@ describe("Janazah wishes form", () => {
     expect(form).toContain('data-testid="janazah-form"');
     expect(form).toContain('data-testid="janazah-save-success"');
     expect(form).toContain("janazahWishes");
-    expect(form).toContain("SaveStatusIndicator");
+    // The one save status of the page comes from the dashboard's storage bar, not from the form.
+    expect(form).not.toContain("<SaveStatusIndicator");
   });
 
   it("shows legal and religious notice", () => {

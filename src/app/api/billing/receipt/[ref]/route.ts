@@ -20,7 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ ref:
   const html = `<!doctype html><html lang="de"><meta charset="utf-8"><title>Testbeleg</title>
 <body style="font-family:sans-serif;max-width:40rem;margin:2rem auto">
 <p style="border:2px solid #b45309;padding:.5rem;font-weight:bold">TESTBELEG – keine Rechnung, keine echte Zahlung (Testmodus)</p>
-<h1>Mein Wille</h1>
+<h1>Amanah – Mein Wille</h1>
 <p>Produkt: ${escapeHtml(product?.name ?? purchase.productId)}</p>
 <p>Betrag: ${formatPrice(purchase.amountCents)} (${escapeHtml(purchase.currency)})</p>
 <p>Status: ${STATUS[purchase.status] ?? escapeHtml(purchase.status)}</p>

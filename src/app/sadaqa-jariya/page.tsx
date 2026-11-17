@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Sadaqa Jariya — Mein Wille",
+  title: "Sadaqa Jariya — Amanah – Mein Wille",
   description: "Fortlaufende Wohltätigkeit für den Barzakh — Wissen und Projekte über Gemeinsam1 e.V.",
 };
 

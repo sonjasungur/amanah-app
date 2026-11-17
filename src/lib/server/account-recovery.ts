@@ -34,9 +34,9 @@ export async function sendVerificationMail(repo: ServerRepository, user: { id: s
   await sendMail({
     to: user.email,
     kind: "verify_email",
-    subject: "Bitte bestätige deine E-Mail-Adresse – Mein Wille",
+    subject: "Bitte bestätige deine E-Mail-Adresse – Amanah – Mein Wille",
     text:
-      "Assalamu alaikum,\n\nbitte bestätige deine E-Mail-Adresse für Mein Wille:\n" +
+      "Assalamu alaikum,\n\nbitte bestätige deine E-Mail-Adresse für Amanah – Mein Wille:\n" +
       `${getPublicBaseUrl()}/konto/bestaetigen?token=${encodeURIComponent(token)}\n\n` +
       "Der Link ist 24 Stunden gültig und nur einmal nutzbar. Wenn du kein Konto angelegt hast, ignoriere diese E-Mail.",
   });
@@ -46,9 +46,9 @@ export async function sendAccountExistsMail(email: string): Promise<void> {
   await sendMail({
     to: email,
     kind: "account_exists",
-    subject: "Du hast bereits ein Konto – Mein Wille",
+    subject: "Du hast bereits ein Konto – Amanah – Mein Wille",
     text:
-      "Assalamu alaikum,\n\nfür diese E-Mail-Adresse besteht bereits ein Konto bei Mein Wille. " +
+      "Assalamu alaikum,\n\nfür diese E-Mail-Adresse besteht bereits ein Konto bei Amanah – Mein Wille. " +
       `Falls du dein Passwort vergessen hast: ${getPublicBaseUrl()}/passwort-vergessen\n\n` +
       "Wenn du keine Registrierung versucht hast, kannst du diese E-Mail ignorieren.",
   });
@@ -59,7 +59,7 @@ export async function sendPasswordResetMail(repo: ServerRepository, user: { id: 
   await sendMail({
     to: user.email,
     kind: "reset_password",
-    subject: "Passwort zurücksetzen – Mein Wille",
+    subject: "Passwort zurücksetzen – Amanah – Mein Wille",
     text:
       "Assalamu alaikum,\n\nüber diesen Link kannst du ein neues Passwort festlegen:\n" +
       `${getPublicBaseUrl()}/passwort-zuruecksetzen?token=${encodeURIComponent(token)}\n\n` +

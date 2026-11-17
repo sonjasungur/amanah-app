@@ -33,10 +33,12 @@ beforeEach(() => useAmanahStore.setState({ ...structuredClone(defaultAmanahData)
 afterEach(() => vi.unstubAllGlobals());
 
 describe("history view", () => {
-  it("says it is not available while switched off, and offers nothing", async () => {
+  it("says it is switched off, that the data is safe, and offers only the way back", async () => {
     mockApi({ "GET /api/amanah/history": { status: 404 } });
     render(<DataHistoryView />);
-    await waitFor(() => expect(screen.getByTestId("history-unavailable").textContent).toContain("noch nicht verfügbar"));
+    await waitFor(() => expect(screen.getByTestId("history-unavailable").textContent).toContain("nicht eingeschaltet"));
+    expect(screen.getByTestId("history-unavailable").textContent).toContain("bleiben gespeichert");
+    expect(screen.getByTestId("history-back").getAttribute("href")).toBe("/dashboard");
     expect(screen.queryByRole("button")).toBeNull();
   });
 

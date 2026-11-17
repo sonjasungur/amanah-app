@@ -26,7 +26,7 @@ describe("content sources, tiles, and article structure", () => {
     expect(card).toContain("Was du mit deiner Familie klären solltest");
     expect(card).toContain("Deutschland: Dokumente und rechtliche Hinweise");
     expect(card).toContain("Was passiert, wenn es ungeklärt bleibt?");
-    expect(card).toContain("Jetzt in Mein Wille festhalten");
+    expect(card).toContain("Jetzt in Amanah – Mein Wille festhalten");
     expect(card).not.toContain("Mein nächster Schritt");
   });
 

@@ -74,8 +74,9 @@ describe("janazah-guided-flow: file structure", () => {
     expect(flow).toContain("currentStep === 0");
   });
 
-  it("includes SaveStatusIndicator", () => {
-    expect(flow).toContain("SaveStatusIndicator");
+  it("shows no second save status; the dashboard's storage bar carries the single one", () => {
+    expect(flow).not.toContain("<SaveStatusIndicator");
+    expect(read("src/components/auth/storage-mode-banner.tsx")).toContain("<SaveStatusIndicator compact");
   });
 
   it("includes Zurück zum Vorsorgeplan link", () => {

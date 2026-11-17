@@ -8,7 +8,12 @@ import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 
-export function SaveStatusIndicator({ className }: { className?: string }) {
+/**
+ * The one save status of a page. `compact` keeps it to a single line (status and time); problems
+ * (error, partial, near the limit) always show their full explanation. `fallback` is shown while
+ * nothing has been changed yet, so the place of storage is never left unsaid.
+ */
+export function SaveStatusIndicator({ className, compact, fallback }: { className?: string; compact?: boolean; fallback?: string }) {
   const saveStatus = useAmanahStore((s) => s.saveStatus);
   const saveError = useAmanahStore((s) => s.saveError);
   const lastSaved = useAmanahStore((s) => s.lastSaved);
@@ -37,7 +42,16 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
         : t("storage.location.local")
       : null;
 
-  if (folderProblem || (!statusLabel && saveStatus === "idle")) return null;
+  if (folderProblem) return null;
+  if (!statusLabel && saveStatus === "idle") {
+    return fallback ? (
+      <p className={cn("flex items-center gap-2 text-xs font-medium text-green-700", className)} data-testid="save-status-indicator">
+        <Check size={14} aria-hidden />
+        <span>{fallback}</span>
+      </p>
+    ) : null;
+  }
+  const savedAt = saveStatus === "saved" && lastSaved ? new Date(lastSaved).toLocaleString() : null;
 
   return (
     <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator" aria-live="polite">
@@ -55,9 +69,10 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
           {saveStatus === "saving" && <Loader2 size={14} className="animate-spin" aria-hidden />}
           {(saveStatus === "error" || saveStatus === "partial") && <AlertCircle size={14} aria-hidden />}
           <span>{statusLabel}</span>
+          {compact && savedAt && <span className="font-normal text-muted">· {savedAt}</span>}
         </div>
       )}
-      {locationHint && (
+      {!compact && locationHint && (
         <p className="text-xs text-muted" data-testid="save-status-location">
           {locationHint}
         </p>
@@ -90,9 +105,9 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
           {t("storage.retry")}
         </Button>
       )}
-      {saveStatus === "saved" && lastSaved && (
+      {!compact && savedAt && (
         <p className="text-xs text-muted">
-          {t("storage.lastSaved")}: {new Date(lastSaved).toLocaleString()}
+          {t("storage.lastSaved")}: {savedAt}
         </p>
       )}
     </div>

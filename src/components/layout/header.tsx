@@ -1,5 +1,6 @@
 "use client";
 
+import { moduleConfigs } from "@/lib/modules/config";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n, locales } from "@/lib/i18n/context";
@@ -160,13 +161,26 @@ export function Header() {
           {!isLoading &&
             (session ? (
               <>
-                <Link
-                  href="/dashboard"
-                  className={linkButtonClassName({ className: "w-full mt-2" })}
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Mein Konto
-                </Link>
+                <details className="mt-2 rounded-lg border border-border" data-testid="site-mobile-areas">
+                  <summary className="cursor-pointer py-3 px-3 text-base font-semibold text-foreground min-h-[44px]">
+                    Alle Vorsorgebereiche
+                  </summary>
+                  <div className="pb-2">
+                    {moduleConfigs.map((mod) => (
+                      <Link
+                        key={mod.id}
+                        href={mod.path}
+                        className={cn(
+                          "flex items-center gap-2 py-2.5 px-4 text-base min-h-[44px]",
+                          isNavActive(pathname, mod.path) ? "text-primary-dark font-semibold bg-accent-soft" : "text-muted"
+                        )}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span aria-hidden>{mod.icon}</span> {mod.title}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
                 <button
                   onClick={handleLogout}
                   className="block text-base font-semibold py-3 px-3 w-full text-left text-muted min-h-[44px]"
