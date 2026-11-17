@@ -3,8 +3,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getAuthMode } from "./config";
 import { localAuthProvider } from "./local-auth-provider";
-import { apiAuthProvider, rememberSession } from "./api-auth-provider";
-import { syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
+import { apiAuthProvider, rememberSession, SESSION_HINT_KEY, sessionUserId } from "./api-auth-provider";
+import { getStorageMode } from "./config";
+import { discardDeviceDataWithoutSession, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
+import { wipeDeviceData } from "@/lib/storage/device-data";
+import { cancelPendingSave, flushBeforeSignOut } from "@/lib/store/use-amanah-store";
 import type { AuthProvider, AuthSession, LoginInput, RegisterInput } from "./types";
 
 interface AuthContextValue {
@@ -15,7 +18,18 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<{ success: boolean; error?: string; pendingVerification?: boolean }>;
   /** Adopts a session the server already created (e-mail confirmation). */
   adoptSession: (session: AuthSession) => Promise<void>;
-  logout: () => Promise<void>;
+  /** Without `force`, refuses while a change may not have reached the account (`unsaved`). */
+  logout: (options?: { force?: boolean }) => Promise<LogoutResult>;
+}
+
+export interface LogoutResult {
+  ok: boolean;
+  unsaved?: boolean;
+}
+
+/** In API mode the browser only holds a working copy of an account, which a logout removes. */
+function keepsWorkingCopy(): boolean {
+  return getStorageMode() === "api";
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -31,6 +45,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const provider = useMemo(() => getProvider(), []);
   // A login or adopted session wins over a slower initial session check (e.g. e-mail confirmation).
   const sessionVersion = useRef(0);
+  const shownUserId = useRef<string | null>(null);
+  useEffect(() => {
+    shownUserId.current = session?.user.id ?? null;
+  }, [session]);
+
+  // Another tab signed out or in as someone else, or the page came back from the back-forward cache
+  // after that: this page still holds the old folder in memory. Reloading drops it; the reload then
+  // reads only what belongs to the current session.
+  useEffect(() => {
+    if (!keepsWorkingCopy()) return;
+    const sessionChangedElsewhere = () => sessionUserId() !== shownUserId.current;
+    const reload = () => {
+      cancelPendingSave();
+      window.location.reload();
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== SESSION_HINT_KEY) return;
+      if (sessionChangedElsewhere()) reload();
+    };
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted && sessionChangedElsewhere()) reload();
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, []);
 
   useEffect(() => {
     const version = sessionVersion.current;
@@ -43,6 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       if (s) {
         await syncStoreWithRemoteAfterAuth();
+      } else if (keepsWorkingCopy()) {
+        discardDeviceDataWithoutSession();
       }
     });
   }, [provider]);
@@ -84,11 +129,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await syncStoreWithRemoteAfterAuth();
   }, []);
 
-  const logout = useCallback(async () => {
-    await provider.logout();
-    sessionVersion.current += 1;
-    setSession(null);
-  }, [provider]);
+  const logout = useCallback(
+    async (options?: { force?: boolean }): Promise<LogoutResult> => {
+      const wipe = keepsWorkingCopy();
+      if (wipe && !options?.force && !(await flushBeforeSignOut())) return { ok: false, unsaved: true };
+      await provider.logout();
+      if (wipe) wipeDeviceData();
+      sessionVersion.current += 1;
+      setSession(null);
+      return { ok: true };
+    },
+    [provider]
+  );
 
   const value = useMemo(
     () => ({ session, isLoading, authMode, login, register, logout, adoptSession }),

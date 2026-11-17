@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { wipeDeviceData } from "@/lib/storage/device-data";
 import { useRouter } from "next/navigation";
 import { Download, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function AccountControls() {
       // store reset only clears this device instead of calling the API again.
       await apiAuthProvider.logout();
       await resetAmanahStore();
+      wipeDeviceData();
       router.replace("/");
       router.refresh();
     } catch (e) {

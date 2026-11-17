@@ -1,6 +1,8 @@
 import type { AuthProvider, AuthResult, AuthSession, LoginInput, RegisterInput } from "./types";
 
 const SESSION_KEY = "amanah-auth-session";
+/** Key of the session hint; other tabs watch it to notice a logout or a change of account. */
+export const SESSION_HINT_KEY = SESSION_KEY;
 
 /**
  * The session token is an HttpOnly cookie set by the server. Locally we keep only a

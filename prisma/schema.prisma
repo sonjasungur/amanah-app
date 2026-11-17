@@ -148,3 +148,14 @@ model DataKeyReference {
 
   @@map("data_key_references")
 }
+
+/// Fixed-window counters for login, registration and account-recovery limits. Keys are keyed hashes
+/// (never an e-mail address or IP in clear). Shared by every app instance; rows expire after a day.
+model AuthRateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime @map("window_start")
+
+  @@index([windowStart])
+  @@map("auth_rate_limits")
+}

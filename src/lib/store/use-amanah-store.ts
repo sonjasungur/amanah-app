@@ -8,7 +8,8 @@ import { migrateRawData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
 import { STORAGE_KEY, type FolderProblem, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
-import { persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
+import { isRemotePersistenceActive, persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
+import { onDeviceDataWipe } from "@/lib/storage/device-data";
 import { pickDataFields } from "@/lib/store/store-utils";
 
 const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
@@ -164,6 +165,25 @@ if (typeof window !== "undefined") {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") sendPendingSave();
   });
+}
+
+onDeviceDataWipe(() => {
+  cancelPendingSave();
+  // "idle" so that the subscription above does not send the empty folder to the account.
+  useAmanahStore.setState({ ...defaultAmanahData, saveStatus: "idle", saveError: null, saveNearLimit: false, folderProblem: null, lastSaved: null });
+  useAmanahStore.persist.clearStorage();
+});
+
+/**
+ * Sends what is still waiting before a logout. False when the account may not hold the newest state,
+ * so that the person decides instead of the logout quietly dropping it.
+ */
+export async function flushBeforeSignOut(): Promise<boolean> {
+  cancelPendingSave();
+  if (!isRemotePersistenceActive()) return true;
+  await persistStoreChanges();
+  const { saveStatus, folderProblem } = useAmanahStore.getState();
+  return folderProblem === null && (saveStatus === "saved" || saveStatus === "idle");
 }
 
 export async function resetAmanahStore(): Promise<void> {

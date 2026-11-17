@@ -35,10 +35,12 @@ api_env() {
   export AMANAH_BILLING_MODE=sandbox AMANAH_SANDBOX_WEBHOOK_SECRET="$(openssl rand -hex 32)" AMANAH_DATA_HISTORY=true
 }
 
-# Fresh server per project: the registration brake counts per server and must stay in force.
+# Fresh server and fresh login/registration counters per project: the brake stays in force within a
+# run, but the counters live in the throwaway database and would otherwise carry over between runs.
 browser_spec() {
   local name=$1 envs=$2 files=$3 project
   for project in chromium-desktop chromium-mobile; do
+    docker exec "$CONTAINER" psql -q -U test -d hist -c 'DELETE FROM auth_rate_limits' >/dev/null 2>&1
     (
       api_env
       # shellcheck disable=SC2086
@@ -71,6 +73,7 @@ step build-api 600 env NEXT_PUBLIC_AUTH_MODE=api NEXT_PUBLIC_STORAGE_MODE=api NE
 BILLING="AMANAH_BILLING_ENFORCE=true AMANAH_PLUS_LAUNCH_AT=2000-01-01T00:00:00Z"
 browser_spec regression "SECURITY_API_E2E=true PHASE2_API_TESTS=true" "e2e/security-session.spec.ts e2e/phase2-failure-paths.spec.ts e2e/legacy-email-verification.spec.ts"
 browser_spec hydration "HYDRATION=api" "e2e/hydration-session.spec.ts"
+browser_spec devicedata "SECURITY_API_E2E=true" "e2e/device-data-logout.spec.ts"
 browser_spec free "$BILLING FREE_ASSET_E2E=true" "e2e/free-asset-account.spec.ts"
 browser_spec history "$BILLING DATA_HISTORY_E2E=true" "e2e/data-history.spec.ts"
 browser_spec plus "$BILLING PLUS_TARIFF_E2E=true" "e2e/plus-tariff-account.spec.ts"

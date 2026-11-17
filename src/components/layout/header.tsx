@@ -40,7 +40,12 @@ export function Header() {
   const showRegister = isPublicRegistrationEnabled();
 
   const handleLogout = async () => {
-    await logout();
+    const result = await logout();
+    if (!result.ok && result.unsaved) {
+      // The account may not hold the newest changes: the person decides, the logout does not drop them silently.
+      if (!window.confirm(t("auth.logoutUnsaved"))) return;
+      await logout({ force: true });
+    }
     router.push("/");
   };
 

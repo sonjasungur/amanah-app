@@ -3,12 +3,14 @@ import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import { crossOriginRejected, getServerRepository } from "@/lib/server/auth-utils";
 import { isSameOriginRequest } from "@/lib/server/session-cookie";
-import { checkRateLimit } from "@/lib/ai/rate-limit";
+import { clientAddress, consumeLimits, FIFTEEN_MINUTES, MINUTE, tooManyAttempts } from "@/lib/server/auth-rate-limit";
 import { CHECK_EMAIL_RESPONSE, emailKey, sendAccountExistsMail, sendVerificationMail } from "@/lib/server/account-recovery";
 import { MailNotConfiguredError } from "@/lib/server/mailer";
 import { isRegistrationDomainAllowed } from "@/lib/deployment-env";
 
 const REGISTRATIONS_PER_MINUTE = 5;
+/** Mails to one address (confirmation or "account exists") per 15 minutes. */
+const REGISTRATIONS_PER_ADDRESS = 3;
 
 /**
  * Creates an unverified account and sends a confirmation link. The response is the
@@ -25,10 +27,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const ip = request.headers.get("x-forwarded-for") || "local";
-    if (!checkRateLimit(`auth-register:${ip}`, REGISTRATIONS_PER_MINUTE).allowed) {
-      return NextResponse.json({ error: "Zu viele Anfragen. Bitte kurz warten." }, { status: 429 });
-    }
+    const byIp = await consumeLimits([{ scope: "register:ip", subject: clientAddress(request), max: REGISTRATIONS_PER_MINUTE, windowMs: MINUTE }]);
+    if (!byIp.allowed) return tooManyAttempts(byIp, "Zu viele Anfragen. Bitte kurz warten.");
 
     const body = await request.json();
     const { email, password, name } = body as { email?: string; password?: string; name?: string };
@@ -40,6 +40,10 @@ export async function POST(request: Request) {
     if (!isRegistrationDomainAllowed(email)) {
       return NextResponse.json({ error: "Diese E-Mail-Adresse ist in dieser Umgebung nicht zugelassen." }, { status: 400 });
     }
+
+    // Counted for new and existing addresses alike, so the limit reveals nothing about an account.
+    const byAddress = await consumeLimits([{ scope: "register:email", subject: emailKey(email), max: REGISTRATIONS_PER_ADDRESS, windowMs: FIFTEEN_MINUTES }]);
+    if (!byAddress.allowed) return tooManyAttempts(byAddress, "Zu viele Anfragen. Bitte später erneut versuchen.");
 
     const repo = getServerRepository();
     const existing = await repo.findUserByEmail(email);

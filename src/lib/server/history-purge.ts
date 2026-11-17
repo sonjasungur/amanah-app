@@ -1,5 +1,6 @@
 import { purgeDeletionLedgerIfEnabled } from "./deletion-gate";
 import { getServerRepository } from "./repository";
+import { purgeExpiredLimits } from "./auth-rate-limit";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const PURGE_RETRY_MS = 15 * 60 * 1000;
@@ -45,12 +46,23 @@ function runDeletionLedgerPurge(): void {
  * Runs at server start and daily, also with the history switched off: expired versions must go,
  * including those of accounts that no longer write. It only ever deletes, it activates nothing.
  */
+/** Login and registration counters are only needed for their window; a failed run waits for tomorrow. */
+async function runRateLimitPurge(): Promise<void> {
+  try {
+    const purged = await purgeExpiredLimits();
+    if (purged > 0) console.info(`[rate-limit] removed ${purged} expired counters`);
+  } catch (error) {
+    console.error(`[rate-limit] removing expired counters failed (${failureCode(error)})`);
+  }
+}
+
 export function startHistoryPurge(): void {
   if (started) return;
   started = true;
   const run = () => {
     void runHistoryPurge();
     runDeletionLedgerPurge();
+    void runRateLimitPurge();
   };
   run();
   setInterval(run, DAY_MS).unref();

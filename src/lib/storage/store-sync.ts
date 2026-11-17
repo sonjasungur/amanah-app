@@ -9,6 +9,7 @@ import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-s
 import { apiStorageProvider } from "./api-storage-provider";
 import { getActiveStorageLabel } from "./storage-config";
 import { FolderUnreadableError } from "./types";
+import { deviceDataOwner, hasUnsentChangeOf, markDeviceDataOwner, onDeviceDataWipe, UNSENT_CHANGE_KEY, wipeDeviceData } from "./device-data";
 
 export type StorageLocationLabel = "local" | "api" | "local-demo";
 
@@ -61,6 +62,21 @@ let unreadBaseline: { userId: string | null; data: AmanahOrdnerData } | null = n
 let accountState: AmanahOrdnerData | null = null;
 let runningSync: Promise<void> | null = null;
 
+onDeviceDataWipe(() => {
+  folderReadFor = null;
+  unreadBaseline = null;
+  accountState = null;
+});
+
+/**
+ * A session ended (expired or refused by the server) without a logout. The working copy goes, unless
+ * a change of that account is still waiting to be sent: it stays for that account only.
+ */
+export function discardDeviceDataWithoutSession(): void {
+  const owner = deviceDataOwner();
+  if (owner !== null && !hasUnsentChangeOf(owner)) wipeDeviceData();
+}
+
 function isAccountFolderKnown(): boolean {
   return folderReadFor !== null && folderReadFor === sessionUserId();
 }
@@ -74,6 +90,8 @@ function reportFolderUnreadable(error: FolderUnreadableError, baseline: AmanahOr
 async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
   const result = await saveAmanahData(data);
   accountState = data;
+  const userId = sessionUserId();
+  if (userId) markDeviceDataOwner(userId);
   useAmanahStore.setState({
     saveStatus: result?.notStored?.length ? "partial" : "saved",
     saveError: null,
@@ -121,7 +139,7 @@ export async function persistStoreChanges(): Promise<void> {
 }
 
 const KEEPALIVE_MAX_BYTES = 60_000;
-const UNSENT_KEY = "amanah-unsent-change";
+const UNSENT_KEY = UNSENT_CHANGE_KEY;
 
 /** Whether this account left a page with a change the account may not have received. */
 function hasUnsentChange(): boolean {
@@ -179,9 +197,12 @@ export function syncStoreWithRemoteAfterAuth(): Promise<void> {
 }
 
 async function readAndMergeAccountFolder(): Promise<void> {
+  const userId = sessionUserId();
+  // The working copy of another account must never be shown to, or uploaded into, this one.
+  const owner = deviceDataOwner();
+  if (owner !== null && owner !== userId) wipeDeviceData();
   folderReadFor = null;
   useAmanahStore.setState({ saveStatus: "saving", saveError: null });
-  const userId = sessionUserId();
   const atStart = unreadBaseline?.userId === userId ? unreadBaseline.data : pickDataFields(useAmanahStore.getState());
 
   let remoteData: AmanahOrdnerData;
@@ -199,6 +220,7 @@ async function readAndMergeAccountFolder(): Promise<void> {
   folderReadFor = userId;
   unreadBaseline = null;
   accountState = remoteData;
+  if (userId) markDeviceDataOwner(userId);
   useAmanahStore.setState({ folderProblem: null });
 
   try {

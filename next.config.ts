@@ -52,7 +52,11 @@ const nextConfig: NextConfig = {
   ...(isolatedDistDir ? { distDir: isolatedDistDir } : {}),
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Folder, account and session answers must never be kept by the browser or a shared cache.
+      { source: "/api/:path*", headers: [{ key: "Cache-Control", value: "no-store" }] },
+    ];
   },
 };
 

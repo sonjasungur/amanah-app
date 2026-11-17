@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { onDeviceDataWipe } from "@/lib/storage/device-data";
 
 export interface TopicProgress {
   checkedQuestionIds: string[];
@@ -53,3 +54,8 @@ export const useFamilienGespraechStore = create<FamilienGespraechState>()(
     { name: "amanah-familiengespraech-v1" }
   )
 );
+
+onDeviceDataWipe(() => {
+  useFamilienGespraechStore.setState({ topics: {} });
+  useFamilienGespraechStore.persist.clearStorage();
+});
