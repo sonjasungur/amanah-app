@@ -100,6 +100,31 @@ async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
   });
 }
 
+let savesInFlight = 0;
+
+/** Whether a save to the account has started and not yet been answered. */
+export function isSaveInFlight(): boolean {
+  return savesInFlight > 0;
+}
+
+/**
+ * A save the browser may abort when the page goes away. Until the account confirms it, the change is
+ * marked as unsent, so that the next load sends the newer browser state instead of overwriting it.
+ */
+async function saveTracked(data: AmanahOrdnerData): Promise<void> {
+  const userId = sessionUserId();
+  if (userId) markUnsentChange(userId);
+  savesInFlight += 1;
+  try {
+    await saveToAccount(data);
+  } finally {
+    savesInFlight -= 1;
+  }
+  // Cleared only if nothing newer was typed meanwhile; that change is still waiting for its own save.
+  const content = (folder: AmanahOrdnerData) => JSON.stringify({ ...folder, lastSaved: null });
+  if (savesInFlight === 0 && content(pickDataFields(useAmanahStore.getState())) === content(data)) clearUnsentChange();
+}
+
 export async function persistStoreChanges(): Promise<void> {
   if (isRemotePersistenceActive() && !isAccountFolderKnown()) {
     // A read is running or has failed: never write over what is not known. Reading again keeps new input.
@@ -117,7 +142,7 @@ export async function persistStoreChanges(): Promise<void> {
 
   try {
     if (isRemotePersistenceActive()) {
-      await saveToAccount(data);
+      await saveTracked(data);
       return;
     }
 
@@ -150,6 +175,14 @@ function hasUnsentChange(): boolean {
   }
 }
 
+function markUnsentChange(userId: string): void {
+  try {
+    localStorage.setItem(UNSENT_KEY, userId);
+  } catch {
+    // Without a storage only the request remains.
+  }
+}
+
 function clearUnsentChange(): void {
   try {
     localStorage.removeItem(UNSENT_KEY);
@@ -168,13 +201,7 @@ export function saveBeforeLeaving(): void {
   if (!hasMeaningfulLocalData(data)) return;
   // The next page cannot know whether this request arrived, or arrived before it loads the account.
   const userId = sessionUserId();
-  if (userId) {
-    try {
-      localStorage.setItem(UNSENT_KEY, userId);
-    } catch {
-      // Without a storage only the request below remains.
-    }
-  }
+  if (userId) markUnsentChange(userId);
   const body = JSON.stringify(data);
   if (new TextEncoder().encode(body).length > KEEPALIVE_MAX_BYTES) {
     void persistStoreChanges();

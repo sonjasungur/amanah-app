@@ -8,7 +8,7 @@ import { migrateRawData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
 import { STORAGE_KEY, type FolderProblem, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
-import { isRemotePersistenceActive, persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
+import { isRemotePersistenceActive, isSaveInFlight, persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
 import { onDeviceDataWipe } from "@/lib/storage/device-data";
 import { pickDataFields } from "@/lib/store/store-utils";
 
@@ -155,8 +155,10 @@ useAmanahStore.subscribe((state, prevState) => {
 });
 
 if (typeof window !== "undefined") {
+  // A change still waiting for its save, or one whose save is running: the browser aborts that
+  // request when the page goes away, so it is sent again in a way that outlives the page.
   const sendPendingSave = () => {
-    if (!saveDebounceTimer) return;
+    if (!saveDebounceTimer && !isSaveInFlight()) return;
     cancelPendingSave();
     saveBeforeLeaving();
   };
