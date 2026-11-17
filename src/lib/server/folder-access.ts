@@ -5,7 +5,9 @@ import { resolvePlusAccess } from "@/lib/billing/plus-access";
 import { normalizeCheckProgress } from "@/lib/check/progress";
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import { normalizeData } from "@/lib/domain/migration";
-import type { AmanahOrdnerData, AssetEntry } from "@/lib/domain/types";
+import type { AmanahOrdnerData, AssetEntry, VorsorgeAreaId, VorsorgeMeta } from "@/lib/domain/types";
+import { VORSORGE_AREAS } from "@/lib/vorsorge/areas";
+import { normalizeVorsorgeMeta } from "@/lib/vorsorge/meta";
 import { sanitizeAssets } from "@/lib/testament/asset-labels";
 import type { ServerRepository } from "./repository/types";
 
@@ -30,7 +32,7 @@ export function isNearFolderLimit(storedBytes: number): boolean {
 }
 
 /** Not worth a warning: bookkeeping and navigation. */
-const NOT_CONTENT = new Set(["schemaVersion", "lastSaved", "reviewStatus", "selectedPath"]);
+const NOT_CONTENT = new Set(["schemaVersion", "lastSaved", "reviewStatus", "selectedPath", "vorsorgeMeta"]);
 
 const TOO_LARGE = { error: "Die Daten sind zu groß zum Speichern. Bitte kürze längere Texte. Deine Eingaben bleiben in diesem Browser erhalten.", code: "folder_too_large" };
 
@@ -56,9 +58,30 @@ function likeDefaults<T>(value: unknown, defaults: T): T {
   return result as T;
 }
 
+/** Areas whose content an account without Plus can store completely: only their dates are kept. */
+const FREE_ONLY_AREAS: VorsorgeAreaId[] = VORSORGE_AREAS.filter((area) =>
+  area.sections.every((section) => (FREE_ACCOUNT_SECTIONS as readonly string[]).includes(section)),
+).map((area) => area.id);
+
+/**
+ * Bookkeeping of the guided Vorsorge for an account without Plus: the pause point, and the dates of
+ * areas it can store. Dates of other areas and links to people (a Plus section) stay as stored,
+ * so nothing claims a change the account did not keep.
+ */
+export function freeVorsorgeMeta(incoming: unknown, existing: VorsorgeMeta | undefined | null): VorsorgeMeta {
+  const next = normalizeVorsorgeMeta(incoming);
+  const before = normalizeVorsorgeMeta(existing);
+  const areaUpdatedAt = { ...before.areaUpdatedAt };
+  for (const id of FREE_ONLY_AREAS) {
+    if (next.areaUpdatedAt[id]) areaUpdatedAt[id] = next.areaUpdatedAt[id];
+  }
+  return { areaUpdatedAt, flowStep: next.flowStep, flowPausedAt: next.flowPausedAt, personLinks: before.personLinks };
+}
+
 /** Only well-formed free sections from an untrusted body. Sections that were not sent stay as they are. */
-export function freeSectionsOf(incoming: Partial<AmanahOrdnerData>): Partial<AmanahOrdnerData> {
+export function freeSectionsOf(incoming: Partial<AmanahOrdnerData>, existing: AmanahOrdnerData | null = null): Partial<AmanahOrdnerData> {
   const free: Partial<AmanahOrdnerData> = {};
+  if ("vorsorgeMeta" in incoming) free.vorsorgeMeta = freeVorsorgeMeta(incoming.vorsorgeMeta, existing?.vorsorgeMeta);
   if ("assets" in incoming) free.assets = sanitizeAssets(incoming.assets) as AssetEntry[];
   if ("emergencyCard" in incoming) free.emergencyCard = likeDefaults(incoming.emergencyCard, defaultAmanahData.emergencyCard);
   if ("checkProgress" in incoming) free.checkProgress = normalizeCheckProgress(incoming.checkProgress);

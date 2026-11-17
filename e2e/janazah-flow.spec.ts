@@ -52,13 +52,14 @@ test.describe("Vorsorgeplan dashboard", () => {
     await expect(page.getByTestId("dashboard-next-step-cta")).toBeVisible();
   });
 
-  test("all care areas are reachable after expanding", async ({ page }) => {
+  test("the six areas are listed directly and further topics stay reachable", async ({ page }) => {
     await page.goto("/dashboard");
+    await expect(page.getByTestId("area-list").getByRole("link")).toHaveCount(6);
     await expect(page.getByTestId("dashboard-module-tiles")).toBeVisible();
-    // A click before hydration does nothing: repeat it until the areas open.
+    // A click before hydration does nothing: repeat it until the topics open.
     await expect(async () => {
       await page.getByTestId("dashboard-all-areas-toggle").click();
-      await expect(page.getByTestId("dashboard-tile-janazah")).toBeVisible({ timeout: 1_000 });
+      await expect(page.getByTestId("dashboard-tile-testament")).toBeVisible({ timeout: 1_000 });
     }).toPass();
   });
 });

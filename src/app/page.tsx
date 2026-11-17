@@ -67,14 +67,14 @@ const STEPS = [
   },
   {
     step: "2",
-    title: "Einen Schritt wählen",
-    text: "Du erhältst genau eine klare Empfehlung — ohne Überforderung.",
+    title: "Schritt für Schritt festhalten",
+    text: "Ein geführter Ablauf durch sechs Bereiche. Jede Angabe ist freiwillig, du kannst jederzeit pausieren und später weitermachen.",
     icon: Sparkles,
   },
   {
     step: "3",
-    title: "Festhalten",
-    text: "Im persönlichen Vorsorgeplan dokumentieren, was deiner Familie wichtig sein soll.",
+    title: "Notfallpaket für die Familie",
+    text: "Du wählst aus, was deine Familie wissen soll, und druckst es aus. Online wird nichts geteilt.",
     icon: FileSignature,
   },
 ];

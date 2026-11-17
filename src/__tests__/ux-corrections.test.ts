@@ -25,12 +25,12 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
     expect(footer).toContain("Wille");
   });
 
-  it("header shows Anmelden, the account link once, and the care areas in the mobile menu", () => {
+  it("header shows Anmelden and the account link once; care areas live in the dashboard navigation", () => {
     const header = read("src/components/layout/header.tsx");
     expect(header).toContain("Anmelden");
     expect(header).toContain('labelKey: "nav.account"');
     expect(header).not.toMatch(/>\s*Mein Konto\s*</);
-    expect(header).toContain('data-testid="site-mobile-areas"');
+    expect(header).not.toContain('data-testid="site-mobile-areas"');
     expect(header).toContain('href="/login"');
     expect(header).toContain('href: "/dashboard"');
   });

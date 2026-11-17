@@ -162,3 +162,45 @@ test("other areas stay in the browser, are named as such, and the data survives 
   await page.goto("/dashboard/janazah?schritt=0");
   await expect(page.getByTestId("janazah-fullName").locator("input")).toHaveValue("Nur im Browser");
 });
+
+test("P1 without Plus: pause point and emergency card survive a second device; nothing of Plus is stored", async ({ page, browser, baseURL, viewport, userAgent, isMobile, hasTouch }) => {
+  const email = await registerFreeAccount(page);
+  await page.goto("/dashboard/vorsorge");
+  await page.waitForLoadState("networkidle");
+  await page.getByLabel("Dein Name").fill("Amina Beispiel");
+  await page.getByTestId("flow-next").click();
+  const form = page.getByRole("heading", { name: "Person hinzufügen" }).locator("..");
+  await form.getByLabel("Name").fill("Yusuf Beispiel");
+  await form.getByLabel(/Notfallkontakt/).check();
+  await page.getByTestId("person-add").click();
+  await page.getByTestId("flow-next").click();
+  await page.getByTestId("person-picker-emergencyContact1").getByRole("combobox").selectOption({ label: "Yusuf Beispiel (Kind)" });
+  await page.getByTestId("flow-later").click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  type Folder = { emergencyCard: { name: string; emergencyContact1: { name: string } }; familyMembers: unknown[]; vorsorgeMeta: { flowStep: string | null; areaUpdatedAt: Record<string, string>; personLinks: Record<string, string> } };
+  const folder = async (p: Page) => (await (await p.context().request.get("/api/amanah")).json()).data as Folder;
+  await expect.poll(async () => (await folder(page)).vorsorgeMeta.flowStep).toBe("notfallkontakte");
+  const saved = await folder(page);
+  expect(saved.emergencyCard.emergencyContact1.name).toBe("Yusuf Beispiel");
+  expect(Object.keys(saved.vorsorgeMeta.areaUpdatedAt)).toEqual(["notfall"]);
+  expect(saved.vorsorgeMeta.personLinks).toEqual({});
+  expect(saved.familyMembers).toEqual([]);
+
+  // Another browser: nothing from the first tab, only what the account holds.
+  const context = await browser.newContext({ baseURL, viewport, userAgent, isMobile, hasTouch });
+  const second = await context.newPage();
+  await second.goto("/login");
+  await second.getByPlaceholder("name@beispiel.de").fill(email);
+  await second.getByPlaceholder("••••••••").fill(PASSWORD);
+  await second.getByRole("button", { name: "Anmelden" }).last().click();
+  await expect(second).toHaveURL(/\/dashboard/);
+  await expect(second.getByTestId("dashboard-next-step")).toContainText("Schritt 3 von 13");
+  await expect(second.getByTestId("area-notfall")).toContainText("Zuletzt geändert am");
+  await expect(second.getByTestId("area-familie")).toHaveAttribute("data-status", "nicht_begonnen");
+  await second.getByTestId("dashboard-next-step-cta").click();
+  await expect(second.getByTestId("flow-step-title")).toHaveText("Wen soll man im Notfall anrufen?");
+  await second.goto("/dashboard/notfallkarte");
+  await expect(second.getByLabel("Notfallkontakt 1 — Name")).toHaveValue("Yusuf Beispiel");
+  await context.close();
+});

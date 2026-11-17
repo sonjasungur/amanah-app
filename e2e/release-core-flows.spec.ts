@@ -72,6 +72,31 @@ test("an account from registration to deletion", async ({ page, browser, baseURL
     await expect(page.locator("#location-vorsorgevollmacht")).toHaveValue("Ordner im Wohnzimmer");
   });
 
+  await test.step("P1: guided flow saves to the account, a pause survives a reload", async () => {
+    await page.goto("/dashboard/vorsorge");
+    await page.waitForLoadState("networkidle");
+    await page.getByLabel("Dein Name").fill("Amina Beispiel");
+    await page.getByTestId("flow-next").click();
+    const form = page.getByRole("heading", { name: "Person hinzufügen" }).locator("..");
+    await form.getByLabel("Name").fill("Yusuf Beispiel");
+    await form.getByLabel(/Notfallkontakt/).check();
+    await page.getByTestId("person-add").click();
+    await page.getByTestId("flow-next").click();
+    await page.getByTestId("person-picker-emergencyContact1").getByRole("combobox").selectOption({ label: "Yusuf Beispiel (Kind)" });
+    await page.getByTestId("flow-later").click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect
+      .poll(async () => {
+        const data = await folder(page);
+        return [data.vorsorgeMeta?.flowStep, data.emergencyCard.emergencyContact1.name, data.familyMembers.length, Boolean(data.vorsorgeMeta?.areaUpdatedAt?.notfall)];
+      })
+      .toEqual(["notfallkontakte", "Yusuf Beispiel", 1, true]);
+    const linkedId = (await folder(page)).vorsorgeMeta.personLinks.emergencyContact1;
+    expect((await folder(page)).familyMembers[0].id).toBe(linkedId);
+    await page.reload();
+    await expect(page.getByTestId("dashboard-next-step-cta")).toHaveText(/Fortsetzen/);
+  });
+
   await test.step("family letter: complete, without unreviewed statements", async () => {
     await page.goto("/dashboard/vollmacht");
     await page.goto("/dashboard/familie");

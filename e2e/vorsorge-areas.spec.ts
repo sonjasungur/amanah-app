@@ -23,6 +23,7 @@ test.describe("Meine Vorsorge: Dokumente und Personen", () => {
     await page.reload();
     await expect(page.getByTestId("person-list")).toContainText("Yusuf Test");
     await page.getByRole("button", { name: "Yusuf Test entfernen" }).click();
+    await page.getByTestId("person-remove-confirm").click();
     await expect(page.getByTestId("person-list")).not.toContainText("Yusuf Test");
     expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
   });

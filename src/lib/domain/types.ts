@@ -334,6 +334,29 @@ export interface CheckProgress {
   completedAt?: string;
 }
 
+/** The six areas of the guided Vorsorge (dashboard, flow, completion). */
+export type VorsorgeAreaId = "notfall" | "familie" | "gesundheit" | "janazah" | "dokumente" | "vermoegen";
+
+/** Fields that can point at a person from "Familie & Kontakte" instead of holding a second copy. */
+export type PersonLinkField =
+  | "emergencyContact1"
+  | "emergencyContact2"
+  | "authorizedPerson"
+  | "substitutePerson"
+  | "preferredGuardian"
+  | "janazahTrustedContact";
+
+/** Bookkeeping for the guided Vorsorge. Lives in the same encrypted folder; no own database column. */
+export interface VorsorgeMeta {
+  /** ISO time of the last change the person made in an area. */
+  areaUpdatedAt: Partial<Record<VorsorgeAreaId, string>>;
+  /** Step id where the person chose "Später fortsetzen", null when nothing is paused. */
+  flowStep: string | null;
+  flowPausedAt: string | null;
+  /** Field → person id. The field keeps its own text, so removing the link never loses it. */
+  personLinks: Partial<Record<PersonLinkField, string>>;
+}
+
 export interface AmanahOrdnerData {
   schemaVersion: number;
   userProfile: UserProfile;
@@ -360,6 +383,7 @@ export interface AmanahOrdnerData {
   selectedPath: string;
   /** Slugs of saved knowledge articles (free knowledge centre). */
   knowledgeBookmarks: string[];
+  vorsorgeMeta: VorsorgeMeta;
   lastSaved: string | null;
   reviewStatus: ReviewStatus;
 }

@@ -13,6 +13,8 @@ interface ModulePageProps {
   fields: FieldConfig[];
   disclaimerType?: "main" | "islamic" | "legal";
   children?: React.ReactNode;
+  /** Shown above the form, e.g. choosing people from "Familie & Kontakte". */
+  intro?: React.ReactNode;
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
@@ -31,7 +33,7 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: unkno
   };
 }
 
-export function ModulePage({ title, description, section, fields, disclaimerType = "main", children }: ModulePageProps) {
+export function ModulePage({ title, description, section, fields, disclaimerType = "main", children, intro }: ModulePageProps) {
   const store = useAmanahStore();
   const values = store[section] as unknown as Record<string, unknown>;
 
@@ -50,6 +52,7 @@ export function ModulePage({ title, description, section, fields, disclaimerType
       <h1 className="text-2xl font-bold text-primary mb-2">{title}</h1>
       <p className="text-muted mb-6">{description}</p>
       <Disclaimer type={disclaimerType} className="mb-6" />
+      {intro}
       <Card>
         <CardTitle>Deine Angaben</CardTitle>
         <ModuleForm section={section} fields={fields} values={flatValues} onChange={handleChange} />

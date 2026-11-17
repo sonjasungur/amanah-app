@@ -3,6 +3,7 @@ import { SCHEMA_VERSION } from "./schema";
 import type { AmanahOrdnerData, TestamentPreparation } from "./types";
 import { normalizeCheckProgress } from "@/lib/check/progress";
 import { sanitizeBequests } from "@/lib/testament/bequests";
+import { normalizeVorsorgeMeta } from "@/lib/vorsorge/meta";
 
 type LegacyRawData = Record<string, unknown>;
 
@@ -55,6 +56,7 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
       ? merged.knowledgeBookmarks.filter((s): s is string => typeof s === "string").slice(0, 200)
       : [],
     reviewStatus: merged.reviewStatus ?? "draft",
+    vorsorgeMeta: normalizeVorsorgeMeta(merged.vorsorgeMeta),
     checkProgress: normalizeCheckProgress(merged.checkProgress ?? defaultAmanahData.checkProgress),
   };
 }

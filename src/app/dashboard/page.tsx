@@ -1,117 +1,81 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight, Package } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
-import { getAllModuleProgress } from "@/lib/utils/progress";
 import { getDashboardGreeting } from "@/lib/plan/greeting";
-import { getPlanNextStep, getPrioritizedPlanItems } from "@/lib/plan/next-step";
-import { ProgressBar } from "@/components/dashboard/progress-bar";
+import { getAllAreaStates } from "@/lib/vorsorge/areas";
+import { COMPLETION_PATH, getVorsorgeNextStep } from "@/lib/vorsorge/flow";
+import { AreaList } from "@/components/vorsorge/area-list";
 import { ModuleTiles } from "@/components/dashboard/module-tiles";
 import { Card, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useI18n } from "@/lib/i18n/context";
-import { AlertTriangle, ArrowRight, CheckCircle2, Shield } from "lucide-react";
-import { getCriticalMissing } from "@/lib/utils/progress";
-import { isApiStorageEnabled } from "@/lib/auth/config";
+import { linkButtonClassName } from "@/components/ui/button";
 
 export default function DashboardPage() {
   const store = useAmanahStore();
   const data = pickDataFields(store);
-  const { t } = useI18n();
-  const critical = getCriticalMissing(data);
-  const nextStep = getPlanNextStep(data);
-  const planItems = getPrioritizedPlanItems(data, 3);
-  const moduleProgress = getAllModuleProgress(data);
   const greeting = getDashboardGreeting(store.emergencyCard.name || store.userProfile.name);
-
-  const overallPercent = moduleProgress.length
-    ? Math.round(moduleProgress.reduce((s, m) => s + m.percent, 0) / moduleProgress.length)
-    : 0;
+  const states = getAllAreaStates(data);
+  const next = getVorsorgeNextStep(data);
+  const complete = states.filter((s) => s.status === "vollstaendig").length;
+  const started = states.filter((s) => s.status !== "nicht_begonnen").length;
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl bg-gradient-to-br from-accent-soft via-card to-emerald/5 border-2 border-emerald/20 p-6 md:p-8 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
-          <div>
-            <p className="text-emerald font-semibold text-sm mb-1">Assalamu alaikum</p>
-            <h1 className="text-page-title font-bold text-foreground" data-testid="dashboard-greeting">
-              {greeting}
-            </h1>
-            <p className="text-sm text-muted mt-2">Mein Vorsorgeplan</p>
-          </div>
-        </div>
-        <p className="text-body text-muted mb-5 max-w-xl leading-relaxed">
-          {overallPercent >= 70
-            ? "Gute Basis — halte deine gespeicherten Angaben aktuell."
-            : "Schritt für Schritt vorbereiten — zur Orientierung, ohne Garantie auf Vollständigkeit."}
+      <header>
+        <p className="text-emerald font-semibold text-sm mb-1">Assalamu alaikum</p>
+        <h1 className="text-page-title font-bold text-foreground" data-testid="dashboard-greeting">
+          {greeting}
+        </h1>
+        <p className="text-body text-muted mt-2 max-w-2xl" data-testid="dashboard-summary">
+          {complete} von {states.length} Bereichen mit vollständigen Angaben
+          {started > complete ? `, ${started - complete} begonnen` : ""}. Der Status hilft dir beim Ordnen. Über rechtliche
+          Wirksamkeit sagt er nichts.
         </p>
-        <ProgressBar />
       </header>
 
-      <Card className="border-2 border-emerald/30 bg-accent-soft p-6 md:p-7 shadow-sm" data-testid="dashboard-next-step">
-        <CardTitle className="text-card-title mb-2 text-primary">{t("dashboard.next")}</CardTitle>
-        <p className="text-lg font-semibold text-foreground mb-2">{nextStep.title}</p>
-        <p className="text-body text-muted mb-5">{nextStep.reason}</p>
-        <Link href={nextStep.path}>
-          <Button type="button" size="lg" data-testid="dashboard-next-step-cta">
-            Diesen Schritt jetzt erledigen <ArrowRight size={16} className="ml-2" />
-          </Button>
-        </Link>
-      </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
+        <div className="space-y-6 min-w-0">
+          <Card className="border-2 border-emerald/30 bg-accent-soft p-5 md:p-6" data-testid="dashboard-next-step">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Dein nächster Schritt</p>
+            <h2 className="text-xl font-bold text-foreground mt-1">{next.title}</h2>
+            <p className="text-body text-muted mt-1 mb-4">{next.reason}</p>
+            <Link href={next.href} className={linkButtonClassName({ size: "lg" })} data-testid="dashboard-next-step-cta">
+              {next.cta} <ArrowRight size={16} className="ml-2" aria-hidden />
+            </Link>
+          </Card>
 
-      {planItems.length > 0 && (
-        <Card className="p-6">
-          <CardTitle className="text-base mb-3">Deine nächsten Planpunkte</CardTitle>
-          <ul className="space-y-2">
-            {planItems.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={item.path}
-                  className="flex items-center justify-between gap-3 text-sm py-2 min-h-[44px] hover:text-accent"
-                >
-                  <span>{item.title}</span>
-                  <span className="text-muted font-medium">{item.percent}%</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+          <Card className="p-5 md:p-6">
+            <CardTitle className="text-lg text-foreground mb-1">Deine Vorsorge</CardTitle>
+            <AreaList states={states} />
+            <p className="text-sm mt-3">
+              <Link href={COMPLETION_PATH} className="text-primary underline" data-testid="dashboard-completion-link">
+                Zusammenfassung ansehen
+              </Link>
+            </p>
+          </Card>
+        </div>
+
+        <aside className="space-y-4 self-start">
+          <Card className="p-5" data-testid="dashboard-package-card">
+            <CardTitle className="flex items-center gap-2 text-base text-foreground">
+              <Package size={18} aria-hidden /> Für deine Familie
+            </CardTitle>
+            <p className="text-sm text-muted mb-4">
+              Stelle ein Notfallpaket zum Ausdrucken zusammen. Du entscheidest, was hineinkommt. Online wird nichts geteilt.
+            </p>
+            <Link href="/dashboard/notfallpaket" className={linkButtonClassName({ variant: "outline", className: "w-full" })}>
+              Notfallpaket zusammenstellen
+            </Link>
+          </Card>
+          <p className="text-xs text-muted px-1">
+            Diese Plattform ersetzt keinen Imam, Gelehrten, Arzt, Anwalt oder Notar. Keine Rechts- oder Fatwa-Beratung.
+          </p>
+        </aside>
+      </div>
 
       <ModuleTiles />
-
-      {critical.length > 0 && (
-        <Card className="border-warning/40 bg-warning/5 p-6">
-          <CardTitle className="flex items-center gap-2 text-warning text-base">
-            <AlertTriangle size={18} /> {t("dashboard.critical")}
-          </CardTitle>
-          <ul className="space-y-1 mt-2">
-            {critical.slice(0, 3).map((item) => (
-              <li key={item} className="text-sm text-muted flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-
-      <Card className="p-4 flex items-start gap-3 bg-accent-soft/80 border border-border">
-        <Shield size={20} className="text-primary shrink-0 mt-0.5" aria-hidden />
-        <p className="text-sm text-muted leading-relaxed">
-          {isApiStorageEnabled()
-            ? "Angaben in deinem Ordner werden in deinem Konto auf unserem Server gespeichert."
-            : "Angaben in deinem Ordner werden lokal auf diesem Gerät gespeichert."}{" "}
-          Teile sensible Inhalte nur mit Vertrauenspersonen. Keine Rechts- oder Fatwa-Beratung.
-        </p>
-      </Card>
-
-      {overallPercent >= 100 && (
-        <p className="text-sm text-success flex items-center gap-2">
-          <CheckCircle2 size={16} /> Alle Bereiche bearbeitet — regelmäßig aktualisieren.
-        </p>
-      )}
     </div>
   );
 }

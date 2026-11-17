@@ -22,7 +22,7 @@ import {
 /** The client sends the whole folder: store what is free, leave the rest untouched and say what was not stored. */
 async function writeFreeSections(repo: ServerRepository, userId: string, body: Partial<AmanahOrdnerData>) {
   const existing = await repo.getAmanahData(userId);
-  const free = freeSectionsOf(body);
+  const free = freeSectionsOf(body, existing);
   // Only what would really be stored counts, not what stays in the browser.
   const storedBytes = jsonBytes({ ...existing, ...free });
   const rejected = tooManyAssets(free.assets, existing) ?? folderSizeRejected(storedBytes, jsonBytes(existing));

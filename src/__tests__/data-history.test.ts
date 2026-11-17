@@ -449,7 +449,7 @@ describe("rules", () => {
   it("covers every section with content and leaves out bookkeeping", () => {
     const covered = new Set<string>(HISTORY_SECTIONS);
     const left = Object.keys(defaultAmanahData).filter((k) => !covered.has(k)).sort();
-    expect(left).toEqual(["lastSaved", "reviewStatus", "schemaVersion", "selectedPath"]);
+    expect(left).toEqual(["lastSaved", "reviewStatus", "schemaVersion", "selectedPath", "vorsorgeMeta"]);
   });
 
   it("moving through the questionnaire is no change", () => {

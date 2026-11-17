@@ -19,10 +19,10 @@ describe("product tiles and navigation", () => {
     expect(home).toContain("BRAND.ctaPrimary");
   });
 
-  it("dashboard module tiles reference valid routes under Alle Vorsorgebereiche", () => {
+  it("dashboard module tiles list the topics outside the six areas under Weitere Themen", () => {
     const tiles = read("src/components/dashboard/module-tiles.tsx");
     expect(tiles).toContain("moduleConfigs");
-    expect(tiles).toContain("Alle Vorsorgebereiche");
+    expect(tiles).toContain("Weitere Themen");
     expect(tiles).toContain("dashboard-tile-${mod.id}");
     const paths = moduleConfigs.map((m) => m.path);
     for (const route of ["/dashboard/notfallkarte", "/dashboard/janazah", "/dashboard/vollmacht", "/dashboard/testament", "/dashboard/digitaler-nachlass", "/dashboard/familie"]) {

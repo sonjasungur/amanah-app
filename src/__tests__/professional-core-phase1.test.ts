@@ -257,17 +257,15 @@ describe("professional core phase 1 — pricing teaser and checkout safety", () 
 });
 
 describe("professional core phase 1 — dashboard focus navigation", () => {
-  it("reduces primary sidebar links and keeps modules in collapsible area", () => {
+  it("keeps four main destinations and folds all other topics away (P1)", () => {
     const nav = read("src/lib/navigation/dashboard-nav.ts");
     const layout = read("src/components/dashboard/dashboard-layout.tsx");
-    expect(nav).toContain('id: "overview"');
-    expect(nav).toContain('label: "Mein Vorsorgeplan"');
+    for (const label of ['label: "Übersicht"', 'label: "Vorsorge"', 'label: "Familie"', 'label: "Notfallpaket"']) expect(nav).toContain(label);
     expect(nav).toContain('label: "Vorsorge-Check"');
-    expect(nav).not.toContain("/dashboard/notfallkarte");
-    expect(nav).not.toContain("/dashboard/familie");
-    expect(nav).not.toContain("/dashboard/pdf");
-    expect(layout).toContain("Alle Vorsorgebereiche");
-    expect(layout).toContain("moduleConfigs.map");
+    expect(nav).toContain("moduleConfigs");
+    expect(layout).toContain("Weitere Themen");
+    expect(layout).toContain("moreNavItems.map");
+    expect(layout).toContain('data-testid="dashboard-tabbar"');
   });
 
   it("uses updated neutral auth disclaimer wording", () => {

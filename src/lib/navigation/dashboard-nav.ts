@@ -1,43 +1,35 @@
+import { moduleConfigs } from "@/lib/modules/config";
+import { VORSORGE_AREAS } from "@/lib/vorsorge/areas";
+
 export interface NavItem {
   href: string;
   label: string;
   icon?: string;
 }
 
-export interface NavGroup {
-  id: string;
-  label: string;
-  items: NavItem[];
-}
-
-export const dashboardNavGroups: NavGroup[] = [
-  {
-    id: "overview",
-    label: "Übersicht",
-    items: [{ href: "/dashboard", label: "Mein Vorsorgeplan", icon: "🏠" }],
-  },
-  {
-    id: "prep",
-    label: "Vorbereitung",
-    items: [{ href: "/check", label: "Vorsorge-Check", icon: "✓" }],
-  },
-  {
-    id: "modules",
-    label: "Alle Vorsorgebereiche",
-    items: [],
-  },
+/** The four main destinations. Desktop shows them in the sidebar, phones in the bottom bar. */
+export const mainNavItems: NavItem[] = [
+  { href: "/dashboard", label: "Übersicht" },
+  { href: "/dashboard/vorsorge", label: "Vorsorge" },
+  { href: "/dashboard/personen", label: "Familie" },
+  { href: "/dashboard/notfallpaket", label: "Notfallpaket" },
 ];
 
+/** The six areas, each opening its first page. */
+export const areaNavItems: NavItem[] = VORSORGE_AREAS.map((area) => ({ href: area.pages[0].path, label: area.title }));
+
+const AREA_PATHS = new Set(VORSORGE_AREAS.flatMap((a) => a.pages.map((p) => p.path)));
+
+/** Everything else stays reachable, folded away. */
 export const moreNavItems: NavItem[] = [
-  { href: "/dashboard/personen", label: "Familie & Vertrauenspersonen" },
-  { href: "/dashboard/dokumente", label: "Wichtige Dokumente" },
-  { href: "/dashboard/krankheit", label: "Krankheit & Patientenverfügung" },
-  { href: "/dashboard/vollmacht", label: "Vorsorgevollmacht" },
-  { href: "/dashboard/janazah", label: "Janazah-Wünsche" },
-  { href: "/dashboard/testament", label: "Testament & Erbe" },
-  { href: "/dashboard/vermoegen", label: "Vermögensübersicht" },
-  { href: "/dashboard/schulden-amanah", label: "Schulden & Amanah" },
-  { href: "/dashboard/digitaler-nachlass", label: "Digitaler Nachlass" },
-  { href: "/dashboard/sadaqa-jariya", label: "Sadaqa Jariya" },
-  { href: "/dashboard/barzakh", label: "Barzakh" },
+  ...VORSORGE_AREAS.flatMap((a) => a.pages.slice(1).map((p) => ({ href: p.path, label: p.title }))),
+  ...moduleConfigs.filter((m) => !AREA_PATHS.has(m.path)).map((m) => ({ href: m.path, label: m.title })),
+  { href: "/dashboard/familiengespraech", label: "Familiengespräch" },
+  { href: "/check", label: "Vorsorge-Check" },
+  { href: "/dashboard/pdf", label: "Weitere Ausdrucke" },
 ];
+
+export function isDashboardNavActive(pathname: string, href: string): boolean {
+  if (href === "/dashboard") return pathname === "/dashboard";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}

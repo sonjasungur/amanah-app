@@ -1,10 +1,11 @@
 "use client";
 
 import { ModulePage } from "@/components/modules/module-page";
+import { PersonPicker } from "@/components/vorsorge/person-picker";
+import { Card, CardTitle } from "@/components/ui/card";
 import { emergencyCardFields } from "@/lib/modules/fields";
 import { PrintButton, PrintField, PrintSection } from "@/components/print/print-views";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { Card } from "@/components/ui/card";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -48,6 +49,16 @@ export default function NotfallkartePage() {
       description="Wichtige Infos für den Notfall — immer griffbereit für Familie, Pflege und Rettungsdienst."
       section="emergencyCard"
       fields={emergencyCardFields}
+      intro={
+        <Card className="mb-6 p-5" data-testid="person-pickers">
+          <CardTitle className="text-base">Aus Familie &amp; Kontakte übernehmen</CardTitle>
+          <p className="text-sm text-muted mb-3">Gewählte Personen bleiben verbunden: Änderst du sie in „Familie &amp; Kontakte“, ändert sich der Eintrag hier mit.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+          <PersonPicker field="emergencyContact1" label="Notfallkontakt 1" />
+          <PersonPicker field="emergencyContact2" label="Notfallkontakt 2" />
+          </div>
+        </Card>
+      }
     >
       <Card className="mt-6 no-print">
         <p className="text-sm text-muted mb-4">

@@ -123,3 +123,32 @@ body {
 [data-reading-size="large"] .reading-content { zoom: 1.2; }
 
 .print-only { display: none; }
+
+/* Emergency package: large, calm type for older readers, on screen and on paper. */
+.package-document { color: #1a1a1a; background: #fff; padding: 1.5rem; font-size: 1rem; line-height: 1.55; }
+.package-document h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.25rem; }
+.package-document h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; padding-bottom: 0.25rem; border-bottom: 2px solid var(--primary-dark); }
+.package-document h3 { font-size: 1.05rem; font-weight: 700; margin: 1rem 0 0.35rem; }
+.package-document dl > div { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 0.75rem; padding: 0.3rem 0; border-bottom: 1px solid #e5e5e5; }
+.package-document dt { font-weight: 600; }
+.package-document dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.package-document .package-notice { font-weight: 600; margin-top: 0.5rem; }
+.package-document .package-empty { color: #555; }
+.package-document .package-foot { margin-top: 1.5rem; font-size: 0.9rem; color: #444; }
+@media (max-width: 480px) {
+  .package-document { padding: 1rem; }
+  .package-document dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+}
+@media print {
+  .package-document { padding: 0; font-size: 13pt; }
+  .package-document h1 { font-size: 20pt; }
+  .package-document h2 { font-size: 16pt; break-after: avoid; }
+  .package-document h3 { break-after: avoid; }
+  .package-document .package-section { break-inside: avoid; }
+  .package-document .package-part-break { break-before: page; }
+}
+
+/* Phones: room for the dashboard bottom bar, so the end of the page is never hidden behind it. */
+@media (max-width: 1023px) {
+  body:has([data-testid="dashboard-tabbar"]) { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+}

@@ -11,6 +11,7 @@ import { clearAmanahData } from "@/lib/storage/amanah-storage";
 import { isRemotePersistenceActive, isSaveInFlight, persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
 import { folderBackedStorage, onDeviceDataWipe } from "@/lib/storage/device-data";
 import { pickDataFields } from "@/lib/store/store-utils";
+import { changedAreas } from "@/lib/vorsorge/areas";
 
 const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
 
@@ -21,6 +22,8 @@ interface AmanahStore extends AmanahOrdnerData {
   folderProblem: FolderProblem | null;
   updateField: <K extends keyof AmanahOrdnerData>(section: K, value: AmanahOrdnerData[K]) => void;
   updateNested: (section: string, field: string, value: unknown) => void;
+  /** Several sections in one change, e.g. a person and the fields that point at them. */
+  updateSections: (patch: Partial<AmanahOrdnerData>) => void;
   addDebtAmanah: (item: DebtAmanahItem) => void;
   removeDebtAmanah: (id: string) => void;
   addDigitalLegacy: (item: DigitalLegacyItem) => void;
@@ -77,6 +80,7 @@ export const useAmanahStore = create<AmanahStore>()(
           saveStatus: "saving" as SaveStatus,
           saveError: null,
         })),
+      updateSections: (patch) => set((state) => ({ ...state, ...patch, saveStatus: "saving" as SaveStatus, saveError: null })),
       addDebtAmanah: (item) =>
         set((state) => ({
           ...state,
@@ -134,6 +138,20 @@ export const useAmanahStore = create<AmanahStore>()(
     }
   )
 );
+
+/**
+ * Remembers when the person last changed an area ("zuletzt geändert"). Only edits count: loading,
+ * importing and demo data arrive with another save status and keep their own times.
+ */
+useAmanahStore.subscribe((state, prevState) => {
+  if (state.saveStatus !== "saving") return;
+  const ids = changedAreas(prevState, state);
+  if (ids.length === 0) return;
+  const now = new Date().toISOString();
+  const areaUpdatedAt = { ...state.vorsorgeMeta.areaUpdatedAt };
+  for (const id of ids) areaUpdatedAt[id] = now;
+  useAmanahStore.setState({ vorsorgeMeta: { ...state.vorsorgeMeta, areaUpdatedAt } });
+});
 
 let saveDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
