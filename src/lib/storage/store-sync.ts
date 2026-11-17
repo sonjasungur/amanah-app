@@ -9,7 +9,15 @@ import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-s
 import { apiStorageProvider } from "./api-storage-provider";
 import { getActiveStorageLabel } from "./storage-config";
 import { FolderUnreadableError } from "./types";
-import { deviceDataOwner, hasUnsentChangeOf, markDeviceDataOwner, onDeviceDataWipe, UNSENT_CHANGE_KEY, wipeDeviceData } from "./device-data";
+import {
+  clearUnsentChange,
+  deviceDataOwner,
+  hasUnsentChangeOf,
+  markDeviceDataOwner,
+  markUnsentChangeOf,
+  onDeviceDataWipe,
+  wipeDeviceData,
+} from "./device-data";
 
 export type StorageLocationLabel = "local" | "api" | "local-demo";
 
@@ -164,31 +172,13 @@ export async function persistStoreChanges(): Promise<void> {
 }
 
 const KEEPALIVE_MAX_BYTES = 60_000;
-const UNSENT_KEY = UNSENT_CHANGE_KEY;
-
-/** Whether this account left a page with a change the account may not have received. */
+/** Whether this account left a page, or a save is running, with a change the account may not have received. */
 function hasUnsentChange(): boolean {
-  try {
-    return localStorage.getItem(UNSENT_KEY) === sessionUserId();
-  } catch {
-    return false;
-  }
+  return hasUnsentChangeOf(sessionUserId());
 }
 
 function markUnsentChange(userId: string): void {
-  try {
-    localStorage.setItem(UNSENT_KEY, userId);
-  } catch {
-    // Without a storage only the request remains.
-  }
-}
-
-function clearUnsentChange(): void {
-  try {
-    localStorage.removeItem(UNSENT_KEY);
-  } catch {
-    // Nothing to clear without a storage.
-  }
+  markUnsentChangeOf(userId);
 }
 
 /**

@@ -123,6 +123,40 @@ describe("login brake", () => {
     expect((await loginPOST(post("/api/auth/login", { email: "spray-y@test.de", password: "x" }, "198.51.100.21"))).status).toBe(401);
   });
 
+  it("one client cannot pause someone else's address", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const email = `target-${crypto.randomUUID()}@test.de`;
+    await verifiedAccount(email);
+    for (let i = 0; i < 12; i++) {
+      vi.setSystemTime(Date.now() + 7_000);
+      await loginPOST(post("/api/auth/login", { email, password: "falsch-falsch" }, "198.51.100.66"));
+    }
+    expect((await loginPOST(post("/api/auth/login", { email, password: PASSWORD }, "198.51.100.66"))).status).toBe(429);
+    // The owner, from their own device, is not affected.
+    expect((await loginPOST(post("/api/auth/login", { email, password: PASSWORD }, "203.0.113.50"))).status).toBe(200);
+  });
+
+  it("an attack from many sources pauses the address, the same for unknown addresses", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const known = `many-${crypto.randomUUID()}@test.de`;
+    const unknown = `many-unknown-${crypto.randomUUID()}@test.de`;
+    await verifiedAccount(known);
+    const answers: string[] = [];
+    for (const email of [known, unknown]) {
+      for (let source = 0; source < 5; source++) {
+        for (let i = 0; i < 10; i++) {
+          vi.setSystemTime(Date.now() + 1_000);
+          await loginPOST(post("/api/auth/login", { email, password: "falsch-falsch" }, `198.51.${source + 1}.${email === known ? 1 : 2}`));
+        }
+      }
+      vi.setSystemTime(Date.now() + 61_000);
+      const res = await loginPOST(post("/api/auth/login", { email, password: PASSWORD }, "203.0.113.99"));
+      answers.push(`${res.status} ${JSON.stringify(await res.json())}`);
+    }
+    expect(answers[0]).toMatch(/^429 /);
+    expect(answers[1]).toBe(answers[0]);
+  });
+
   it("never writes an e-mail address or a password to the log", async () => {
     const spies = (["log", "info", "warn", "error"] as const).map((level) => vi.spyOn(console, level).mockImplementation(() => {}));
     const email = `quiet-${crypto.randomUUID()}@test.de`;

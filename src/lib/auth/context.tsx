@@ -7,6 +7,7 @@ import { apiAuthProvider, rememberSession, SESSION_HINT_KEY, sessionUserId } fro
 import { getStorageMode } from "./config";
 import { discardDeviceDataWithoutSession, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import { wipeDeviceData } from "@/lib/storage/device-data";
+import { answerSaveRequests, askOtherTabsToSave } from "@/lib/storage/tab-coordination";
 import { cancelPendingSave, flushBeforeSignOut } from "@/lib/store/use-amanah-store";
 import type { AuthProvider, AuthSession, LoginInput, RegisterInput } from "./types";
 
@@ -25,6 +26,8 @@ interface AuthContextValue {
 export interface LogoutResult {
   ok: boolean;
   unsaved?: boolean;
+  /** The change the account may not hold is in another tab. */
+  otherTab?: boolean;
 }
 
 /** In API mode the browser only holds a working copy of an account, which a logout removes. */
@@ -69,9 +72,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("storage", onStorage);
     window.addEventListener("pageshow", onPageShow);
+    // Another tab of this account is about to log out: send what this tab holds first. A tab whose
+    // session changed meanwhile, or that belongs to another account, stays silent and sends nothing.
+    const stopAnswering = answerSaveRequests((userId) =>
+      userId === shownUserId.current && userId === sessionUserId() ? flushBeforeSignOut() : null
+    );
     return () => {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("pageshow", onPageShow);
+      stopAnswering();
     };
   }, []);
 
@@ -132,7 +141,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(
     async (options?: { force?: boolean }): Promise<LogoutResult> => {
       const wipe = keepsWorkingCopy();
-      if (wipe && !options?.force && !(await flushBeforeSignOut())) return { ok: false, unsaved: true };
+      if (wipe && !options?.force) {
+        const ownSaved = await flushBeforeSignOut();
+        const userId = sessionUserId();
+        const others = userId ? await askOtherTabsToSave(userId) : { allSaved: true, tabs: 0 };
+        if (!ownSaved) return { ok: false, unsaved: true };
+        if (!others.allSaved) return { ok: false, unsaved: true, otherTab: true };
+      }
       await provider.logout();
       if (wipe) wipeDeviceData();
       sessionVersion.current += 1;

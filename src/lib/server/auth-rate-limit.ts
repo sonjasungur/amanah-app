@@ -13,6 +13,7 @@ import { memoryClear, memoryHit, memoryPeek } from "./auth-rate-limit-memory";
 
 export const MINUTE = 60_000;
 export const FIFTEEN_MINUTES = 15 * MINUTE;
+export const HOUR = 60 * MINUTE;
 const DAY_MS = 24 * 60 * MINUTE;
 
 export interface LimitRule {

@@ -124,14 +124,91 @@ test("a logout with a change the account did not receive asks first, and keeps i
   await enterName(page, "B nicht gesendet"); // the save of this change fails
   await page.waitForTimeout(800);
 
-  page.once("dialog", (dialog) => void dialog.dismiss());
+  // The question comes after the other tabs were asked; wait for it instead of assuming its timing.
+  const declined = page.waitForEvent("dialog");
   await logOut(page);
+  await (await declined).dismiss();
   await expect.poll(async () => (await context.cookies(baseURL)).some((c) => c.name.endsWith("amanah_session"))).toBe(true);
   expect(await storageDump(page)).toContain("B nicht gesendet");
 
-  page.once("dialog", (dialog) => void dialog.accept());
+  const accepted = page.waitForEvent("dialog");
   await logOut(page);
+  await (await accepted).accept();
   await expect.poll(async () => (await context.cookies(baseURL)).some((c) => c.name.endsWith("amanah_session"))).toBe(false);
   expect(await storageDump(page)).not.toContain("B nicht gesendet");
   await page.unroute("**/api/amanah");
+});
+
+async function logIn(target: Page, email: string) {
+  await target.goto("/login");
+  await target.getByPlaceholder("name@beispiel.de").fill(email);
+  await target.getByPlaceholder("••••••••").fill(PASSWORD);
+  await target.getByRole("button", { name: "Anmelden" }).last().click();
+  await expect(target).toHaveURL(/\/dashboard/);
+}
+
+const SECRET_TAB = "Nur im Tab";
+
+test("while signed in the folder lives only in the tab; a new tab reads it from the account", async () => {
+  await logIn(page, emailB);
+  await enterName(page, SECRET_TAB);
+  await expect.poll(async () => (await (await page.context().request.get("/api/amanah")).json()).data?.janazahWishes?.fullName, { timeout: 10_000 }).toBe(SECRET_TAB);
+
+  const local = await page.evaluate(() => JSON.stringify({ ...localStorage }));
+  expect(local).not.toContain(SECRET_TAB);
+  expect(await page.evaluate(() => sessionStorage.getItem("amanah-ordner-data"))).toContain(SECRET_TAB);
+
+  const fresh = await context.newPage();
+  await fresh.goto("/dashboard/janazah");
+  await expect(fresh.getByTestId("janazah-fullName").locator("input")).toHaveValue(SECRET_TAB);
+  expect(await fresh.evaluate(() => JSON.stringify({ ...localStorage }))).not.toContain(SECRET_TAB);
+  await fresh.close();
+});
+
+test("a logout asks first when another tab holds a change the account did not receive", async ({ baseURL }) => {
+  const other = await context.newPage();
+  await other.goto("/dashboard/janazah");
+  await expect(other.getByTestId("janazah-fullName").locator("input")).toHaveValue(SECRET_TAB);
+  await other.route("**/api/amanah", (route) => (route.request().method() === "GET" ? route.continue() : route.fulfill({ status: 500, body: "{}" })));
+  await other.getByTestId("janazah-fullName").locator("input").fill("Im anderen Tab ungespeichert");
+  await other.getByTestId("janazah-next-button").click();
+  await other.waitForTimeout(800);
+
+  await page.goto("/dashboard");
+  const asked = page.waitForEvent("dialog");
+  await logOut(page);
+  const question = await asked;
+  expect(question.message()).toContain("anderen Tab");
+  await question.dismiss();
+  expect((await context.cookies(baseURL)).some((c) => c.name.endsWith("amanah_session"))).toBe(true);
+
+  await other.unroute("**/api/amanah");
+  await other.close();
+});
+
+test("going back to a page kept in the back-forward cache after a logout elsewhere shows nothing", async () => {
+  const shows: string[] = [];
+  await page.addInitScript(() => {
+    window.addEventListener("pageshow", (event) => {
+      const log = JSON.parse(sessionStorage.getItem("e2e-pageshow") ?? "[]") as boolean[];
+      sessionStorage.setItem("e2e-pageshow", JSON.stringify([...log, event.persisted]));
+    });
+  });
+  await page.goto("/dashboard/janazah");
+  await expect(page.getByTestId("janazah-fullName").locator("input")).toHaveValue(SECRET_TAB);
+  await page.goto("/wissen"); // a full navigation; the dashboard may stay in the back-forward cache
+
+  const other = await context.newPage();
+  await other.goto("/dashboard");
+  await logOut(other);
+  await expect(other).toHaveURL(/\/$/);
+  await other.close();
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
+  expect(await page.evaluate(() => document.body.innerHTML)).not.toContain(SECRET_TAB);
+  expect(await storageDump(page)).not.toContain(SECRET_TAB);
+  shows.push(...((await page.evaluate(() => JSON.parse(sessionStorage.getItem("e2e-pageshow") ?? "[]"))) as string[]));
+  test.info().annotations.push({ type: "bfcache", description: `pageshow persisted: ${JSON.stringify(shows)}` });
+  console.log(`BFCACHE pageshow persisted: ${JSON.stringify(shows)}`);
 });

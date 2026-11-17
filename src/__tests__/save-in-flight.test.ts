@@ -26,6 +26,7 @@ function heldSave() {
 
 beforeEach(async () => {
   localStorage.clear();
+  sessionStorage.clear();
   useAmanahStore.setState({ ...defaultAmanahData, saveStatus: "idle", saveError: null, folderProblem: null, lastSaved: null });
   await syncStoreWithRemoteAfterAuth();
 });
@@ -39,12 +40,12 @@ describe("a save that is still running when the page goes away", () => {
 
     const running = persistStoreChanges();
     await vi.waitFor(() => expect(isSaveInFlight()).toBe(true));
-    expect(localStorage.getItem(UNSENT)).toBe("user-1");
+    expect(sessionStorage.getItem(UNSENT)).toBe("user-1");
 
     held.release();
     await running;
     expect(isSaveInFlight()).toBe(false);
-    expect(localStorage.getItem(UNSENT)).toBeNull();
+    expect(sessionStorage.getItem(UNSENT)).toBeNull();
   });
 
   it("stays marked when something newer was typed during the save", async () => {
@@ -57,7 +58,7 @@ describe("a save that is still running when the page goes away", () => {
     useAmanahStore.setState({ emergencyCard: card("Zweite Fassung") });
     held.release();
     await running;
-    expect(localStorage.getItem(UNSENT)).toBe("user-1");
+    expect(sessionStorage.getItem(UNSENT)).toBe("user-1");
   });
 
   it("is sent again in a way that outlives the page", async () => {
@@ -79,7 +80,7 @@ describe("a save that is still running when the page goes away", () => {
   it("the next load sends the newer browser state instead of taking the older account state", async () => {
     const { saveAmanahData, loadAmanahData } = await import("@/lib/storage/amanah-storage");
     useAmanahStore.setState({ emergencyCard: card("Neuer im Browser") });
-    localStorage.setItem(UNSENT, "user-1"); // the save was aborted with the page
+    sessionStorage.setItem(UNSENT, "user-1"); // the save was aborted with the page
     vi.mocked(loadAmanahData).mockResolvedValueOnce({ ...defaultAmanahData, emergencyCard: card("Aelter im Konto") });
     await syncStoreWithRemoteAfterAuth();
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Neuer im Browser");

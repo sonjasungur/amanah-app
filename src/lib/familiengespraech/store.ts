@@ -1,8 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { onDeviceDataWipe } from "@/lib/storage/device-data";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { folderBackedStorage, onDeviceDataWipe } from "@/lib/storage/device-data";
 
 export interface TopicProgress {
   checkedQuestionIds: string[];
@@ -51,7 +51,8 @@ export const useFamilienGespraechStore = create<FamilienGespraechState>()(
           return { topics: { ...s.topics, [topicId]: { ...t, notes } } };
         }),
     }),
-    { name: "amanah-familiengespraech-v1" }
+    // Notes are personal: kept in the tab while signed in, like the folder.
+    { name: "amanah-familiengespraech-v1", storage: createJSONStorage(() => folderBackedStorage) }
   )
 );
 

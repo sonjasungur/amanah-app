@@ -9,7 +9,7 @@ import type { AmanahOrdnerData, DebtAmanahItem, DigitalLegacyItem } from "@/lib/
 import { STORAGE_KEY, type FolderProblem, type SaveStatus } from "@/lib/storage/types";
 import { clearAmanahData } from "@/lib/storage/amanah-storage";
 import { isRemotePersistenceActive, isSaveInFlight, persistStoreChanges, saveBeforeLeaving } from "@/lib/storage/store-sync";
-import { onDeviceDataWipe } from "@/lib/storage/device-data";
+import { folderBackedStorage, onDeviceDataWipe } from "@/lib/storage/device-data";
 import { pickDataFields } from "@/lib/store/store-utils";
 
 const DATA_KEYS = Object.keys(defaultAmanahData) as (keyof AmanahOrdnerData)[];
@@ -37,12 +37,13 @@ interface AmanahStore extends AmanahOrdnerData {
  */
 const STORAGE_FULL_MESSAGE = "Der Speicher dieses Browsers ist voll. Bitte kürze längere Texte oder sichere deine Daten als Export.";
 
+// The tab while signed in (API mode), localStorage otherwise: see device-data.ts.
 const guardedLocalStorage: StateStorage = {
-  getItem: (name) => localStorage.getItem(name),
-  removeItem: (name) => localStorage.removeItem(name),
+  getItem: (name) => folderBackedStorage.getItem(name),
+  removeItem: (name) => folderBackedStorage.removeItem(name),
   setItem: (name, value) => {
     try {
-      localStorage.setItem(name, value);
+      folderBackedStorage.setItem(name, value);
     } catch {
       queueMicrotask(() => {
         // setState persists again: reporting the same failure twice would never end.
@@ -163,6 +164,16 @@ if (typeof window !== "undefined") {
     saveBeforeLeaving();
   };
   window.addEventListener("pagehide", sendPendingSave);
+  // The working copy ends with the tab while signed in. If the account did not take the last change,
+  // closing the tab would drop it silently: the browser asks first instead.
+  window.addEventListener("beforeunload", (event) => {
+    if (!isRemotePersistenceActive()) return;
+    const { saveStatus, folderProblem } = useAmanahStore.getState();
+    if (saveStatus === "error" || saveStatus === "partial" || folderProblem !== null) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
   // Phones often close background tabs without a pagehide.
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") sendPendingSave();

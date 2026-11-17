@@ -113,9 +113,11 @@ test("emergency card, check and bookmarks reach the account and a second device"
   await expect(other).toHaveURL(/\/dashboard/);
   await other.goto("/dashboard/notfallkarte");
   await expect(other.getByLabel("Name", { exact: true })).toHaveValue("Amina Test");
-  const local = await other.evaluate(() => localStorage.getItem("amanah-ordner-data") ?? "");
+  // While signed in, the working copy lives in the tab only, never in the browser profile.
+  const local = await other.evaluate(() => sessionStorage.getItem("amanah-ordner-data") ?? "");
   expect(local).toContain("artikel-a");
   expect(JSON.parse(local).state.checkProgress.index).toBeGreaterThan(0);
+  expect(await other.evaluate(() => localStorage.getItem("amanah-ordner-data"))).toBeNull();
   await fresh.close();
 
   const exported = await (await page.context().request.get("/api/account/export")).json();

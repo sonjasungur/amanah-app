@@ -124,13 +124,13 @@ describe("syncStoreWithRemoteAfterAuth", () => {
     useAmanahStore.getState().updateField("emergencyCard", { ...defaultAmanahData.emergencyCard, name: "Neuer im Browser" });
     useAmanahStore.setState({ saveStatus: "saving" });
     saveBeforeLeaving();
-    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBe("user-1");
 
     vi.mocked(loadAmanahData).mockResolvedValue({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Aelter im Konto" } });
     await syncStoreWithRemoteAfterAuth();
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Neuer im Browser");
     expect(vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0].emergencyCard.name).toBe("Neuer im Browser");
-    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBeNull();
 
     await syncStoreWithRemoteAfterAuth();
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Aelter im Konto");
@@ -145,35 +145,35 @@ describe("syncStoreWithRemoteAfterAuth", () => {
     useAmanahStore.setState({ saveStatus: "saving" });
     saveBeforeLeaving();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBe("user-1");
 
     vi.mocked(loadAmanahData).mockResolvedValueOnce(defaultAmanahData);
     await syncStoreWithRemoteAfterAuth();
     const last = vi.mocked(saveAmanahData).mock.calls.at(-1)?.[0];
     expect(last?.emergencyCard.allergies.length).toBe(big.length);
-    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBeNull();
     vi.unstubAllGlobals();
   });
 
   it("an unsent change of another account is not uploaded here", async () => {
     const { loadAmanahData, saveAmanahData } = await remoteMode();
-    localStorage.setItem("amanah-unsent-change", "jemand-anderes");
+    sessionStorage.setItem("amanah-unsent-change", "jemand-anderes");
     vi.mocked(loadAmanahData).mockResolvedValueOnce({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Eigenes Konto" } });
     await syncStoreWithRemoteAfterAuth();
     expect(useAmanahStore.getState().emergencyCard.name).toBe("Eigenes Konto");
     expect(saveAmanahData).not.toHaveBeenCalled();
-    localStorage.removeItem("amanah-unsent-change");
+    sessionStorage.removeItem("amanah-unsent-change");
   });
 
   it("a failed upload keeps the change marked for the next load", async () => {
     const { loadAmanahData, saveAmanahData } = await remoteMode();
-    localStorage.setItem("amanah-unsent-change", "user-1");
+    sessionStorage.setItem("amanah-unsent-change", "user-1");
     vi.mocked(saveAmanahData).mockRejectedValueOnce(new Error("offline"));
     vi.mocked(loadAmanahData).mockResolvedValueOnce(defaultAmanahData);
     await syncStoreWithRemoteAfterAuth();
-    expect(localStorage.getItem("amanah-unsent-change")).toBe("user-1");
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBe("user-1");
     expect(useAmanahStore.getState().saveStatus).toBe("error");
-    localStorage.removeItem("amanah-unsent-change");
+    sessionStorage.removeItem("amanah-unsent-change");
   });
 
   it("keeps and saves what was entered while the account data was loading", async () => {
@@ -232,7 +232,7 @@ describe("account folder that cannot be read", () => {
     vi.mocked(storage.saveAmanahData).mockReset();
     vi.mocked(storage.saveAmanahData).mockResolvedValue({ notStored: [], nearLimit: false });
     vi.mocked(storage.loadAmanahData).mockReset();
-    localStorage.removeItem("amanah-unsent-change");
+    sessionStorage.removeItem("amanah-unsent-change");
     useAmanahStore.setState({ ...defaultAmanahData, saveStatus: "idle", saveError: null, lastSaved: null, folderProblem: null });
     return storage;
   };
@@ -256,7 +256,7 @@ describe("account folder that cannot be read", () => {
     saveBeforeLeaving();
     expect(saveAmanahData).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(localStorage.getItem("amanah-unsent-change")).toBeNull();
+    expect(sessionStorage.getItem("amanah-unsent-change")).toBeNull();
     expect(useAmanahStore.getState().folderProblem).toBe(problem);
     vi.unstubAllGlobals();
   });

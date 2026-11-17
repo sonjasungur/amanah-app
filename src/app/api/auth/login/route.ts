@@ -1,14 +1,29 @@
 import { NextResponse } from "next/server";
 import { crossOriginRejected, getServerRepository, sessionToResponse } from "@/lib/server/auth-utils";
 import { isSameOriginRequest, readSessionToken, setSessionCookie } from "@/lib/server/session-cookie";
-import { clearLimit, clientAddress, consumeLimits, FIFTEEN_MINUTES, isLimitReached, MINUTE, recordLimitHit, tooManyAttempts } from "@/lib/server/auth-rate-limit";
+import { clearLimit, clientAddress, consumeLimits, FIFTEEN_MINUTES, HOUR, isLimitReached, MINUTE, recordLimitHit, tooManyAttempts } from "@/lib/server/auth-rate-limit";
 import { emailKey } from "@/lib/server/account-recovery";
 import { emailVerificationInfo, mayLogIn } from "@/lib/server/email-verification";
 
-const LOGIN_ATTEMPTS_PER_MINUTE = 10;
-/** Failed passwords per address before it is paused; counted whether or not the account exists. */
-const FAILED_LOGINS_PER_15_MINUTES = 10;
+/**
+ * Limits that one client cannot use against someone else's account: attempts and failed passwords
+ * count per pair of address and client. Only a much higher count across all clients pauses the address
+ * itself, the case of an attack from many sources. Every limit applies whether or not the account exists.
+ */
+const ATTEMPTS_PER_CLIENT_PER_MINUTE = 10;
+const ATTEMPTS_PER_ADDRESS_PER_MINUTE = 60;
+const FAILED_PER_ADDRESS_AND_CLIENT_15_MIN = 10;
+const FAILED_PER_ADDRESS_PER_HOUR = 50;
 const TOO_MANY_LOGINS = "Zu viele Anmeldeversuche. Bitte kurz warten.";
+
+/**
+ * Prepared, not active: an address paused by an attack from many sources could receive a one-time
+ * login link instead. Needs working mail delivery and the owner's release; until then it stays off and
+ * the address is paused.
+ */
+function loginLinkInsteadOfPause(): boolean {
+  return false;
+}
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginRejected();
@@ -21,22 +36,31 @@ export async function POST(request: Request) {
     }
 
     const address = emailKey(email);
+    const client = clientAddress(request);
+    const pair = `${address}\n${client}`;
     const attempt = await consumeLimits([
-      { scope: "login:ip", subject: clientAddress(request), max: LOGIN_ATTEMPTS_PER_MINUTE, windowMs: MINUTE },
-      { scope: "login:email", subject: address, max: LOGIN_ATTEMPTS_PER_MINUTE, windowMs: MINUTE },
+      { scope: "login:ip", subject: client, max: ATTEMPTS_PER_CLIENT_PER_MINUTE, windowMs: MINUTE },
+      { scope: "login:email-client", subject: pair, max: ATTEMPTS_PER_CLIENT_PER_MINUTE, windowMs: MINUTE },
+      { scope: "login:email", subject: address, max: ATTEMPTS_PER_ADDRESS_PER_MINUTE, windowMs: MINUTE },
     ]);
     if (!attempt.allowed) return tooManyAttempts(attempt, TOO_MANY_LOGINS);
-    const failures = { scope: "login:failed", subject: address, max: FAILED_LOGINS_PER_15_MINUTES, windowMs: FIFTEEN_MINUTES };
+    const pairFailures = { scope: "login:failed-pair", subject: pair, max: FAILED_PER_ADDRESS_AND_CLIENT_15_MIN, windowMs: FIFTEEN_MINUTES };
+    const addressFailures = { scope: "login:failed-address", subject: address, max: FAILED_PER_ADDRESS_PER_HOUR, windowMs: HOUR };
     // Checked before the password, so a paused address answers the same with a right or wrong one.
-    if (await isLimitReached(failures)) return tooManyAttempts({ allowed: false, retryAfterSeconds: FIFTEEN_MINUTES / 1000 }, TOO_MANY_LOGINS);
+    if (await isLimitReached(pairFailures)) return tooManyAttempts({ allowed: false, retryAfterSeconds: FIFTEEN_MINUTES / 1000 }, TOO_MANY_LOGINS);
+    if ((await isLimitReached(addressFailures)) && !loginLinkInsteadOfPause()) {
+      return tooManyAttempts({ allowed: false, retryAfterSeconds: FIFTEEN_MINUTES / 1000 }, TOO_MANY_LOGINS);
+    }
 
     const repo = getServerRepository();
     const user = await repo.authenticateUser(email, password);
     if (!user) {
-      await recordLimitHit(failures);
+      await recordLimitHit(pairFailures);
+      await recordLimitHit(addressFailures);
       return NextResponse.json({ error: "E-Mail oder Passwort ungültig." }, { status: 401 });
     }
-    await clearLimit(failures);
+    await clearLimit(pairFailures);
+    await clearLimit(addressFailures);
     // Only reachable with the correct password, so it does not reveal accounts to strangers.
     // Accounts from before e-mail confirmation may log in and are asked to confirm.
     if (!mayLogIn(emailVerificationInfo(user))) {
