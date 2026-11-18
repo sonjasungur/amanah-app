@@ -51,7 +51,7 @@ test("janazah-vorschau screenshots", async ({ page }) => {
     // Verify updated button label
     const downloadBtn = page.getByTestId("janazah-preview-download");
     await expect(downloadBtn).toBeVisible();
-    await expect(downloadBtn).toContainText("PDF-Vorschau öffnen");
+    await expect(downloadBtn).toContainText("Dokument ansehen, als PDF speichern oder drucken");
     await page.screenshot({
       path: screenshotPath(`janazah-vorschau-${vp.name}-${vp.width}x${vp.height}`),
       fullPage: false,
