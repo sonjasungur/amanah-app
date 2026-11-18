@@ -83,6 +83,8 @@ test.describe("Islamic knowledge centre", () => {
       "/wissen/islam/islamisches-erbrecht-grundlagen",
       "/wissen/redaktion",
       "/wissen/redaktion/paket/ik-start-01-faraid-grundlagen",
+      "/wissen/redaktion/artikel",
+      "/wissen/redaktion/artikel/p25-a-grundlagen",
       "/intern/pruefworkflow",
       "/intern/vorsorge-plus",
     ]) {
