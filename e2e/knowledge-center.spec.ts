@@ -56,11 +56,11 @@ test.describe("Islamic knowledge centre", () => {
     expect(await hasHorizontalOverflow(page)).toBe(false);
   });
 
-  test("hub shows areas A–E and no unreviewed articles", async ({ page }) => {
+  test("hub shows areas A–F and no unreviewed articles", async ({ page }) => {
     await page.goto("/wissen");
     await expect(page.getByRole("heading", { level: 1, name: "Islamisches Wissen" })).toBeVisible();
     const areas = page.getByTestId("knowledge-areas").locator("section");
-    await expect(areas).toHaveCount(5);
+    await expect(areas).toHaveCount(6);
     await expect(page.getByText(/Themen in Vorbereitung/).first()).toBeVisible();
     await expect(page.locator('a[href^="/wissen/islam/"]')).toHaveCount(0);
     expect(await hasHorizontalOverflow(page)).toBe(false);

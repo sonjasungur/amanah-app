@@ -28,7 +28,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 /** Bookkeeping, no use to a reader. */
-const HIDDEN_FIELDS = new Set(["id", "schemaVersion", "reviewStatus", "currentStep", "index", "phase", "completedAt", "areaUpdatedAt", "flowStep", "flowPausedAt", "personLinks"]);
+const HIDDEN_FIELDS = new Set(["id", "schemaVersion", "reviewStatus", "currentStep", "index", "phase", "completedAt", "areaUpdatedAt", "flowStep", "flowPausedAt", "personLinks", "reviewedAt"]);
 
 const FIELD_LABELS: Record<string, string> = {
   additionalContacts: "Weitere Kontakte", additionalWishes: "Weitere Wünsche", adoptedChildren: "Adoptierte Kinder", allergies: "Allergien",

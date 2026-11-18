@@ -44,5 +44,6 @@ export function normalizeVorsorgeMeta(raw: unknown): VorsorgeMeta {
     flowStep: shortString(source.flowStep),
     flowPausedAt: isIsoTime(source.flowPausedAt) ? source.flowPausedAt : null,
     personLinks,
+    reviewedAt: isIsoTime(source.reviewedAt) ? source.reviewedAt : null,
   };
 }

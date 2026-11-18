@@ -355,6 +355,8 @@ export interface VorsorgeMeta {
   flowPausedAt: string | null;
   /** Field → person id. The field keeps its own text, so removing the link never loses it. */
   personLinks: Partial<Record<PersonLinkField, string>>;
+  /** ISO time the person last confirmed "my details are still correct". */
+  reviewedAt?: string | null;
 }
 
 export interface AmanahOrdnerData {

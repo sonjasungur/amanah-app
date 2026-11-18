@@ -87,13 +87,13 @@ describe("P1 bookkeeping in the folder (no database migration)", () => {
     const legacy = { ...structuredClone(defaultAmanahData), familyMembers: [yusuf] } as Record<string, unknown>;
     delete legacy.vorsorgeMeta;
     const loaded = normalizeData(legacy);
-    expect(loaded.vorsorgeMeta).toEqual({ areaUpdatedAt: {}, flowStep: null, flowPausedAt: null, personLinks: {} });
+    expect(loaded.vorsorgeMeta).toEqual({ areaUpdatedAt: {}, flowStep: null, flowPausedAt: null, personLinks: {}, reviewedAt: null });
     expect(loaded.familyMembers).toEqual([yusuf]);
   });
 
   it("drops unknown keys and wrong types from imported meta", () => {
     const meta = normalizeVorsorgeMeta({ areaUpdatedAt: { notfall: "2026-01-01T00:00:00Z", fremd: "x", familie: 5 }, flowStep: { x: 1 }, personLinks: { emergencyContact1: "p1", evil: "p2" }, extra: true });
-    expect(meta).toEqual({ areaUpdatedAt: { notfall: "2026-01-01T00:00:00Z" }, flowStep: null, flowPausedAt: null, personLinks: { emergencyContact1: "p1" } });
+    expect(meta).toEqual({ areaUpdatedAt: { notfall: "2026-01-01T00:00:00Z" }, flowStep: null, flowPausedAt: null, personLinks: { emergencyContact1: "p1" }, reviewedAt: null });
   });
 
   it("meta is bookkeeping: a restricted save never reports it as lost content", () => {
@@ -243,6 +243,7 @@ describe("P1 bookkeeping for accounts without Plus (billing enforced)", () => {
       flowStep: "vollmacht",
       flowPausedAt: "2026-11-17T10:00:00.000Z",
       personLinks: { authorizedPerson: "old" },
+      reviewedAt: null,
     });
   });
 

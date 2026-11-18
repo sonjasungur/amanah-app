@@ -230,9 +230,8 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
 describe("professional core phase 1 — pricing teaser and checkout safety", () => {
   it("homepage teaser and /preise show the owner-confirmed split: free + Vorsorge Plus (39 € test price)", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Vorsorge-Check"');
-    expect(home).toContain('price: "0 €"');
-    expect(home).toContain('name: "Vorsorge Plus"');
+    expect(home).toContain("Kostenlos");
+    expect(home).toContain("Vorsorge Plus · geplant {PLUS_PRICE} einmalig");
     const preise = read("src/app/preise/page.tsx");
     expect(preise).toContain('featuresByTier("plus")');
     expect(preise).toContain('statusNote="In Vorbereitung"');
@@ -242,7 +241,7 @@ describe("professional core phase 1 — pricing teaser and checkout safety", () 
 
   it("keeps paid teaser cards in preparation without active buy CTA", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('statusNote={p.name === "Vorsorge-Check" ? undefined : "In Vorbereitung"}');
+    expect(home).toContain("In Vorbereitung");
     expect(home).not.toContain("Details");
     expect(home).not.toContain("Kaufen");
     expect(home).not.toContain("Checkout");

@@ -68,6 +68,9 @@ export default function DashboardPage() {
             <Link href="/dashboard/notfallpaket" className={linkButtonClassName({ variant: "outline", className: "w-full" })}>
               Notfallpaket zusammenstellen
             </Link>
+            <Link href="/dashboard/pdf" className="block text-sm text-primary underline mt-3 min-h-[44px]" data-testid="dashboard-documents-link">
+              Dokumente &amp; Ausdrucke
+            </Link>
           </Card>
           <p className="text-xs text-muted px-1">
             Diese Plattform ersetzt keinen Imam, Gelehrten, Arzt, Anwalt oder Notar. Keine Rechts- oder Fatwa-Beratung.

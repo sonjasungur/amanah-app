@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { areaNavItems, isDashboardNavActive, mainNavItems, moreNavItems } from "@/lib/navigation/dashboard-nav";
+import { areaNavItems, isDashboardNavActive, mainNavItems, moreNavItems, secondaryNavItems } from "@/lib/navigation/dashboard-nav";
 import { cn } from "@/lib/utils/cn";
 import { ChevronDown, ChevronUp, ClipboardList, Download, Home, Package, Settings, Users } from "lucide-react";
 
@@ -76,6 +76,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
+              {secondaryNavItems.map((item) => (
+                <Link key={item.href} href={item.href} className={linkClass(item.href)} data-testid={`nav-secondary-${item.href.split("/").pop()}`}>
+                  {item.label}
+                </Link>
+              ))}
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted px-3 mb-1">Vorsorgebereiche</p>

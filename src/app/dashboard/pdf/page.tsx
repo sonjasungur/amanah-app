@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils/cn";
 const CARD_TEST_ID: Record<DocumentId, string> = {
   notfallkarte: "export-notfallkarte",
   notfallinfo: "export-notfallinfo",
+  leitfaden: "export-leitfaden",
   gesamt: "export-full",
   janazah: "export-janazah",
   erbprofil: "export-testament",

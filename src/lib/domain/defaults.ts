@@ -179,7 +179,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
   },
   selectedPath: "complete",
   knowledgeBookmarks: [],
-  vorsorgeMeta: { areaUpdatedAt: {}, flowStep: null, flowPausedAt: null, personLinks: {} },
+  vorsorgeMeta: { areaUpdatedAt: {}, flowStep: null, flowPausedAt: null, personLinks: {}, reviewedAt: null },
   lastSaved: null,
   reviewStatus: "draft",
 };

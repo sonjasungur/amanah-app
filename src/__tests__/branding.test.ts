@@ -96,13 +96,15 @@ describe("branding — Amanah – Mein Wille", () => {
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("homepage teaser shows the free offer and Vorsorge Plus, no paid purchase button", () => {
+  it("homepage shows the free offer, Vorsorge Plus in preparation and what still waits for review, no purchase button", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Vorsorge-Check"');
-    expect(home).toContain('name: "Vorsorge Plus"');
-    expect(home).toContain("price: formatPrice(getTestPriceCents())");
-    expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
+    expect(home).toContain('featuresByTier("free")');
+    expect(home).toContain('featuresByTier("plus")');
+    expect(home).toContain("formatPrice(getTestPriceCents())");
     expect(home).toContain("In Vorbereitung");
+    expect(home).toContain("Kauf ist noch nicht möglich");
+    expect(home).toContain("Wartet auf fachliche Freigabe");
+    expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
     expect(home).not.toContain("Details");
   });
 

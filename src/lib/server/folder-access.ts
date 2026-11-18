@@ -75,7 +75,7 @@ export function freeVorsorgeMeta(incoming: unknown, existing: VorsorgeMeta | und
   for (const id of FREE_ONLY_AREAS) {
     if (next.areaUpdatedAt[id]) areaUpdatedAt[id] = next.areaUpdatedAt[id];
   }
-  return { areaUpdatedAt, flowStep: next.flowStep, flowPausedAt: next.flowPausedAt, personLinks: before.personLinks };
+  return { areaUpdatedAt, flowStep: next.flowStep, flowPausedAt: next.flowPausedAt, personLinks: before.personLinks, reviewedAt: next.reviewedAt ?? before.reviewedAt ?? null };
 }
 
 /** Only well-formed free sections from an untrusted body. Sections that were not sent stay as they are. */

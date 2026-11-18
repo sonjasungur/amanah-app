@@ -15,6 +15,12 @@ export const mainNavItems: NavItem[] = [
   { href: "/dashboard/notfallpaket", label: "Notfallpaket" },
 ];
 
+/** Secondary destinations shown under the main ones on desktop (phones reach them via the overview). */
+export const secondaryNavItems: NavItem[] = [
+  { href: "/dashboard/pdf", label: "Dokumente & Ausdrucke" },
+  { href: "/dashboard/vorsorge/abschluss", label: "Zusammenfassung" },
+];
+
 /** The six areas, each opening its first page. */
 export const areaNavItems: NavItem[] = VORSORGE_AREAS.map((area) => ({ href: area.pages[0].path, label: area.title }));
 
@@ -26,7 +32,6 @@ export const moreNavItems: NavItem[] = [
   ...moduleConfigs.filter((m) => !AREA_PATHS.has(m.path)).map((m) => ({ href: m.path, label: m.title })),
   { href: "/dashboard/familiengespraech", label: "Familiengespräch" },
   { href: "/check", label: "Vorsorge-Check" },
-  { href: "/dashboard/pdf", label: "Weitere Ausdrucke" },
 ];
 
 export function isDashboardNavActive(pathname: string, href: string): boolean {

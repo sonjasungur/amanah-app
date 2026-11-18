@@ -30,7 +30,7 @@ export interface DocSection {
   blocks: DocBlock[];
 }
 
-export type DocumentId = "notfallkarte" | "notfallinfo" | "gesamt" | "janazah" | "erbprofil" | "familienbrief" | "schulden" | "vermoegen";
+export type DocumentId = "notfallkarte" | "notfallinfo" | "leitfaden" | "gesamt" | "janazah" | "erbprofil" | "familienbrief" | "schulden" | "vermoegen";
 
 export interface DocModel {
   id: DocumentId;
@@ -289,6 +289,46 @@ export function buildVermoegen(data: AmanahOrdnerData): DocModel {
   });
 }
 
+/**
+ * "What should my family do?" Concrete people, places and next steps from the person's own entries.
+ * General steps only; no individual legal advice.
+ */
+export function buildLeitfaden(data: AmanahOrdnerData): DocModel {
+  const c = data.emergencyCard;
+  const j = data.janazahWishes;
+  const trusted = data.familyMembers.filter((m) => m.roles?.includes("vertrauensperson"));
+  const places = DOCUMENT_CHECKLIST.map((d) => [d.title, documentPlace(data, d.type)] as [string, string | null]);
+  const hasPeople = Boolean(docValue(c.emergencyContact1.name) || trusted.length);
+  return finish({
+    id: "leitfaden",
+    title: "Was soll meine Familie im Notfall tun?",
+    status: "Ein Leitfaden mit meinen Angaben. Keine Rechtsberatung.",
+    editPath: "/dashboard/vorsorge",
+    missing: [!docValue(c.emergencyContact1.name) && "Erster Notfallkontakt", !places.some(([, v]) => v) && "Ablageorte der Dokumente"].filter(Boolean) as string[],
+    warnings: emergencyWarnings(data),
+    sections: [
+      hasPeople
+        ? section("1. Sofort", [
+            { kind: "list", items: [{ title: "Bei Lebensgefahr: Notruf 112." }] },
+            rows([["Zuerst anrufen", contact(c.emergencyContact1)], ["Danach", contact(c.emergencyContact2)], ["Hausarzt", docValue(c.familyDoctor)]]),
+          ])
+        : null,
+      section("2. Wer meine Wünsche kennt", [
+        trusted.length ? { kind: "list", items: trusted.map((m) => ({ title: m.name, detail: [m.relation, m.phone].filter(Boolean).join(" · ") || undefined })) } : null,
+        rows([["Vorgesehen für die Vollmacht", docValue(data.powerOfAttorney.authorizedPerson)], ["Ersatzperson", docValue(data.powerOfAttorney.substitutePerson)]]),
+      ], "Die Nennung hier ist keine Vollmacht."),
+      section("3. Wo meine Unterlagen liegen", [rows(places)]),
+      section("4. Im Todesfall", [
+        rows([["Bestatter", docValue(j.preferredFuneralDirector) ?? docValue(c.preferredFuneralDirector)], ["Moschee / Imam", docValue(j.preferredMosque) ?? docValue(c.mosqueImam)], ["Vertrauensperson", docValue(j.trustedContact)]]),
+        j.islamicBurialDesired !== null ? { kind: "list", items: [{ title: "Meine Wünsche zu Waschung, Gebet und Beisetzung stehen im Dokument „Janazah-Wünsche“." }] } : null,
+      ]),
+      hasPeople || places.some(([, v]) => v)
+        ? section("5. Was dieser Leitfaden nicht ist", [{ kind: "text", text: "Er ersetzt keine Vollmacht, kein Testament und keine Beratung. Fragen zu Erbe und Formalitäten klären Anwalt, Notar oder das Nachlassgericht; religiöse Fragen ein Imam oder Gelehrte." }])
+        : null,
+    ],
+  });
+}
+
 export const FULL_DOC_NOTICE = "Persönliche Übersicht: kein Testament, keine Vollmacht, keine Patientenverfügung";
 
 /** All entries for looking things up, each part labelled with what it is not. */
@@ -332,6 +372,7 @@ export interface DocumentInfo {
 export const DOCUMENTS: readonly DocumentInfo[] = [
   { id: "notfallkarte", title: "Notfallkarte", description: "Eine Seite, dazu eine Karte fürs Portemonnaie.", build: buildNotfallkarte, health: true },
   { id: "notfallinfo", title: "Notfallinformationen", description: "Ausführlich für Helfende: Kontakte, Ärzte, Ablageorte.", build: buildNotfallinfo, health: true },
+  { id: "leitfaden", title: "Leitfaden für die Familie", description: "Was im Notfall zu tun ist: wen anrufen, wo die Unterlagen liegen.", build: buildLeitfaden },
   { id: "gesamt", title: "Vorsorge-Übersicht", description: "Alle Angaben zum Nachschlagen. Kein Testament, keine Vollmacht.", build: buildGesamt, health: true },
   { id: "janazah", title: "Janazah-Wünsche", description: "Waschung, Gebet und Beisetzung für die Familie.", build: buildJanazah },
   { id: "erbprofil", title: "Erbprofil für das Gespräch", description: "Fakten und Fragen für Gelehrte, Anwalt oder Notar. Kein Testament.", build: buildErbprofil },
