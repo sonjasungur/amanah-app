@@ -144,13 +144,17 @@ export function DateInput({
 }) {
   const [text, setText] = useState(() => formatDisplayDate(value));
   const [touched, setTouched] = useState(false);
+  const [editing, setEditing] = useState(false);
   const focused = useRef(false);
   // A value that arrives later (loading the account) shows up unless the person is typing.
   useEffect(() => {
     if (!focused.current) setText(formatDisplayDate(value));
   }, [value]);
   const check = checkBirthDate(text);
-  const problem = touched && check !== "ok" && check !== "empty" ? DATE_CHECK_MESSAGES[check] : null;
+  // A stored value that is no full date (e.g. "03.07.") is shown as a problem at once, not only after
+  // editing: otherwise it would end up incomplete on the emergency card (P2.6).
+  const storedIncomplete = !editing && Boolean(value.trim()) && check !== "ok" && check !== "empty";
+  const problem = (touched || storedIncomplete) && check !== "ok" && check !== "empty" ? DATE_CHECK_MESSAGES[check] : null;
   const errorId = id ? `${id}-error` : undefined;
   return (
     <div>
@@ -165,9 +169,13 @@ export function DateInput({
         aria-describedby={[describedBy, problem ? errorId : undefined].filter(Boolean).join(" ") || undefined}
         className={className}
         data-testid={testId}
-        onFocus={() => (focused.current = true)}
+        onFocus={() => {
+          focused.current = true;
+          setEditing(true);
+        }}
         onBlur={() => {
           focused.current = false;
+          setEditing(false);
           setTouched(true);
         }}
         onChange={(e) => {

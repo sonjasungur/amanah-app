@@ -253,7 +253,17 @@ export interface SadaqaJariyaPlan {
 }
 
 export interface FamilyMessage {
+  /** The letter body. Paragraphs are separated by blank lines. */
   familyLetter: string;
+  /** P2.6 letter layout: salutation ("Meine Lieben,"), closing ("In Liebe"), printed name, place. */
+  letterGreeting: string;
+  letterClosing: string;
+  letterSignature: string;
+  letterPlace: string;
+  /** Print the Basmala above the salutation. Off unless the person chooses it. */
+  letterBismillah: boolean;
+  /** ISO time of the last change to the letter (greeting, body, closing, signature, place). */
+  letterUpdatedAt: string | null;
   whatsappMessage: string;
   conversationGuide: string;
   keyWishesSummary: string;

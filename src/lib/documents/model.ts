@@ -65,22 +65,29 @@ export interface DocSection {
   title: string;
   note?: string;
   icon?: DocIcon;
+  /** Medically critical (allergies, medication, illnesses): the only part framed in red. */
+  critical?: boolean;
   blocks: DocBlock[];
 }
 
 export type DocumentId = "notfallkarte" | "notfallinfo" | "leitfaden" | "gesamt" | "janazah" | "erbprofil" | "familienbrief" | "schulden" | "vermoegen";
 
-/** The credit-card sized fold card; built from the same entries as the A4 sheet. */
+/** One line on the fold card. Weight ≈ printed lines at 9 pt (name and phone are set larger). */
+export interface CardLine {
+  kind: "name" | "text" | "label" | "strong" | "critical-label" | "critical" | "note";
+  text: string;
+}
+
+/**
+ * The credit-card sized fold card; built from the same entries as the A4 sheet. P2.6: no text below
+ * 9 pt and nothing cut off. Lines are budgeted per side instead; what does not fit is left out and
+ * the card points to the A4 sheet.
+ */
 export interface WalletCardData {
-  name: string | null;
-  birthDate: string | null;
-  language: string | null;
-  contacts: { name: string; detail: string | null; phone: string | null }[];
-  doctor: string | null;
-  /** Only with the explicit choice for this printout. */
-  health: DocRow[];
-  documents: DocRow[];
-  mosque: string | null;
+  front: CardLine[];
+  back: CardLine[];
+  /** Entries left out for lack of room (they are on the A4 sheet). */
+  omitted: number;
 }
 
 export interface DocModel {
@@ -109,6 +116,8 @@ export interface DocModel {
   editPath: string;
   /** Emergency card only: the fold card to cut out, on its own page. */
   card?: WalletCardData;
+  /** Family letter only: set as a real letter instead of numbered sections. */
+  letter?: LetterData;
 }
 
 export interface DocOptions {
@@ -142,7 +151,7 @@ function contacts(items: (DocContact | null)[]): DocBlock | null {
   return kept.length ? { kind: "contacts", items: kept } : null;
 }
 
-function section(title: string, blocks: (DocBlock | null)[], extra: { note?: string; icon?: DocIcon } = {}): DocSection | null {
+function section(title: string, blocks: (DocBlock | null)[], extra: { note?: string; icon?: DocIcon; critical?: boolean } = {}): DocSection | null {
   // A section with only a subhead or a notice has nothing of the person's own in it.
   const kept = blocks.filter((b): b is DocBlock => b !== null);
   if (!kept.some((b) => b.kind !== "subhead" && b.kind !== "callout")) return null;
@@ -190,6 +199,22 @@ const textContact = (raw: string | undefined, role: string): DocContact | null =
   return name ? { name, role } : null;
 };
 
+/**
+ * A date as it is printed. ISO dates become TT.MM.JJJJ; anything else (an old free-text entry, or a
+ * date left unfinished such as "03.07.") is printed as entered but reported as incomplete, so it is
+ * never silently cut short on paper.
+ */
+export function dateForDocument(raw: string | null | undefined): { display: string | null; complete: boolean } {
+  const display = docValue(formatDisplayDate(raw));
+  if (!display) return { display: null, complete: true };
+  return { display, complete: /^\d{2}\.\d{2}\.\d{4}$/.test(display) };
+}
+
+function dateWarnings(data: AmanahOrdnerData): string[] {
+  const birth = dateForDocument(data.emergencyCard.birthDate);
+  return birth.display && !birth.complete ? [`Geburtsdatum ist unvollständig („${birth.display}“). Bitte in der Notfallkarte als TT.MM.JJJJ ergänzen.`] : [];
+}
+
 function identityOf(name: string | null, birth: string | null): string | undefined {
   if (!name) return undefined;
   return birth ? `${name}, geboren am ${birth}` : name;
@@ -202,7 +227,7 @@ function documentPlace(data: AmanahOrdnerData, type: (typeof DOCUMENT_CHECKLIST)
 }
 
 function emergencyWarnings(data: AmanahOrdnerData): string[] {
-  const w: string[] = [];
+  const w: string[] = [...dateWarnings(data)];
   const pv = data.documents.find((d) => d.type === "patientenverfuegung")?.status;
   const vv = data.documents.find((d) => d.type === "vorsorgevollmacht")?.status;
   if (data.emergencyCard.hasPatientenverfuegung === true && pv === "fehlt") w.push("Patientenverfügung: Notfallkarte sagt „vorhanden“, Dokumentenliste sagt „fehlt noch“.");
@@ -217,7 +242,7 @@ function healthRows(data: AmanahOrdnerData, options: DocOptions): DocBlock | nul
 }
 
 function healthSection(data: AmanahOrdnerData, options: DocOptions): DocSection | null {
-  return section("Medizinische Hinweise", [healthRows(data, options)], { icon: "health" });
+  return section("Medizinische Hinweise", [healthRows(data, options)], { icon: "health", critical: true });
 }
 
 const EMERGENCY_CALL = "Bei Lebensgefahr sofort den Notruf 112 wählen. Danach die Kontakte unten anrufen.";
@@ -230,30 +255,82 @@ function emergencyDocumentRows(data: AmanahOrdnerData): DocBlock | null {
   ]);
 }
 
+/** Characters per printed line on the card at 9 pt (79 mm text width, Source Sans 3), kept conservative. */
+const CARD_CHARS_PER_LINE = 42;
+const CARD_LINES = { front: 9, back: 12 };
+
+const cardLineWeight = (l: CardLine) => {
+  const factor = l.kind === "name" ? 1.35 : l.kind === "strong" ? 1.15 : 1;
+  const chars = l.kind === "name" ? CARD_CHARS_PER_LINE * 0.8 : l.kind === "strong" ? CARD_CHARS_PER_LINE * 0.9 : CARD_CHARS_PER_LINE;
+  return Math.ceil(l.text.length / chars) * factor;
+};
+
+/** Keeps lines in order of priority until the side is full. Returns kept lines in reading order. */
+function fitCard(lines: { line: CardLine; priority: number }[], budget: number): { kept: CardLine[]; omitted: number } {
+  const order = lines.map((l, i) => ({ ...l, i })).sort((a, b) => a.priority - b.priority);
+  let used = 0;
+  const keep = new Set<number>();
+  for (const l of order) {
+    const w = cardLineWeight(l.line);
+    if (used + w <= budget) {
+      used += w;
+      keep.add(l.i);
+    }
+  }
+  return { kept: lines.filter((_, i) => keep.has(i)).map((l) => l.line), omitted: lines.filter((l, i) => !keep.has(i) && l.line.kind !== "label" && l.line.kind !== "critical-label").length };
+}
+
 function walletCard(data: AmanahOrdnerData, options: DocOptions): WalletCardData {
   const c = data.emergencyCard;
-  const docs = emergencyDocumentRows(data);
+  const birth = dateForDocument(c.birthDate);
   const health = healthRows(data, options);
-  return {
-    name: docValue(c.name),
-    birthDate: docValue(formatDisplayDate(c.birthDate)),
-    language: languageOf(c),
-    contacts: [c.emergencyContact1, c.emergencyContact2]
-      .filter((x) => docValue(x.name) || docValue(x.phone))
-      .map((x) => ({ name: docValue(x.name) ?? "Ohne Namen", detail: docValue(x.relation), phone: docValue(x.phone) })),
-    doctor: docValue(c.familyDoctor),
-    health: health?.kind === "rows" ? health.rows : [],
-    // On the card only whether it exists; where it lies stays on the A4 sheet (room for 8 pt text).
-    documents: docs?.kind === "rows" ? docs.rows.map((r) => ({ label: r.label, value: r.value.split(" · ")[0] })) : [],
-    mosque: docValue(c.mosqueImam) ?? docValue(data.janazahWishes.preferredMosque),
-  };
+  const healthLines = health?.kind === "rows" ? health.rows : [];
+  const docs = emergencyDocumentRows(data);
+  const docLine = docs?.kind === "rows" ? docs.rows.map((r) => `${r.label}: ${r.value.split(" · ")[0]}`).join(" · ") : null;
+  const lang = languageOf(c);
+  const mosque = docValue(c.mosqueImam) ?? docValue(data.janazahWishes.preferredMosque);
+  const asOf = data.lastSaved && !Number.isNaN(Date.parse(data.lastSaved)) ? formatDisplayDate(data.lastSaved.slice(0, 10)) : null;
+
+  const front: { line: CardLine; priority: number }[] = [
+    { line: { kind: "name", text: docValue(c.name) ?? "Name: ____________________" }, priority: 0 },
+    ...(birth.display ? [{ line: { kind: "text" as const, text: `geb. ${birth.display}` }, priority: 1 }] : []),
+    ...(lang ? [{ line: { kind: "text" as const, text: `Spricht: ${lang}` }, priority: 5 }] : []),
+    ...(healthLines.length
+      ? [
+          { line: { kind: "critical-label" as const, text: "Allergien und Medizin" }, priority: 2 },
+          ...healthLines.map((r, i) => ({ line: { kind: "critical" as const, text: `${r.label}: ${r.value}` }, priority: 3 + i * 0.1 })),
+        ]
+      : [{ line: { kind: "note" as const, text: "Medizinische Angaben: siehe Notfallblatt (A4)" }, priority: 4 }]),
+  ];
+  const contactLines = [c.emergencyContact1, c.emergencyContact2]
+    .filter((x) => docValue(x.name) || docValue(x.phone))
+    .flatMap((x, i) => [
+      { line: { kind: "text" as const, text: [docValue(x.name) ?? "Ohne Namen", docValue(x.relation) && `(${x.relation.trim()})`].filter(Boolean).join(" ") }, priority: 1 + i },
+      ...(docValue(x.phone) ? [{ line: { kind: "strong" as const, text: x.phone.trim() }, priority: 1 + i }] : []),
+    ]);
+  const back: { line: CardLine; priority: number }[] = [
+    { line: { kind: "label", text: "Im Notfall bitte anrufen" }, priority: 0 },
+    ...(contactLines.length ? contactLines : [{ line: { kind: "text" as const, text: "____________________ · ____________" }, priority: 1 }]),
+    ...(docValue(c.familyDoctor) ? [{ line: { kind: "text" as const, text: `Hausarzt: ${c.familyDoctor.trim()}` }, priority: 4 }] : []),
+    ...(docLine ? [{ line: { kind: "text" as const, text: docLine }, priority: 5 }] : []),
+    ...(mosque ? [{ line: { kind: "text" as const, text: `Im Todesfall: ${mosque}` }, priority: 6 }] : []),
+    { line: { kind: "note", text: [asOf && `Stand ${asOf}`, "Kein rechtliches Dokument · Notruf 112"].filter(Boolean).join(" · ") }, priority: 0.5 },
+  ];
+  const f = fitCard(front, CARD_LINES.front);
+  const b = fitCard(back, CARD_LINES.back);
+  const omitted = f.omitted + b.omitted;
+  if (omitted > 0) {
+    // Say so, and make room for it by dropping the lowest line if needed.
+    b.kept.splice(b.kept.length - 1, 0, { kind: "note", text: "Weitere Angaben auf dem Notfallblatt (A4)" });
+  }
+  return { front: f.kept, back: b.kept, omitted };
 }
 
 /** One A4 sheet for helpers and, on its own page, a fold card for the wallet. */
 export function buildNotfallkarte(data: AmanahOrdnerData, options: DocOptions = {}): DocModel {
   const c = data.emergencyCard;
   const name = docValue(c.name);
-  const birth = docValue(formatDisplayDate(c.birthDate));
+  const birth = dateForDocument(c.birthDate).display;
   const missing = [
     !name && "Name",
     !docValue(c.emergencyContact1.name) && "Erster Notfallkontakt",
@@ -298,7 +375,7 @@ function peopleContacts(data: AmanahOrdnerData, only?: FamilyRole[]): DocContact
 export function buildNotfallinfo(data: AmanahOrdnerData, options: DocOptions = {}): DocModel {
   const c = data.emergencyCard;
   const name = docValue(c.name);
-  const birth = docValue(formatDisplayDate(c.birthDate));
+  const birth = dateForDocument(c.birthDate).display;
   const places = DOCUMENT_CHECKLIST.map((d) => [d.title, documentPlace(data, d.type)] as [string, string | null]);
   // People already named as emergency contacts above are not repeated.
   const named = [docValue(c.emergencyContact1.name), docValue(c.emergencyContact2.name)];
@@ -395,10 +472,18 @@ export function buildJanazah(data: AmanahOrdnerData): DocModel {
     title: "Janazah-Wünsche",
     status: "Persönliche Wünsche für die Familie. Keine rechtliche Verfügung.",
     audience: "Für meine Familie und die Menschen, die die Janazah begleiten",
-    identity: identityOf(docValue(j.fullName) ?? docValue(data.emergencyCard.name), docValue(formatDisplayDate(j.birthDate)) ?? docValue(j.birthDate)),
+    identity: identityOf(docValue(j.fullName) ?? docValue(data.emergencyCard.name), dateForDocument(j.birthDate).display ?? dateForDocument(data.emergencyCard.birthDate).display),
     editPath: "/dashboard/janazah",
     missing: [j.islamicBurialDesired === null && "Ob eine islamische Bestattung gewünscht ist", !docValue(j.preferredFuneralDirector) && !docValue(j.preferredMosque) && "Bestatter oder Moschee"].filter(Boolean) as string[],
-    warnings: data.emergencyCard.hasJanazahWishes === false && j.islamicBurialDesired !== null ? ["Notfallkarte sagt „keine Janazah-Wünsche“, es sind aber Wünsche eingetragen."] : [],
+    warnings: [
+      ...(data.emergencyCard.hasJanazahWishes === false && j.islamicBurialDesired !== null ? ["Notfallkarte sagt „keine Janazah-Wünsche“, es sind aber Wünsche eingetragen."] : []),
+      ...(() => {
+        // Same person, two dates: say so instead of printing either silently.
+        const a = dateForDocument(data.emergencyCard.birthDate).display;
+        const b = dateForDocument(j.birthDate).display;
+        return a && b && a !== b ? [`Geburtsdatum unterscheidet sich: Notfallkarte ${a}, Janazah-Wünsche ${b}.`] : [];
+      })(),
+    ],
     sections: janazahOwnSections(data),
     derived: [janazahSteps(data), janazahOpen(data)],
   });
@@ -435,20 +520,61 @@ export function buildErbprofil(data: AmanahOrdnerData): DocModel {
   });
 }
 
+/** The letter as it is set on paper (P2.6): salutation, paragraphs, closing, signature. */
+export interface LetterData {
+  /** The writer as in the folder (emergency card or profile); the signature is how they sign. */
+  sender: string | null;
+  greeting: string | null;
+  paragraphs: string[];
+  closing: string | null;
+  signature: string | null;
+  place: string | null;
+  bismillah: boolean;
+  summary: string | null;
+}
+
+/** Below this the letter is a start, not yet a letter the family can be given. */
+export const LETTER_MIN_CHARS = 40;
+
+export function letterParagraphs(body: string): string[] {
+  return body
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 export function buildFamilienbrief(data: AmanahOrdnerData): DocModel {
   const f = data.familyMessage;
+  const body = docValue(f.familyLetter);
+  const letter: LetterData = {
+    sender: docValue(data.emergencyCard.name) ?? docValue(data.userProfile?.name),
+    greeting: docValue(f.letterGreeting),
+    paragraphs: body ? letterParagraphs(body) : [],
+    closing: docValue(f.letterClosing),
+    signature: docValue(f.letterSignature),
+    place: docValue(f.letterPlace),
+    bismillah: f.letterBismillah === true,
+    summary: docValue(f.keyWishesSummary),
+  };
+  const missing = [
+    !body && "Der Brieftext",
+    body && body.length < LETTER_MIN_CHARS && "Der Brieftext ist noch sehr kurz",
+    body && !letter.greeting && "Eine Anrede",
+    body && !letter.closing && "Schlussworte",
+  ].filter(Boolean) as string[];
   return finish({
     id: "familienbrief",
     title: "Brief an meine Familie",
     status: "Persönliche Worte. Kein rechtliches Dokument.",
     audience: "Für meine Familie",
+    identity: letter.signature ?? docValue(data.emergencyCard.name) ?? undefined,
     editPath: "/dashboard/familie",
-    missing: docValue(f.familyLetter) ? [] : ["Der Brief selbst"],
+    missing,
     warnings: [],
-    sections: [
-      section("Brief", [docValue(f.familyLetter) ? { kind: "text", text: f.familyLetter.trim() } : null], { icon: "message" }),
-      section("Das Wichtigste in Kürze", [docValue(f.keyWishesSummary) ? { kind: "text", text: f.keyWishesSummary.trim() } : null], { icon: "info" }),
-    ],
+    letter,
+    // The letter itself is the content; the summary alone is no letter.
+    sections: [section("Brief", [body ? { kind: "text", text: body } : null], { icon: "message" })],
   });
 }
 
@@ -587,7 +713,7 @@ export function buildGesamt(data: AmanahOrdnerData, options: DocOptions = {}): D
   const v = data.powerOfAttorney;
   const care = data.careDirective;
   const name = docValue(c.name) ?? docValue(data.userProfile?.name);
-  const birth = docValue(formatDisplayDate(c.birthDate));
+  const birth = dateForDocument(c.birthDate).display;
   const parts = [buildNotfallinfo(data, options), buildJanazah(data), buildErbprofil(data), buildSchulden(data), buildVermoegen(data), buildFamilienbrief(data)];
   const places = DOCUMENT_CHECKLIST.map((d) => [d.title, documentPlace(data, d.type)] as [string, string | null]);
   const emergencyPeople = peopleContacts(data, ["notfallkontakt", "vertrauensperson"]).filter((p) => p.name !== docValue(c.emergencyContact1.name) && p.name !== docValue(c.emergencyContact2.name));

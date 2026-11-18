@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, ClipboardList, FileText, FolderOpen, Printer } from "lucide-react";
@@ -127,13 +127,14 @@ const CARD_TEST_ID: Record<DocumentId, string> = {
   vermoegen: "export-vermoegen",
 };
 
-function StatusChip({ ready, missing }: { ready: boolean; missing: number }) {
-  const label = !ready ? "Noch keine Angaben" : missing > 0 ? "Unvollständig" : "Bereit";
+/** "Bereit" only when there is content, nothing required is missing and nothing contradicts. */
+function StatusChip({ ready, missing, warnings = 0 }: { ready: boolean; missing: number; warnings?: number }) {
+  const label = !ready ? "Noch keine Angaben" : warnings > 0 ? "Bitte prüfen" : missing > 0 ? "Unvollständig" : "Bereit";
   return (
     <span
       className={cn(
         "text-xs font-semibold rounded-full px-2.5 py-1 shrink-0",
-        !ready ? "bg-border/60 text-muted" : missing > 0 ? "bg-warning/15 text-warning" : "bg-emerald/15 text-primary-dark",
+        !ready ? "bg-border/60 text-muted" : missing > 0 || warnings > 0 ? "bg-warning/15 text-warning" : "bg-emerald/15 text-primary-dark",
       )}
     >
       {label}
@@ -148,7 +149,17 @@ function DocumentsPage() {
   // "?dokument=janazah" opens that preview, e.g. from the Janazah page.
   const requested = useSearchParams()?.get("dokument");
   const fromLink = requested && requested !== "vermoegen" && DOCUMENTS.some((d) => d.id === requested) ? (requested as DocumentId) : null;
-  const [chosen, setSelected] = useState<DocumentId | null>(null);
+  const [chosen, setChosen] = useState<DocumentId | null>(null);
+  const previewRef = useRef<HTMLElement>(null);
+  /** Shows the chosen document and brings its preview into view (it sits below the list). */
+  const setSelected = (id: DocumentId) => {
+    setChosen(id);
+    window.history.replaceState(null, "", `/dashboard/pdf?dokument=${id}`);
+    requestAnimationFrame(() => {
+      previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      previewRef.current?.focus({ preventScroll: true });
+    });
+  };
   const selected = chosen ?? fromLink ?? "notfallkarte";
 
   return (
@@ -184,7 +195,7 @@ function DocumentsPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle className="text-base text-foreground mb-0">{doc.id === "gesamt" ? "Gesamtübersicht (Vorsorge-Übersicht)" : doc.title}</CardTitle>
-                  <StatusChip ready={model.hasContent} missing={model.missing.length} />
+                  <StatusChip ready={model.hasContent} missing={model.missing.length} warnings={model.warnings.length} />
                 </div>
                 {(() => {
                   const p = printouts.find((x) => x.id === doc.id)!;
@@ -222,7 +233,7 @@ function DocumentsPage() {
         </div>
       </div>
 
-      <section aria-label="Vorschau und Druck" className="space-y-3">
+      <section aria-label="Vorschau und Druck" className="space-y-3 scroll-mt-24 focus:outline-none" ref={previewRef} tabIndex={-1} data-testid="pdf-preview-section">
         <h2 className="no-print text-lg font-semibold text-foreground">{DOCUMENTS.find((d) => d.id === selected)?.title}</h2>
         {selected === "gesamt" ? (
           // The complete overview keeps its existing Plus hint (plan matrix: pdf_exports).

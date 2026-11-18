@@ -88,9 +88,10 @@ describe("P2.5-B wallet card", () => {
     const d = demo();
     d.documents = [{ id: "1", type: "patientenverfuegung", title: "Patientenverfügung", location: "Schrank links, Ordner Vorsorge", status: "vorhanden" }];
     const card = buildNotfallkarte(d).card!;
-    expect(card.documents).toEqual([{ label: "Patientenverfügung", value: "Vorhanden" }, { label: "Vorsorgevollmacht", value: "Vorhanden" }]);
-    expect(card.health).toEqual([]);
-    expect(buildNotfallkarte(d, { includeHealth: true }).card!.health.map((r) => r.label)).toContain("Medikamente");
+    const text = (c: typeof card) => JSON.stringify([...c.front, ...c.back]);
+    expect(text(card)).toContain("Patientenverfügung: Vorhanden · Vorsorgevollmacht: Vorhanden");
+    expect(text(card)).not.toContain("Medikamente");
+    expect(text(buildNotfallkarte(d, { includeHealth: true }).card!)).toContain("Medikamente");
     render(<WalletCard model={buildNotfallkarte(d)} />);
     const view = screen.getByTestId("wallet-card");
     expect(view.querySelectorAll(".doc-card")).toHaveLength(2);

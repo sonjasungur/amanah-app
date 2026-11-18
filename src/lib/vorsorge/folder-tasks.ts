@@ -35,6 +35,8 @@ export const DOCUMENT_AREAS: Record<DocumentId, VorsorgeAreaId[]> = {
 
 /** Latest change in the areas a printout draws from; null when nothing was recorded. */
 export function documentUpdatedAt(data: AmanahOrdnerData, id: DocumentId): string | null {
+  // The letter keeps its own date (P2.6); it belongs to no Vorsorge area.
+  if (id === "familienbrief") return data.familyMessage?.letterUpdatedAt ?? null;
   const times = DOCUMENT_AREAS[id].map((a) => data.vorsorgeMeta?.areaUpdatedAt?.[a]).filter((t): t is string => Boolean(t) && !Number.isNaN(Date.parse(t!)));
   if (!times.length) return null;
   return times.reduce((a, b) => (Date.parse(a) >= Date.parse(b) ? a : b));

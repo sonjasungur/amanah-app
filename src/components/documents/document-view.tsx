@@ -21,15 +21,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { DocumentLogoMark } from "@/components/layout/logo";
-import type { DocBlock, DocIcon, DocModel, WalletCardData } from "@/lib/documents/model";
+import type { CardLine, DocBlock, DocIcon, DocModel } from "@/lib/documents/model";
 
 /**
- * P2.5 design directions, chosen per printout by attribute only (same markup):
- * - "klinisch": register strip with numbered markers, sans serif, emergency-first (direction A)
- * - "editorial": serif headings, cover page with contents, tinted cards (direction B)
- * - "praktisch": checklists with boxes, heavy section bars, write-in friendly (direction C)
+ * One design system with two modes (P2.6), chosen per document by attribute (same markup):
+ * - "klinisch": functional, sans serif, quick to scan (emergency documents)
+ * - "editorial": calm, serif headings and text (Janazah wishes, family letter, overview)
  */
-export type DocVariant = "klinisch" | "editorial" | "praktisch";
+export type DocVariant = "klinisch" | "editorial";
 export const DEFAULT_DOC_VARIANT: DocVariant = "klinisch";
 
 /**
@@ -150,6 +149,63 @@ const fmt = (d: Date) => d.toLocaleDateString("de-DE", { day: "2-digit", month: 
  * Page numbers come from the print style (@page); the table head repeats the person's name and the
  * legal notice on every printed page. No browser URL or form field ever appears.
  */
+const longDate = (d: Date) => d.toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
+
+/**
+ * The family letter, set as a letter (P2.6, DIN 5008 grid): small letterhead, sender, place and date,
+ * optional Basmala, salutation, paragraphs, closing, room for the signature, printed name. No numbered
+ * sections, no form look.
+ */
+function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; createdAt: Date; dataAsOf: string | null; testId: string }) {
+  const l = model.letter!;
+  const asOf = dataAsOf && !Number.isNaN(Date.parse(dataAsOf)) ? fmt(new Date(dataAsOf)) : null;
+  return (
+    <article className="amanah-doc amanah-letter" data-doc-variant="editorial" data-doc-id={model.id} data-testid={testId} lang="de">
+      <header className="letter-head">
+        <div className="doc-brand">
+          <DocumentLogoMark size={22} />
+          <span>Amanah</span>
+          <span className="doc-audience">{model.title}</span>
+        </div>
+        {l.sender && <p className="letter-sender">{l.sender}</p>}
+        <p className="letter-date">{[l.place, longDate(createdAt)].filter(Boolean).join(", ")}</p>
+        <h1 className="sr-only">{model.title}</h1>
+      </header>
+      {l.bismillah && (
+        <p className="letter-basmala" lang="ar" dir="rtl">
+          بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+        </p>
+      )}
+      {l.greeting && <p className="letter-greeting">{l.greeting}</p>}
+      <div className="letter-body">
+        {l.paragraphs.map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+      <div className="letter-sign">
+        {l.closing && <p className="letter-closing">{l.closing}</p>}
+        <div className="letter-sign-space" aria-hidden />
+        {l.signature && <p className="letter-name">{l.signature}</p>}
+      </div>
+      {l.summary && (
+        <section className="letter-summary">
+          <h2>Das Wichtigste in Kürze</h2>
+          <p>{l.summary}</p>
+        </section>
+      )}
+      {model.missing.length > 0 && (
+        <p className="doc-callout doc-missing letter-missing" data-testid="doc-missing">
+          Noch nicht ausgefüllt: {model.missing.join(" · ")}
+        </p>
+      )}
+      <footer className="doc-foot letter-foot">
+        <span data-testid="doc-status">{model.status}</span> Erstellt am {fmt(createdAt)}
+        {asOf ? ` · Stand der Angaben: ${asOf}` : ""}.
+      </footer>
+    </article>
+  );
+}
+
 export function DocumentView({
   model,
   createdAt,
@@ -164,6 +220,7 @@ export function DocumentView({
   variant?: DocVariant;
   testId?: string;
 }) {
+  if (model.letter && model.hasContent) return <LetterView model={model} createdAt={createdAt} dataAsOf={dataAsOf} testId={testId} />;
   const look = variant ?? variantFor(model.id);
   const asOf = dataAsOf && !Number.isNaN(Date.parse(dataAsOf)) ? fmt(new Date(dataAsOf)) : null;
   const running = [model.identity && model.title, model.identity].filter(Boolean).join(" · ");
@@ -171,37 +228,40 @@ export function DocumentView({
   return (
     <article className="amanah-doc" data-doc-variant={look} data-doc-id={model.id} data-testid={testId} lang="de">
       <table className="doc-frame" role="presentation">
-        {(model.pageNotice || running) && (
-          <thead>
-            <tr>
-              <td className="doc-running">
-                {running && <span className="doc-running-id">{running}</span>}
-                {model.pageNotice && (
-                  <span className="doc-page-notice" data-testid="doc-page-notice">
-                    {model.pageNotice}
-                  </span>
-                )}
-              </td>
-            </tr>
-          </thead>
-        )}
+        {/* Repeats on every printed page: the top margin with who and what (Chrome repeats thead/tfoot). */}
+        <thead>
+          <tr>
+            <td className="doc-running">
+              {running && <span className="doc-running-id">{running}</span>}
+              {model.pageNotice && (
+                <span className="doc-page-notice" data-testid="doc-page-notice">
+                  {model.pageNotice}
+                </span>
+              )}
+            </td>
+          </tr>
+        </thead>
+        <tfoot aria-hidden>
+          <tr>
+            <td className="doc-page-spacer" />
+          </tr>
+        </tfoot>
         <tbody>
           <tr>
             <td>
               <header className={showCover ? "doc-head doc-cover" : "doc-head"}>
                 <div className="doc-brand">
-                  <DocumentLogoMark size={28} />
+                  <DocumentLogoMark size={26} />
                   <span>Amanah</span>
                   {model.audience && <span className="doc-audience">{model.audience}</span>}
                 </div>
                 <h1 className="doc-title">{model.title}</h1>
                 {model.identity && <p className="doc-identity">{model.identity}</p>}
+                <p className="doc-meta">
+                  Stand der Angaben: {asOf ?? "nicht gespeichert"} · Erstellt am {fmt(createdAt)} · Spätere Änderungen sind in diesem Ausdruck nicht enthalten.
+                </p>
                 <p className="doc-status" data-testid="doc-status">
                   {model.status}
-                </p>
-                <p className="doc-meta">
-                  Erstellt am {fmt(createdAt)}
-                  {asOf ? ` · Stand der Angaben: ${asOf}` : ""} · Spätere Änderungen sind in diesem Ausdruck nicht enthalten.
                 </p>
                 {showCover && (
                   <nav className="doc-toc" aria-label="Inhalt">
@@ -240,7 +300,7 @@ export function DocumentView({
               {model.sections.map((s, i) => {
                 const Icon = s.icon ? ICONS[s.icon] : null;
                 return (
-                  <section key={s.title} className="doc-section" data-section-icon={s.icon}>
+                  <section key={s.title} className="doc-section" data-section-icon={s.icon} data-critical={s.critical ? "" : undefined}>
                     <h2>
                       <span className="doc-num" aria-hidden>
                         {i + 1}
@@ -277,50 +337,33 @@ export function DocumentView({
   );
 }
 
-function CardFace({ card }: { card: WalletCardData }) {
+function CardSide({ lines, className, band }: { lines: CardLine[]; className: string; band?: boolean }) {
   return (
-    <>
-      <div className="doc-card-face doc-card-front">
+    <div className={`doc-card-face ${className}`}>
+      {band && (
         <div className="doc-card-band">
-          <span>NOTFALLKARTE</span>
-          <span className="doc-card-band-sub">Im Notfall · In case of emergency</span>
+          <span>NOTFALL · Bitte lesen</span>
         </div>
-        <div className="doc-card-body">
-          <span className="doc-card-name">{card.name ?? "Name: ____________________"}</span>
-          {(card.birthDate || card.language) && <span>{[card.birthDate && `geb. ${card.birthDate}`, card.language && `spricht ${card.language}`].filter(Boolean).join(" · ")}</span>}
-          <span className="doc-card-label">Bitte anrufen</span>
-          {card.contacts.length ? (
-            card.contacts.map((c, i) => (
-              <span key={i} className={i === 0 ? "doc-card-contact doc-card-first" : "doc-card-contact"}>
-                {c.name}
-                {c.detail ? ` (${c.detail})` : ""}
-                {c.phone ? ` · ${c.phone}` : ""}
-              </span>
-            ))
-          ) : (
-            <span>____________________ · ____________</span>
-          )}
-        </div>
+      )}
+      <div className="doc-card-body">
+        {lines.map((l, i) => (
+          <span key={i} className={`card-${l.kind}`}>
+            {l.text}
+          </span>
+        ))}
       </div>
-      <div className="doc-card-face doc-card-back">
-        <div className="doc-card-body">
-          {card.doctor && <span>Hausarzt: {card.doctor}</span>}
-          {card.health.length ? card.health.map((r) => <span key={r.label}>{r.label}: {r.value}</span>) : <span>Medizinische Angaben: siehe Notfallblatt (A4)</span>}
-          {card.documents.length > 0 && <span>{card.documents.map((r) => `${r.label}: ${r.value}`).join(" · ")}</span>}
-          {card.mosque && <span>Im Todesfall: {card.mosque}</span>}
-          <small>Kein rechtliches Dokument · Notruf 112</small>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
 
 /**
  * The fold card on its own sheet: front and back side by side (85.6 × 54 mm each), cut along the
- * marks, fold in the middle. Two copies: one for the wallet, one for a trusted person.
+ * marks, fold in the middle. Two copies: one for the wallet, one for a trusted person. No text below
+ * 9 pt; what does not fit stays on the A4 sheet (see walletCard in model.ts).
  */
 export function WalletCard({ model, variant }: { model: DocModel; variant?: DocVariant }) {
   if (!model.card) return null;
+  const card = model.card;
   return (
     <section className="doc-wallet" data-doc-variant={variant ?? variantFor(model.id)} data-testid="wallet-card" lang="de" aria-label="Notfallkarte zum Ausschneiden">
       <h2 className="doc-wallet-title">
@@ -328,7 +371,7 @@ export function WalletCard({ model, variant }: { model: DocModel; variant?: DocV
       </h2>
       <p className="doc-wallet-hint">
         An den Ecken ausschneiden, in der Mitte falten und ins Portemonnaie stecken. Die zweite Karte ist für eine Vertrauensperson.
-        Bei Änderungen bitte neu drucken.
+        Mit „Tatsächliche Größe“ drucken. Bei Änderungen bitte neu drucken.
       </p>
       {[0, 1].map((n) => (
         <div key={n} className="doc-card" data-testid={n === 0 ? "wallet-card-face" : undefined}>
@@ -336,7 +379,8 @@ export function WalletCard({ model, variant }: { model: DocModel; variant?: DocV
           <span className="doc-cut doc-cut-tr" aria-hidden />
           <span className="doc-cut doc-cut-bl" aria-hidden />
           <span className="doc-cut doc-cut-br" aria-hidden />
-          <CardFace card={model.card!} />
+          <CardSide lines={card.front} className="doc-card-front" band />
+          <CardSide lines={card.back} className="doc-card-back" />
         </div>
       ))}
     </section>

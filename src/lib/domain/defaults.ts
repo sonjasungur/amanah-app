@@ -173,6 +173,12 @@ export const defaultAmanahData: AmanahOrdnerData = {
   },
   familyMessage: {
     familyLetter: "",
+    letterGreeting: "",
+    letterClosing: "",
+    letterSignature: "",
+    letterPlace: "",
+    letterBismillah: false,
+    letterUpdatedAt: null,
     whatsappMessage: "",
     conversationGuide: "",
     keyWishesSummary: "",

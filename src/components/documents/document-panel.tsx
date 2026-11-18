@@ -90,6 +90,24 @@ export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }
             <p className="text-xs text-muted mt-1">
               „Als PDF speichern“ öffnet den Druckdialog: dort „Als PDF speichern“ als Ziel wählen. Es wird nichts automatisch übertragen.
             </p>
+            {(model.missing.length > 0 || model.warnings.length > 0) && (
+              <div className="mt-3 rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm" data-testid="doc-gaps">
+                {model.warnings.length > 0 && (
+                  <>
+                    <p className="font-semibold">Bitte prüfen</p>
+                    <ul className="list-disc pl-5">
+                      {model.warnings.map((w) => (
+                        <li key={w}>{w}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {model.missing.length > 0 && <p className={model.warnings.length ? "mt-2" : ""}>Noch offen: {model.missing.join(" · ")}</p>}
+                <Link href={model.editPath} className="text-primary font-semibold underline inline-flex items-center min-h-[44px]" data-testid="doc-gaps-link">
+                  Angaben ergänzen
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border p-4 text-sm" data-testid="doc-empty">

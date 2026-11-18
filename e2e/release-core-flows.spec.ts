@@ -100,7 +100,7 @@ test("an account from registration to deletion", async ({ page, browser, baseURL
   await test.step("family letter: complete, without unreviewed statements", async () => {
     await page.goto("/dashboard/vollmacht");
     await page.goto("/dashboard/familie");
-    await page.getByRole("button", { name: "Template-Brief erstellen" }).click();
+    await page.getByRole("button", { name: "Vorlage einfügen" }).click();
     await expect.poll(async () => (await folder(page)).familyMessage.familyLetter).toContain("Liebe Familie");
     const letter = (await folder(page)).familyMessage.familyLetter as string;
     expect(letter).toContain("Mir ist wichtig: [bitte in eigenen Worten ergänzen]");
