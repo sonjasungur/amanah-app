@@ -204,3 +204,28 @@ test("P1 without Plus: pause point and emergency card survive a second device; n
   await expect(second.getByLabel("Notfallkontakt 1 — Name")).toHaveValue("Yusuf Beispiel");
   await context.close();
 });
+
+test("family conversation (Variante 1): recording a talk is free and kept; notes and people stay Plus", async ({ page }) => {
+  await registerFreeAccount(page);
+  await page.goto("/dashboard/familiengespraech");
+  await expect(page.getByTestId("talk-add")).toBeVisible();
+  await expect(page.getByTestId("plus-area-notice")).toHaveCount(0);
+  // Preparation questions with notes are Plus: the page shows the Plus box instead of the questions.
+  await expect(page.getByTestId("plus-gate-family_people").first()).toBeVisible();
+  await page.getByTestId("talk-add").click();
+  const card = page.getByTestId("talk-card").first();
+  await card.getByTestId("talk-others").fill("Yusuf, Mariam");
+  await card.getByTestId("talk-explained").selectOption("teilweise");
+  await card.getByTestId("talk-open").fill("Free-Test: Grabstelle klären");
+  await page.getByTestId("save-bar-save").click();
+  await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "gespeichert");
+  const folder = (await (await page.context().request.get("/api/amanah")).json()) as { data: AmanahLike };
+  expect(folder.data.familyConversation.talks[0].openPoints).toBe("Free-Test: Grabstelle klären");
+  await page.reload();
+  await expect(page.getByTestId("talk-open")).toHaveValue("Free-Test: Grabstelle klären");
+  // People management stays Plus.
+  await page.goto("/dashboard/personen");
+  await expect(page.getByTestId("plus-area-notice")).toHaveAttribute("data-feature", "family_people");
+});
+
+type AmanahLike = { familyConversation: { talks: { openPoints: string }[] } };

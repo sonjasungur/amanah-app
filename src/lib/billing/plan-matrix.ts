@@ -78,6 +78,15 @@ export const PLAN_FEATURES: PlanFeature[] = [
     note: "Kostenlos mit Wiederherstellung (Owner 02.11.2026); bis zur Datenschutzfreigabe ausgeschaltet. Der Verlauf anderer Bereiche kann später zu Plus gehören; Einsicht, Export und Löschen bleiben immer frei.",
   },
   {
+    id: "family_conversation_record",
+    title: "Familiengespräch festhalten",
+    tier: "free",
+    routes: ["/dashboard/familiengespraech"],
+    enforcement: "server",
+    availableBeforeLaunch: true,
+    note: "Owner-Entscheidung 18.11.2026 (Variante 1): Gespräche festhalten (Datum, Teilnehmende als Freitext, Themen, Aufgaben, Unterlagen, Ort erklärt, Offenes) ist kostenlos und wird auch ohne Plus im Konto gespeichert. Vorbereitungsfragen mit Notizen und die Auswahl aus „Familie & Kontakte“ bleiben Plus (family_people).",
+  },
+  {
     id: "persistent_folder",
     title: "Dauerhaft nutzbarer persönlicher Vorsorgeordner (verschlüsselt im Konto)",
     tier: "plus",
@@ -90,7 +99,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     id: "family_people",
     title: "Familien- und Vertrauenspersonenverwaltung",
     tier: "plus",
-    routes: ["/dashboard/personen", "/dashboard/familie", "/dashboard/familiengespraech"],
+    routes: ["/dashboard/personen", "/dashboard/familie"],
     enforcement: "client_hint",
     availableBeforeLaunch: true,
   },
@@ -138,6 +147,12 @@ export const PLAN_FEATURES: PlanFeature[] = [
     note: "Druck entsteht im Browser; der Konto-Export (Art. 15/20 DSGVO) bleibt immer frei.",
   },
 ];
+
+/**
+ * Sections of which only some fields are free (owner decision 18.11.2026, Variante 1). Without Plus
+ * the server stores these fields and keeps the rest as stored (folder-access.ts).
+ */
+export const PARTLY_FREE_SECTIONS = { familyConversation: ["talks"] } as const;
 
 /** Sections every account may save on the server, also without Plus and with enforcement on. */
 export const FREE_ACCOUNT_SECTIONS = ["assets", "emergencyCard", "checkProgress", "knowledgeBookmarks"] as const;

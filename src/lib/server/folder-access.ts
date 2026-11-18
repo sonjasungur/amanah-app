@@ -4,7 +4,7 @@ import { FREE_ACCOUNT_SECTIONS, planFeature } from "@/lib/billing/plan-matrix";
 import { resolvePlusAccess } from "@/lib/billing/plus-access";
 import { normalizeCheckProgress } from "@/lib/check/progress";
 import { defaultAmanahData } from "@/lib/domain/defaults";
-import { normalizeData } from "@/lib/domain/migration";
+import { normalizeData, normalizeFamilyConversation } from "@/lib/domain/migration";
 import type { AmanahOrdnerData, AssetEntry, VorsorgeAreaId, VorsorgeMeta } from "@/lib/domain/types";
 import { VORSORGE_AREAS } from "@/lib/vorsorge/areas";
 import { normalizeVorsorgeMeta } from "@/lib/vorsorge/meta";
@@ -78,6 +78,18 @@ export function freeVorsorgeMeta(incoming: unknown, existing: VorsorgeMeta | und
   return { areaUpdatedAt, flowStep: next.flowStep, flowPausedAt: next.flowPausedAt, personLinks: before.personLinks, reviewedAt: next.reviewedAt ?? before.reviewedAt ?? null };
 }
 
+/**
+ * Family conversation without Plus (Variante 1): the recorded talks are free; the preparation notes
+ * (topics) stay as stored, and a talk may only point to people the folder already holds, because
+ * managing people is Plus.
+ */
+export function freeFamilyConversation(incoming: unknown, existing: AmanahOrdnerData | null): AmanahOrdnerData["familyConversation"] {
+  const next = normalizeFamilyConversation(incoming);
+  const before = normalizeFamilyConversation(existing?.familyConversation);
+  const known = new Set((existing?.familyMembers ?? []).map((m) => m.id));
+  return { topics: before.topics, talks: next.talks.map((t) => ({ ...t, personIds: t.personIds.filter((id) => known.has(id)) })) };
+}
+
 /** Only well-formed free sections from an untrusted body. Sections that were not sent stay as they are. */
 export function freeSectionsOf(incoming: Partial<AmanahOrdnerData>, existing: AmanahOrdnerData | null = null): Partial<AmanahOrdnerData> {
   const free: Partial<AmanahOrdnerData> = {};
@@ -85,6 +97,7 @@ export function freeSectionsOf(incoming: Partial<AmanahOrdnerData>, existing: Am
   if ("assets" in incoming) free.assets = sanitizeAssets(incoming.assets) as AssetEntry[];
   if ("emergencyCard" in incoming) free.emergencyCard = likeDefaults(incoming.emergencyCard, defaultAmanahData.emergencyCard);
   if ("checkProgress" in incoming) free.checkProgress = normalizeCheckProgress(incoming.checkProgress);
+  if ("familyConversation" in incoming) free.familyConversation = freeFamilyConversation(incoming.familyConversation, existing);
   if ("knowledgeBookmarks" in incoming) {
     free.knowledgeBookmarks = normalizeData({ knowledgeBookmarks: incoming.knowledgeBookmarks }).knowledgeBookmarks;
   }
@@ -95,12 +108,14 @@ export function freeSectionsOf(incoming: Partial<AmanahOrdnerData>, existing: Am
 export function notStoredSections(existing: AmanahOrdnerData | null, incoming: Partial<AmanahOrdnerData>): string[] {
   const before = (existing ?? normalizeData({})) as unknown as Record<string, unknown>;
   const after = normalizeData(incoming) as unknown as Record<string, unknown>;
-  return Object.keys(incoming).filter(
-    (key) =>
-      !NOT_CONTENT.has(key) &&
-      !(FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key) &&
-      JSON.stringify(before[key]) !== JSON.stringify(after[key]),
-  );
+  return Object.keys(incoming).filter((key) => {
+    if (NOT_CONTENT.has(key) || (FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key)) return false;
+    // Partly free: "not stored" only if the stored result differs from what was sent.
+    if (key === "familyConversation") {
+      return JSON.stringify(after[key]) !== JSON.stringify(freeFamilyConversation(incoming.familyConversation, existing));
+    }
+    return JSON.stringify(before[key]) !== JSON.stringify(after[key]);
+  });
 }
 
 export function jsonBytes(value: unknown): number {

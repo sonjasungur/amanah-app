@@ -57,8 +57,17 @@ export function keepLocalOnlySections(remote: AmanahOrdnerData, local: AmanahOrd
   const isDefault = (key: string, value: unknown) => JSON.stringify(value) === JSON.stringify(defaults[key]);
   for (const [key, value] of Object.entries(local)) {
     if (key === "lastSaved" || isDefault(key, value)) continue;
+    if (key === "familyConversation") continue; // partly free, handled below
     if (!(FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key) || isDefault(key, account[key])) merged[key] = value;
   }
+  // Partly free (Variante 1): the talks follow the free rule (account wins unless it has none), the
+  // preparation notes follow the Plus rule (what exists only in this browser stays).
+  const localTalk = local.familyConversation ?? defaultAmanahData.familyConversation;
+  const accountTalk = remote.familyConversation ?? defaultAmanahData.familyConversation;
+  merged.familyConversation = {
+    talks: accountTalk.talks.length ? accountTalk.talks : localTalk.talks,
+    topics: Object.keys(localTalk.topics).length ? localTalk.topics : accountTalk.topics,
+  };
   return merged as unknown as AmanahOrdnerData;
 }
 

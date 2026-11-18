@@ -14,6 +14,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { SaveBar } from "@/components/storage/save-bar";
+import { PlusGate } from "@/components/billing/plus-gate";
 import { cn } from "@/lib/utils/cn";
 
 const toggle = <T extends string>(list: T[], id: T) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -86,25 +87,28 @@ function TalkCard({ talk, index }: { talk: FamilyTalk; index: number }) {
 
       <fieldset>
         <legend className="text-sm font-medium mb-1">Wer war dabei?</legend>
+        {/* Choosing from "Familie & Kontakte" is people management and stays Plus (Variante 1). */}
+        <PlusGate feature="family_people">
         {people.length > 0 ? (
-          <div className="flex flex-wrap gap-x-4">
-            {people.map((p) => (
-              <label key={p.id} className="flex items-center gap-2 min-h-[44px] text-sm">
-                <input type="checkbox" className="h-5 w-5" checked={talk.personIds.includes(p.id)} onChange={() => update({ personIds: toggle(talk.personIds, p.id) })} />
-                {p.name}
-                {p.relation ? <span className="text-muted">({p.relation})</span> : null}
-              </label>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-muted">
-            Noch keine Personen eingetragen. <Link href="/dashboard/personen" className="text-primary underline">Familie &amp; Kontakte</Link>
-          </p>
-        )}
+            <div className="flex flex-wrap gap-x-4">
+              {people.map((p) => (
+                <label key={p.id} className="flex items-center gap-2 min-h-[44px] text-sm">
+                  <input type="checkbox" className="h-5 w-5" checked={talk.personIds.includes(p.id)} onChange={() => update({ personIds: toggle(talk.personIds, p.id) })} />
+                  {p.name}
+                  {p.relation ? <span className="text-muted">({p.relation})</span> : null}
+                </label>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted">
+              Noch keine Personen eingetragen. <Link href="/dashboard/personen" className="text-primary underline">Familie &amp; Kontakte</Link>
+            </p>
+          )}
+        </PlusGate>
         <label htmlFor={`${base}-others`} className="sr-only">
-          Weitere Personen
+          Wer war dabei (Namen)
         </label>
-        <Input id={`${base}-others`} value={talk.otherPeople} onChange={(e) => update({ otherPeople: e.target.value })} placeholder="Weitere Personen (optional)" className="mt-1" data-testid="talk-others" />
+        <Input id={`${base}-others`} value={talk.otherPeople} onChange={(e) => update({ otherPeople: e.target.value })} placeholder="Wer war dabei? Namen, mit Komma getrennt" className="mt-1" data-testid="talk-others" />
       </fieldset>
 
       <fieldset>
@@ -216,6 +220,11 @@ export default function FamilienGespraechPage() {
         <h2 id="topics-title" className="text-lg font-semibold text-foreground">
           Themen zur Vorbereitung
         </h2>
+        <p className="text-xs text-muted" data-testid="topics-plus-hint">
+          Gespräche festhalten ist kostenlos. Die Vorbereitungsfragen mit eigenen Notizen gehören später zu Vorsorge Plus;{" "}
+          <Link href="/preise" className="text-primary hover:underline">mehr dazu</Link>.
+        </p>
+        <PlusGate feature="family_people">
         {FAMILIEN_GESPRAECH_TOPICS.map((topic) => {
           const progress = store.getTopic(topic.id);
           const open = openId === topic.id;
@@ -310,6 +319,7 @@ export default function FamilienGespraechPage() {
             </Card>
           );
         })}
+        </PlusGate>
       </section>
 
       <SaveBar />
