@@ -32,6 +32,24 @@ import type { DocBlock, DocIcon, DocModel, WalletCardData } from "@/lib/document
 export type DocVariant = "klinisch" | "editorial" | "praktisch";
 export const DEFAULT_DOC_VARIANT: DocVariant = "klinisch";
 
+/**
+ * Owner decision P2.5 (18.11.2026): A "klinisch" for everything used in a hurry, B "editorial" for
+ * the calm, personal documents. One design system (tokens, icons, blocks), two treatments.
+ */
+export const DOCUMENT_VARIANTS: Record<DocModel["id"], DocVariant> = {
+  notfallkarte: "klinisch",
+  notfallinfo: "klinisch",
+  leitfaden: "klinisch",
+  erbprofil: "klinisch",
+  schulden: "klinisch",
+  vermoegen: "klinisch",
+  janazah: "editorial",
+  familienbrief: "editorial",
+  gesamt: "editorial",
+};
+
+export const variantFor = (id: DocModel["id"]): DocVariant => DOCUMENT_VARIANTS[id] ?? DEFAULT_DOC_VARIANT;
+
 const ICONS: Record<DocIcon, LucideIcon> = {
   person: User,
   phone: Phone,
@@ -136,7 +154,7 @@ export function DocumentView({
   model,
   createdAt,
   dataAsOf,
-  variant = DEFAULT_DOC_VARIANT,
+  variant,
   testId = "document-view",
 }: {
   model: DocModel;
@@ -146,11 +164,12 @@ export function DocumentView({
   variant?: DocVariant;
   testId?: string;
 }) {
+  const look = variant ?? variantFor(model.id);
   const asOf = dataAsOf && !Number.isNaN(Date.parse(dataAsOf)) ? fmt(new Date(dataAsOf)) : null;
   const running = [model.identity && model.title, model.identity].filter(Boolean).join(" · ");
   const showCover = Boolean(model.cover && model.hasContent);
   return (
-    <article className="amanah-doc" data-doc-variant={variant} data-doc-id={model.id} data-testid={testId} lang="de">
+    <article className="amanah-doc" data-doc-variant={look} data-doc-id={model.id} data-testid={testId} lang="de">
       <table className="doc-frame" role="presentation">
         {(model.pageNotice || running) && (
           <thead>
@@ -268,7 +287,7 @@ function CardFace({ card }: { card: WalletCardData }) {
         </div>
         <div className="doc-card-body">
           <span className="doc-card-name">{card.name ?? "Name: ____________________"}</span>
-          {card.birthDate && <span>geb. {card.birthDate}</span>}
+          {(card.birthDate || card.language) && <span>{[card.birthDate && `geb. ${card.birthDate}`, card.language && `spricht ${card.language}`].filter(Boolean).join(" · ")}</span>}
           <span className="doc-card-label">Bitte anrufen</span>
           {card.contacts.length ? (
             card.contacts.map((c, i) => (
@@ -285,16 +304,11 @@ function CardFace({ card }: { card: WalletCardData }) {
       </div>
       <div className="doc-card-face doc-card-back">
         <div className="doc-card-body">
-          {card.language && <span>Sprache: {card.language}</span>}
           {card.doctor && <span>Hausarzt: {card.doctor}</span>}
           {card.health.length ? card.health.map((r) => <span key={r.label}>{r.label}: {r.value}</span>) : <span>Medizinische Angaben: siehe Notfallblatt (A4)</span>}
-          {card.documents.map((r) => (
-            <span key={r.label}>
-              {r.label}: {r.value}
-            </span>
-          ))}
-          {card.mosque && <span>Im Todesfall bitte informieren: {card.mosque}</span>}
-          <small>Amanah · kein rechtliches Dokument · Notruf 112</small>
+          {card.documents.length > 0 && <span>{card.documents.map((r) => `${r.label}: ${r.value}`).join(" · ")}</span>}
+          {card.mosque && <span>Im Todesfall: {card.mosque}</span>}
+          <small>Kein rechtliches Dokument · Notruf 112</small>
         </div>
       </div>
     </>
@@ -305,10 +319,10 @@ function CardFace({ card }: { card: WalletCardData }) {
  * The fold card on its own sheet: front and back side by side (85.6 × 54 mm each), cut along the
  * marks, fold in the middle. Two copies: one for the wallet, one for a trusted person.
  */
-export function WalletCard({ model, variant = DEFAULT_DOC_VARIANT }: { model: DocModel; variant?: DocVariant }) {
+export function WalletCard({ model, variant }: { model: DocModel; variant?: DocVariant }) {
   if (!model.card) return null;
   return (
-    <section className="doc-wallet" data-doc-variant={variant} data-testid="wallet-card" lang="de" aria-label="Notfallkarte zum Ausschneiden">
+    <section className="doc-wallet" data-doc-variant={variant ?? variantFor(model.id)} data-testid="wallet-card" lang="de" aria-label="Notfallkarte zum Ausschneiden">
       <h2 className="doc-wallet-title">
         <span>Notfallkarte zum Ausschneiden</span>
       </h2>

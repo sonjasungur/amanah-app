@@ -6,7 +6,7 @@ import { Eye, FileDown, Printer, ShieldAlert } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { DOCUMENTS, documentFileTitle, type DocumentId } from "@/lib/documents/model";
-import { DEFAULT_DOC_VARIANT, DocumentView, WalletCard, type DocVariant } from "@/components/documents/document-view";
+import { DocumentView, WalletCard, variantFor, type DocVariant } from "@/components/documents/document-view";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
  * (never the form). Health details join only after an explicit choice for this printout. An empty
  * document is not offered for printing; the panel says what is missing instead.
  */
-export function DocumentPanel({ id, variant = DEFAULT_DOC_VARIANT, previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
+export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
   const store = useAmanahStore();
   const data = pickDataFields(store);
   const info = DOCUMENTS.find((d) => d.id === id)!;
@@ -22,6 +22,7 @@ export function DocumentPanel({ id, variant = DEFAULT_DOC_VARIANT, previewOpen =
   const [askHealth, setAskHealth] = useState(false);
   const [showPreview, setShowPreview] = useState(previewOpen);
   const model = info.build(data, { includeHealth });
+  const variant = chosenVariant ?? variantFor(id);
   const createdAt = new Date();
 
   const print = () => {

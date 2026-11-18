@@ -5,7 +5,8 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { DOCUMENTS, buildGesamt, buildJanazah, buildLeitfaden, buildNotfallinfo, buildNotfallkarte } from "@/lib/documents/model";
-import { DEFAULT_DOC_VARIANT, DocumentView, WalletCard } from "@/components/documents/document-view";
+import { readFileSync } from "node:fs";
+import { DEFAULT_DOC_VARIANT, DOCUMENT_VARIANTS, DocumentView, WalletCard } from "@/components/documents/document-view";
 
 afterEach(cleanup);
 const empty = (): AmanahOrdnerData => structuredClone(defaultAmanahData);
@@ -125,5 +126,26 @@ describe("P2.5-B view", () => {
     const toc = screen.getByRole("navigation", { name: "Inhalt" });
     expect(toc.querySelectorAll("li")).toHaveLength(10);
     expect(toc.querySelectorAll("a")).toHaveLength(0);
+  });
+});
+
+describe("P2.5 owner decision: design per document and card type size", () => {
+  it("A for quick emergency documents, B for Janazah, letter and the complete overview", () => {
+    expect(DOCUMENT_VARIANTS).toMatchObject({ notfallkarte: "klinisch", notfallinfo: "klinisch", leitfaden: "klinisch", janazah: "editorial", familienbrief: "editorial", gesamt: "editorial" });
+    for (const doc of DOCUMENTS) expect(DOCUMENT_VARIANTS[doc.id], doc.id).toMatch(/^(klinisch|editorial)$/);
+    render(<DocumentView model={buildGesamt(demo())} createdAt={new Date("2026-11-18")} dataAsOf={null} />);
+    expect(screen.getByTestId("document-view").getAttribute("data-doc-variant")).toBe("editorial");
+    cleanup();
+    render(<WalletCard model={buildNotfallkarte(demo())} />);
+    expect(screen.getByTestId("wallet-card").getAttribute("data-doc-variant")).toBe("klinisch");
+  });
+
+  it("no text on the fold card is set below 9 pt", () => {
+    const css = readFileSync("src/app/globals.css", "utf8");
+    const cardRules = [...css.matchAll(/([^{}]*\.doc-card[^{}]*)\{([^}]*)\}/g)];
+    expect(cardRules.length).toBeGreaterThan(5);
+    for (const [, selector, body] of cardRules) {
+      for (const m of body.matchAll(/font-size:\s*([\d.]+)pt/g)) expect(Number(m[1]), selector.trim()).toBeGreaterThanOrEqual(9);
+    }
   });
 });
