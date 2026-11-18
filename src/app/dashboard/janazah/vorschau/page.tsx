@@ -49,7 +49,7 @@ export default function JanazahVorschauPage() {
   }));
 
   const handleDownload = () => {
-    router.push("/dashboard/pdf");
+    router.push("/dashboard/pdf?dokument=janazah");
   };
 
   return (

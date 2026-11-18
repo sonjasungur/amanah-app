@@ -2,6 +2,9 @@
 
 import type { AssetEntry } from "@/lib/domain/types";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { pickDataFields } from "@/lib/store/store-utils";
+import { buildVermoegen } from "@/lib/documents/model";
+import { DocumentView } from "@/components/documents/document-view";
 import { ASSET_TYPES, MORTGAGE, OWNERSHIP } from "@/lib/testament/asset-labels";
 
 export const ASSET_PRINT_NOTICE =
@@ -25,17 +28,7 @@ export function AssetPrintEntries({ assets }: { assets: AssetEntry[] }) {
 }
 
 export function AssetPrintView() {
-  const assets = useAmanahStore((s) => s.assets);
-  return (
-    <div className="print-view max-w-2xl mx-auto p-8 bg-white" data-testid="asset-print-view">
-      <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Vermögensübersicht</h1>
-        <p className="text-sm font-semibold">Kein Testament</p>
-        <p className="text-sm text-muted">Stand: {new Date().toLocaleDateString("de-DE")}</p>
-        <p className="text-xs text-muted mt-2">{ASSET_PRINT_NOTICE}</p>
-      </div>
-      <AssetPrintEntries assets={assets} />
-      <p className="text-xs text-muted mt-6">Enthält private Angaben. Bewahre den Ausdruck sicher auf und gib ihn nur an Menschen, denen du vertraust.</p>
-    </div>
-  );
+  const store = useAmanahStore();
+  const data = pickDataFields(store);
+  return <DocumentView model={buildVermoegen(data)} createdAt={new Date()} dataAsOf={data.lastSaved} testId="asset-print-view" />;
 }

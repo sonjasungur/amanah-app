@@ -159,12 +159,17 @@ test.describe("Testament hints", () => {
   });
 
   test("the printed overview cannot pass for a legal document", async ({ page }) => {
-    await page.goto("/dashboard/pdf");
+    await page.goto("/dashboard/notfallkarte");
+    await page.getByLabel("Name", { exact: true }).fill("Test Person");
+    await page.waitForTimeout(600);
+    await page.goto("/dashboard/pdf?dokument=gesamt");
+    await page.waitForLoadState("networkidle");
+    await page.evaluate(() => (document.body.dataset.printDoc = "gesamt"));
     await page.emulateMedia({ media: "print" });
-    const view = page.getByTestId("full-print-view");
+    const view = page.getByTestId("doc-print-gesamt");
     await expect(view).toBeVisible();
     await expect(view.getByRole("heading", { level: 1 })).toHaveText("Vorsorge-Übersicht");
-    await expect(page.getByTestId("full-print-page-notice")).toContainText("kein Testament, keine Vollmacht, keine Patientenverfügung");
+    await expect(view.getByTestId("doc-page-notice")).toContainText("kein Testament, keine Vollmacht, keine Patientenverfügung");
     await expect(view).not.toContainText("Mein Wille — Komplett");
     await expect(view).toContainText("keine Patientenverfügung");
   });

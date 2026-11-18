@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "fs";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultAmanahData } from "@/lib/domain/defaults";
+import { demoAmanahData } from "@/lib/domain/demo-data";
 import { inheritanceConversationPoints } from "@/lib/domain/validation";
 import { isInheritanceHintsEnabled } from "@/lib/flags/inheritance-hints";
 import { inheritanceFields } from "@/lib/modules/fields";
@@ -74,15 +75,23 @@ describe("complete printout", () => {
   beforeEach(() => useAmanahStore.setState({ ...structuredClone(defaultAmanahData) }));
 
   it("cannot read as a will, a power of attorney or an advance directive", () => {
+    useAmanahStore.setState({ ...structuredClone(demoAmanahData) });
     render(<FullPrintView />);
     const text = screen.getByTestId("full-print-view").textContent!;
     expect(text).not.toContain("Mein Wille");
     expect(text).toContain("Vorsorge-Übersicht");
-    expect(screen.getByTestId("full-print-page-notice").closest("thead")).not.toBeNull();
-    for (const label of ["(keine Patientenverfügung)", "(keine Vollmacht)", "(keine Betreuungsverfügung)", "(kein Testament)", "Formfragen klärt ein Anwalt oder Notar."]) {
+    // Repeated on every printed page (table head).
+    expect(screen.getByTestId("doc-page-notice").closest("thead")).not.toBeNull();
+    expect(screen.getByTestId("doc-status").textContent).toContain("Kein Testament, keine Vollmacht, keine Patientenverfügung, keine Betreuungsverfügung");
+    for (const label of ["(keine Patientenverfügung)", "(keine Vollmacht)", "(kein Testament)", "Formfragen klärt ein Anwalt oder Notar."]) {
       expect(text).toContain(label);
     }
     expect(text).not.toContain("Bevollmächtigte Person");
+  });
+
+  it("even empty, it says what it is not", () => {
+    render(<FullPrintView />);
+    expect(screen.getByTestId("doc-status").textContent).toContain("Kein Testament");
   });
 
   it("is not offered under a title that sounds like a will", () => {

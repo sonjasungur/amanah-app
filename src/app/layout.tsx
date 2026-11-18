@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
@@ -10,6 +10,15 @@ import { BRAND } from "@/lib/brand";
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+/** Arabic names and terms in documents and prints. Loaded only where Arabic characters appear. */
+const arabic = Noto_Naskh_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -39,7 +48,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={`${geist.variable} h-full`}>
+    <html lang="de" className={`${geist.variable} ${arabic.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <Providers>
           <StagingBanner />

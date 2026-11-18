@@ -264,7 +264,9 @@ describe("no external data transfer in PDF export", () => {
   const pdfPage = read("src/app/dashboard/pdf/page.tsx");
 
   it("uses window.print() not external service", () => {
-    expect(pdfPage).toContain("window.print");
+    const panel = read("src/components/documents/document-panel.tsx");
+    expect(panel).toContain("window.print");
+    expect(panel).not.toContain("fetch(");
     expect(pdfPage).not.toContain("fetch(");
     expect(pdfPage).not.toContain("axios");
   });
