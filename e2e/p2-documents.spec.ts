@@ -23,6 +23,7 @@ test.describe("P2.2 documents", () => {
     await loadDemo(page);
     await page.goto("/dashboard/notfallkarte");
     await page.waitForLoadState("networkidle");
+    await page.getByTestId("doc-preview-toggle").click();
     await expect(page.getByTestId("doc-preview-notfallkarte")).toContainText("Ahmed Demo");
     await page.evaluate(() => (document.body.dataset.printDoc = "notfallkarte"));
     await page.emulateMedia({ media: "print" });

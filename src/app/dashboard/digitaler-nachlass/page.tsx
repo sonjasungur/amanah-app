@@ -4,6 +4,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { AlertTriangle } from "lucide-react";
 import { DigitalLegacyEditor } from "@/components/vorsorge/digital-legacy-editor";
 import { HelpTip } from "@/components/ui/help-tip";
+import { SaveBar } from "@/components/storage/save-bar";
 
 export default function DigitalerNachlassPage() {
   return (
@@ -26,6 +27,7 @@ export default function DigitalerNachlassPage() {
       </div>
 
       <DigitalLegacyEditor />
+      <SaveBar />
     </div>
   );
 }

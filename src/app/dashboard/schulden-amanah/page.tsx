@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { RelatedKnowledge } from "@/components/islamic-knowledge/related-knowledge";
 import { DebtsEditor } from "@/components/vorsorge/debts-editor";
 import { HelpTip } from "@/components/ui/help-tip";
+import { SaveBar } from "@/components/storage/save-bar";
 
 export default function SchuldenAmanahPage() {
   return (
@@ -22,6 +23,7 @@ export default function SchuldenAmanahPage() {
       />
 
       <DebtsEditor />
+      <SaveBar />
     </div>
   );
 }

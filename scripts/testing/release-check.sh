@@ -71,7 +71,7 @@ step migration-rehearsal 200 scripts/testing/migration-rehearsal.sh
 
 step build-api 600 env NEXT_PUBLIC_AUTH_MODE=api NEXT_PUBLIC_STORAGE_MODE=api NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED=true NEXT_PUBLIC_AMANAH_AI_ENABLED=true npx next build
 BILLING="AMANAH_BILLING_ENFORCE=true AMANAH_PLUS_LAUNCH_AT=2000-01-01T00:00:00Z"
-browser_spec regression "SECURITY_API_E2E=true PHASE2_API_TESTS=true" "e2e/security-session.spec.ts e2e/phase2-failure-paths.spec.ts e2e/legacy-email-verification.spec.ts e2e/p2-save-status.spec.ts"
+browser_spec regression "SECURITY_API_E2E=true PHASE2_API_TESTS=true" "e2e/security-session.spec.ts e2e/phase2-failure-paths.spec.ts e2e/legacy-email-verification.spec.ts e2e/p2-save-status.spec.ts e2e/p25-consent.spec.ts"
 browser_spec hydration "HYDRATION=api" "e2e/hydration-session.spec.ts"
 browser_spec devicedata "SECURITY_API_E2E=true" "e2e/device-data-logout.spec.ts e2e/save-before-leaving.spec.ts"
 browser_spec free "$BILLING FREE_ASSET_E2E=true" "e2e/free-asset-account.spec.ts"

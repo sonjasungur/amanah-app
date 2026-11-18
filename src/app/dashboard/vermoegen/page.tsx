@@ -2,6 +2,7 @@
 
 import { AssetOverview } from "@/components/testament/asset-overview";
 import { AssetPrintView } from "@/components/print/asset-print-view";
+import { SaveBar } from "@/components/storage/save-bar";
 
 /** Free for good, including account storage and the simple printout (plan matrix: asset_overview). */
 export default function VermoegenPage() {
@@ -15,6 +16,7 @@ export default function VermoegenPage() {
           </div>
         </div>
         <AssetOverview />
+        <SaveBar />
       </div>
       <div className="print-only">
         <AssetPrintView />

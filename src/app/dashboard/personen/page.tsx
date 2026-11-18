@@ -1,6 +1,7 @@
 "use client";
 
 import { PeopleEditor } from "@/components/vorsorge/people-editor";
+import { SaveBar } from "@/components/storage/save-bar";
 
 /** One list of people, reused by emergency card, powers of attorney, Janazah and the testament preparation. */
 export default function PersonenPage() {
@@ -14,6 +15,7 @@ export default function PersonenPage() {
         </p>
       </header>
       <PeopleEditor />
+      <SaveBar />
     </div>
   );
 }

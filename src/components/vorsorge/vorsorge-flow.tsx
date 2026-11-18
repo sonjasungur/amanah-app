@@ -18,6 +18,7 @@ import { DocumentChecklist } from "@/components/vorsorge/document-checklist";
 import { DebtsEditor } from "@/components/vorsorge/debts-editor";
 import { DigitalLegacyEditor } from "@/components/vorsorge/digital-legacy-editor";
 import { AssetOverview } from "@/components/testament/asset-overview";
+import { SaveBar } from "@/components/storage/save-bar";
 
 const contactFields = emergencyCardFields.filter((f) => f.key.startsWith("emergencyContact"));
 const attorneyFields = powerOfAttorneyFields
@@ -168,6 +169,7 @@ export function VorsorgeFlow({ stepId }: { stepId: string | null }) {
           {isLast ? "Speichern und zur Zusammenfassung" : "Speichern und weiter"} <ArrowRight size={16} className="ml-2" aria-hidden />
         </Button>
       </div>
+      <SaveBar compact className="mt-0" />
       <p className="text-xs text-muted">
         Alle Angaben sind freiwillig. Du kannst jeden Schritt überspringen und später auf der Seite{" "}
         <Link href={area.pages[0].path} className="underline">

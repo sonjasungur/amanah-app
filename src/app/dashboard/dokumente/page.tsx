@@ -3,6 +3,7 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { DocumentChecklist } from "@/components/vorsorge/document-checklist";
 import { HelpTip } from "@/components/ui/help-tip";
+import { SaveBar } from "@/components/storage/save-bar";
 
 /** Where important documents are — the app never stores the documents themselves. */
 export default function DokumentePage() {
@@ -17,6 +18,7 @@ export default function DokumentePage() {
         </div>
       </header>
       <DocumentChecklist />
+      <SaveBar />
       <Disclaimer />
     </div>
   );

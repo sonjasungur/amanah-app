@@ -47,17 +47,37 @@ export function ConsentGate({ children }: { children: React.ReactNode }) {
     };
   }, [required]);
 
+  const [errorText, setErrorText] = useState<string | null>(null);
+
+  /**
+   * Reads the whole answer, always ends the waiting state, and never sends twice. Only a confirmed
+   * grant opens the folder; a save that waited for the consent is then sent.
+   */
   const grant = async () => {
+    if (busy) return;
     setBusy(true);
-    const res = await fetch("/api/consent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ purpose: PURPOSE.purpose, version: PURPOSE.version, confirmed: true }),
-    });
-    setBusy(false);
-    setState(res.ok ? "granted" : "error");
-    // A save refused for the missing consent (e.g. from the check) goes through now.
-    if (res.ok && useAmanahStore.getState().saveStatus === "error") void flushPendingSave();
+    setErrorText(null);
+    try {
+      const res = await fetch("/api/consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purpose: PURPOSE.purpose, version: PURPOSE.version, confirmed: true }),
+      });
+      const body = (await res.json().catch(() => null)) as { error?: string; granted?: boolean } | null;
+      if (!res.ok) {
+        setErrorText(res.status === 401 ? "Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an." : (body?.error ?? "Das hat nicht geklappt. Bitte später erneut versuchen."));
+        setState("error");
+        return;
+      }
+      setState("granted");
+      const { saveStatus } = useAmanahStore.getState();
+      if (saveStatus === "error" || saveStatus === "saving") void flushPendingSave();
+    } catch {
+      setErrorText("Keine Verbindung. Bitte prüfe deine Internetverbindung und versuche es erneut.");
+      setState("error");
+    } finally {
+      setBusy(false);
+    }
   };
 
   if (state === "granted") return children;
@@ -93,8 +113,13 @@ export function ConsentGate({ children }: { children: React.ReactNode }) {
         Textversion {PURPOSE.version} · Entwurf, rechtlich noch nicht geprüft.{" "}
         <Link href="/datenschutz" className="underline">Datenschutz</Link>
       </p>
-      {state === "error" && <p className="text-sm text-destructive mt-3" role="alert">Das hat nicht geklappt. Bitte später erneut versuchen.</p>}
-      <Button type="button" className="mt-5" disabled={!checked || busy} onClick={() => void grant()} data-testid="consent-submit">
+      {state === "error" && (
+        <p className="text-sm text-destructive mt-3" role="alert" data-testid="consent-error">
+          {errorText ?? "Das hat nicht geklappt. Bitte später erneut versuchen."}
+        </p>
+      )}
+      <Button type="button" className="mt-5" disabled={!checked || busy} aria-busy={busy} onClick={() => void grant()} data-testid="consent-submit">
+        {busy ? <Loader2 size={16} className="mr-2 animate-spin" aria-hidden /> : null}
         Einwilligen und fortfahren
       </Button>
     </Card>

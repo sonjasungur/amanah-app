@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Printer, ShieldAlert } from "lucide-react";
+import { Eye, FileDown, Printer, ShieldAlert } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { DOCUMENTS, documentFileTitle, type DocumentId } from "@/lib/documents/model";
@@ -14,12 +14,13 @@ import { Button } from "@/components/ui/button";
  * (never the form). Health details join only after an explicit choice for this printout. An empty
  * document is not offered for printing; the panel says what is missing instead.
  */
-export function DocumentPanel({ id, variant = "klar" }: { id: DocumentId; variant?: DocVariant }) {
+export function DocumentPanel({ id, variant = "klar", previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
   const store = useAmanahStore();
   const data = pickDataFields(store);
   const info = DOCUMENTS.find((d) => d.id === id)!;
   const [includeHealth, setIncludeHealth] = useState(false);
   const [askHealth, setAskHealth] = useState(false);
+  const [showPreview, setShowPreview] = useState(previewOpen);
   const model = info.build(data, { includeHealth });
   const createdAt = new Date();
 
@@ -74,10 +75,20 @@ export function DocumentPanel({ id, variant = "klar" }: { id: DocumentId; varian
 
         {model.hasContent ? (
           <div>
-            <Button type="button" size="lg" onClick={print} data-testid="doc-print">
-              <Printer size={18} className="mr-2" aria-hidden /> Drucken oder als PDF speichern
-            </Button>
-            <p className="text-xs text-muted mt-1">Im Druckdialog „Als PDF speichern“ wählen. Es wird nichts automatisch übertragen.</p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowPreview((v) => !v)} aria-expanded={showPreview} data-testid="doc-preview-toggle">
+                <Eye size={16} className="mr-2" aria-hidden /> {showPreview ? "Vorschau ausblenden" : "Vorschau anzeigen"}
+              </Button>
+              <Button type="button" variant="secondary" onClick={print} data-testid="doc-pdf">
+                <FileDown size={16} className="mr-2" aria-hidden /> Als PDF speichern
+              </Button>
+              <Button type="button" variant="secondary" onClick={print} data-testid="doc-print">
+                <Printer size={16} className="mr-2" aria-hidden /> Drucken
+              </Button>
+            </div>
+            <p className="text-xs text-muted mt-1">
+              „Als PDF speichern“ öffnet den Druckdialog: dort „Als PDF speichern“ als Ziel wählen. Es wird nichts automatisch übertragen.
+            </p>
           </div>
         ) : (
           <div className="rounded-xl border border-dashed border-border p-4 text-sm" data-testid="doc-empty">
@@ -89,11 +100,15 @@ export function DocumentPanel({ id, variant = "klar" }: { id: DocumentId; varian
           </div>
         )}
 
+        {(showPreview || !model.hasContent) && (
+        <>
         <p className="text-sm font-semibold text-foreground">Vorschau</p>
         <div className="rounded-2xl border border-border bg-white shadow-sm overflow-x-auto" data-testid="doc-preview">
           <DocumentView model={model} createdAt={createdAt} dataAsOf={data.lastSaved} variant={variant} testId={`doc-preview-${id}`} />
           {id === "notfallkarte" && model.hasContent && <WalletCard model={model} />}
         </div>
+        </>
+        )}
       </div>
       {model.hasContent && (
         <div className="print-only doc-print-root">

@@ -25,11 +25,11 @@ export default function NotfallkartePage() {
       }
     >
       <Card className="mt-6" data-testid="notfallkarte-document">
-        <CardTitle className="text-base">Notfallkarte ansehen und drucken</CardTitle>
+        <CardTitle className="text-base">Vorschau, PDF und Ausdruck</CardTitle>
         <p className="text-sm text-muted mb-4 no-print">
           Eine Seite für Kühlschrank oder Ordner, dazu eine Karte zum Ausschneiden fürs Portemonnaie.
         </p>
-        <DocumentPanel id="notfallkarte" />
+        <DocumentPanel id="notfallkarte" previewOpen={false} />
       </Card>
     </ModulePage>
   );

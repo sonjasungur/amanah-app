@@ -7,6 +7,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { HelpTip } from "@/components/ui/help-tip";
 import type { HelpTopicId } from "@/lib/content/help-topics";
+import { SaveBar } from "@/components/storage/save-bar";
 
 interface ModulePageProps {
   title: string;
@@ -62,6 +63,7 @@ export function ModulePage({ title, description, section, fields, disclaimerType
         <p className="text-sm text-muted mb-4">Alle Felder sind freiwillig und werden automatisch gespeichert.</p>
         <ModuleForm section={section} fields={fields} values={flatValues} onChange={handleChange} />
       </Card>
+      <SaveBar />
       {children}
     </div>
   );
