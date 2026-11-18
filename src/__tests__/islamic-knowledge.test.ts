@@ -32,6 +32,7 @@ const published: KnowledgeArticleRecord = {
   title: "Sadaqa Jariya Testartikel",
   summary: "Zusammenfassung",
   body: "Fortlaufende Wohltätigkeit.",
+  practicalNote: "Wünsche zur Sadaqa Jariya im Ordner festhalten.",
   sourceIds: ["hadith-sadaqa-jariya"],
   requiresLegalReview: false,
   status: "PUBLISHED",

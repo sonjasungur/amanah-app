@@ -85,6 +85,20 @@ export const KNOWLEDGE_AREAS: KnowledgeArea[] = [
       { id: "anwalt-notar", title: "Wann anwaltlicher oder notarieller Rat erforderlich ist" },
     ],
   },
+  {
+    id: "akhira",
+    letter: "F",
+    title: "Akhira",
+    description: "Barzakh, Rechenschaft und was nach dem Tod weiterwirkt: Sadaqa Jāriya, nützliches Wissen und Bittgebete.",
+    legalReviewRequired: false,
+    subtopics: [
+      { id: "barzakh", title: "Barzakh" },
+      { id: "rechenschaft", title: "Rechenschaft und Verantwortung" },
+      { id: "sadaqa-jariya-akhira", title: "Sadaqa Jāriya" },
+      { id: "nuetzliches-wissen", title: "Nützliches Wissen" },
+      { id: "bittgebete-verstorbene", title: "Bittgebete für Verstorbene" },
+    ],
+  },
 ];
 
 export function getKnowledgeArea(id: KnowledgeAreaId): KnowledgeArea {

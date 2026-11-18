@@ -5,7 +5,7 @@ import type { KnowledgeArticleRecord, SchoolDifference } from "../types";
  *
  * Rules for these drafts:
  * - Statements only where a cited, technically verified source says so (Qurʾān verbatim
- *   QuranEnc 1.1.4; hadith numbers verified 2026-10-30, renderings marked as own paraphrase).
+ *   QuranEnc 1.1.4, re-checked unchanged in 1.1.5 on 2026-11-18; hadith numbers verified 2026-10-30, renderings marked as own paraphrase).
  * - No partial verbatim verse quotes in the body (QuranEnc terms: no deletion); the full
  *   verse is shown with the sources.
  * - Everything else is an editorial marker "[Redaktion: …]" / "[Juristische Prüfung: …]",

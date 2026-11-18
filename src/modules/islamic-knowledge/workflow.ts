@@ -6,9 +6,9 @@ export const STATUS_ORDER: ArticleStatus[] = ["DRAFT", "SOURCE_REVIEW", "SCHOLAR
 
 export const STATUS_LABELS: Record<ArticleStatus, string> = {
   DRAFT: "Entwurf",
-  SOURCE_REVIEW: "Quellenprüfung",
-  SCHOLAR_REVIEW: "Prüfung durch Gelehrte",
-  APPROVED: "Freigegeben",
+  SOURCE_REVIEW: "Quellen in Prüfung",
+  SCHOLAR_REVIEW: "Quellen geprüft – religiöse Prüfung läuft",
+  APPROVED: "Religiös (und ggf. rechtlich) freigegeben",
   PUBLISHED: "Veröffentlicht",
 };
 
@@ -57,7 +57,7 @@ export const EDITORIAL_MARKERS = ["[Redaktion", "[Juristische Prüfung"];
 
 export function structuralIssues(article: KnowledgeArticleRecord): string[] {
   const issues: string[] = [];
-  const texts = [article.body, article.summary, article.germanLawNote ?? "", article.differingOpinions ?? ""];
+  const texts = [article.body, article.summary, article.germanLawNote ?? "", article.differingOpinions ?? "", article.practicalNote ?? ""];
   if (texts.some((t) => EDITORIAL_MARKERS.some((m) => t.includes(m)))) {
     issues.push("Text enthält noch offene Redaktions- oder Prüfvermerke.");
   }
@@ -70,6 +70,10 @@ export function structuralIssues(article: KnowledgeArticleRecord): string[] {
     if (d.positions.some((p) => p.sourceIds.length === 0 && !p.reference)) {
       issues.push(`„${d.question}“: Position ohne Quelle oder Werkangabe.`);
     }
+  }
+  if (!article.practicalNote?.trim()) issues.push("Bedeutung für den Vorsorgeordner fehlt.");
+  if (!allSourceIds(article).some((id) => ["quran", "hadith"].includes(islamicSources[id]?.type ?? ""))) {
+    issues.push("Kein Qurʾān- oder Hadith-Beleg.");
   }
   for (const id of allSourceIds(article)) {
     const source = islamicSources[id];

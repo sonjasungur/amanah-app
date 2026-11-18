@@ -17,7 +17,7 @@ export interface SourceCheck {
 const CHECKED_AT = "2026-10-30";
 
 const VERBATIM =
-  "Wörtlich: Deutsch QuranEnc german_bubenheim 1.1.4, Arabisch Tanzil Uthmani 1.1 (data/quran-verbatim.json, gegen beide Quellen abgeglichen). Lizenzbestätigung der Rechteinhaber offen.";
+  "Wörtlich: Deutsch QuranEnc german_bubenheim 1.1.5 (am 2026-11-18 erneut abgerufen, unverändert gegenüber 1.1.4), Arabisch Tanzil Uthmani 1.1 (data/quran-verbatim.json). QuranEnc-Bedingungen erlauben die Weiterveröffentlichung ohne Änderung, mit Quelle und Versionsnummer; eine schriftliche Bestätigung des Herausgebers liegt nicht vor.";
 
 function ok(finding: string): SourceCheck {
   return { status: "checked_ok", checkedAt: CHECKED_AT, finding };

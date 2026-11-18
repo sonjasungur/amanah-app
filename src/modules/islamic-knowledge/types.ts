@@ -8,7 +8,7 @@ export type ArticleStatus = "DRAFT" | "SOURCE_REVIEW" | "SCHOLAR_REVIEW" | "APPR
 /** Legal review is an additional gate for articles touching German law. */
 export type ReviewKind = "source" | "scholar" | "legal";
 
-export type KnowledgeAreaId = "faraid" | "tod-sterben" | "janazah" | "vorsorge" | "islam-und-recht";
+export type KnowledgeAreaId = "faraid" | "tod-sterben" | "janazah" | "vorsorge" | "islam-und-recht" | "akhira";
 
 export interface ReviewRecord {
   kind: ReviewKind;
@@ -85,6 +85,15 @@ export interface KnowledgeArticleRecord {
   schoolDifferences?: SchoolDifference[];
   /** German-law aspects are kept separate from religious statements. */
   germanLawNote?: string;
+  /** What the topic means for the person's Vorsorge folder (practical, no ruling). Required for approval. */
+  practicalNote?: string;
+  /**
+   * Tafsir Ibn Kathir only as a reference (sura/verse, optionally volume/page of the Dār Ṭayba
+   * edition after checking a print copy). No quoted text: the German translation is a publisher's work.
+   */
+  tafsirRefs?: { surah: number; ayah: number; edition?: string; volumePage?: string }[];
+  /** ISO date of the last content change. */
+  updatedAt?: string;
   requiresLegalReview: boolean;
   status: ArticleStatus;
   version: number;
@@ -103,7 +112,7 @@ export interface KnowledgeSubtopic {
 
 export interface KnowledgeArea {
   id: KnowledgeAreaId;
-  letter: "A" | "B" | "C" | "D" | "E";
+  letter: "A" | "B" | "C" | "D" | "E" | "F";
   title: string;
   description: string;
   /** Every article in this area needs a legal review in addition to the scholar review. */
