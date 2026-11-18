@@ -17,7 +17,7 @@ export const mainNavItems: NavItem[] = [
 
 /** Secondary destinations shown under the main ones on desktop (phones reach them via the overview). */
 export const secondaryNavItems: NavItem[] = [
-  { href: "/dashboard/pdf", label: "Dokumente & Ausdrucke" },
+  { href: "/dashboard/pdf", label: "Meine Dokumente" },
   { href: "/dashboard/vorsorge/abschluss", label: "Zusammenfassung" },
 ];
 

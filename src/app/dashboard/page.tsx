@@ -69,7 +69,7 @@ export default function DashboardPage() {
               Notfallpaket zusammenstellen
             </Link>
             <Link href="/dashboard/pdf" className="block text-sm text-primary underline mt-3 min-h-[44px]" data-testid="dashboard-documents-link">
-              Dokumente &amp; Ausdrucke
+              Meine Dokumente
             </Link>
           </Card>
           <p className="text-xs text-muted px-1">
