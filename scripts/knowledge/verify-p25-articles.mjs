@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * P2.5-E source check for the editorial drafts (src/modules/islamic-knowledge/full-articles/p25-drafts.json).
+ * P2.5-E source check for the editorial drafts (src/modules/islamic-knowledge/full-articles/archive/p25-drafts-v1.json).
  *
  * 1. Qur'an: every German text is fetched again from the public QuranEnc API (Bubenheim & Elyas) and
  *    compared character by character with the draft. Also reports the translation version.
@@ -13,7 +13,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
-const FILE = new URL("../../src/modules/islamic-knowledge/full-articles/p25-drafts.json", import.meta.url);
+const FILE = new URL("../../src/modules/islamic-knowledge/full-articles/archive/p25-drafts-v1.json", import.meta.url); // version 1, archived in P2.6
 const { articles } = JSON.parse(readFileSync(FILE, "utf8"));
 const out = process.argv[2];
 

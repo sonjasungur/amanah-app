@@ -1,174 +1,246 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
 import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
 import { getKnowledgeArea } from "@/modules/islamic-knowledge";
-import { fullArticleIssues, getFullArticleDraft, manualChecks, requiredFullArticleReviews } from "@/modules/islamic-knowledge/full-articles";
+import {
+  PARAGRAPH_KIND_LABELS,
+  SOURCE_LEVEL_LABELS,
+  allSources,
+  fullArticleIssues,
+  getFullArticle,
+  manualChecks,
+  requiredFullArticleReviews,
+  type FullArticle,
+  type SourceStatus,
+} from "@/modules/islamic-knowledge/full-articles";
+import { OwnerReviewSummary, OwnerSourceCheck } from "@/components/knowledge/owner-review";
 
-export const metadata = { title: "Artikelentwurf — intern", robots: { index: false, follow: false } };
+export const metadata = { title: "Artikelentwurf prüfen — intern", robots: { index: false, follow: false } };
 
 const COLLECTION = { bukhari: "Sahih al-Bukhari", muslim: "Sahih Muslim" } as const;
 const REVIEW = { source: "Quellenprüfung", scholar: "Prüfung durch islamische Fachperson", legal: "Juristische Prüfung" } as const;
+const FOR = { gelehrte: "An Gelehrte", jurist: "An Juristen", redaktion: "An die Redaktion" } as const;
+const KIND_TONE: Record<string, string> = {
+  quran: "border-emerald-700 bg-emerald-50",
+  hadith: "border-sky-700 bg-sky-50",
+  tafsir: "border-amber-700 bg-amber-50",
+  kontext: "border-sky-400",
+  fiqh: "border-violet-600 bg-violet-50",
+  recht: "border-red-700 bg-red-50",
+};
 
-function Part({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+function Status({ status, testId }: { status: SourceStatus; testId?: string }) {
   return (
-    <section className="mt-8" aria-labelledby={`part-${n}`}>
-      <h2 id={`part-${n}`} className="text-xl font-bold text-primary border-b border-border pb-1 mb-3">
-        {n}. {title}
-      </h2>
-      <div className="space-y-3">{children}</div>
-    </section>
+    <p className="text-xs mt-1" data-testid={testId}>
+      <span className="font-semibold">{SOURCE_LEVEL_LABELS[status.level]}</span> · {status.by}, {status.checkedAt} · Fachliche Freigabe: offen
+      <span className="block text-muted">Prüfweg: {status.method}</span>
+    </p>
   );
 }
 
-const Prose = ({ text, empty }: { text: string; empty: string }) =>
-  text.trim() ? (
-    <>
-      {text.split(/\n{2,}/).map((p, i) => (
-        <p key={i} className="whitespace-pre-wrap">{p}</p>
+function SourceList({ a }: { a: FullArticle }) {
+  return (
+    <div className="space-y-3">
+      {a.sources.quran.map((q) => (
+        <div key={q.ref} id={`src-${q.ref}`} className="rounded-xl border border-border p-3 scroll-mt-20" data-testid="source-card">
+          <p className="text-xs font-semibold text-muted">
+            [{q.ref}] Qur’an, Sure {q.surah}, Vers {q.ayah} · {q.edition}
+          </p>
+          {q.arabic && (
+            <p dir="rtl" lang="ar" className="text-xl mt-2" style={{ fontFamily: "var(--font-arabic), serif" }}>
+              {q.arabic}
+            </p>
+          )}
+          <blockquote className="mt-2 border-l-4 border-emerald-700/40 pl-3">{q.germanVerbatim}</blockquote>
+          <a href={q.url} className="text-xs text-primary underline" rel="noreferrer">
+            {q.url}
+          </a>
+          <Status status={q.status} />
+          <OwnerSourceCheck articleId={a.id} sourceRef={q.ref} />
+        </div>
       ))}
-    </>
-  ) : (
-    <p className="text-warning">{empty}</p>
+      {a.sources.tafsir.map((t) => (
+        <div key={t.ref} id={`src-${t.ref}`} className="rounded-xl border border-border p-3 scroll-mt-20" data-testid="source-card">
+          <p className="text-xs font-semibold text-muted">
+            [{t.ref}] {t.edition}
+          </p>
+          <p className="text-xs">Fundstelle: {t.locator} · Gelesen: {t.readExtent}</p>
+          <p className="mt-1">{t.summary}</p>
+          <a href={t.url} className="text-xs text-primary underline" rel="noreferrer">
+            {t.url}
+          </a>
+          <Status status={t.status} />
+          <OwnerSourceCheck articleId={a.id} sourceRef={t.ref} />
+        </div>
+      ))}
+      {a.sources.hadith.map((h) => (
+        <div key={h.ref} id={`src-${h.ref}`} className="rounded-xl border border-border p-3 scroll-mt-20" data-testid="source-card">
+          <p className="text-xs font-semibold text-muted">
+            [{h.ref}] {COLLECTION[h.collection]} Nr. {h.number} · Erzähler: {h.narrator}
+            {h.numberingNote ? ` · ${h.numberingNote}` : ""}
+          </p>
+          {h.arabicExcerpt && (
+            <p dir="rtl" lang="ar" className="text-lg mt-1" style={{ fontFamily: "var(--font-arabic), serif" }}>
+              {h.arabicExcerpt}
+            </p>
+          )}
+          <p className="mt-1">{h.summary}</p>
+          <p className="text-xs">
+            <a href={h.sunnahComUrl} className="text-primary underline" rel="noreferrer">
+              {h.sunnahComUrl}
+            </a>
+            {h.mirrorUrl ? (
+              <>
+                {" · "}
+                <a href={h.mirrorUrl} className="text-primary underline" rel="noreferrer">
+                  Spiegel
+                </a>
+              </>
+            ) : null}
+          </p>
+          <Status status={h.status} />
+          <OwnerSourceCheck articleId={a.id} sourceRef={h.ref} />
+        </div>
+      ))}
+      {a.sources.law.map((l) => (
+        <div key={l.ref} id={`src-${l.ref}`} className="rounded-xl border border-border p-3 scroll-mt-20" data-testid="source-card">
+          <p className="text-xs font-semibold text-muted">
+            [{l.ref}] {l.title} · {l.jurisdiction} · abgerufen {l.retrievedAt}
+          </p>
+          <a href={l.url} className="text-xs text-primary underline" rel="noreferrer">
+            {l.url}
+          </a>
+          <Status status={l.status} />
+          <OwnerSourceCheck articleId={a.id} sourceRef={l.ref} />
+        </div>
+      ))}
+    </div>
   );
+}
 
-/** One full article draft in its eight parts. Internal reading view for editors and reviewers only. */
-export default async function FullArticleDraftPage({ params }: { params: Promise<{ id: string }> }) {
+/**
+ * One draft for reading and source checking. Each paragraph shows its kind and links to its sources,
+ * which are listed with edition, locator, link and review state. Printable as review material.
+ */
+export default async function FullArticleReviewPage({ params }: { params: Promise<{ id: string }> }) {
   if (!isInternalToolsEnabled()) notFound();
   const { id } = await params;
-  const a = getFullArticleDraft(id);
+  const a = getFullArticle(id);
   if (!a) notFound();
   const area = getKnowledgeArea(a.area);
   const issues = fullArticleIssues(a);
+  const byFor = (f: keyof typeof FOR) => a.openQuestions.filter((q) => q.for === f);
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-8 leading-relaxed" lang="de">
+    <article className="max-w-3xl mx-auto px-4 py-8 leading-relaxed print:px-0" lang="de">
       <p className="rounded-xl border-2 border-warning/50 bg-warning/10 p-3 text-sm font-semibold" data-testid="draft-banner">
-        Entwurf – ungeprüft, nicht veröffentlicht. Keine Fatwa und keine Rechtsberatung. Nicht weitergeben.
+        Entwurf – ungeprüft, nicht veröffentlicht. Keine Fatwa und keine Rechtsberatung. Nur zur Prüfung.
       </p>
-      <p className="text-xs text-muted mt-4">
-        <Link href="/wissen/redaktion/artikel" className="underline">Alle Entwürfe</Link> · Bereich {area.letter} ({area.title}) · {a.id} · Version {a.version} · Status: Entwurf
+      <p className="text-xs text-muted mt-4 print:hidden">
+        <Link href="/wissen/redaktion/artikel" className="underline">
+          Alle Artikel
+        </Link>{" "}
+        · Bereich {area.letter} ({area.title}) · {a.id} · Version {a.version} · Status: Entwurf
       </p>
       <h1 className="text-3xl font-bold text-primary mt-2">{a.title}</h1>
       <p className="text-lg text-muted mt-2">{a.summary}</p>
+      <p className="text-xs mt-2">
+        <OwnerReviewSummary articleId={a.id} refs={allSources(a).map((s) => s.ref)} /> · Erforderlich: {requiredFullArticleReviews(a).map((k) => REVIEW[k]).join(", ")} · Erfasst:{" "}
+        {a.reviews.length ? a.reviews.map((r) => `${REVIEW[r.kind]} (${r.reviewer}, ${r.reviewedAt})`).join("; ") : "keine"}
+      </p>
+      <p className="text-xs text-muted mt-1 print:hidden">Zum Exportieren als Prüfunterlage: drucken bzw. „Als PDF speichern“.</p>
 
-      <Part n={1} title="Einleitung">
-        {a.introduction.map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
-      </Part>
-
-      <Part n={2} title="Qur’an">
-        {a.quran.length === 0 && <p className="text-warning">Keine Qur’an-Stelle zugeordnet.</p>}
-        {a.quran.map((q) => (
-          <div key={`${q.surah}:${q.ayah}`} className="rounded-xl border border-border p-4">
-            <p className="text-xs font-semibold text-muted">
-              Sure {q.surah}, Vers {q.ayah} · Bubenheim &amp; Elyas ({q.translationVersion ?? "QuranEnc"}) · abgerufen {q.fetchedAt}
-            </p>
-            {q.arabic && (
-              <p dir="rtl" lang="ar" className="text-xl mt-2" style={{ fontFamily: "var(--font-arabic), serif" }}>
-                {q.arabic}
+      {a.sections.map((s, i) => (
+        <section key={`${s.key}-${i}`} className="mt-8 break-inside-auto" aria-labelledby={`sec-${i}`}>
+          <h2 id={`sec-${i}`} className="text-xl font-bold text-primary border-b border-border pb-1 mb-3">
+            {s.title}
+          </h2>
+          {s.paragraphs.map((p, j) => (
+            <div key={j} className={`mb-3 border-l-4 pl-3 ${KIND_TONE[p.kind] ?? "border-border"}`} data-kind={p.kind} data-testid="review-paragraph">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">
+                {PARAGRAPH_KIND_LABELS[p.kind]}
+                {(p.refs ?? []).length > 0 && (
+                  <>
+                    {" · "}
+                    {(p.refs ?? []).map((r, k) => (
+                      <span key={r}>
+                        {k > 0 && ", "}
+                        <a href={`#src-${r}`} className="underline normal-case">
+                          {r}
+                        </a>
+                      </span>
+                    ))}
+                  </>
+                )}
               </p>
-            )}
-            <blockquote className="mt-2 border-l-4 border-emerald/40 pl-3">{q.germanVerbatim}</blockquote>
-            <p className="text-sm text-muted mt-2">Warum diese Stelle: {q.why}</p>
-            <a href={q.url} className="text-xs text-primary underline" rel="noreferrer">
-              {q.url}
-            </a>
-          </div>
-        ))}
-      </Part>
+              <p className="whitespace-pre-wrap">{p.text}</p>
+              {(p.seeAlso ?? []).length > 0 && (
+                <p className="text-[11px] text-muted">
+                  Siehe auch (eigene Quellenart, gesondert geprüft):{" "}
+                  {(p.seeAlso ?? []).map((r, k) => (
+                    <span key={r}>
+                      {k > 0 && ", "}
+                      <a href={`#src-${r}`} className="underline">
+                        {r}
+                      </a>
+                    </span>
+                  ))}
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      ))}
 
-      <Part n={3} title="Tafsir Ibn Kaṯīr (eigene Zusammenfassung)">
-        {a.tafsir.length === 0 && <p className="text-warning">Kein Tafsir-Abschnitt zugeordnet.</p>}
-        {a.tafsir.map((t) => (
-          <div key={`${t.surah}:${t.ayah}`} className="rounded-xl border border-border p-4">
-            <p className="text-xs font-semibold text-muted">
-              Zu Sure {t.surah}, Vers {t.ayah} · {t.status} · Band/Seite: vom Prüfer am Druckexemplar zu ergänzen
-            </p>
-            <p className="mt-1">{t.summary}</p>
-            <a href={t.url} className="text-xs text-primary underline" rel="noreferrer">
-              {t.url}
-            </a>
-          </div>
-        ))}
-      </Part>
+      {a.differingOpinions.trim() && (
+        <section className="mt-8">
+          <h2 className="text-xl font-bold text-primary border-b border-border pb-1 mb-3">Unterschiedliche Auffassungen (Zusammenfassung)</h2>
+          <p className="whitespace-pre-wrap">{a.differingOpinions}</p>
+        </section>
+      )}
 
-      <Part n={4} title="Sunnah (Sahih al-Bukhari, Sahih Muslim)">
-        {a.sunnah.map((s) => (
-          <div key={`${s.collection}-${s.number}`} className="rounded-xl border border-border p-4">
-            <p className="text-xs font-semibold text-muted">
-              {COLLECTION[s.collection]} {s.number} · Erzähler: {s.narrator} · Nummer im Spiegel {s.mirrorMatch ? "gefunden" : "NICHT gefunden"} · sunnah.com: von Hand zu prüfen
-            </p>
-            <p className="mt-1">{s.summary}</p>
-            {s.duaArabic && (
-              <p dir="rtl" lang="ar" className="text-lg mt-2" style={{ fontFamily: "var(--font-arabic), serif" }}>
-                {s.duaArabic}
-              </p>
-            )}
-            {s.duaGermanOwn && <p className="text-sm mt-1">Eigene deutsche Wiedergabe (Entwurf): {s.duaGermanOwn}</p>}
-            <p className="text-sm mt-2"><span className="font-semibold">Erklärung:</span> {s.explanation}</p>
-            <p className="text-sm"><span className="font-semibold">Zusammenhang:</span> {s.context}</p>
-            {(s.numberingNote || s.verificationNote) && <p className="text-xs text-warning mt-1">{s.numberingNote ?? s.verificationNote}</p>}
-            <p className="text-xs mt-1">
-              <a href={s.sunnahComUrl} className="text-primary underline" rel="noreferrer">{s.sunnahComUrl}</a> ·{" "}
-              <a href={s.mirrorUrl} className="text-primary underline" rel="noreferrer">Spiegel</a>
-            </p>
-          </div>
-        ))}
-      </Part>
+      <section className="mt-10" data-testid="source-list">
+        <h2 className="text-xl font-bold text-primary border-b border-border pb-1 mb-3">Quellenverzeichnis und Prüfstand</h2>
+        <SourceList a={a} />
+      </section>
 
-      <Part n={5} title="Unterschiedliche Auffassungen">
-        <Prose text={a.differingOpinions} empty="Keine belegten Unterschiede erfasst. Prüfer: Gibt es welche?" />
-      </Part>
-
-      <Part n={6} title="Praktische Bedeutung für Muslime in Deutschland">
-        <Prose text={a.practical} empty="Fehlt." />
-      </Part>
-
-      <Part n={7} title="Bedeutung für Amanah">
-        <Prose text={a.forAmanah} empty="Fehlt." />
-        {a.germanLaw.trim() && (
-          <div className="rounded-xl border border-warning/40 bg-warning/5 p-4">
-            <p className="text-xs font-semibold text-warning">Deutsches Recht – nur allgemein, juristisch zu prüfen</p>
-            <Prose text={a.germanLaw} empty="" />
-          </div>
+      <section className="mt-10" data-testid="open-questions">
+        <h2 className="text-xl font-bold text-primary border-b border-border pb-1 mb-3">Offene Fragen ({a.openQuestions.length})</h2>
+        {(Object.keys(FOR) as (keyof typeof FOR)[]).map((f) =>
+          byFor(f).length ? (
+            <div key={f} className="mb-3">
+              <p className="font-semibold">{FOR[f]}</p>
+              <ol className="list-decimal pl-5">
+                {byFor(f).map((q) => (
+                  <li key={q.question}>
+                    {q.question}
+                    {(q.refs ?? []).length ? <span className="text-xs text-muted"> ({(q.refs ?? []).join(", ")})</span> : null}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null,
         )}
-      </Part>
-
-      <Part n={8} title="Quellen und Prüfstatus">
-        <p>
-          Erforderliche Prüfungen: {requiredFullArticleReviews(a).map((k) => REVIEW[k]).join(", ")}. Erfasst: {a.reviews.length ? a.reviews.map((r) => `${REVIEW[r.kind]} (${r.reviewer}, ${r.reviewedAt})`).join("; ") : "keine"}.
-        </p>
-        <div data-testid="manual-checks">
-          <p className="font-semibold">Von Hand zu prüfen</p>
-          <ul className="list-disc pl-5">
-            {manualChecks(a).map((c) => (
-              <li key={c}>{c}</li>
-            ))}
-          </ul>
-        </div>
+        <p className="font-semibold mt-4">Von Hand zu prüfen</p>
+        <ul className="list-disc pl-5" data-testid="manual-checks">
+          {manualChecks(a).map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
         {issues.length > 0 && (
-          <div>
-            <p className="font-semibold text-danger">Strukturhinweise</p>
+          <>
+            <p className="font-semibold mt-4 text-danger">Strukturhinweise</p>
             <ul className="list-disc pl-5 text-danger">
               {issues.map((c) => (
                 <li key={c}>{c}</li>
               ))}
             </ul>
-          </div>
+          </>
         )}
-        <div>
-          <p className="font-semibold">Offene Fragen an Gelehrte und Juristen ({a.openQuestions.length})</p>
-          <ol className="list-decimal pl-5">
-            {a.openQuestions.map((q) => (
-              <li key={q}>{q}</li>
-            ))}
-          </ol>
-        </div>
-        {a.replacesExisting.length > 0 && <p className="text-sm text-muted">Bündelt bestehende Einträge: {a.replacesExisting.join(", ")} (diese bleiben unverändert, bis die Redaktion entscheidet).</p>}
-        <p className="text-sm text-muted">Unterthemen: {a.subtopicIds.join(", ")}</p>
-      </Part>
+        {a.replacesExisting.length > 0 && (
+          <p className="text-sm text-muted mt-4">Bündelt bestehende Einträge: {a.replacesExisting.join(", ")} (diese bleiben unverändert, bis die Redaktion entscheidet).</p>
+        )}
+      </section>
     </article>
   );
 }
