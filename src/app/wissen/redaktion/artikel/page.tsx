@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
 import { KNOWLEDGE_AREAS } from "@/modules/islamic-knowledge";
-import { FULL_ARTICLE_DRAFTS, fullArticleIssues } from "@/modules/islamic-knowledge/full-articles";
+import { FULL_ARTICLE_DRAFTS, OPEN_EDITORIAL_TASKS, fullArticleIssues } from "@/modules/islamic-knowledge/full-articles";
 
 export const metadata = { title: "Artikelentwürfe A–F — intern", robots: { index: false, follow: false } };
 
@@ -22,6 +22,17 @@ export default async function FullArticleDraftsPage() {
         {FULL_ARTICLE_DRAFTS.length} Entwürfe. Qur’an wörtlich nach Bubenheim &amp; Elyas (QuranEnc), Tafsir Ibn Kaṯīr als eigene
         Zusammenfassung, Hadithe nur aus Bukhari und Muslim. Jede Stelle braucht noch die Prüfung von Hand.
       </p>
+      <section className="mb-8 rounded-xl border border-border bg-card p-4" data-testid="editorial-tasks">
+        <h2 className="text-lg font-bold text-primary mb-2">Redaktionelle Aufgaben (noch ohne Entwurf)</h2>
+        <ul className="space-y-2 text-sm">
+          {OPEN_EDITORIAL_TASKS.map((t) => (
+            <li key={t.subtopicId}>
+              <span className="font-semibold">{t.title}</span> <span className="text-xs text-muted">({t.area} · {t.subtopicId} · {t.status})</span>
+              <span className="block text-muted">{t.needs}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
       {KNOWLEDGE_AREAS.map((area) => {
         const list = FULL_ARTICLE_DRAFTS.filter((a) => a.area === area.id);
         if (!list.length) return null;

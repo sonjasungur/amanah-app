@@ -91,6 +91,17 @@ Bestandene automatische Prüfungen sind **keine** Freigabe.
   - Kein eigener Artikel zu FAQ (folgt aus den Artikeln) und Bestattungsrecht (braucht Juristen; Hinweise in E).
   - Sadaqa Jāriya steht nur in F, um Doppelungen zu vermeiden.
 
+## Redaktionelle Aufgabenliste (Owner 18.11.2026)
+
+Die folgenden Unterthemen haben weder einen bestehenden Eintrag noch einen Entwurf. Sie stehen als Aufgabe in `OPEN_EDITORIAL_TASKS` und in der internen Übersicht `/wissen/redaktion/artikel`. Ein Test hält die Liste mit der Struktur A–F synchron.
+
+| Bereich | Unterthema | Was nötig ist | Status |
+|---|---|---|---|
+| C | Häufige Fragen zur Bestattung (`faq`) | Fragen aus den fertigen C-Artikeln ableiten, jede Antwort mit Quelle; religiöse Prüfung | offen |
+| C | Islamische Lehre und deutsches Bestattungsrecht (`bestattungsrecht`) | Landesrecht (Sargpflicht, Fristen, Gräberfelder) nur mit juristischer Prüfung; religiöse Prüfung; Abgrenzung zu `p25-e-bestattung-deutschland` | offen |
+
+**Weiterhin gilt:** Die 26 Artikel bleiben intern. Kein Artikel wird ohne dokumentierte religiöse Freigabe veröffentlicht.
+
 ## Offene Freigaben
 
 | Freigabe | Wer | Stand |

@@ -135,3 +135,32 @@ export function manualChecks(a: FullArticleDraft): string[] {
   if (!a.differingOpinions.trim()) checks.push("Unterschiedliche Auffassungen: nicht belegt erfasst – prüfen, ob es welche gibt");
   return checks;
 }
+
+/**
+ * Editorial task list (owner decision 18.11.2026): subtopics of the A–F structure that have neither
+ * an existing entry nor a P2.5 draft. Writing starts only on assignment; nothing here is published.
+ */
+export interface EditorialTask {
+  area: KnowledgeAreaId;
+  subtopicId: string;
+  title: string;
+  needs: string;
+  status: "offen";
+}
+
+export const OPEN_EDITORIAL_TASKS: readonly EditorialTask[] = [
+  {
+    area: "janazah",
+    subtopicId: "faq",
+    title: "Häufige Fragen zur Bestattung",
+    needs: "Fragen aus den fertigen C-Artikeln ableiten; jede Antwort mit Quelle aus Qur’an, Bukhari oder Muslim; religiöse Prüfung.",
+    status: "offen",
+  },
+  {
+    area: "janazah",
+    subtopicId: "bestattungsrecht",
+    title: "Islamische Lehre und deutsches Bestattungsrecht",
+    needs: "Landesrechtliche Unterschiede (Sargpflicht, Fristen, muslimische Gräberfelder) nur mit juristischer Prüfung; religiöse Prüfung; Abgrenzung zu p25-e-bestattung-deutschland.",
+    status: "offen",
+  },
+];

@@ -5,6 +5,7 @@ import verbatim from "@/lib/knowledge/data/quran-verbatim.json";
 import { KNOWLEDGE_AREAS, KNOWLEDGE_CATALOG, getPublishedArticles } from "@/modules/islamic-knowledge";
 import {
   FULL_ARTICLE_DRAFTS,
+  OPEN_EDITORIAL_TASKS,
   fullArticleIssues,
   fullArticleReviewsComplete,
   isFullArticlePublishable,
@@ -104,5 +105,16 @@ describe("P2.5-E source rules", () => {
     const catalog = new Set(KNOWLEDGE_CATALOG.flatMap((a) => [a.id, a.legacy?.recordId].filter((x): x is string => Boolean(x))));
     for (const a of FULL_ARTICLE_DRAFTS) for (const r of a.replacesExisting) expect(catalog.has(r), `${a.id} → ${r}`).toBe(true);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe("P2.5 editorial task list", () => {
+  it("lists exactly the subtopics without any entry or draft (FAQ, Bestattungsrecht) and nothing is published", () => {
+    const covered = new Set([...KNOWLEDGE_CATALOG.map((a) => a.subtopicId), ...FULL_ARTICLE_DRAFTS.flatMap((a) => a.subtopicIds)]);
+    const uncovered = KNOWLEDGE_AREAS.flatMap((a) => a.subtopics.map((s) => s.id)).filter((id) => !covered.has(id));
+    expect(OPEN_EDITORIAL_TASKS.map((t) => t.subtopicId).sort()).toEqual(uncovered.sort());
+    expect(OPEN_EDITORIAL_TASKS.map((t) => t.subtopicId).sort()).toEqual(["bestattungsrecht", "faq"]);
+    expect(OPEN_EDITORIAL_TASKS.every((t) => t.status === "offen")).toBe(true);
+    expect(getPublishedArticles()).toEqual([]);
   });
 });
