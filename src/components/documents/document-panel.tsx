@@ -6,7 +6,7 @@ import { Eye, FileDown, Printer, ShieldAlert } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
 import { DOCUMENTS, documentFileTitle, type DocumentId } from "@/lib/documents/model";
-import { DocumentView, WalletCard, type DocVariant } from "@/components/documents/document-view";
+import { DEFAULT_DOC_VARIANT, DocumentView, WalletCard, type DocVariant } from "@/components/documents/document-view";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
  * (never the form). Health details join only after an explicit choice for this printout. An empty
  * document is not offered for printing; the panel says what is missing instead.
  */
-export function DocumentPanel({ id, variant = "klar", previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
+export function DocumentPanel({ id, variant = DEFAULT_DOC_VARIANT, previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
   const store = useAmanahStore();
   const data = pickDataFields(store);
   const info = DOCUMENTS.find((d) => d.id === id)!;
@@ -105,7 +105,7 @@ export function DocumentPanel({ id, variant = "klar", previewOpen = true }: { id
         <p className="text-sm font-semibold text-foreground">Vorschau</p>
         <div className="rounded-2xl border border-border bg-white shadow-sm overflow-x-auto" data-testid="doc-preview">
           <DocumentView model={model} createdAt={createdAt} dataAsOf={data.lastSaved} variant={variant} testId={`doc-preview-${id}`} />
-          {id === "notfallkarte" && model.hasContent && <WalletCard model={model} />}
+          {model.hasContent && <WalletCard model={model} variant={variant} />}
         </div>
         </>
         )}
@@ -113,7 +113,7 @@ export function DocumentPanel({ id, variant = "klar", previewOpen = true }: { id
       {model.hasContent && (
         <div className="print-only doc-print-root">
           <DocumentView model={model} createdAt={createdAt} dataAsOf={data.lastSaved} variant={variant} testId={`doc-print-${id}`} />
-          {id === "notfallkarte" && <WalletCard model={model} />}
+          <WalletCard model={model} variant={variant} />
         </div>
       )}
     </div>

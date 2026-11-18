@@ -18,7 +18,8 @@ export default function VermoegenPage() {
         <AssetOverview />
         <SaveBar />
       </div>
-      <div className="print-only">
+      {/* The page prints only this document (see globals.css), so no blank first page appears. */}
+      <div className="print-only doc-print-root" data-print-always="">
         <AssetPrintView />
       </div>
     </>

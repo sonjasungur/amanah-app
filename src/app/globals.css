@@ -153,71 +153,203 @@ body {
   body:has([data-testid="dashboard-tabbar"]) { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ── Documents (P2.2): one design for preview and print ──────────────────────────────────────── */
-.amanah-doc {
-  --doc-ink: #1b1f1d;
-  --doc-muted: #4a524e;
-  --doc-line: #d7ddd9;
-  --doc-accent: var(--primary-dark);
-  --doc-soft: #eef5f1;
+/* ── Documents (P2.5): one markup for preview and print, three design directions by attribute ─── */
+.amanah-doc, .doc-wallet {
+  --doc-ink: #17201b;
+  --doc-muted: #4b5550;
+  --doc-line: #d3dcd6;
+  --doc-accent: #0f4c3a;
+  --doc-accent-2: #2f6f57;
+  --doc-soft: #e9f2ed;
+  --doc-soft-2: #f5f8f6;
+  --doc-red: #a3342b;
+  --doc-sans: var(--font-geist-sans), var(--font-arabic), "Noto Naskh Arabic", system-ui, sans-serif;
+  --doc-serif: var(--font-doc-serif), var(--font-arabic), "Noto Naskh Arabic", Georgia, serif;
   color: var(--doc-ink);
   background: #fff;
-  font-family: var(--font-geist-sans), var(--font-arabic), "Noto Naskh Arabic", system-ui, sans-serif;
-  font-size: 11pt;
-  line-height: 1.5;
-  padding: 18mm 16mm;
-  max-width: 210mm;
-  margin: 0 auto;
+  font-family: var(--doc-sans);
 }
+.amanah-doc { font-size: 11.5pt; line-height: 1.5; padding: 18mm 16mm; max-width: 210mm; margin: 0 auto; }
 .amanah-doc .doc-frame { width: 100%; border-collapse: collapse; }
 .amanah-doc .doc-frame td { padding: 0; vertical-align: top; }
-.amanah-doc .doc-page-notice { font-size: 8.5pt; font-weight: 600; text-align: center; color: var(--doc-muted); padding-bottom: 4mm; }
-.amanah-doc .doc-head { border-bottom: 2px solid var(--doc-accent); padding-bottom: 5mm; margin-bottom: 6mm; }
-.amanah-doc .doc-brand { display: flex; align-items: center; gap: 2.5mm; color: var(--doc-accent); font-weight: 700; font-size: 10pt; letter-spacing: 0.02em; }
-.amanah-doc .doc-title { font-size: 22pt; line-height: 1.15; font-weight: 700; margin: 4mm 0 2mm; text-wrap: balance; }
+.amanah-doc .doc-running { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2mm 6mm; font-size: 8.5pt; color: var(--doc-muted); padding-bottom: 4mm; }
+.amanah-doc .doc-running-id { font-weight: 600; }
+.amanah-doc .doc-page-notice { font-weight: 600; }
+.amanah-doc .doc-head { margin-bottom: 6mm; }
+.amanah-doc .doc-brand { display: flex; flex-wrap: wrap; align-items: center; gap: 2.5mm; color: var(--doc-accent); font-weight: 700; font-size: 10pt; letter-spacing: 0.02em; }
+.amanah-doc .doc-audience { margin-left: auto; font-weight: 500; color: var(--doc-muted); font-size: 9pt; letter-spacing: 0; }
+.amanah-doc .doc-title { font-size: 24pt; line-height: 1.15; font-weight: 700; margin: 4mm 0 1.5mm; text-wrap: balance; }
+.amanah-doc .doc-identity { font-size: 13pt; font-weight: 600; margin: 0 0 2mm; overflow-wrap: anywhere; }
 .amanah-doc .doc-status { font-weight: 600; margin: 0; }
 .amanah-doc .doc-meta { color: var(--doc-muted); font-size: 9pt; margin: 1.5mm 0 0; }
+.amanah-doc .doc-key { display: flex; gap: 3mm; align-items: flex-start; border: 2px solid var(--doc-red); border-radius: 2mm; padding: 3mm 4mm; margin: 0 0 6mm; font-weight: 700; font-size: 12.5pt; line-height: 1.35; break-inside: avoid; }
+.amanah-doc .doc-key svg { color: var(--doc-red); flex-shrink: 0; margin-top: 0.6mm; }
 .amanah-doc .doc-section { margin-bottom: 6mm; break-inside: avoid-page; }
-.amanah-doc .doc-section h2 { font-size: 13pt; font-weight: 700; color: var(--doc-accent); margin: 0 0 2.5mm; break-after: avoid; }
+.amanah-doc .doc-section h2 { display: flex; align-items: center; gap: 2.5mm; font-size: 13.5pt; line-height: 1.25; font-weight: 700; margin: 0 0 2.5mm; break-after: avoid; break-inside: avoid; }
+.amanah-doc .doc-section-body > :first-child, .amanah-doc .doc-section-body > .doc-note + * { break-before: avoid; }
+.amanah-doc .doc-num { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 7.5mm; height: 7.5mm; border-radius: 50%; background: var(--doc-accent); color: #fff; font-size: 10.5pt; font-weight: 700; font-variant-numeric: tabular-nums; }
+.amanah-doc .doc-icon { color: var(--doc-accent); flex-shrink: 0; }
+.amanah-doc .doc-h2-text { min-width: 0; }
 .amanah-doc .doc-note { color: var(--doc-muted); font-size: 9.5pt; margin: 0 0 2mm; }
+.amanah-doc .doc-subhead { font-size: 10pt; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--doc-accent-2); margin: 4mm 0 1.2mm; break-after: avoid; }
+.amanah-doc .doc-section-body > .doc-subhead:first-child { margin-top: 0; }
 .amanah-doc .doc-rows { margin: 0; }
-.amanah-doc .doc-rows > div { display: grid; grid-template-columns: minmax(0, 48mm) minmax(0, 1fr); gap: 4mm; padding: 1.8mm 0; border-bottom: 1px solid var(--doc-line); break-inside: avoid; }
-.amanah-doc .doc-rows dt { font-weight: 600; }
-.amanah-doc .doc-rows dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.amanah-doc .doc-rows > div { display: grid; grid-template-columns: minmax(0, 52mm) minmax(0, 1fr); gap: 4mm; padding: 1.8mm 0; border-bottom: 1px solid var(--doc-line); break-inside: avoid; }
+.amanah-doc .doc-rows dt { font-weight: 600; color: var(--doc-muted); }
+.amanah-doc .doc-rows dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 500; }
 .amanah-doc .doc-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 3mm; }
 .amanah-doc .doc-list { list-style: none; margin: 0; padding: 0; }
 .amanah-doc .doc-list li { padding: 2mm 0; border-bottom: 1px solid var(--doc-line); break-inside: avoid; }
 .amanah-doc .doc-list-title { display: block; font-weight: 600; overflow-wrap: anywhere; }
 .amanah-doc .doc-list-detail { display: block; color: var(--doc-muted); font-size: 10pt; overflow-wrap: anywhere; }
+.amanah-doc .doc-contacts { list-style: none; margin: 0 0 2mm; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3mm; }
+.amanah-doc .doc-contact { display: flex; flex-direction: column; gap: 0.6mm; border: 1px solid var(--doc-line); border-radius: 2mm; padding: 2.8mm 3.5mm; break-inside: avoid; min-width: 0; }
+.amanah-doc .doc-contact-role { font-size: 8.5pt; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--doc-muted); }
+.amanah-doc .doc-contact-name { font-size: 12.5pt; font-weight: 700; overflow-wrap: anywhere; }
+.amanah-doc .doc-contact-phone { display: inline-flex; align-items: center; gap: 1.5mm; font-size: 13pt; font-weight: 700; color: var(--doc-accent); font-variant-numeric: tabular-nums; }
+.amanah-doc .doc-contact-note { font-size: 9.5pt; color: var(--doc-muted); }
+.amanah-doc .doc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 2mm; }
+.amanah-doc .doc-steps li { display: flex; gap: 3mm; align-items: flex-start; break-inside: avoid; }
+.amanah-doc .doc-step-box { display: none; }
+.amanah-doc .doc-step-num { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 6mm; height: 6mm; border-radius: 50%; background: var(--doc-soft); color: var(--doc-accent); font-size: 9.5pt; font-weight: 700; margin-top: 0.4mm; }
+.amanah-doc .doc-step-body { min-width: 0; }
+.amanah-doc .doc-step-title { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.amanah-doc .doc-step-detail { display: block; color: var(--doc-muted); font-size: 10pt; overflow-wrap: anywhere; }
+.amanah-doc .doc-inline-callout { display: flex; gap: 2mm; align-items: flex-start; background: var(--doc-soft-2); border-radius: 1.5mm; padding: 2.5mm 3mm; font-size: 10pt; margin: 2.5mm 0 0; break-inside: avoid; }
+.amanah-doc .doc-inline-icon { color: var(--doc-accent-2); flex-shrink: 0; margin-top: 0.8mm; }
 .amanah-doc .doc-callout { border: 1.5px solid var(--doc-line); border-radius: 2mm; padding: 3mm 4mm; margin-bottom: 6mm; break-inside: avoid; }
 .amanah-doc .doc-callout h2 { font-size: 11pt; margin: 0 0 1.5mm; }
 .amanah-doc .doc-callout p, .amanah-doc .doc-callout ul { margin: 0; }
 .amanah-doc .doc-warn { border-color: #9a6a00; }
 .amanah-doc .doc-missing { border-style: dashed; color: var(--doc-muted); }
+.amanah-doc .doc-toc { margin-top: 8mm; }
+.amanah-doc .doc-toc-title { font-weight: 700; font-size: 12pt; margin: 0 0 2mm; }
+.amanah-doc .doc-toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.6mm; }
+.amanah-doc .doc-toc li { display: flex; gap: 3mm; align-items: baseline; }
+.amanah-doc .doc-toc-num { font-weight: 700; color: var(--doc-accent); min-width: 6mm; font-variant-numeric: tabular-nums; }
+.amanah-doc .doc-toc-hint { margin: 6mm 0 0; font-size: 9pt; color: var(--doc-muted); }
 .amanah-doc .doc-foot { margin-top: 8mm; padding-top: 3mm; border-top: 1px solid var(--doc-line); font-size: 8.5pt; color: var(--doc-muted); }
 
-/* Variant "klassisch": calm, serif headings, centred head. */
-.amanah-doc[data-doc-variant="klassisch"] .doc-head { text-align: center; border-bottom: 1px solid var(--doc-ink); }
-.amanah-doc[data-doc-variant="klassisch"] .doc-brand { justify-content: center; }
-.amanah-doc[data-doc-variant="klassisch"] .doc-title,
-.amanah-doc[data-doc-variant="klassisch"] .doc-section h2 { font-family: Georgia, "Noto Serif", serif; color: var(--doc-ink); }
-.amanah-doc[data-doc-variant="klassisch"] .doc-section h2 { border-bottom: 1px solid var(--doc-line); padding-bottom: 1mm; }
-/* Variant "kompakt": dense table, small type, for long overviews. */
-.amanah-doc[data-doc-variant="kompakt"] { font-size: 10pt; padding: 14mm 14mm; }
-.amanah-doc[data-doc-variant="kompakt"] .doc-title { font-size: 17pt; }
-.amanah-doc[data-doc-variant="kompakt"] .doc-section h2 { background: var(--doc-soft); color: var(--doc-ink); padding: 1.2mm 2mm; font-size: 11pt; }
-.amanah-doc[data-doc-variant="kompakt"] .doc-rows > div { grid-template-columns: minmax(0, 42mm) minmax(0, 1fr); padding: 1mm 2mm; }
+/* A "Klinisch-klar": register strip, numbered markers with a guide line, emergency first. */
+.amanah-doc[data-doc-variant="klinisch"] .doc-head { border-left: 2.5mm solid var(--doc-accent); padding: 1mm 0 1mm 5mm; }
+.amanah-doc[data-doc-variant="klinisch"] .doc-section { position: relative; padding-left: 12mm; }
+.amanah-doc[data-doc-variant="klinisch"] .doc-section::before { content: ""; position: absolute; left: 3.6mm; top: 9mm; bottom: -4mm; width: 0.5mm; background: var(--doc-line); }
+.amanah-doc[data-doc-variant="klinisch"] .doc-section:last-of-type::before { display: none; }
+.amanah-doc[data-doc-variant="klinisch"] .doc-num { position: absolute; left: 0; top: -0.3mm; }
+.amanah-doc[data-doc-variant="klinisch"] .doc-contact { border-left: 1.2mm solid var(--doc-accent); }
+.amanah-doc[data-doc-variant="klinisch"] .doc-cover .doc-toc { border-top: 1px solid var(--doc-line); padding-top: 5mm; }
+.amanah-doc[data-doc-variant="klinisch"] .doc-cover .doc-toc ol { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8mm; }
 
-/* Wallet card to cut out. */
-.doc-wallet { display: flex; flex-wrap: wrap; gap: 6mm; margin: 6mm auto 0; max-width: 210mm; padding: 0 16mm; }
-.doc-wallet-card { width: 85.6mm; height: 54mm; border: 1px dashed #555; border-radius: 3mm; padding: 3.5mm; display: flex; flex-direction: column; gap: 0.8mm; font-size: 8.5pt; line-height: 1.3; overflow: hidden; color: #1b1f1d; background: #fff; font-family: var(--font-geist-sans), var(--font-arabic), system-ui, sans-serif; }
-.doc-wallet-card strong { font-size: 10pt; letter-spacing: 0.06em; color: var(--primary-dark); }
-.doc-wallet-card small { margin-top: auto; font-size: 7pt; color: #555; }
+/* B "Ruhig-editorial": serif headings, centred cover with contents, tinted cards, no circles. */
+.amanah-doc[data-doc-variant="editorial"] { line-height: 1.6; }
+.amanah-doc[data-doc-variant="editorial"] .doc-head { text-align: center; border-bottom: 1px solid var(--doc-line); padding-bottom: 6mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-brand { justify-content: center; }
+.amanah-doc[data-doc-variant="editorial"] .doc-audience { margin-left: 0; flex-basis: 100%; }
+.amanah-doc[data-doc-variant="editorial"] .doc-title,
+.amanah-doc[data-doc-variant="editorial"] .doc-section h2,
+.amanah-doc[data-doc-variant="editorial"] .doc-toc-title { font-family: var(--doc-serif); font-weight: 600; }
+.amanah-doc[data-doc-variant="editorial"] .doc-title { font-size: 28pt; color: var(--doc-accent); }
+.amanah-doc[data-doc-variant="editorial"] .doc-cover { display: flex; flex-direction: column; justify-content: center; min-height: 235mm; border-bottom: 0; }
+.amanah-doc[data-doc-variant="editorial"] .doc-cover .doc-title { font-size: 36pt; margin-top: 30mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-cover .doc-identity::after { content: ""; display: block; width: 24mm; height: 0.6mm; background: var(--doc-accent); margin: 6mm auto 0; }
+.amanah-doc[data-doc-variant="editorial"] .doc-toc { text-align: left; max-width: 120mm; margin: 14mm auto 0; }
+.amanah-doc[data-doc-variant="editorial"] .doc-toc li span:last-child { flex: 1; border-bottom: 1px dotted var(--doc-line); }
+.amanah-doc[data-doc-variant="editorial"] .doc-toc-hint { text-align: center; }
+.amanah-doc[data-doc-variant="editorial"] .doc-section h2 { font-size: 16pt; color: var(--doc-ink); border-bottom: 1px solid var(--doc-line); padding-bottom: 1.5mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-num { width: auto; height: auto; border-radius: 0; background: none; color: var(--doc-accent); font-family: var(--doc-serif); font-size: 16pt; }
+.amanah-doc[data-doc-variant="editorial"] .doc-num::after { content: "."; }
+.amanah-doc[data-doc-variant="editorial"] .doc-icon { color: var(--doc-accent-2); }
+.amanah-doc[data-doc-variant="editorial"] .doc-rows > div { grid-template-columns: minmax(0, 1fr); gap: 0.3mm; border-bottom: 0; padding: 1.5mm 0; }
+.amanah-doc[data-doc-variant="editorial"] .doc-rows dt { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
+.amanah-doc[data-doc-variant="editorial"] .doc-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 8mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-contact { border: 0; background: var(--doc-soft); border-radius: 3mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-text { font-family: var(--doc-serif); font-size: 12.5pt; line-height: 1.7; border-left: 0.8mm solid var(--doc-soft); padding-left: 5mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-step-num { background: none; color: var(--doc-accent); font-family: var(--doc-serif); font-size: 14pt; width: 7mm; margin-top: -0.6mm; }
+.amanah-doc[data-doc-variant="editorial"] .doc-subhead { font-family: var(--doc-serif); text-transform: none; letter-spacing: 0; font-size: 12pt; font-style: italic; }
+
+/* C "Kompakt-praktisch": heavy section bars, boxed fields, checklists to tick off. */
+.amanah-doc[data-doc-variant="praktisch"] { font-size: 11pt; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-head { border: 1.5px solid var(--doc-ink); border-radius: 0; padding: 4mm 5mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-title { font-size: 21pt; margin-top: 2mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-key { border-radius: 0; background: var(--doc-red); color: #fff; border-color: var(--doc-red); }
+.amanah-doc[data-doc-variant="praktisch"] .doc-key svg { color: #fff; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-section h2 { background: var(--doc-accent); color: #fff; padding: 1.8mm 3mm; font-size: 12.5pt; margin-bottom: 0; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-num { background: #fff; color: var(--doc-accent); border-radius: 1mm; width: 6.5mm; height: 6.5mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-icon { color: #fff; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-section-body { border: 1px solid var(--doc-line); border-top: 0; padding: 3mm 3.5mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-rows > div { grid-template-columns: minmax(0, 46mm) minmax(0, 1fr); padding: 0; gap: 0; border: 1px solid var(--doc-line); border-bottom: 0; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-rows > div:last-child { border-bottom: 1px solid var(--doc-line); }
+.amanah-doc[data-doc-variant="praktisch"] .doc-rows dt { background: var(--doc-soft-2); padding: 2mm 2.5mm; border-right: 1px solid var(--doc-line); }
+.amanah-doc[data-doc-variant="praktisch"] .doc-rows dd { padding: 2mm 2.5mm; min-height: 9mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-contact { border-radius: 0; border-width: 1.5px; border-color: var(--doc-ink); }
+.amanah-doc[data-doc-variant="praktisch"] .doc-step-box { display: inline-block; flex-shrink: 0; width: 5mm; height: 5mm; border: 1.5px solid var(--doc-ink); margin-top: 0.6mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-step-num { display: none; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-steps li { border-bottom: 1px dashed var(--doc-line); padding-bottom: 2mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-cover .doc-toc ol { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 6mm; }
+.amanah-doc[data-doc-variant="praktisch"] .doc-toc li { border: 1px solid var(--doc-line); padding: 1.5mm 2.5mm; }
+
+/* Emergency sheet: one A4 page even with health details and two contacts. */
+.amanah-doc[data-doc-id="notfallkarte"] { font-size: 11pt; line-height: 1.4; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-title { font-size: 20pt; margin-top: 2mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-head { margin-bottom: 4mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-key { margin-bottom: 4mm; font-size: 12pt; padding: 2.5mm 3.5mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section { margin-bottom: 3.5mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section h2 { margin-bottom: 1.5mm; font-size: 12.5pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contacts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact { padding: 2mm 2.5mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact-name { font-size: 11.5pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact-phone { font-size: 12pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-rows > div { padding: 1.1mm 0; }
+.amanah-doc[data-doc-id="notfallkarte"][data-doc-variant="praktisch"] .doc-rows > div { padding: 0; }
+.amanah-doc[data-doc-id="notfallkarte"][data-doc-variant="praktisch"] .doc-rows dt,
+.amanah-doc[data-doc-id="notfallkarte"][data-doc-variant="praktisch"] .doc-rows dd { padding: 1.2mm 2.5mm; min-height: 0; }
+.amanah-doc[data-doc-id="notfallkarte"][data-doc-variant="praktisch"] .doc-section-body { padding: 2mm 2.5mm; }
+.amanah-doc[data-doc-id="notfallkarte"][data-doc-variant="editorial"] .doc-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-foot { margin-top: 2.5mm; padding-top: 1.5mm; font-size: 8pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section { margin-bottom: 3mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-meta { margin-top: 0.8mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-note { margin-bottom: 1mm; }
+/* One page only: the identity is in the head already, no running head needed. */
+.amanah-doc[data-doc-id="notfallkarte"] .doc-frame > thead { display: none; }
+
+/* Fold card to cut out: front and back side by side, fold in the middle, cut marks at the corners. */
+.doc-wallet { max-width: 210mm; margin: 0 auto; padding: 10mm 16mm 14mm; font-size: 10pt; line-height: 1.4; }
+.doc-wallet-title { font-size: 15pt; font-weight: 700; margin: 0 0 1.5mm; color: var(--doc-accent); }
+.doc-wallet-hint { margin: 0 0 8mm; color: var(--doc-muted); font-size: 9.5pt; }
+.doc-card { position: relative; display: flex; width: 171.2mm; max-width: 100%; height: 54mm; margin: 0 auto 14mm; outline: 0.2mm solid #c9cfcb; }
+.doc-card-face { width: 85.6mm; height: 54mm; overflow: hidden; display: flex; flex-direction: column; font-size: 8pt; line-height: 1.28; }
+.doc-card-body > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.doc-card-back { border-left: 0.3mm dashed #8a938e; }
+.doc-card-band { display: flex; flex-direction: column; background: var(--doc-accent); color: #fff; padding: 2.2mm 3.5mm; font-weight: 700; font-size: 10.5pt; letter-spacing: 0.08em; }
+.doc-card-band-sub { font-size: 7pt; letter-spacing: 0.02em; font-weight: 500; }
+.doc-card-body { display: flex; flex-direction: column; gap: 0.5mm; padding: 2.5mm 3.5mm; flex: 1; min-height: 0; overflow-wrap: anywhere; }
+.doc-card-name { font-size: 11pt; font-weight: 700; }
+.doc-card-label { margin-top: 1mm; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--doc-muted); }
+.doc-card-first { font-weight: 700; font-size: 9pt; }
+.doc-card-back small { margin-top: auto; font-size: 7pt; color: var(--doc-muted); }
+.doc-cut { position: absolute; width: 4mm; height: 4mm; border-color: #555; border-style: solid; border-width: 0; }
+.doc-cut-tl { top: -6mm; left: -6mm; border-right-width: 0.3mm; border-bottom-width: 0.3mm; }
+.doc-cut-tr { top: -6mm; right: -6mm; border-left-width: 0.3mm; border-bottom-width: 0.3mm; }
+.doc-cut-bl { bottom: -6mm; left: -6mm; border-right-width: 0.3mm; border-top-width: 0.3mm; }
+.doc-cut-br { bottom: -6mm; right: -6mm; border-left-width: 0.3mm; border-top-width: 0.3mm; }
+.doc-wallet[data-doc-variant="editorial"] .doc-wallet-title { font-family: var(--doc-serif); font-weight: 600; }
+.doc-wallet[data-doc-variant="editorial"] .doc-card-band { background: var(--doc-soft); color: var(--doc-accent); }
+.doc-wallet[data-doc-variant="editorial"] .doc-card-name { font-family: var(--doc-serif); }
+.doc-wallet[data-doc-variant="praktisch"] .doc-card { outline: 0.4mm solid var(--doc-ink); }
+.doc-wallet[data-doc-variant="praktisch"] .doc-card-band { background: var(--doc-red); }
 
 @media screen and (max-width: 640px) {
   .amanah-doc { padding: 6mm 5mm; font-size: 10pt; }
-  .amanah-doc .doc-rows > div { grid-template-columns: minmax(0, 1fr); gap: 0.5mm; }
-  .doc-wallet { padding: 0 5mm; }
+  .amanah-doc .doc-rows > div { grid-template-columns: minmax(0, 1fr) !important; gap: 0.5mm; }
+  .amanah-doc .doc-rows { grid-template-columns: minmax(0, 1fr) !important; }
+  .amanah-doc .doc-contacts { grid-template-columns: minmax(0, 1fr); }
+  .amanah-doc[data-doc-variant="klinisch"] .doc-section { padding-left: 10mm; }
+  .amanah-doc[data-doc-variant="editorial"] .doc-cover { min-height: 0; }
+  .amanah-doc[data-doc-variant="editorial"] .doc-cover .doc-title { margin-top: 4mm; font-size: 24pt; }
+  .amanah-doc .doc-cover .doc-toc ol { grid-template-columns: minmax(0, 1fr) !important; }
+  .doc-wallet { padding: 6mm 5mm; }
+  .doc-card { flex-direction: column; height: auto; width: 85.6mm; }
+  .doc-card-back { border-left: 0; border-top: 0.3mm dashed #8a938e; }
 }
 
 @page amanah-doc {
@@ -235,12 +367,15 @@ body {
   .amanah-doc .doc-section { break-inside: auto; }
   .amanah-doc .doc-section h2 { break-after: avoid; }
   .amanah-doc .doc-warn, .amanah-doc .doc-missing { color: #000; }
+  .amanah-doc .doc-cover { break-after: page; }
+  .doc-wallet { break-before: page; padding: 0 16mm; }
 }
 
 /* Printing one document: everything that is not the document or one of its ancestors stays off paper. */
 @media print {
-  body[data-print-doc] *:not(:has(.doc-print-root)):not(.doc-print-root):not(.doc-print-root *) { display: none !important; }
-  body[data-print-doc] :has(> .doc-print-root),
-  body[data-print-doc] :has(.doc-print-root) { padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; max-width: none !important; gap: 0 !important; }
-  body[data-print-doc] { background: #fff !important; }
+  body[data-print-doc] *:not(:has(.doc-print-root)):not(.doc-print-root):not(.doc-print-root *),
+  body:has(.doc-print-root[data-print-always]) *:not(:has(.doc-print-root)):not(.doc-print-root):not(.doc-print-root *) { display: none !important; }
+  body[data-print-doc] :has(.doc-print-root),
+  body:has(.doc-print-root[data-print-always]) :has(.doc-print-root) { padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; max-width: none !important; gap: 0 !important; }
+  body[data-print-doc], body:has(.doc-print-root[data-print-always]) { background: #fff !important; }
 }

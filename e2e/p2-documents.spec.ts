@@ -18,7 +18,7 @@ async function pdfPages(page: Page): Promise<number> {
 test.describe("P2.2 documents", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "PDF output needs Chromium");
 
-  test("the emergency card prints as one A4 page, without the form around it", async ({ page }, info) => {
+  test("the emergency card prints as one A4 sheet plus the fold card page, without the form around it", async ({ page }, info) => {
     test.skip(info.project.name !== "chromium-desktop", "page.pdf once is enough");
     await loadDemo(page);
     await page.goto("/dashboard/notfallkarte");
@@ -30,7 +30,9 @@ test.describe("P2.2 documents", () => {
     await expect(page.getByTestId("doc-print-notfallkarte")).toBeVisible();
     await expect(page.getByLabel("Name", { exact: true })).toBeHidden();
     await expect(page.getByRole("button", { name: /Drucken/ })).toBeHidden();
-    expect(await pdfPages(page)).toBe(1);
+    await expect(page.getByTestId("wallet-card").last()).toBeVisible();
+    // P2.5: the A4 emergency sheet and, on its own page, the fold card to cut out.
+    expect(await pdfPages(page)).toBe(2);
   });
 
   test("empty documents are not offered as finished; filled ones print German values only", async ({ page }) => {

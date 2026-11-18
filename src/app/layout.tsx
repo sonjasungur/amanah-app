@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Noto_Naskh_Arabic } from "next/font/google";
+import { Geist, Noto_Naskh_Arabic, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
@@ -17,6 +17,14 @@ const arabic = Noto_Naskh_Arabic({
   variable: "--font-arabic",
   subsets: ["arabic"],
   weight: ["400", "700"],
+  display: "swap",
+  preload: false,
+});
+
+/** Serif for document headings (design direction "editorial"). Self-hosted by next/font, not preloaded. */
+const docSerif = Source_Serif_4({
+  variable: "--font-doc-serif",
+  subsets: ["latin", "latin-ext"],
   display: "swap",
   preload: false,
 });
@@ -48,7 +56,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={`${geist.variable} ${arabic.variable} h-full`}>
+    <html lang="de" className={`${geist.variable} ${arabic.variable} ${docSerif.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <Providers>
           <StagingBanner />
