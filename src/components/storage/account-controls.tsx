@@ -5,7 +5,7 @@ import { wipeDeviceData } from "@/lib/storage/device-data";
 import { useRouter } from "next/navigation";
 import { Download, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/input";
 import { apiAuthProvider } from "@/lib/auth/api-auth-provider";
 import { resetAmanahStore } from "@/lib/store/use-amanah-store";
 
@@ -64,8 +64,7 @@ export function AccountControls() {
           </p>
           <label className="block text-sm font-medium">
             Passwort zur Bestätigung
-            <Input
-              type="password"
+            <PasswordInput
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

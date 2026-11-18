@@ -9,6 +9,7 @@ import { careDirectiveFields } from "@/lib/modules/fields";
 export default function BetreuungPage() {
   return (
     <ModulePage
+      help="betreuungsverfuegung"
       title="Betreuungsverfügung"
       description={moduleText("betreuung-intro")}
       section="careDirective"

@@ -9,6 +9,7 @@ import { powerOfAttorneyFields } from "@/lib/modules/fields";
 export default function VollmachtPage() {
   return (
     <ModulePage
+      help="vorsorgevollmacht"
       title="Vorsorgevollmacht"
       description={moduleText("vollmacht-intro")}
       section="powerOfAttorney"

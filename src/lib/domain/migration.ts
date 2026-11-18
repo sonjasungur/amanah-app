@@ -4,6 +4,10 @@ import type { AmanahOrdnerData, TestamentPreparation } from "./types";
 import { normalizeCheckProgress } from "@/lib/check/progress";
 import { sanitizeBequests } from "@/lib/testament/bequests";
 import { normalizeVorsorgeMeta } from "@/lib/vorsorge/meta";
+import { toIsoDate } from "@/lib/utils/date-input";
+
+/** Birth dates typed as TT.MM.JJJJ in earlier versions become ISO; anything else stays as typed. */
+const isoIfDate = (value: unknown): string => (typeof value === "string" ? (toIsoDate(value) ?? value) : "");
 
 type LegacyRawData = Record<string, unknown>;
 
@@ -44,7 +48,7 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
   return {
     ...merged,
     schemaVersion: SCHEMA_VERSION,
-    familyMembers: merged.familyMembers ?? [],
+    familyMembers: (merged.familyMembers ?? []).map((m) => (m.birthDate ? { ...m, birthDate: isoIfDate(m.birthDate) } : m)),
     documents: merged.documents ?? [],
     assets: merged.assets ?? [],
     testamentPreparation: normalizeTestamentPreparation(merged.testamentPreparation),
@@ -57,6 +61,9 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
       : [],
     reviewStatus: merged.reviewStatus ?? "draft",
     vorsorgeMeta: normalizeVorsorgeMeta(merged.vorsorgeMeta),
+    userProfile: { ...merged.userProfile, birthDate: isoIfDate(merged.userProfile?.birthDate) },
+    emergencyCard: { ...merged.emergencyCard, birthDate: isoIfDate(merged.emergencyCard?.birthDate) },
+    janazahWishes: { ...merged.janazahWishes, birthDate: isoIfDate(merged.janazahWishes?.birthDate) },
     checkProgress: normalizeCheckProgress(merged.checkProgress ?? defaultAmanahData.checkProgress),
   };
 }

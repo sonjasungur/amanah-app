@@ -6,6 +6,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { emergencyCardFields } from "@/lib/modules/fields";
 import { PrintButton, PrintField, PrintSection } from "@/components/print/print-views";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { formatDisplayDate } from "@/lib/utils/date-input";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -18,7 +19,7 @@ function NotfallkartePrintView() {
       </div>
       <PrintSection title="Persönliche Daten">
         <PrintField label="Name" value={d.emergencyCard.name} />
-        <PrintField label="Geburtsdatum" value={d.emergencyCard.birthDate} />
+        <PrintField label="Geburtsdatum" value={formatDisplayDate(d.emergencyCard.birthDate)} />
         <PrintField label="Sprache" value={d.emergencyCard.language} />
       </PrintSection>
       <PrintSection title="Notfallkontakte">

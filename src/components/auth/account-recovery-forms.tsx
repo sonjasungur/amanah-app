@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { Logo } from "@/components/layout/logo";
 import { useAuth } from "@/lib/auth/context";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/config";
@@ -105,7 +105,7 @@ export function ResetPasswordForm() {
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const [first, second] = [...e.currentTarget.querySelectorAll<HTMLInputElement>('input[type="password"]')].map((input) => input.value);
+    const [first, second] = [...e.currentTarget.querySelectorAll<HTMLInputElement>('input[data-password]')].map((input) => input.value);
     setPassword(first);
     setRepeat(second);
     if (first !== second) return setResult({ ok: false, text: "Die Passwörter stimmen nicht überein." });
@@ -127,11 +127,11 @@ export function ResetPasswordForm() {
         <form onSubmit={submit} className="space-y-4 mt-6">
           <label className="text-sm font-medium block">
             Neues Passwort (mind. {MIN_PASSWORD_LENGTH} Zeichen)
-            <Input type="password" required minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" />
+            <PasswordInput required minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" />
           </label>
           <label className="text-sm font-medium block">
             Passwort wiederholen
-            <Input type="password" required minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} className="mt-1" />
+            <PasswordInput required minLength={MIN_PASSWORD_LENGTH} autoComplete="new-password" value={repeat} onChange={(e) => setRepeat(e.target.value)} className="mt-1" />
           </label>
           {result && <p className="text-sm text-destructive" role="alert">{result.text}</p>}
           <Button type="submit" className="w-full" disabled={busy || !token}>Passwort speichern</Button>

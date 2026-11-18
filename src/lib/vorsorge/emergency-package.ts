@@ -2,6 +2,7 @@ import type { AmanahOrdnerData, DocumentType } from "@/lib/domain/types";
 import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS } from "@/lib/vorsorge/documents";
 import { ASSET_TYPES } from "@/lib/testament/asset-labels";
 import { debtTypeLabels, digitalTypeLabels } from "@/lib/vorsorge/labels";
+import { formatDisplayDate } from "@/lib/utils/date-input";
 
 /**
  * The offline emergency package: a printout the person compiles and hands over themselves.
@@ -87,7 +88,7 @@ function sectionFor(data: AmanahOrdnerData, id: PackageItemId): PackageRow[] {
     case "kontakte":
       return rows([
         ["Name", card.name],
-        ["Geburtsdatum", card.birthDate],
+        ["Geburtsdatum", formatDisplayDate(card.birthDate)],
         ["Sprache", card.language],
         ["Notfallkontakt 1", contact(card.emergencyContact1)],
         ["Notfallkontakt 2", contact(card.emergencyContact2)],

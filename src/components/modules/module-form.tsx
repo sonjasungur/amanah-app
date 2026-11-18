@@ -1,18 +1,22 @@
 "use client";
 
 import { useId } from "react";
-import { Input, Textarea, Label, Select } from "@/components/ui/input";
+import { DateInput, Input, Textarea, Label, Select } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n/context";
+import { HelpTip } from "@/components/ui/help-tip";
+import type { HelpTopicId } from "@/lib/content/help-topics";
 
 export interface FieldConfig {
   key: string;
   label: string;
-  type: "text" | "textarea" | "select" | "boolean" | "number";
+  type: "text" | "textarea" | "select" | "boolean" | "number" | "date";
   options?: { value: string; label: string }[];
   placeholder?: string;
   testId?: string;
   showWhenProfileBirthDateEmpty?: boolean;
   helpText?: string;
+  /** A "?" with a short explanation next to the label. */
+  help?: HelpTopicId;
 }
 
 interface ModuleFormProps {
@@ -32,7 +36,10 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
         const control = { id, "aria-describedby": field.helpText ? `${id}-help` : undefined };
         return (
         <div key={field.key} data-testid={field.testId}>
-          <Label htmlFor={id}>{field.label}</Label>
+          <div className="flex flex-wrap items-center">
+            <Label htmlFor={id}>{field.label}</Label>
+            {field.help && <HelpTip topic={field.help} />}
+          </div>
           {field.helpText && <p id={`${id}-help`} className="text-xs text-muted mb-1.5">{field.helpText}</p>}
           {field.type === "textarea" && (
             <Textarea
@@ -48,6 +55,14 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
               value={(values[field.key] as string) || ""}
               onChange={(e) => onChange(field.key, e.target.value)}
               placeholder={field.placeholder}
+            />
+          )}
+          {field.type === "date" && (
+            <DateInput
+              id={id}
+              describedBy={control["aria-describedby"]}
+              value={(values[field.key] as string) || ""}
+              onValueChange={(v) => onChange(field.key, v)}
             />
           )}
           {field.type === "number" && (

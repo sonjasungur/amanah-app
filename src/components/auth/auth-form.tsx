@@ -8,7 +8,7 @@ import { useI18n } from "@/lib/i18n/context";
 import { typedValue } from "@/lib/utils/form-input";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
 import { Card, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input, PasswordInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Logo } from "@/components/layout/logo";
@@ -47,8 +47,8 @@ export function AuthForm({ mode }: AuthFormProps) {
     e.preventDefault();
     const typed = {
       email: typedValue(e.currentTarget, 'input[type="email"]'),
-      password: typedValue(e.currentTarget, 'input[type="password"]'),
-      name: mode === "register" ? typedValue(e.currentTarget, 'input:not([type="email"]):not([type="password"])') : name,
+      password: typedValue(e.currentTarget, 'input[data-password]'),
+      name: mode === "register" ? typedValue(e.currentTarget, 'input:not([type="email"]):not([data-password])') : name,
     };
     setEmail(typed.email);
     setPassword(typed.password);
@@ -136,7 +136,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
           <div>
             <label className="text-sm font-medium block mb-1">{t("auth.password")}</label>
-            <Input type="password" required minLength={MIN_PASSWORD_LENGTH} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+            <PasswordInput required minLength={MIN_PASSWORD_LENGTH} autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
           </div>
           {mode === "login" && authMode === "api" && (
             <p className="text-sm text-right -mt-2">

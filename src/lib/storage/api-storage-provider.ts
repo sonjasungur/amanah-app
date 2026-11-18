@@ -1,7 +1,7 @@
 import { normalizeData } from "@/lib/domain/migration";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { hasAuthSession } from "@/lib/auth/api-auth-provider";
-import { FOLDER_UNREADABLE_CODE, FolderUnreadableError, type FolderWriteScope, type SaveResult, type StorageProvider } from "./types";
+import { FOLDER_UNREADABLE_CODE, FolderUnreadableError, SaveFailedError, type FolderWriteScope, type SaveResult, type StorageProvider } from "./types";
 
 async function throwIfFolderUnreadable(res: Response): Promise<void> {
   if (res.status !== 503) return;
@@ -32,17 +32,28 @@ export class ApiStorageProvider implements StorageProvider {
   }
 
   async save(data: AmanahOrdnerData): Promise<SaveResult> {
-    const res = await fetch("/api/amanah", {
-      method: "PUT",
-      headers: this.getHeaders(),
-      body: JSON.stringify(data),
-    });
+    let res: Response;
+    try {
+      res = await fetch("/api/amanah", {
+        method: "PUT",
+        headers: this.getHeaders(),
+        body: JSON.stringify(data),
+      });
+    } catch {
+      throw new SaveFailedError("offline");
+    }
     await throwIfFolderUnreadable(res);
     if (res.status === 413 || res.status === 422) {
       const { error } = (await res.json().catch(() => ({}))) as { error?: string };
-      throw new Error(error ?? "Die Daten sind zu groß zum Speichern.");
+      throw new SaveFailedError("rejected", error ?? "Die Daten sind zu groß zum Speichern.");
     }
-    if (!res.ok) throw new Error("Speichern auf dem Server fehlgeschlagen.");
+    if (res.status === 401) throw new SaveFailedError("session");
+    if (res.status === 403) {
+      const { code, error } = (await res.json().catch(() => ({}))) as { code?: string; error?: string };
+      if (code === "consent_required") throw new SaveFailedError("consent");
+      throw new SaveFailedError("rejected", error ? `${error} Deine Eingaben bleiben in diesem Tab erhalten.` : undefined);
+    }
+    if (!res.ok) throw new SaveFailedError(res.status >= 500 ? "server" : "rejected");
     const { notStored, nearLimit } = (await res.json().catch(() => ({}))) as SaveResult;
     return { notStored: Array.isArray(notStored) ? notStored : [], nearLimit: nearLimit === true };
   }

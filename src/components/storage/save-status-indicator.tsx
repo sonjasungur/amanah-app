@@ -19,7 +19,7 @@ export function SaveStatusIndicator({ className, compact, fallback }: { classNam
   const lastSaved = useAmanahStore((s) => s.lastSaved);
   const nearLimit = useAmanahStore((s) => s.saveNearLimit);
   const folderProblem = useAmanahStore((s) => s.folderProblem);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const storageLabel = useActiveStorageLabel();
 
   const statusLabel =
@@ -51,7 +51,7 @@ export function SaveStatusIndicator({ className, compact, fallback }: { classNam
       </p>
     ) : null;
   }
-  const savedAt = saveStatus === "saved" && lastSaved ? new Date(lastSaved).toLocaleString() : null;
+  const savedAt = saveStatus === "saved" && lastSaved ? new Date(lastSaved).toLocaleString(locale === "de" ? "de-DE" : locale, { dateStyle: "short", timeStyle: "short" }) : null;
 
   return (
     <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator" aria-live="polite">

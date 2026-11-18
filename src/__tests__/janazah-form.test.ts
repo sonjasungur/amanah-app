@@ -71,7 +71,7 @@ describe("Janazah wishes form", () => {
   it("optional fields have no required constraint in field config", () => {
     for (const field of janazahFields) {
       expect(field.label.length).toBeGreaterThan(0);
-      expect(["text", "textarea", "select", "boolean", "number"]).toContain(field.type);
+      expect(["text", "textarea", "select", "boolean", "number", "date"]).toContain(field.type);
     }
   });
 });

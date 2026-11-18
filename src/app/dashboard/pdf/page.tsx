@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { FileText, Printer } from "lucide-react";
 import { PlusGate } from "@/components/billing/plus-gate";
+import { formatDisplayDate } from "@/lib/utils/date-input";
 
 function NotfallkartePrintView() {
   const d = useAmanahStore();
@@ -29,7 +30,7 @@ function NotfallkartePrintView() {
       </div>
       <PrintSection title="Persönlich">
         <PrintField label="Name" value={d.emergencyCard.name} />
-        <PrintField label="Geburtsdatum" value={d.emergencyCard.birthDate} />
+        <PrintField label="Geburtsdatum" value={formatDisplayDate(d.emergencyCard.birthDate)} />
         <PrintField label="Sprache" value={d.emergencyCard.language} />
       </PrintSection>
       <PrintSection title="Notfallkontakte">

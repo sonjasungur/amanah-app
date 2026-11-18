@@ -8,7 +8,7 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { lastFolderWriteScope, loadAmanahData, saveAmanahData } from "./amanah-storage";
 import { apiStorageProvider } from "./api-storage-provider";
 import { getActiveStorageLabel } from "./storage-config";
-import { FolderUnreadableError } from "./types";
+import { FolderUnreadableError, RETRYABLE_SAVE_FAILURES, SaveFailedError } from "./types";
 import {
   clearUnsentChange,
   deviceDataOwner,
@@ -95,16 +95,61 @@ function reportFolderUnreadable(error: FolderUnreadableError, baseline: AmanahOr
   useAmanahStore.setState({ folderProblem: "unreadable", saveStatus: "error", saveError: error.message });
 }
 
+const sameContent = (a: AmanahOrdnerData, b: AmanahOrdnerData) =>
+  JSON.stringify({ ...a, lastSaved: null }) === JSON.stringify({ ...b, lastSaved: null });
+
 async function saveToAccount(data: AmanahOrdnerData): Promise<void> {
   const result = await saveAmanahData(data);
   accountState = data;
+  retryAttempt = 0;
   const userId = sessionUserId();
   if (userId) markDeviceDataOwner(userId);
+  // "Saved" only for what the person sees now. A newer change is still on its way and keeps "saving".
+  const current = pickDataFields(useAmanahStore.getState());
+  if (!sameContent(current, data)) {
+    useAmanahStore.setState({ saveStatus: "saving", saveError: null });
+    return;
+  }
   useAmanahStore.setState({
     saveStatus: result?.notStored?.length ? "partial" : "saved",
     saveError: null,
     saveNearLimit: result?.nearLimit === true,
     lastSaved: new Date().toISOString(),
+  });
+}
+
+/** Saves to the account one after the other, so that an older answer never overtakes a newer state. */
+let saveChain: Promise<unknown> = Promise.resolve();
+
+const RETRY_DELAYS_MS = [5_000, 15_000, 30_000, 60_000];
+let retryAttempt = 0;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleRetry(): void {
+  if (retryTimer || retryAttempt >= RETRY_DELAYS_MS.length) return;
+  const delay = RETRY_DELAYS_MS[retryAttempt];
+  retryAttempt += 1;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    if (useAmanahStore.getState().saveStatus === "error") void persistStoreChanges();
+  }, delay);
+}
+
+function reportSaveFailure(err: unknown): void {
+  if (err instanceof SaveFailedError && RETRYABLE_SAVE_FAILURES.includes(err.kind)) scheduleRetry();
+  useAmanahStore.setState({
+    saveStatus: "error",
+    saveError: err instanceof Error ? err.message : "Speicherung fehlgeschlagen. Deine Eingaben bleiben in diesem Tab erhalten.",
+  });
+}
+
+if (typeof window !== "undefined") {
+  // Back online: send what is waiting at once instead of waiting for the next retry.
+  window.addEventListener("online", () => {
+    if (useAmanahStore.getState().saveStatus === "error" && isRemotePersistenceActive()) {
+      retryAttempt = 0;
+      void persistStoreChanges();
+    }
   });
 }
 
@@ -123,8 +168,10 @@ async function saveTracked(data: AmanahOrdnerData): Promise<void> {
   const userId = sessionUserId();
   if (userId) markUnsentChange(userId);
   savesInFlight += 1;
+  const run = saveChain.catch(() => undefined).then(() => saveToAccount(data));
+  saveChain = run;
   try {
-    await saveToAccount(data);
+    await run;
   } finally {
     savesInFlight -= 1;
   }
@@ -164,10 +211,7 @@ export async function persistStoreChanges(): Promise<void> {
       reportFolderUnreadable(err, accountState ?? data);
       return;
     }
-    useAmanahStore.setState({
-      saveStatus: "error",
-      saveError: err instanceof Error ? err.message : "Speichern nicht möglich — erneut versuchen",
-    });
+    reportSaveFailure(err);
   }
 }
 

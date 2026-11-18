@@ -3,11 +3,12 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { AlertTriangle } from "lucide-react";
 import { DigitalLegacyEditor } from "@/components/vorsorge/digital-legacy-editor";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export default function DigitalerNachlassPage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary mb-2">Digitaler Nachlass</h1>
+      <h1 className="text-2xl font-bold text-primary mb-2 flex flex-wrap items-center">Digitaler Nachlass <HelpTip topic="digitaler-nachlass" /></h1>
       <p className="text-muted mb-6">
         Dokumentiere Hinweise zu digitalen Konten und Dateien — ohne Passwörter zu speichern.
       </p>

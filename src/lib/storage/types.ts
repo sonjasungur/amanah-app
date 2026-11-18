@@ -28,6 +28,33 @@ export class FolderUnreadableError extends Error {
   }
 }
 
+/**
+ * Why a save to the account did not go through. Each kind has its own message, so that nobody sees a
+ * generic failure for a missing consent or an expired session. The input always stays in this tab.
+ */
+export type SaveFailureKind = "consent" | "session" | "offline" | "server" | "rejected";
+
+export const SAVE_FAILURE_MESSAGES: Record<SaveFailureKind, string> = {
+  consent: "Für die Speicherung im Konto fehlt deine Einwilligung. Deine Eingaben bleiben in diesem Tab erhalten.",
+  session: "Deine Anmeldung ist abgelaufen. Deine Eingaben bleiben in diesem Tab erhalten. Bitte melde dich erneut an.",
+  offline: "Keine Verbindung zum Server. Deine Eingaben bleiben in diesem Tab und werden gesendet, sobald die Verbindung wieder steht.",
+  server: "Der Server hat die Speicherung nicht bestätigt. Deine Eingaben bleiben in diesem Tab und werden erneut gesendet.",
+  rejected: "Die Speicherung wurde abgelehnt. Deine Eingaben bleiben in diesem Tab erhalten.",
+};
+
+/** Kinds that can succeed later without the person doing anything. */
+export const RETRYABLE_SAVE_FAILURES: readonly SaveFailureKind[] = ["offline", "server"];
+
+export class SaveFailedError extends Error {
+  constructor(
+    public readonly kind: SaveFailureKind,
+    message: string = SAVE_FAILURE_MESSAGES[kind],
+  ) {
+    super(message);
+    this.name = "SaveFailedError";
+  }
+}
+
 export interface StorageProvider {
   load(): Promise<AmanahOrdnerData | null>;
   save(data: AmanahOrdnerData): Promise<SaveResult | void>;

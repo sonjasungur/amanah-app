@@ -1,4 +1,5 @@
 import type { AmanahOrdnerData } from "@/lib/domain/types";
+import { toIsoDate } from "@/lib/utils/date-input";
 
 /**
  * Questions to take to a lawyer or notary — derived deterministically from the answers.
@@ -62,8 +63,9 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
 }
 
 function isMinor(birthDate?: string): boolean {
-  if (!birthDate) return false;
-  const born = new Date(birthDate);
+  const iso = birthDate ? toIsoDate(birthDate) : null;
+  if (!iso) return false;
+  const born = new Date(iso);
   if (Number.isNaN(born.getTime())) return false;
   const eighteen = new Date(born);
   eighteen.setFullYear(born.getFullYear() + 18);

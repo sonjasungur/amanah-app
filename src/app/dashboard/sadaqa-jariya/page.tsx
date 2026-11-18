@@ -7,6 +7,7 @@ import { sadaqaFields } from "@/lib/modules/fields";
 export default function SadaqaJariyaPage() {
   return (
     <ModulePage
+      help="sadaqa-jariya"
       title="Sadaqa Jariya"
       description={moduleText("sadaqa-intro")}
       section="sadaqaJariya"

@@ -1,5 +1,7 @@
 "use client";
 
+import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { flushPendingSave } from "@/lib/storage/store-sync";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,6 +56,8 @@ export function ConsentGate({ children }: { children: React.ReactNode }) {
     });
     setBusy(false);
     setState(res.ok ? "granted" : "error");
+    // A save refused for the missing consent (e.g. from the check) goes through now.
+    if (res.ok && useAmanahStore.getState().saveStatus === "error") void flushPendingSave();
   };
 
   if (state === "granted") return children;

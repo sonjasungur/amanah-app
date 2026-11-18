@@ -20,8 +20,7 @@ export function getJanazahSections(locale: string): JanazahSection[] {
         {
           key: "birthDate",
           label: t(loc, "janazah.field.birthDate"),
-          type: "text",
-          placeholder: t(loc, "janazah.field.birthDatePlaceholder"),
+          type: "date",
           showWhenProfileBirthDateEmpty: true,
           testId: "janazah-birthDate",
         },
@@ -36,7 +35,7 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       fields: [
         { key: "peopleToNotify", label: t(loc, "janazah.field.peopleToNotify"), type: "textarea", testId: "janazah-peopleToNotify" },
         { key: "mosqueCommunity", label: t(loc, "janazah.field.mosqueCommunity"), type: "text", testId: "janazah-mosqueCommunity" },
-        { key: "preferredFuneralDirector", label: t(loc, "janazah.field.preferredFuneralDirector"), type: "text", testId: "janazah-preferredFuneralDirector" },
+        { key: "preferredFuneralDirector", help: "moschee-bestatter", label: t(loc, "janazah.field.preferredFuneralDirector"), type: "text", testId: "janazah-preferredFuneralDirector" },
         { key: "additionalContacts", label: t(loc, "janazah.field.additionalContacts"), type: "textarea", testId: "janazah-additionalContacts" },
       ],
     },
@@ -47,12 +46,12 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       fields: [
         { key: "islamicBurialDesired", label: t(loc, "janazah.field.islamicBurialDesired"), type: "boolean", testId: "janazah-islamicBurialDesired" },
         { key: "noUnnecessaryDelay", label: t(loc, "janazah.field.noUnnecessaryDelay"), type: "boolean", testId: "janazah-noUnnecessaryDelay" },
-        { key: "ghusl", label: t(loc, "janazah.field.ghusl"), type: "textarea", testId: "janazah-ghusl" },
-        { key: "preferredGhuslPersons", label: t(loc, "janazah.field.preferredGhuslPersons"), type: "text", testId: "janazah-preferredGhuslPersons" },
-        { key: "genderSpecificWishes", label: t(loc, "janazah.field.genderSpecificWishes"), type: "textarea", testId: "janazah-genderSpecificWishes" },
-        { key: "kafan", label: t(loc, "janazah.field.kafan"), type: "textarea", testId: "janazah-kafan" },
-        { key: "janazahPrayer", label: t(loc, "janazah.field.janazahPrayer"), type: "textarea", testId: "janazah-janazahPrayer" },
-        { key: "preferredMosque", label: t(loc, "janazah.field.preferredMosque"), type: "text", testId: "janazah-preferredMosque" },
+        { key: "ghusl", help: "ghusl", label: t(loc, "janazah.field.ghusl"), type: "textarea", testId: "janazah-ghusl" },
+        { key: "preferredGhuslPersons", help: "ghusl-personen", label: t(loc, "janazah.field.preferredGhuslPersons"), type: "text", testId: "janazah-preferredGhuslPersons" },
+        { key: "genderSpecificWishes", help: "ghusl-personen", label: t(loc, "janazah.field.genderSpecificWishes"), type: "textarea", testId: "janazah-genderSpecificWishes" },
+        { key: "kafan", help: "kafan", label: t(loc, "janazah.field.kafan"), type: "textarea", testId: "janazah-kafan" },
+        { key: "janazahPrayer", help: "janazah-gebet", label: t(loc, "janazah.field.janazahPrayer"), type: "textarea", testId: "janazah-janazahPrayer" },
+        { key: "preferredMosque", help: "moschee-bestatter", label: t(loc, "janazah.field.preferredMosque"), type: "text", testId: "janazah-preferredMosque" },
       ],
     },
     {
@@ -60,9 +59,9 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       title: t(loc, "janazah.section.beisetzung.title"),
       description: t(loc, "janazah.section.beisetzung.desc"),
       fields: [
-        { key: "burialGermany", label: t(loc, "janazah.field.burialGermany"), type: "boolean", testId: "janazah-burialGermany" },
+        { key: "burialGermany", help: "bestattung-ort", label: t(loc, "janazah.field.burialGermany"), type: "boolean", testId: "janazah-burialGermany" },
         {
-          key: "repatriation",
+          key: "repatriation", help: "bestattung-ort",
           label: t(loc, "janazah.field.repatriation"),
           type: "select",
           options: [
@@ -88,8 +87,8 @@ export function getJanazahSections(locale: string): JanazahSection[] {
         { key: "peopleToInclude", label: t(loc, "janazah.field.peopleToInclude"), type: "textarea", testId: "janazah-peopleToInclude" },
         { key: "messageToFamily", label: t(loc, "janazah.field.messageToFamily"), type: "textarea", testId: "janazah-messageToFamily" },
         { key: "obligationsNotes", label: t(loc, "janazah.field.obligationsNotes"), type: "textarea", testId: "janazah-obligationsNotes" },
-        { key: "debtsAmanahNotes", label: t(loc, "janazah.field.debtsAmanahNotes"), type: "textarea", testId: "janazah-debtsAmanahNotes" },
-        { key: "donationWishes", label: t(loc, "janazah.field.donationWishes"), type: "textarea", testId: "janazah-donationWishes" },
+        { key: "debtsAmanahNotes", help: "schulden-amanah", label: t(loc, "janazah.field.debtsAmanahNotes"), type: "textarea", testId: "janazah-debtsAmanahNotes" },
+        { key: "donationWishes", help: "sadaqa-jariya", label: t(loc, "janazah.field.donationWishes"), type: "textarea", testId: "janazah-donationWishes" },
         { key: "culturalExclusions", label: t(loc, "janazah.field.culturalExclusions"), type: "textarea", testId: "janazah-culturalExclusions" },
         { key: "additionalWishes", label: t(loc, "janazah.field.additionalWishes"), type: "textarea", testId: "janazah-additionalWishes" },
       ],

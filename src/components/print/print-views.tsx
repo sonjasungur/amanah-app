@@ -5,6 +5,7 @@ import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { AssetPrintEntries, ASSET_PRINT_NOTICE } from "@/components/print/asset-print-view";
+import { formatDisplayDate } from "@/lib/utils/date-input";
 
 interface PrintButtonProps {
   label?: string;
@@ -74,7 +75,7 @@ export function FullPrintView() {
 
       <PrintSection title="1. Notfallkontakte">
         <PrintField label="Name" value={d.emergencyCard.name} />
-        <PrintField label="Geburtsdatum" value={d.emergencyCard.birthDate} />
+        <PrintField label="Geburtsdatum" value={formatDisplayDate(d.emergencyCard.birthDate)} />
         <PrintField label="Notfallkontakt 1" value={`${d.emergencyCard.emergencyContact1.name} (${d.emergencyCard.emergencyContact1.phone})`} />
         <PrintField label="Notfallkontakt 2" value={`${d.emergencyCard.emergencyContact2.name} (${d.emergencyCard.emergencyContact2.phone})`} />
         <PrintField label="Hausarzt" value={d.emergencyCard.familyDoctor} />
