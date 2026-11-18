@@ -177,6 +177,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
     conversationGuide: "",
     keyWishesSummary: "",
   },
+  familyConversation: { topics: {}, talks: [] },
   selectedPath: "complete",
   knowledgeBookmarks: [],
   vorsorgeMeta: { areaUpdatedAt: {}, flowStep: null, flowPausedAt: null, personLinks: {}, reviewedAt: null },

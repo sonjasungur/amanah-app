@@ -70,7 +70,8 @@ export const VORSORGE_AREAS: readonly VorsorgeArea[] = [
     id: "familie",
     title: "Familie & Kontakte",
     description: "Jede Person nur einmal, für Notfallkarte, Vollmacht und Janazah.",
-    sections: ["familyMembers"],
+    // The conversation record counts as a change in this area (date of last change), not as core detail.
+    sections: ["familyMembers", "familyConversation"],
     pages: [{ title: "Familie & Kontakte", path: "/dashboard/personen" }],
     core: [
       { label: "Mindestens eine Person eingetragen", done: (d) => d.familyMembers.length > 0 },

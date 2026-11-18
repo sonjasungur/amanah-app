@@ -3,7 +3,7 @@ import { defaultAmanahData } from "@/lib/domain/defaults";
 import { STORAGE_KEY } from "@/lib/storage/types";
 import { DEVICE_OWNER_KEY, UNSENT_CHANGE_KEY, folderBackedStorage, hasUnsentChangeOf, keepsFolderInTab } from "@/lib/storage/device-data";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { useFamilienGespraechStore } from "@/lib/familiengespraech/store";
+import { familyConversationActions } from "@/lib/familiengespraech/store";
 
 const session = vi.hoisted(() => ({ signedIn: true, mode: "api" as "api" | "local" }));
 vi.mock("@/lib/auth/config", () => ({ getStorageMode: () => session.mode }));
@@ -35,10 +35,11 @@ describe("the working copy while signed in (API mode)", () => {
     expect(JSON.stringify({ ...localStorage })).not.toContain(secret);
   });
 
-  it("family conversation notes follow the folder into the tab", () => {
-    useFamilienGespraechStore.getState().setNotes("erbe", secret);
-    expect(sessionStorage.getItem("amanah-familiengespraech-v1")).toContain(secret);
-    expect(localStorage.getItem("amanah-familiengespraech-v1")).toBeNull();
+  it("family conversation notes are part of the folder: in the tab copy, never in the browser profile", () => {
+    // P2.5-D: the notes live in the folder (and so in the account), no longer in a key of their own.
+    familyConversationActions.setNotes("erbe", secret);
+    expect(sessionStorage.getItem(STORAGE_KEY)).toContain(secret);
+    expect(JSON.stringify({ ...localStorage })).not.toContain(secret);
   });
 
   it("an older copy in localStorage moves into the tab once, with its unsent mark, and leaves the profile", () => {

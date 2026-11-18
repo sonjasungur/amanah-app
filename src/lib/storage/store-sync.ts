@@ -85,7 +85,8 @@ export function discardDeviceDataWithoutSession(): void {
   if (owner !== null && !hasUnsentChangeOf(owner)) wipeDeviceData();
 }
 
-function isAccountFolderKnown(): boolean {
+/** True once the account folder was read for this session; before that, nothing may be merged in. */
+export function isAccountFolderKnown(): boolean {
   return folderReadFor !== null && folderReadFor === sessionUserId();
 }
 

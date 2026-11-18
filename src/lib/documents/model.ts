@@ -543,6 +543,13 @@ export function buildLeitfaden(data: AmanahOrdnerData): DocModel {
         rows([["Vorgesehen für die Vollmacht", docValue(data.powerOfAttorney.authorizedPerson)], ["Ersatzperson", docValue(data.powerOfAttorney.substitutePerson)]]),
       ], { icon: "people", note: "Die Nennung hier ist keine Vollmacht." }),
       section("Wo meine Unterlagen liegen", [rows(places)], { icon: "documents" }),
+      section("Wer was übernommen hat", [
+        (() => {
+          // Agreed in a recorded family conversation; open tasks only. Not an authorisation.
+          const tasks = (data.familyConversation?.talks ?? []).flatMap((t) => t.tasks).filter((k) => !k.done && (docValue(k.who) || docValue(k.what)));
+          return tasks.length ? ({ kind: "steps", items: tasks.map((k) => ({ title: docValue(k.what) ?? "Aufgabe", detail: docValue(k.who) ? `Übernimmt: ${k.who.trim()}` : undefined })) } as DocBlock) : null;
+        })(),
+      ], { icon: "steps", note: "So haben wir es im Familiengespräch abgesprochen. Das ist keine Vollmacht." }),
       section("Im Todesfall", [
         contacts([textContact(funeral ?? undefined, "Bestatter"), textContact(mosque ?? undefined, "Moschee oder Imam"), textContact(j.trustedContact, "Vertrauensperson für die Janazah")]),
         j.islamicBurialDesired !== null ? { kind: "steps", items: [{ title: "Meine Wünsche zu Waschung, Gebet und Beisetzung lesen", detail: "Sie stehen im Dokument „Janazah-Wünsche“." }] } : null,

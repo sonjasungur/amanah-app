@@ -39,6 +39,7 @@ export const HISTORY_SECTIONS = [
   "barzakhPlan",
   "sadaqaJariya",
   "familyMessage",
+  "familyConversation",
   "checkProgress",
   "knowledgeBookmarks",
 ] as const satisfies readonly (keyof AmanahOrdnerData)[];

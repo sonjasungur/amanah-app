@@ -359,6 +359,46 @@ export interface VorsorgeMeta {
   reviewedAt?: string | null;
 }
 
+/** Progress through the conversation guide; kept in the folder so it survives sign-out (P2.5-D). */
+export interface ConversationTopicProgress {
+  checkedQuestionIds: string[];
+  starredQuestionIds: string[];
+  notes: string;
+}
+
+export interface FamilyTalkTask {
+  id: string;
+  who: string;
+  what: string;
+  done: boolean;
+}
+
+/**
+ * One conversation the person had with relatives. A record of what was said and agreed;
+ * it gives nobody access to anything and is no power of attorney.
+ */
+export interface FamilyTalk {
+  id: string;
+  /** ISO date (YYYY-MM-DD) or "" when not known. */
+  date: string;
+  /** Ids from familyMembers who took part. */
+  personIds: string[];
+  /** Others who took part (free text). */
+  otherPeople: string;
+  topicIds: string[];
+  tasks: FamilyTalkTask[];
+  /** Document types the relatives should know about. */
+  documentsToKnow: DocumentType[];
+  /** Whether the place of the originals was explained: "ja", "teilweise", "nein" or "" (not stated). */
+  storageExplained: "ja" | "teilweise" | "nein" | "";
+  openPoints: string;
+}
+
+export interface FamilyConversation {
+  topics: Record<string, ConversationTopicProgress>;
+  talks: FamilyTalk[];
+}
+
 export interface AmanahOrdnerData {
   schemaVersion: number;
   userProfile: UserProfile;
@@ -382,6 +422,7 @@ export interface AmanahOrdnerData {
   barzakhPlan: BarzakhPlan;
   sadaqaJariya: SadaqaJariyaPlan;
   familyMessage: FamilyMessage;
+  familyConversation: FamilyConversation;
   selectedPath: string;
   /** Slugs of saved knowledge articles (free knowledge centre). */
   knowledgeBookmarks: string[];

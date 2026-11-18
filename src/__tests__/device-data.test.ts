@@ -14,7 +14,7 @@ import {
 } from "@/lib/storage/device-data";
 import { discardDeviceDataWithoutSession, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import { flushBeforeSignOut, useAmanahStore } from "@/lib/store/use-amanah-store";
-import { useFamilienGespraechStore } from "@/lib/familiengespraech/store";
+import { LEGACY_FAMILY_CONVERSATION_ITEM, familyConversationActions } from "@/lib/familiengespraech/store";
 
 vi.mock("@/lib/auth/config", () => ({ getStorageMode: vi.fn(() => "api" as const) }));
 vi.mock("@/lib/auth/api-auth-provider", () => ({
@@ -32,7 +32,9 @@ const secret = "Vertraulich von Konto A";
 
 function fillAsAccountA() {
   useAmanahStore.getState().importData({ ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: secret } });
-  useFamilienGespraechStore.getState().setNotes("erbe", secret);
+  familyConversationActions.setNotes("erbe", secret);
+  // An old browser-only copy from before P2.5-D must go with the rest.
+  localStorage.setItem(LEGACY_FAMILY_CONVERSATION_ITEM, JSON.stringify({ state: { topics: { erbe: { notes: secret } } } }));
   localStorage.setItem(DEVICE_OWNER_KEY, "user-a");
   localStorage.setItem(GUIDED_FLOW_STORAGE_KEY, JSON.stringify({ skippedQuestions: ["x"] }));
   localStorage.setItem(AI_CONSENT_STORAGE_KEY, "granted");
@@ -58,7 +60,7 @@ describe("the working copy of a folder in this browser", () => {
   it("lists every key that holds folder content or answers", () => {
     expect(DEVICE_LOCAL_KEYS).toEqual(
       expect.arrayContaining([
-        useFamilienGespraechStore.persist.getOptions().name,
+        LEGACY_FAMILY_CONVERSATION_ITEM,
         STORAGE_KEY,
         UNSENT_CHANGE_KEY,
         GUIDED_FLOW_STORAGE_KEY,
@@ -66,7 +68,7 @@ describe("the working copy of a folder in this browser", () => {
       ])
     );
     expect(DEVICE_SESSION_KEYS).toContain(CHECK_STORAGE_KEY);
-    expect(useFamilienGespraechStore.persist.getOptions().name).toBe("amanah-familiengespraech-v1");
+    expect(LEGACY_FAMILY_CONVERSATION_ITEM).toBe("amanah-familiengespraech-v1");
   });
 
   it("is gone from storage and memory after a wipe", () => {
@@ -79,7 +81,7 @@ describe("the working copy of a folder in this browser", () => {
     for (const key of DEVICE_LOCAL_KEYS) expect(localStorage.getItem(key)).toBeNull();
     for (const key of DEVICE_SESSION_KEYS) expect(sessionStorage.getItem(key)).toBeNull();
     expect(useAmanahStore.getState().emergencyCard.name).toBe("");
-    expect(useFamilienGespraechStore.getState().topics).toEqual({});
+    expect(useAmanahStore.getState().familyConversation).toEqual({ topics: {}, talks: [] });
   });
 
   it("the wipe does not send the emptied folder to the account", async () => {
