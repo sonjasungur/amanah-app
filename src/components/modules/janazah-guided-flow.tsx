@@ -4,10 +4,10 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ModuleForm } from "@/components/modules/module-form";
+import { PersonPicker } from "@/components/vorsorge/person-picker";
 import { JanazahLegalNotice } from "@/components/modules/janazah-legal-notice";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { getJanazahSections, janazahSections } from "@/lib/modules/janazah-sections";
 import { flushPendingSave } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
@@ -152,7 +152,6 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
             {t("janazah.subtitle")}
           </p>
         </div>
-        <SaveStatusIndicator className="shrink-0" />
       </div>
 
       <div
@@ -194,6 +193,11 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
         <Card className="border-2 border-border/80 shadow-sm">
           <CardTitle className="text-card-title text-primary-dark">{section.title}</CardTitle>
           <p className="text-sm text-muted mt-1 mb-5">{section.description}</p>
+          {section.fields.some((f) => f.key === "trustedContact") && (
+            <div className="mb-5" data-testid="janazah-person-picker">
+              <PersonPicker field="janazahTrustedContact" label="Vertrauensperson aus Familie & Kontakte" />
+            </div>
+          )}
           <ModuleForm
             section="janazahWishes"
             fields={section.fields}

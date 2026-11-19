@@ -25,12 +25,14 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
     expect(footer).toContain("Wille");
   });
 
-  it("header shows Anmelden and Mein Konto labels", () => {
+  it("header shows Anmelden and the account link once; care areas live in the dashboard navigation", () => {
     const header = read("src/components/layout/header.tsx");
     expect(header).toContain("Anmelden");
-    expect(header).toContain("Mein Konto");
+    expect(header).toContain('labelKey: "nav.account"');
+    expect(header).not.toMatch(/>\s*Mein Konto\s*</);
+    expect(header).not.toContain('data-testid="site-mobile-areas"');
     expect(header).toContain('href="/login"');
-    expect(header).toContain('href="/dashboard"');
+    expect(header).toContain('href: "/dashboard"');
   });
 
   it("check start button uses Vorsorge-Check starten", () => {
@@ -48,7 +50,7 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
   });
 
   it("wissen page has scroll-spy section ids and no saved topics", () => {
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("useWissenScrollSpy");
     expect(wissen).toContain("WISSEN_SECTION_ID");
     expect(wissen).toContain("WissenTopicRow");

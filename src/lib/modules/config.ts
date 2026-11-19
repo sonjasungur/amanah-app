@@ -1,3 +1,4 @@
+import { moduleText } from "@/lib/content/module-texts";
 import type { ModuleConfig } from "@/lib/types";
 
 export const moduleConfigs: ModuleConfig[] = [
@@ -62,7 +63,7 @@ export const moduleConfigs: ModuleConfig[] = [
   {
     id: "testament",
     title: "Testament & Erbe",
-    description: "Farāʾiḍ, Waṣiyya und Ampelcheck.",
+    description: "Erbprofil, Notizen und Fragen für das Gespräch.",
     icon: "📜",
     path: "/dashboard/testament",
     criticalFields: ["inheritanceProfile.married", "inheritanceProfile.sons", "inheritanceProfile.daughters"],
@@ -94,7 +95,7 @@ export const moduleConfigs: ModuleConfig[] = [
   {
     id: "sadaqa-jariya",
     title: "Sadaqa Jariya",
-    description: "Das Gute, das nach dir bleibt.",
+    description: moduleText("sadaqa-tile"),
     icon: "💚",
     path: "/dashboard/sadaqa-jariya",
     criticalFields: ["sadaqaJariya.preferredPot"],

@@ -11,6 +11,6 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
   return NextResponse.json({
     entry,
-    disclaimer: "Allgemeine Orientierung — fachliche Prüfung empfohlen.",
+    disclaimer: "Organisationsinformation, nicht fachlich geprüft — keine Rechts-, Medizin- oder Fatwa-Beratung.",
   });
 }

@@ -9,6 +9,7 @@ export default function GhuslKafanPage() {
     <>
       <JanazahModuleNav />
       <ModulePage
+      help="ghusl"
         title="Ghusl & Kafan"
         description="Dokumentiere Wünsche zur Waschung und zum Leichentuch — mit Würde und Schamgrenzen."
         section="ghuslKafan"

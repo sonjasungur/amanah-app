@@ -6,10 +6,16 @@ export interface UserProfile {
   language: string;
 }
 
+export type FamilyRelationType = "ehepartner" | "kind" | "elternteil" | "geschwister" | "sonstige";
+export type FamilyRole = "notfallkontakt" | "vertrauensperson" | "vormund_wunsch";
+
 export interface FamilyMember {
   id: string;
   name: string;
   relation: string;
+  /** Structured relation, reused by the testament questionnaire. */
+  relationType?: FamilyRelationType;
+  roles?: FamilyRole[];
   birthDate?: string;
   phone?: string;
   notes?: string;
@@ -132,22 +138,42 @@ export interface FuneralWish {
   burial: BurialPreference;
 }
 
+export type DocumentType =
+  | "patientenverfuegung"
+  | "vorsorgevollmacht"
+  | "betreuungsverfuegung"
+  | "testament"
+  | "ausweis"
+  | "versicherung"
+  | "bank"
+  | "grundbuch"
+  | "bestattungsvorsorge"
+  | "organspende"
+  | "other";
+
+/** Whether the document exists — the app stores no files, only where they are. */
+export type DocumentStatus = "vorhanden" | "fehlt" | "pruefen";
+
 export interface DocumentEntry {
   id: string;
-  type: "patientenverfuegung" | "vorsorgevollmacht" | "betreuungsverfuegung" | "testament" | "other";
+  type: DocumentType;
   title: string;
   location: string;
+  status?: DocumentStatus;
   notes?: string;
   reviewStatus?: ReviewStatus;
 }
 
 export interface AssetEntry {
   id: string;
-  type: "real_estate" | "bank" | "investment" | "vehicle" | "business" | "other";
+  type: "real_estate" | "bank" | "investment" | "pension" | "life_insurance" | "gold_silver" | "vehicle" | "business" | "other";
   description: string;
   approximateValue?: string;
   locationHint?: string;
   notes?: string;
+  /** Real estate only. */
+  mortgage?: "ja" | "nein" | "unsicher";
+  ownership?: "allein" | "gemeinsam" | "unsicher";
 }
 
 export interface DebtAmanahItem {
@@ -227,19 +253,160 @@ export interface SadaqaJariyaPlan {
 }
 
 export interface FamilyMessage {
+  /** The letter body. Paragraphs are separated by blank lines. */
   familyLetter: string;
+  /** P2.6 letter layout: salutation ("Meine Lieben,"), closing ("In Liebe"), printed name, place. */
+  letterGreeting: string;
+  letterClosing: string;
+  letterSignature: string;
+  letterPlace: string;
+  /** Print the Basmala above the salutation. Off unless the person chooses it. */
+  letterBismillah: boolean;
+  /** ISO time of the last change to the letter (greeting, body, closing, signature, place). */
+  letterUpdatedAt: string | null;
   whatsappMessage: string;
   conversationGuide: string;
   keyWishesSummary: string;
 }
 
-/** Versioned Amanah-Check progress stored in the same folder state. */
+export type YesNoUnsure = "ja" | "nein" | "unsicher" | "";
+
+/**
+ * Testament preparation — facts and wishes for a conversation with a lawyer or notary.
+ * Never a will, never legal advice. Kept strictly in separate parts.
+ */
+/**
+ * A wish for the conversation with a lawyer or notary. It bequeaths nothing by itself, and nothing
+ * in the product says whether it could be legally effective.
+ */
+export interface BequestWish {
+  id: string;
+  kind: "amount" | "percent" | "item";
+  /** Euro for "amount", percent for "percent". */
+  value?: number;
+  /** Description for "item". */
+  item?: string;
+  beneficiary: string;
+  beneficiaryKind: "person" | "organisation";
+  /** Whether the beneficiary would also inherit. Persons only. */
+  alsoHeir: YesNoUnsure;
+  note?: string;
+}
+
+export interface TestamentPreparation {
+  personalWishes: {
+    wishes: string;
+    charitableWishes: string;
+    bequests: BequestWish[];
+    /** Wishes for the conversation with a lawyer or notary; they appoint nobody by themselves. */
+    executorWish: YesNoUnsure;
+    executorPerson: string;
+    guardianPerson: string;
+    guardianExcluded: string;
+  };
+  islamicModel: {
+    wantsIslamicDistribution: YesNoUnsure;
+    preferredSchool: "hanafi" | "maliki" | "shafii" | "hanbali" | "unsicher" | "";
+    /** Only for the (locked) model calculation. */
+    ownGender: "male" | "female" | "";
+    fatherAlive: YesNoUnsure;
+    motherAlive: YesNoUnsure;
+    grandparentsAlive: YesNoUnsure;
+    grandchildrenViaDeceasedSon: YesNoUnsure;
+    halfSiblings: YesNoUnsure;
+    adoptedChildren: YesNoUnsure;
+    moreThanOneSpouse: YesNoUnsure;
+    otherRelatives: YesNoUnsure;
+  };
+  legalFacts: {
+    maritalStatus: "ledig" | "verheiratet" | "geschieden" | "verwitwet" | "";
+    propertyRegime: "zugewinn" | "guetertrennung" | "guetergemeinschaft" | "unbekannt" | "";
+    citizenships: string;
+    habitualResidence: "deutschland" | "ausland" | "";
+    existingWill: YesNoUnsure;
+    jointWillWithSpouse: YesNoUnsure;
+    realEstateGermany: YesNoUnsure;
+    assetsAbroad: YesNoUnsure;
+    assetsAbroadCountries: string;
+    businessInterests: YesNoUnsure;
+    differentReligionRelatives: YesNoUnsure;
+    minorChildren: YesNoUnsure;
+  };
+  currentStep: number;
+}
+
+/** Versioned Vorsorge-Check progress stored in the same folder state. */
 export interface CheckProgress {
   schemaVersion: number;
   index: number;
   answers: Record<string, boolean>;
   phase: "intro" | "questions" | "result";
   completedAt?: string;
+}
+
+/** The six areas of the guided Vorsorge (dashboard, flow, completion). */
+export type VorsorgeAreaId = "notfall" | "familie" | "gesundheit" | "janazah" | "dokumente" | "vermoegen";
+
+/** Fields that can point at a person from "Familie & Kontakte" instead of holding a second copy. */
+export type PersonLinkField =
+  | "emergencyContact1"
+  | "emergencyContact2"
+  | "authorizedPerson"
+  | "substitutePerson"
+  | "preferredGuardian"
+  | "janazahTrustedContact";
+
+/** Bookkeeping for the guided Vorsorge. Lives in the same encrypted folder; no own database column. */
+export interface VorsorgeMeta {
+  /** ISO time of the last change the person made in an area. */
+  areaUpdatedAt: Partial<Record<VorsorgeAreaId, string>>;
+  /** Step id where the person chose "Später fortsetzen", null when nothing is paused. */
+  flowStep: string | null;
+  flowPausedAt: string | null;
+  /** Field → person id. The field keeps its own text, so removing the link never loses it. */
+  personLinks: Partial<Record<PersonLinkField, string>>;
+  /** ISO time the person last confirmed "my details are still correct". */
+  reviewedAt?: string | null;
+}
+
+/** Progress through the conversation guide; kept in the folder so it survives sign-out (P2.5-D). */
+export interface ConversationTopicProgress {
+  checkedQuestionIds: string[];
+  starredQuestionIds: string[];
+  notes: string;
+}
+
+export interface FamilyTalkTask {
+  id: string;
+  who: string;
+  what: string;
+  done: boolean;
+}
+
+/**
+ * One conversation the person had with relatives. A record of what was said and agreed;
+ * it gives nobody access to anything and is no power of attorney.
+ */
+export interface FamilyTalk {
+  id: string;
+  /** ISO date (YYYY-MM-DD) or "" when not known. */
+  date: string;
+  /** Ids from familyMembers who took part. */
+  personIds: string[];
+  /** Others who took part (free text). */
+  otherPeople: string;
+  topicIds: string[];
+  tasks: FamilyTalkTask[];
+  /** Document types the relatives should know about. */
+  documentsToKnow: DocumentType[];
+  /** Whether the place of the originals was explained: "ja", "teilweise", "nein" or "" (not stated). */
+  storageExplained: "ja" | "teilweise" | "nein" | "";
+  openPoints: string;
+}
+
+export interface FamilyConversation {
+  topics: Record<string, ConversationTopicProgress>;
+  talks: FamilyTalk[];
 }
 
 export interface AmanahOrdnerData {
@@ -255,6 +422,7 @@ export interface AmanahOrdnerData {
   ghuslKafan: GhuslKafanWishes;
   burialPreference: BurialPreference;
   inheritanceProfile: InheritanceProfile;
+  testamentPreparation: TestamentPreparation;
   documents: DocumentEntry[];
   assets: AssetEntry[];
   debtsAmanah: DebtEntry[];
@@ -264,7 +432,11 @@ export interface AmanahOrdnerData {
   barzakhPlan: BarzakhPlan;
   sadaqaJariya: SadaqaJariyaPlan;
   familyMessage: FamilyMessage;
+  familyConversation: FamilyConversation;
   selectedPath: string;
+  /** Slugs of saved knowledge articles (free knowledge centre). */
+  knowledgeBookmarks: string[];
+  vorsorgeMeta: VorsorgeMeta;
   lastSaved: string | null;
   reviewStatus: ReviewStatus;
 }

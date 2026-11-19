@@ -31,7 +31,7 @@ export const sadaqaJariyaArticles: KnowledgeArticle[] = [
     content:
       "Ein Förderkreis ermöglicht regelmäßige Sadaqa Jariya — zu Lebzeiten und als Plan für nach dem Tod. Gemeinsam1 e.V. bietet strukturierte Projekte. Spenden laufen direkt über den Verein.",
     sourceIds: ["hadith-sadaqa-jariya", "hadith-wasiyyah-third"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "sadaqa-jariya",
   },
 ];

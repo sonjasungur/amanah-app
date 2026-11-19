@@ -1,8 +1,8 @@
 import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
-  title: "Impressum — Mein Wille",
-  description: "Impressum und Anbieterkennzeichnung für Mein Wille.",
+  title: "Impressum — Amanah – Mein Wille",
+  description: "Impressum und Anbieterkennzeichnung für Amanah – Mein Wille.",
 };
 
 export default function ImpressumPage() {
@@ -65,7 +65,7 @@ export default function ImpressumPage() {
           <p className="leading-relaxed text-sm">
             Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
-            Mein Wille ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
+            Amanah – Mein Wille ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
           </p>
         </section>
 

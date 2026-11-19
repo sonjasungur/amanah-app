@@ -60,7 +60,7 @@ export default function AusfuellenPage() {
           <ArrowLeft size={16} /> Assistent
         </Link>
         <Button variant="ghost" size="sm" onClick={resetFlow} disabled={loading}>
-          <Trash2 size={14} className="mr-1" /> Demo zurücksetzen
+          <Trash2 size={14} className="mr-1" /> Fortschritt zurücksetzen
         </Button>
       </div>
 
@@ -204,7 +204,7 @@ export default function AusfuellenPage() {
                   <RotateCcw size={16} className="mr-1" /> Erneut laden
                 </Button>
                 <Button variant="outline" onClick={resetFlow} disabled={loading}>
-                  Demo zurücksetzen
+                  Fortschritt zurücksetzen
                 </Button>
               </div>
             </>

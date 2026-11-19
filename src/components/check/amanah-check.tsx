@@ -55,6 +55,8 @@ export function AmanahCheck() {
   useEffect(() => {
     if (!state.hydrated || state.phase === "loading") return;
     persistCheckState(state);
+    // An untouched check must not overwrite progress from the folder, e.g. from another device.
+    if (state.phase === "intro" && state.index === 0 && Object.keys(state.answers).length === 0) return;
     const writeToFolder = () => {
       useAmanahStore.getState().updateField("checkProgress", checkStateToProgress(state));
     };

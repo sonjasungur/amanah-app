@@ -28,7 +28,7 @@ export function DashboardAuthGate({ children }: { children: React.ReactNode }) {
         role="status"
       >
         <Loader2 className="animate-spin mr-2" size={20} aria-hidden />
-        Weiterleitung zur Anmeldung …
+        {isLoading ? "Wird geladen …" : "Weiterleitung zur Anmeldung …"}
       </div>
     );
   }

@@ -8,6 +8,8 @@ import { MessageCircle, X, Send } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { useI18n } from "@/lib/i18n/context";
 import { isAiUiEnabled } from "@/lib/ai/config";
+import { getAiConsent } from "@/lib/ai/consent-client";
+import { pickDataFields } from "@/lib/store/store-utils";
 
 /** Kept for a later optional AI add-on. Not mounted in public layouts. */
 export function AmanahAssistantFloat() {
@@ -37,8 +39,8 @@ export function AmanahAssistantFloat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages, { role: "user", content: userMsg }],
-          context: { amanahData: store },
-          consentGranted: true,
+          context: { amanahData: pickDataFields(store) },
+          consentGranted: getAiConsent() === "granted",
         }),
       });
       const data = await res.json();

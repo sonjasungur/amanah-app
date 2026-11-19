@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -37,11 +38,35 @@ function shouldSkipSecretScan(filePath) {
   return false;
 }
 
+/**
+ * The only database addresses with credentials allowed in the source: throwaway Postgres containers
+ * that one test script starts on this machine (127.0.0.1) or on its own Docker network ($DB), each
+ * allowed in exactly that script. Any other address, or this one in another file, still fails.
+ */
+/** File → SHA-256 of the one exact address allowed there (the address itself stays out of this file). */
+const ALLOWED_TEST_DATABASE_URLS = new Map([
+  ["scripts/testing/migration-rehearsal.sh", "2b39b8d9ff786a3fe3e22bef365e84dc989458d60da4d8426d4e1d3fbbe342e4"],
+  ["scripts/testing/release-check.sh", "b9c9d8f36fbd6d8bca822c11d3d177449d867c00cdb21e7826ddb6fe51455df7"],
+  ["scripts/testing/restore-drill.mjs", "36d871685416b5d683f5891b1d8c9f43340fd9cdfc5f1be91c4882a62ed6064a"],
+  ["scripts/testing/rollback-encryption-probe.sh", "365e8498a4f1f4a51a6eda57e65663a94a851bf2332d0301cf1a47ce0fd2e900"],
+]);
+const DATABASE_URL_WITH_CREDENTIALS = /postgresql:\/\/[^:\s"'`]+:[^@\s"'`]+@[^/\s"'`]+/gi;
+const DATABASE_URL_PATTERN = /postgresql:\/\/[^:]+:[^@]+@/i;
+const LOCAL_TEST_HOST = /@(127\.0\.0\.1|\$DB)(:|$)/;
+
+/** True if every credential URL in this file is the one allowlisted for it. */
+function onlyAllowedTestDatabaseUrls(rel, text) {
+  const allowed = ALLOWED_TEST_DATABASE_URLS.get(rel);
+  const found = text.match(DATABASE_URL_WITH_CREDENTIALS) ?? [];
+  const fingerprint = (url) => createHash("sha256").update(url).digest("hex");
+  return found.length > 0 && allowed !== undefined && found.every((url) => LOCAL_TEST_HOST.test(url) && fingerprint(url) === allowed);
+}
+
 function scanForSecrets() {
   let scanFailed = 0;
   const forbidden = [
     { pattern: /sk-[a-zA-Z0-9]{20,}/, label: "OpenAI API key pattern" },
-    { pattern: /postgresql:\/\/[^:]+:[^@]+@/i, label: "DATABASE_URL with credentials" },
+    { pattern: DATABASE_URL_PATTERN, label: "DATABASE_URL with credentials" },
   ];
   const skipDirs = new Set(["node_modules", ".next", ".git", "coverage", "backups"]);
 
@@ -56,7 +81,9 @@ function scanForSecrets() {
       if (shouldSkipSecretScan(full)) continue;
       if (!/\.(ts|tsx|js|jsx|json|yml|yaml|sh|mjs|cjs)$/.test(entry.name)) continue;
       const text = readFileSync(full, "utf8");
+      const rel = full.replace(root + "/", "");
       for (const { pattern, label } of forbidden) {
+        if (pattern === DATABASE_URL_PATTERN && pattern.test(text) && onlyAllowedTestDatabaseUrls(rel, text)) continue;
         if (pattern.test(text)) {
           fail(`${label} found in ${full.replace(root + "/", "")}`);
           scanFailed += 1;

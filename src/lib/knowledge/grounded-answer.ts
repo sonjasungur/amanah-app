@@ -2,6 +2,7 @@ import { DOMAIN_DISCLAIMER } from "@/lib/ai/safety";
 import { NO_SOURCE_MESSAGE, ORIENTATION_NOTE } from "./config";
 import { toCitation } from "./citations";
 import { retrieveKnowledgeSync } from "./retrieval";
+import { isProductionSafe } from "./safety";
 import {
   classifyKnowledgeSensitivity,
   isIndividualDecisionQuestion,
@@ -34,25 +35,26 @@ export function buildGroundedKnowledgeAnswer(
       usedEntryIds: [],
       safetyLevel,
       blocked: true,
-      suggestedNextStep: "Nutze den Mein Wille zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
+      suggestedNextStep: "Nutze den Amanah – Mein Wille zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
       noSource: false,
       disclaimer,
     };
   }
 
-  const results = retrieveKnowledgeSync(question, {
-    language: options?.language ?? "de",
-    productionOnly: true,
-  });
+  const language = options?.language ?? "de";
+  const results = retrieveKnowledgeSync(question, { language, productionOnly: true });
+  // A question about a locked topic gets no unrelated entry as its answer.
+  const bestOverall = retrieveKnowledgeSync(question, { language, productionOnly: false })[0];
+  const aboutLockedTopic = Boolean(bestOverall && !isProductionSafe(bestOverall.entry));
 
-  if (results.length === 0) {
+  if (results.length === 0 || aboutLockedTopic) {
     return {
       answer: `${NO_SOURCE_MESSAGE}\n\n${ORIENTATION_NOTE} Fachliche Prüfung empfohlen.`,
       citations: [],
       usedEntryIds: [],
       safetyLevel: "general_allowed",
       blocked: false,
-      suggestedNextStep: "Ergänze deinen Mein Wille im passenden Modul oder konsultiere eine Fachperson.",
+      suggestedNextStep: "Ergänze deinen Amanah – Mein Wille im passenden Modul oder konsultiere eine Fachperson.",
       noSource: true,
       disclaimer,
     };
@@ -67,7 +69,7 @@ export function buildGroundedKnowledgeAnswer(
     usedEntryIds: entries.map((e) => e.id),
     safetyLevel: "general_allowed",
     blocked: false,
-    suggestedNextStep: "Dokumentiere passende Angaben in Mein Wille und lasse sie fachlich prüfen.",
+    suggestedNextStep: "Dokumentiere passende Angaben in Amanah – Mein Wille und lasse sie fachlich prüfen.",
     noSource: false,
     disclaimer: `${disclaimer} Keine Fatwa, keine Rechtsberatung.`,
   };

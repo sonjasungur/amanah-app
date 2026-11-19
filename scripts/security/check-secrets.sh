@@ -44,10 +44,8 @@ if [[ "$BIN" != "docker" ]]; then
   fi
 fi
 
-CFG_ARGS=()
-if [[ -f "$CONFIG" ]]; then
-  CFG_ARGS+=(--config "$CONFIG")
-fi
+[[ -f "$CONFIG" ]] || die "gitleaks config missing: ${CONFIG}"
+CFG_ARGS=(--config "$CONFIG")
 BASELINE="${ROOT}/.gitleaks-baseline.json"
 IGNORE_FILE="${ROOT}/.gitleaksignore"
 # gitleaks --baseline-path requires the full default report schema (including Secret/Match).
@@ -84,13 +82,22 @@ case "$MODE" in
   --staged) scan_staged ;;
   --working-tree) scan_working_tree ;;
   --history) scan_history ;;
+  --range)
+    # Git log options of what is about to leave this machine.
+    [[ -n "${2:-}" ]] || die "--range needs git log options"
+    info "scanning range (redacted)"
+    run_gitleaks "$BIN" detect --source "$ROOT" --log-opts "$2" --no-banner --redact "${CFG_ARGS[@]}" --exit-code 1
+    ;;
   --all)
-    scan_staged || true
-    scan_working_tree
-    scan_history
+    # Every part runs; any finding or failure makes the whole check fail.
+    rc=0
+    scan_staged || rc=$?
+    scan_working_tree || rc=$?
+    scan_history || rc=$?
+    [[ "$rc" -eq 0 ]] || { echo "ERROR: scan failed (exit ${rc})" >&2; exit "$rc"; }
     ;;
   *)
-    die "unknown mode: $MODE (use --staged|--working-tree|--history|--all)"
+    die "unknown mode: $MODE (use --staged|--working-tree|--history|--range <log-opts>|--all)"
     ;;
 esac
 

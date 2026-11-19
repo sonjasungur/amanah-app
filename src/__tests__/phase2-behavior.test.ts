@@ -103,10 +103,10 @@ describe("getActiveStorageLabel: logic via source inspection", () => {
     expect(storageConfig).toContain("return \"local\"");
   });
 
-  it("returns 'api' when storageMode is api and token exists", () => {
+  it("returns 'api' when storageMode is api and a session exists", () => {
     expect(storageConfig).toContain("return \"api\"");
     expect(storageConfig).toContain("getStorageMode() === \"api\"");
-    expect(storageConfig).toContain("getAuthToken()");
+    expect(storageConfig).toContain("hasAuthSession()");
   });
 });
 
@@ -160,8 +160,9 @@ describe("vorschau page: PDF button updated label", () => {
 describe("pdf page: print and no-send note", () => {
   const pdfFile = read("src/app/dashboard/pdf/page.tsx");
 
-  it("uses window.print()", () => {
-    expect(pdfFile).toContain("window.print");
+  it("uses window.print() (in the document panel it renders)", () => {
+    expect(pdfFile).toContain("DocumentPanel");
+    expect(read("src/components/documents/document-panel.tsx")).toContain("window.print");
   });
 
   it("has no external fetch/API calls", () => {

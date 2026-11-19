@@ -32,9 +32,10 @@ export function Logo({ className, light }: { className?: string; light?: boolean
       aria-label={`${BRAND.name} — Startseite`}
     >
       <DocumentLogoMark size={40} />
-      <span className="font-bold text-[clamp(1.125rem,2.5vw,1.375rem)] leading-none tracking-tight truncate">
-        <span className={cn("font-semibold", light ? "text-white/85" : "text-foreground")}>Mein </span>
-        <span className={cn(light ? "text-emerald" : "text-primary")}>Wille</span>
+      {/* Two-line lockup: "Amanah" carries the brand, "Mein Wille" the product; the full name is the link label. */}
+      <span className="flex flex-col font-bold leading-none tracking-tight min-w-0" aria-hidden>
+        <span className={cn("text-[clamp(1.125rem,2.5vw,1.375rem)]", light ? "text-emerald" : "text-primary")}>Amanah</span>
+        <span className={cn("text-[0.8rem] font-semibold mt-1", light ? "text-white/85" : "text-foreground")}>Mein Wille</span>
       </span>
     </Link>
   );

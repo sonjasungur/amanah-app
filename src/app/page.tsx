@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
+import { HomeEntryPoints } from "@/components/marketing/home-entry-points";
 import {
   FreeVsPaidSummary,
-  PricingCard,
   SectionHeader,
   StepCard,
   TrustStrip,
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
+import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
+import { featuresByTier } from "@/lib/billing/plan-matrix";
 import { Button, linkButtonClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -60,19 +62,19 @@ const STEPS = [
   {
     step: "1",
     title: "Prüfen",
-    text: "Der kostenlose Amanah-Check zeigt in wenigen Minuten, was noch fehlt.",
+    text: "Der kostenlose Vorsorge-Check zeigt in wenigen Minuten, was noch fehlt.",
     icon: ClipboardCheck,
   },
   {
     step: "2",
-    title: "Einen Schritt wählen",
-    text: "Du erhältst genau eine klare Empfehlung — ohne Überforderung.",
+    title: "Schritt für Schritt festhalten",
+    text: "Ein geführter Ablauf durch sechs Bereiche. Jede Angabe ist freiwillig, du kannst jederzeit pausieren und später weitermachen.",
     icon: Sparkles,
   },
   {
     step: "3",
-    title: "Festhalten",
-    text: "Im persönlichen Vorsorgeplan dokumentieren, was deiner Familie wichtig sein soll.",
+    title: "Notfallpaket für die Familie",
+    text: "Du wählst aus, was deine Familie wissen soll, und druckst es aus. Online wird nichts geteilt.",
     icon: FileSignature,
   },
 ];
@@ -86,12 +88,10 @@ const AREAS = [
   { icon: Users, title: "Familie und Akhira", text: "Gespräch mit Angehörigen, Familienbrief und Sadaqa Jariya.", accent: COLORS.catAkhira },
 ] as const;
 
-const PRICING_TEASER = [
-  { name: "Amanah-Check", price: "0 €", note: "Einmalig kostenlos, ohne Konto", highlighted: false },
-  { name: "Basic", price: "29 €", note: "Einmalig — wichtigste Wünsche dokumentieren", highlighted: false },
-  { name: "Komplett", price: "79 €", note: "Einmalig — alle Bereiche, empfohlen", highlighted: true },
-  { name: "Familie", price: "99 €", note: "Einmalig — maximal zwei Erwachsenenprofile", highlighted: false },
-];
+/** From the plan matrix, so the homepage cannot promise more than the code enforces. */
+const FREE_TITLES = featuresByTier("free").map((f) => f.title);
+const PLUS_TITLES = featuresByTier("plus").map((f) => f.title);
+const PLUS_PRICE = formatPrice(getTestPriceCents());
 
 function HeroCheckInfoCard({ className }: { className?: string }) {
   const points = [
@@ -169,6 +169,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <HomeEntryPoints />
+
       <section className="py-10 md:py-18 bg-background">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
@@ -207,7 +209,7 @@ export default function HomePage() {
       <section id="so-funktioniert" className="py-14 md:py-18 bg-accent-soft border-y border-border scroll-mt-24">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
-            title="So funktioniert Mein Wille"
+            title="So funktioniert Amanah – Mein Wille"
             description="Du musst nicht alles heute erledigen. Der erste Überblick dauert nur wenige Minuten."
             accent={COLORS.primary}
           />
@@ -252,36 +254,45 @@ export default function HomePage() {
 
       <AkhiraSection />
 
-      <section className="py-14 md:py-18 bg-background">
+      <section className="py-14 md:py-18 bg-background" data-testid="home-availability">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
-            title="Preise — klar getrennt"
-            description="Starte kostenlos. Vollständige Dokumentation ist als Einmalpaket geplant — kein Abo."
+            title="Was du heute nutzen kannst"
+            description="Klar getrennt: was kostenlos ist, was zu Vorsorge Plus gehört und was noch auf eine fachliche Freigabe wartet."
             accent={COLORS.emerald}
           />
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-            {PRICING_TEASER.map((p) => (
-              <PricingCard
-                key={p.name}
-                name={p.name}
-                price={p.price}
-                description={p.note}
-                features={[]}
-                highlighted={p.highlighted}
-                statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}
-                cta={
-                  p.name === "Amanah-Check" ? (
-                    <Link href="/check">
-                      <Button className="w-full" variant="primary">
-                        {BRAND.ctaPrimary}
-                      </Button>
-                    </Link>
-                  ) : undefined
-                }
-              />
-            ))}
+          <div className="grid gap-5 md:grid-cols-3">
+            <article className="rounded-2xl border-2 border-emerald/40 bg-card p-6" data-testid="home-free">
+              <p className="text-xs font-bold uppercase tracking-wide text-emerald">Kostenlos</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">Dauerhaft frei</h3>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                {FREE_TITLES.map((t) => (
+                  <li key={t} className="flex gap-2"><span className="text-emerald font-bold" aria-hidden>✓</span>{t}</li>
+                ))}
+                <li className="flex gap-2"><span className="text-emerald font-bold" aria-hidden>✓</span>Notfallpaket zum Ausdrucken (vorläufig kostenlos)</li>
+              </ul>
+            </article>
+            <article className="rounded-2xl border-2 border-border bg-card p-6" data-testid="home-plus">
+              <p className="text-xs font-bold uppercase tracking-wide text-primary">Vorsorge Plus · geplant {PLUS_PRICE} einmalig</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">In Vorbereitung</h3>
+              <p className="text-sm text-muted mt-1">Kauf ist noch nicht möglich. Bis zum Start nutzt du diese Bereiche ohne Einschränkung.</p>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                {PLUS_TITLES.map((t) => (
+                  <li key={t} className="flex gap-2"><span aria-hidden>•</span>{t}</li>
+                ))}
+              </ul>
+            </article>
+            <article className="rounded-2xl border-2 border-dashed border-border bg-card p-6" data-testid="home-pending">
+              <p className="text-xs font-bold uppercase tracking-wide text-muted">Noch nicht verfügbar</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">Wartet auf fachliche Freigabe</h3>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                <li className="flex gap-2"><span aria-hidden>–</span>Islamische Fachartikel (Themen sind angelegt, Inhalte erst nach Prüfung durch Gelehrte)</li>
+                <li className="flex gap-2"><span aria-hidden>–</span>Vorbereitung des Testaments und Hinweise zum Erbe (nach juristischer Prüfung)</li>
+                <li className="flex gap-2"><span aria-hidden>–</span>Digitaler Zugang für Angehörige (Konzept in Prüfung, bis dahin teilt Amanah nichts online)</li>
+              </ul>
+            </article>
           </div>
-          <Link href="/preise">
+          <Link href="/preise" className="inline-block mt-8">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               Alle Preise ansehen
             </Button>

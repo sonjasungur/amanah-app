@@ -53,7 +53,10 @@ describe("verified source references", () => {
     expect(janazah?.sourceIds).toContain("hadith-bukhari-janazah-1273");
     const primary = getPrimarySourcesByIds(janazah!.sourceIds);
     expect(primary.some((s) => s.reference.includes("1315"))).toBe(true);
-    expect(primary.some((s) => s.reference.includes("1254"))).toBe(true);
+    // Legacy IDs resolve to the corrected references (2026-10-30): Qirat = Bukhari 1325, graves = Tirmidhi 1054.
+    expect(primary.some((s) => s.reference.includes("Hadith 1325"))).toBe(true);
+    expect(primary.some((s) => s.reference.includes("Tirmidhī, Hadith 1054"))).toBe(true);
+    expect(primary.some((s) => s.reference.includes("Hadith 1254"))).toBe(false);
   });
 
   it("quran verses have quranEnc metadata and bubenheim translator", () => {

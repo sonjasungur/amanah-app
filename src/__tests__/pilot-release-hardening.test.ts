@@ -52,13 +52,13 @@ describe("controlled public error pages", () => {
 });
 
 describe("public content hardening", () => {
-  it("production knowledge only includes reviewed entries", () => {
+  it("production knowledge requires a documented review", () => {
     const entries = read("src/lib/knowledge/entries.ts");
-    expect(entries).toContain('return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");');
+    expect(entries).toContain("return getAllEntries().filter(isProductionSafe);");
   });
 
   it("public wissen page uses reviewed-only topic source", () => {
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/app/wissen/page.tsx") + read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("getPublicWissenTopics");
     expect(wissen).toContain("Wissensbereich in Vorbereitung");
   });
@@ -100,7 +100,19 @@ describe("release validator modes", () => {
     DATABASE_URL: "postgresql://amanah:supersecretlongpass@postgres:5432/amanah?schema=public",
     SESSION_SECRET: "x".repeat(40),
     POSTGRES_PASSWORD: "supersecretlongpass",
+    // Test-only data key (32 bytes of 0x02), never a real key.
+    AMANAH_DATA_KEYS: `t1:${Buffer.alloc(32, 2).toString("base64")}`,
+    AMANAH_DATA_KEY_ACTIVE: "t1",
   };
+
+  it("fails without data encryption keys", () => {
+    const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=private-review"], {
+      cwd: ROOT,
+      env: { ...baseEnv, AMANAH_DATA_KEYS: "" },
+      encoding: "utf8",
+    });
+    expect(res.status).not.toBe(0);
+  });
 
   it("private-review mode passes with safe technical env values", () => {
     const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=private-review"], {
@@ -109,6 +121,30 @@ describe("release validator modes", () => {
       encoding: "utf8",
     });
     expect(res.status).toBe(0);
+  });
+
+  it("public-release mode stays blocked while a binding approval is missing", () => {
+    const res = spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-release"], {
+      cwd: ROOT,
+      env: baseEnv,
+      encoding: "utf8",
+    });
+    expect(res.status).toBe(1);
+    for (const id of ["datenschutz", "recht", "religion", "medizin", "nutzungsrechte", "smartphone"]) {
+      expect(res.stderr).toContain(`Freigabe fehlt: ${id}`);
+    }
+  });
+
+  it("public registration needs a real mail provider, also in a release", () => {
+    const run = (extra: Record<string, string>) =>
+      spawnSync("node", ["scripts/validate-release.mjs", "--mode=public-release"], {
+        cwd: ROOT,
+        env: { ...baseEnv, AMANAH_PUBLIC_REGISTRATION_ENABLED: "true", NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED: "true", ...extra },
+        encoding: "utf8",
+      }).stderr;
+    expect(run({ AMANAH_MAIL_TRANSPORT: "disabled" })).toContain("Registration needs a configured mail provider");
+    expect(run({ AMANAH_MAIL_TRANSPORT: "outbox" })).toContain("Registration needs a configured mail provider");
+    expect(run({ AMANAH_MAIL_TRANSPORT: "brevo" })).not.toContain("Registration needs a configured mail provider");
   });
 
   it("public-pilot mode passes with complete legal operator details", () => {

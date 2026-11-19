@@ -1,3 +1,6 @@
+import { DataEncryptionError, parseKeyring } from "./data-encryption";
+import { getDeploymentEnv } from "@/lib/deployment-env";
+
 export type ProductionEnvValidation = {
   valid: boolean;
   errors: string[];
@@ -51,6 +54,54 @@ export function validateProductionEnv(
     errors.push("POSTGRES_PASSWORD still contains a placeholder value");
   }
 
+  try {
+    if (!parseKeyring(env)) errors.push("AMANAH_DATA_KEYS is required in production (data encryption at rest)");
+  } catch (e) {
+    errors.push(e instanceof DataEncryptionError ? e.message : "AMANAH_DATA_KEYS is invalid");
+  }
+  if (env.AMANAH_DATA_ENCRYPTION === "optional") {
+    errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
+  }
+
+  if (env.AMANAH_BILLING_MODE === "sandbox") {
+    errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
+  }
+  if (env.AMANAH_BILLING_MODE === "stripe_test") {
+    errors.push("AMANAH_BILLING_MODE=stripe_test is not allowed in production (Stripe test mode is for staging only)");
+  }
+  // Live keys are refused everywhere until a live mode is implemented and approved (docs 25).
+  for (const name of ["AMANAH_STRIPE_SECRET_KEY", "AMANAH_STRIPE_PUBLISHABLE_KEY"]) {
+    if (/^(sk|rk|pk)_live_/.test(env[name]?.trim() ?? "")) {
+      errors.push(`${name} is a Stripe live key — only test mode is implemented`);
+    }
+  }
+  if (env.AMANAH_BILLING_ENFORCE === "true" && !env.AMANAH_PLUS_LAUNCH_AT?.trim()) {
+    errors.push("AMANAH_BILLING_ENFORCE=true needs AMANAH_PLUS_LAUNCH_AT so existing accounts keep their features");
+  }
+  if (env.AMANAH_MAIL_TRANSPORT === "brevo" || env.AMANAH_MAIL_TRANSPORT === "postmark") {
+    if (!env.AMANAH_MAIL_API_KEY?.trim() || isPlaceholderValue(env.AMANAH_MAIL_API_KEY)) {
+      errors.push("AMANAH_MAIL_API_KEY is required for the configured mail provider");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for the configured mail provider");
+    }
+  }
+  if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
+    errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
+  }
+  if (env.AMANAH_INTERNAL_TOOLS === "true") {
+    errors.push("AMANAH_INTERNAL_TOOLS must not be enabled in production");
+  }
+  if (env.AMANAH_DEV_OUTBOX === "true") {
+    errors.push("AMANAH_DEV_OUTBOX must not be enabled in production");
+  }
+  if (!env.AMANAH_PUBLIC_BASE_URL?.trim() && !env.NEXT_PUBLIC_SITE_URL?.trim() && !env.NEXT_PUBLIC_APP_URL?.trim()) {
+    errors.push("AMANAH_PUBLIC_BASE_URL (or NEXT_PUBLIC_SITE_URL) is required for links in e-mails");
+  }
+  if ((env.AMANAH_MAIL_TRANSPORT ?? "disabled") === "disabled") {
+    warnings.push("No mail transport configured: registration, e-mail confirmation and password reset are unavailable");
+  }
+
   if (env.NEXT_PUBLIC_AUTH_MODE !== "api") {
     errors.push("NEXT_PUBLIC_AUTH_MODE must be api in production");
   }
@@ -86,7 +137,7 @@ export function validateProductionEnv(
 }
 
 export function getPublicEnvironmentLabel(): string {
-  return process.env.NODE_ENV === "production" ? "production" : "development";
+  return getDeploymentEnv();
 }
 
 export function sanitizeEnvForLogs(env: NodeJS.ProcessEnv = process.env): Record<string, string> {
@@ -105,6 +156,7 @@ export function sanitizeEnvForLogs(env: NodeJS.ProcessEnv = process.env): Record
   }
   if (env.DATABASE_URL) out.DATABASE_URL = "[set]";
   if (env.SESSION_SECRET) out.SESSION_SECRET = "[set]";
+  if (env.AMANAH_DATA_KEYS) out.AMANAH_DATA_KEYS = "[set]";
   if (env.OPENAI_API_KEY) out.OPENAI_API_KEY = "[set]";
   return out;
 }

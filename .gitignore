@@ -15,11 +15,13 @@
 
 # Playwright generated artifacts
 /test-results/
+/test-results-mobile/
 /playwright-report/
 /blob-report/
 
 # next.js
 /.next/
+/.next-e2e-flags/
 /out/
 
 # production
@@ -51,6 +53,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Prisma 7 generated client (prisma generate)
+/src/generated/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -72,6 +77,8 @@ next-env.d.ts
 *.keystore
 id_rsa
 id_ed25519
+id_ecdsa
+*.kdbx
 *.credentials.csv
 *credentials*.csv
 *credential*.json

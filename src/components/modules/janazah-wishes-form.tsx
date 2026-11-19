@@ -8,7 +8,6 @@ import { JanazahLegalNotice } from "@/components/modules/janazah-legal-notice";
 import { JanazahModuleNav } from "@/components/modules/janazah-module-nav";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SaveStatusIndicator } from "@/components/storage/save-status-indicator";
 import { janazahSections } from "@/lib/modules/janazah-sections";
 import { buildAuthHref } from "@/lib/auth/return-url";
 import { flushPendingSave, getStorageLocationLabel } from "@/lib/storage/store-sync";
@@ -87,7 +86,6 @@ export function JanazahWishesForm() {
             Halte deine islamischen Bestattungswünsche fest — damit deine Familie im schwersten Moment weiß, was zu tun ist.
           </p>
         </div>
-        <SaveStatusIndicator className="shrink-0" />
       </div>
 
       <JanazahLegalNotice className="mb-6" />

@@ -52,17 +52,13 @@ test.describe("English locale shows English text", () => {
   test("switching to English shows English step titles", async ({ page }) => {
     await page.goto("/dashboard/janazah?schritt=0");
     await page.waitForSelector('[data-testid="janazah-guided-flow"]');
-    const localeSwitcher = page
-      .locator('[data-testid="locale-switcher"], select[name="locale"]')
-      .first();
-    if ((await localeSwitcher.count()) > 0) {
-      await localeSwitcher.selectOption("en");
-      await expect(
-        page.locator('[data-testid="janazah-step-progress"]')
-      ).toContainText(/Step|Personal|Details/i);
-    } else {
-      test.skip();
-    }
+    const mobileNavToggle = page.getByTestId("site-mobile-nav-toggle");
+    if (await mobileNavToggle.isVisible()) await mobileNavToggle.click();
+    await page.locator("header select:visible").first().selectOption("en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(
+      page.locator('[data-testid="janazah-step-progress"]')
+    ).toContainText(/Step|Personal|Details/i);
   });
 });
 
@@ -89,10 +85,11 @@ test.describe("Delete confirmation requires two steps", () => {
   test("delete requires confirmation before executing", async ({ page }) => {
     await page.goto("/dashboard/einstellungen");
     await page.waitForSelector('[data-testid="settings-delete-data-button"]');
-    await page.getByTestId("settings-delete-data-button").click();
-    await expect(
-      page.getByTestId("settings-delete-data-confirm")
-    ).toBeVisible();
+    // A click before hydration does nothing: repeat it until the page has reacted.
+    await expect(async () => {
+      await page.getByTestId("settings-delete-data-button").click();
+      await expect(page.getByTestId("settings-delete-data-confirm")).toBeVisible({ timeout: 500 });
+    }).toPass();
     await page.getByText(/Abbrechen|Cancel/).click();
     await expect(
       page.getByTestId("settings-delete-data-confirm")

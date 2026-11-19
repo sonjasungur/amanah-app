@@ -17,9 +17,8 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { messages, context, consentGranted } = body as {
+    const { messages, consentGranted } = body as {
       messages: { role: string; content: string }[];
-      context?: Record<string, unknown>;
       consentGranted?: boolean;
     };
 
@@ -38,10 +37,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ response: safety.redirectMessage, provider: getAiProviderName(), blocked: true });
     }
 
+    // Never a free answer from a model: only what the released entries say.
     const provider = getAmanahAIProvider();
-    const response = provider.chat
-      ? await provider.chat(messages, context)
-      : "Chat nicht verfügbar — nutze die Assistent-Funktionen im Dashboard.";
+    const response = (await provider.knowledge(last)).answer;
     logAiEvent("chat", provider.name, true);
     return NextResponse.json({ response, provider: provider.name });
   } catch {

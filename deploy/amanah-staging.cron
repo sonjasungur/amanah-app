@@ -1,0 +1,10 @@
+# /etc/cron.d/amanah-staging — Amanah STAGING only (synthetic test data). Delete the file to switch the jobs off.
+# Does not touch production (amanah-app, /opt/amanah-app, 03:15 backup) or other projects.
+# Each job keeps its last output in /var/log/amanah-staging-<job>.log; alarms and all-clears go to
+# /var/log/amanah-staging-alerts.log and, only if enabled in alert.env, to the push channel (docs 29).
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+*/5 * * * * root /opt/amanah-staging/scripts/staging-cron.sh health
+45 3 * * *  root /opt/amanah-staging/scripts/staging-cron.sh backup
+15 4 * * *  root /opt/amanah-staging/scripts/staging-cron.sh restore
+30 4 * * 1  root /opt/amanah-staging/scripts/staging-cron.sh security

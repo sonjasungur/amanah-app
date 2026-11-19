@@ -25,6 +25,7 @@ const USER_FACING_FILES = [
   "src/app/page.tsx",
   "src/app/preise/page.tsx",
   "src/app/wissen/page.tsx",
+  "src/components/wissen/wissen-hub-view.tsx",
   "src/app/layout.tsx",
   "src/components/layout/footer.tsx",
   "src/components/layout/logo.tsx",
@@ -36,16 +37,16 @@ const USER_FACING_FILES = [
   "src/components/print/print-views.tsx",
 ];
 
-describe("branding — Mein Wille", () => {
+describe("branding — Amanah – Mein Wille", () => {
   it("exports brand constants", () => {
-    expect(BRAND.name).toBe("Mein Wille");
+    expect(BRAND.name).toBe("Amanah – Mein Wille");
     expect(BRAND.subtitle).toBe("Islamische Vorsorge für Notfall, Janazah und Akhira");
     expect(BRAND.claim).toBe("Ich entscheide heute, was später wichtig ist.");
     expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
     expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
-    expect(BRAND.ctaPrimary).toBe("Kostenlosen Amanah-Check starten");
-    expect(BRAND.metadataTitle).toBe("Mein Wille – Islamische Vorsorge");
+    expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
+    expect(BRAND.metadataTitle).toBe("Amanah – Mein Wille | Islamische Vorsorge");
     expect(BRAND.themeColor).toBe("#071A16");
   });
 
@@ -65,9 +66,13 @@ describe("branding — Mein Wille", () => {
     expect(home).toContain("home-outcome-");
   });
 
-  it("uses Vorsorge-Check label in navigation while keeping /check route", () => {
+  it("keeps the Vorsorge-Check reachable (footer, homepage) while the header shows the five main areas", () => {
     expect(read("src/lib/i18n/translations.ts")).toContain('"nav.check": "Vorsorge-Check"');
-    expect(read("src/components/layout/header.tsx")).toContain('href: "/check"');
+    expect(read("src/components/layout/footer.tsx")).toContain('href="/check"');
+    expect(read("src/components/marketing/home-entry-points.tsx")).toContain('href: "/check"');
+    for (const href of ["/wissen", "/dashboard", "/dashboard/testament", "/dashboard/janazah", "/dashboard/einstellungen"]) {
+      expect(read("src/components/layout/header.tsx")).toContain(`href: "${href}"`);
+    }
     expect(read("src/components/layout/header.tsx")).toContain("Registrieren");
     expect(read("src/components/layout/header.tsx")).toContain("Anmelden");
     expect(read("src/app/check/page.tsx")).toContain("CHECK_LABELS.pageTitle");
@@ -91,22 +96,24 @@ describe("branding — Mein Wille", () => {
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("homepage teaser shows all four public prices and no paid purchase button", () => {
+  it("homepage shows the free offer, Vorsorge Plus in preparation and what still waits for review, no purchase button", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Amanah-Check"');
-    expect(home).toContain('name: "Basic"');
-    expect(home).toContain('name: "Komplett"');
-    expect(home).toContain('name: "Familie"');
-    expect(home).toContain('price: "29 €"');
+    expect(home).toContain('featuresByTier("free")');
+    expect(home).toContain('featuresByTier("plus")');
+    expect(home).toContain("formatPrice(getTestPriceCents())");
     expect(home).toContain("In Vorbereitung");
+    expect(home).toContain("Kauf ist noch nicht möglich");
+    expect(home).toContain("Wartet auf fachliche Freigabe");
+    expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
     expect(home).not.toContain("Details");
   });
 
   it("wissen hub has categories, entry topics, search and scroll sections", () => {
     expect(WISSEN_CATEGORIES).toHaveLength(4);
     expect(WISSEN_ENTRY_TOPIC_IDS).toHaveLength(3);
-    const wissen = read("src/app/wissen/page.tsx");
-    expect(wissen).toContain("Wissen, das dir Entscheidungen leichter macht");
+    const wissen = read("src/app/wissen/page.tsx") + read("src/components/wissen/wissen-hub-view.tsx");
+    expect(wissen).toContain("Islamisches Wissenszentrum");
+    expect(wissen).toContain("KnowledgeAreasOverview");
     expect(wissen).toContain("Worüber möchtest du mehr wissen?");
     expect(wissen).toContain("Für deinen Einstieg");
     expect(wissen).toContain("WISSEN_SECTION_ID");
@@ -122,10 +129,10 @@ describe("branding — Mein Wille", () => {
     expect(PROVISIONAL_LOGO_VARIANT).toBe("A");
   });
 
-  it("manifest uses Mein Wille and new theme color", () => {
+  it("manifest uses Amanah – Mein Wille and new theme color", () => {
     const manifest = JSON.parse(read("public/manifest.json"));
-    expect(manifest.name).toBe("Mein Wille – Islamische Vorsorge");
-    expect(manifest.short_name).toBe("Mein Wille");
+    expect(manifest.name).toBe("Amanah – Mein Wille | Islamische Vorsorge");
+    expect(manifest.short_name).toBe("Amanah");
     expect(manifest.theme_color).toBe("#071A16");
   });
 

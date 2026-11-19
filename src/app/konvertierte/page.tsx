@@ -5,7 +5,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Users, HeartHandshake, FileText, Phone } from "lucide-react";
 
 export const metadata = {
-  title: "Für Konvertierte & alleinstehende Muslime — Mein Wille",
+  title: "Für Konvertierte & alleinstehende Muslime — Amanah – Mein Wille",
 };
 
 const checklist = [
@@ -41,7 +41,7 @@ export default function KonvertiertePage() {
         <Card className="border-l-4 border-l-accent">
           <HeartHandshake className="text-accent mb-2" size={24} />
           <h2 className="font-semibold text-primary mb-2">Ohne Ehepartner</h2>
-          <p className="text-sm text-muted">Vertrauensperson, Moschee und Bestatter müssen vorher benannt sein — sonst entscheidet das deutsche System allein.</p>
+          <p className="text-sm text-muted">Vertrauensperson, Moschee und Bestatter sollten vorher benannt sein — sonst kennt im Ernstfall niemand deine Wünsche.</p>
         </Card>
       </div>
 

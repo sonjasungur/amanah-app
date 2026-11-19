@@ -6,6 +6,7 @@ import { medicalFields } from "@/lib/modules/fields";
 export default function KrankheitPage() {
   return (
     <ModulePage
+      help="patientenverfuegung"
       title="Krankheit & Patientenverfügung"
       description="Dokumentiere medizinische und religiöse Wünsche für den Krankenhausfall."
       section="medicalWishes"

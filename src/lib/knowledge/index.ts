@@ -5,7 +5,7 @@ import { keywordSearchOrFallback } from "./search";
 import { retrieveKnowledgeSync, retrieveKnowledge } from "./retrieval";
 import { toPublicEntry, toPublicEntryDetail, toCitation } from "./citations";
 import { buildGroundedKnowledgeAnswer, buildGroundedKnowledgeAnswerAsync } from "./grounded-answer";
-import { isProductionSafe } from "./safety";
+import { hasReviewEvidence, isProductionSafe } from "./safety";
 
 export { islamicSources, getSourcesByIds } from "./sources";
 export { cultureFilterCards } from "./kulturfilter";
@@ -34,7 +34,7 @@ function entryToLegacyArticle(entry: KnowledgeEntry): KnowledgeArticle {
     summary: entry.summary,
     content: entry.content,
     sourceIds: [],
-    reviewStatus: entry.reviewedStatus === "reviewed" ? "reviewed" : "needs_scholar_review",
+    reviewStatus: hasReviewEvidence(entry) ? "reviewed" : "needs_scholar_review",
     category: entry.category,
   };
 }
@@ -62,7 +62,7 @@ export function listPublicEntries(language: KnowledgeLanguage = "de") {
 
 export function getPublicEntry(id: string) {
   const entry = getEntryById(id);
-  if (!entry || entry.reviewedStatus !== "reviewed") return null;
+  if (!entry || !isProductionSafe(entry)) return null;
   return toPublicEntryDetail(entry);
 }
 

@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+/**
+ * Encrypts legacy plaintext rows in amanah_data and amanah_data_versions and re-wraps rows to the active key.
+ *
+ * Default is a dry run (counts only), which also opens every row: run it after any key change.
+ * Writing requires BOTH:
+ *   --apply   and   AMANAH_REENCRYPT_CONFIRM=yes
+ * Never run against production without a backup and owner approval.
+ * Optional: AMANAH_REENCRYPT_USER_IDS="id1,id2" limits the run to these users.
+ * Output contains counts and row ids only — no plaintext, no keys.
+ *
+ * Requires Node >= 22.18 / 24 (native TypeScript type stripping for the shared module).
+ */
+import pg from "pg";
+
+const { parseKeyring, reencryptStoredValue } = await import("../src/lib/server/data-encryption.ts");
+
+const apply = process.argv.includes("--apply");
+if (apply && process.env.AMANAH_REENCRYPT_CONFIRM !== "yes") {
+  console.error("✗ --apply requires AMANAH_REENCRYPT_CONFIRM=yes");
+  process.exit(2);
+}
+
+const keyring = parseKeyring(process.env);
+if (!keyring) {
+  console.error("✗ AMANAH_DATA_KEYS is not set");
+  process.exit(2);
+}
+
+// Plain SQL via pg: only these tables are touched, independent of the generated Prisma client.
+const client = new pg.Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5_000 });
+await client.connect();
+const counts = { encrypt_plaintext: 0, rewrap: 0, unchanged: 0, failed: 0, changed_meanwhile: 0 };
+try {
+  const onlyUsers = process.env.AMANAH_REENCRYPT_USER_IDS?.split(",").map((s) => s.trim()).filter(Boolean);
+  const { rows: [{ versions }] } = await client.query("SELECT to_regclass('amanah_data_versions') AS versions");
+  for (const table of versions ? ["amanah_data", "amanah_data_versions"] : ["amanah_data"]) {
+    const { rows } = onlyUsers?.length
+      ? await client.query(`SELECT id, user_id, data FROM ${table} WHERE user_id = ANY($1)`, [onlyUsers])
+      : await client.query(`SELECT id, user_id, data FROM ${table}`);
+    for (const row of rows) {
+      try {
+        const { action, value } = reencryptStoredValue(row.data, row.user_id, keyring);
+        if (apply && action !== "unchanged") {
+          const touch = table === "amanah_data" ? ", updated_at = now()" : "";
+          // Only if the row still is what was read: a save made since then must survive this run.
+          const { rowCount } = await client.query(`UPDATE ${table} SET data = $1${touch} WHERE id = $2 AND data = $3::jsonb`, [JSON.stringify(value), row.id, JSON.stringify(row.data)]);
+          if (rowCount !== 1) {
+            counts.changed_meanwhile += 1;
+            console.error(`✗ row ${row.id}: changed during this run, left alone. Run again.`);
+            continue;
+          }
+        }
+        counts[action] += 1;
+      } catch {
+        counts.failed += 1;
+        console.error(`✗ row ${row.id}: could not be processed (wrong key or damaged data)`);
+      }
+    }
+  }
+  console.log(`${apply ? "applied" : "dry run"} · active key ${keyring.active} ·`, JSON.stringify(counts));
+  process.exitCode = counts.failed + counts.changed_meanwhile > 0 ? 1 : 0;
+} finally {
+  await client.end();
+}

@@ -9,6 +9,7 @@ export default function BestattungPage() {
     <>
       <JanazahModuleNav />
       <ModulePage
+      help="bestattung-ort"
         title="Bestattung / Überführung"
         description="Lege Kriterien fest: Beisetzung in Deutschland oder Überführung in die Heimat."
         section="burialPreference"

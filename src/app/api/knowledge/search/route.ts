@@ -25,6 +25,6 @@ export async function GET(request: Request) {
     language,
     count: results.length,
     results,
-    disclaimer: "Allgemeine Orientierung — fachliche Prüfung empfohlen.",
+    disclaimer: "Organisationsinformation, nicht fachlich geprüft — keine Rechts-, Medizin- oder Fatwa-Beratung.",
   });
 }

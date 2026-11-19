@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
+import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 import { computeCheckResult, isContextProfileQuestion, pickPrimaryRecommendation } from "@/lib/check/results";
 import { CHECK_QUESTIONS } from "@/lib/check/questions";
 import { mergeCheckProgressIntoFolder, hasCheckProgress, CHECK_PROGRESS_VERSION } from "@/lib/check/progress";
@@ -114,10 +115,10 @@ describe("professional core phase 1 — check persistence", () => {
 
 describe("professional core phase 1 — dashboard greeting and next step", () => {
   it("never greets with dort", () => {
-    expect(getDashboardGreeting("")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Mein Wille");
-    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Mein Wille");
+    expect(getDashboardGreeting("")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Amanah – Mein Wille");
     expect(getDashboardGreeting("Amina")).toBe("Willkommen, Amina");
     expect(getDashboardGreeting("Amina")).not.toMatch(/dort/i);
   });
@@ -227,21 +228,20 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
 });
 
 describe("professional core phase 1 — pricing teaser and checkout safety", () => {
-  it("shows all four public prices on homepage teaser", () => {
+  it("homepage teaser and /preise show the owner-confirmed split: free + Vorsorge Plus (39 € test price)", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Amanah-Check"');
-    expect(home).toContain('price: "0 €"');
-    expect(home).toContain('name: "Basic"');
-    expect(home).toContain('price: "29 €"');
-    expect(home).toContain('name: "Komplett"');
-    expect(home).toContain('price: "79 €"');
-    expect(home).toContain('name: "Familie"');
-    expect(home).toContain('price: "99 €"');
+    expect(home).toContain("Kostenlos");
+    expect(home).toContain("Vorsorge Plus · geplant {PLUS_PRICE} einmalig");
+    const preise = read("src/app/preise/page.tsx");
+    expect(preise).toContain('featuresByTier("plus")');
+    expect(preise).toContain('statusNote="In Vorbereitung"');
+    expect(preise).not.toMatch(/"(29|79|99) €"/);
+    expect(formatPrice(getTestPriceCents())).toBe("39 €");
   });
 
   it("keeps paid teaser cards in preparation without active buy CTA", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('statusNote={p.name === "Amanah-Check" ? undefined : "In Vorbereitung"}');
+    expect(home).toContain("In Vorbereitung");
     expect(home).not.toContain("Details");
     expect(home).not.toContain("Kaufen");
     expect(home).not.toContain("Checkout");
@@ -256,17 +256,15 @@ describe("professional core phase 1 — pricing teaser and checkout safety", () 
 });
 
 describe("professional core phase 1 — dashboard focus navigation", () => {
-  it("reduces primary sidebar links and keeps modules in collapsible area", () => {
+  it("keeps four main destinations and folds all other topics away (P1)", () => {
     const nav = read("src/lib/navigation/dashboard-nav.ts");
     const layout = read("src/components/dashboard/dashboard-layout.tsx");
-    expect(nav).toContain('id: "overview"');
-    expect(nav).toContain('label: "Mein Vorsorgeplan"');
+    for (const label of ['label: "Übersicht"', 'label: "Vorsorge"', 'label: "Familie"', 'label: "Notfallpaket"']) expect(nav).toContain(label);
     expect(nav).toContain('label: "Vorsorge-Check"');
-    expect(nav).not.toContain("/dashboard/notfallkarte");
-    expect(nav).not.toContain("/dashboard/familie");
-    expect(nav).not.toContain("/dashboard/pdf");
-    expect(layout).toContain("Alle Vorsorgebereiche");
-    expect(layout).toContain("moduleConfigs.map");
+    expect(nav).toContain("moduleConfigs");
+    expect(layout).toContain("Weitere Themen");
+    expect(layout).toContain("moreNavItems.map");
+    expect(layout).toContain('data-testid="dashboard-tabbar"');
   });
 
   it("uses updated neutral auth disclaimer wording", () => {

@@ -10,8 +10,8 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-10 md:gap-12 mb-10">
           <div className="md:col-span-1">
             <p className="font-bold text-[clamp(1.125rem,2.5vw,1.375rem)] leading-none mb-4">
-              <span className="text-white/85 font-semibold">Mein </span>
-              <span className="text-emerald">Wille</span>
+              <span className="text-emerald">Amanah</span>
+              <span className="text-white/85 font-semibold"> – Mein Wille</span>
             </p>
             <p className="text-sm md:text-base text-white/75 leading-relaxed">{BRAND.subtitle}</p>
             <p className="text-sm text-white/60 mt-3 italic">{BRAND.claim}</p>
