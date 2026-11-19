@@ -80,6 +80,16 @@ export function checkBirthDate(display: string, today: Date = new Date()): DateC
   return iso > today.toISOString().slice(0, 10) ? "future" : "ok";
 }
 
+/**
+ * The value a date field may store: "" for a deliberately empty field, ISO for a real calendar date,
+ * null for anything unfinished or impossible (e.g. "03.07." or "31.02.1962"). Input, saving and the
+ * document check all use this same calendar check (toIsoDate), so no impossible date reaches paper.
+ */
+export function storableDate(text: string): string | null {
+  const t = text.trim();
+  return t ? toIsoDate(t) : "";
+}
+
 export const DATE_CHECK_MESSAGES: Record<Exclude<DateCheck, "empty" | "ok">, string> = {
   incomplete: "Bitte vollständig als TT.MM.JJJJ eingeben, zum Beispiel 15.03.1980.",
   invalid: "Dieses Datum gibt es nicht. Bitte Tag und Monat prüfen.",

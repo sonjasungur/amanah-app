@@ -161,47 +161,67 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
   const asOf = dataAsOf && !Number.isNaN(Date.parse(dataAsOf)) ? fmt(new Date(dataAsOf)) : null;
   return (
     <article className="amanah-doc amanah-letter" data-doc-variant="editorial" data-doc-id={model.id} data-testid={testId} lang="de">
-      <header className="letter-head">
-        <div className="doc-brand">
-          <DocumentLogoMark size={22} />
-          <span>Amanah</span>
-          <span className="doc-audience">{model.title}</span>
-        </div>
-        {l.sender && <p className="letter-sender">{l.sender}</p>}
-        <p className="letter-date">{[l.place, longDate(createdAt)].filter(Boolean).join(", ")}</p>
-        <h1 className="sr-only">{model.title}</h1>
-      </header>
-      {l.bismillah && (
-        <p className="letter-basmala" lang="ar" dir="rtl">
-          بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
-        </p>
-      )}
-      {l.greeting && <p className="letter-greeting">{l.greeting}</p>}
-      <div className="letter-body">
-        {l.paragraphs.map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
-      </div>
-      <div className="letter-sign">
-        {l.closing && <p className="letter-closing">{l.closing}</p>}
-        <div className="letter-sign-space" aria-hidden />
-        {l.signature && <p className="letter-name">{l.signature}</p>}
-      </div>
-      {l.summary && (
-        <section className="letter-summary">
-          <h2>Das Wichtigste in Kürze</h2>
-          <p>{l.summary}</p>
-        </section>
-      )}
-      {model.missing.length > 0 && (
-        <p className="doc-callout doc-missing letter-missing" data-testid="doc-missing">
-          Noch nicht ausgefüllt: {model.missing.join(" · ")}
-        </p>
-      )}
-      <footer className="doc-foot letter-foot">
-        <span data-testid="doc-status">{model.status}</span> Erstellt am {fmt(createdAt)}
-        {asOf ? ` · Stand der Angaben: ${asOf}` : ""}.
-      </footer>
+      {/* The same frame as the other documents: its empty head and foot repeat on every printed page and
+          keep the top and bottom margins. Firefox does not repeat a cloned padding (P2.6, F2). */}
+      <table className="doc-frame" role="presentation">
+        <thead aria-hidden>
+          <tr>
+            <td className="doc-running" />
+          </tr>
+        </thead>
+        <tfoot aria-hidden>
+          <tr>
+            <td className="doc-page-spacer" />
+          </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td>
+              <header className="letter-head">
+                <div className="doc-brand">
+                  <DocumentLogoMark size={22} />
+                  <span>Amanah</span>
+                  <span className="doc-audience">{model.title}</span>
+                </div>
+                {l.sender && <p className="letter-sender">{l.sender}</p>}
+                <p className="letter-date">{[l.place, longDate(createdAt)].filter(Boolean).join(", ")}</p>
+                <h1 className="sr-only">{model.title}</h1>
+              </header>
+              {l.bismillah && (
+                <p className="letter-basmala" lang="ar" dir="rtl">
+                  بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ
+                </p>
+              )}
+              {l.greeting && <p className="letter-greeting">{l.greeting}</p>}
+              <div className="letter-body">
+                {l.paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              <div className="letter-sign">
+                {l.closing && <p className="letter-closing">{l.closing}</p>}
+                <div className="letter-sign-space" aria-hidden />
+                {l.signature && <p className="letter-name">{l.signature}</p>}
+              </div>
+              {l.summary && (
+                <section className="letter-summary">
+                  <h2>Das Wichtigste in Kürze</h2>
+                  <p>{l.summary}</p>
+                </section>
+              )}
+              {model.missing.length > 0 && (
+                <p className="doc-callout doc-missing letter-missing" data-testid="doc-missing">
+                  Noch nicht ausgefüllt: {model.missing.join(" · ")}
+                </p>
+              )}
+              <footer className="doc-foot letter-foot">
+                <span data-testid="doc-status">{model.status}</span> Erstellt am {fmt(createdAt)}
+                {asOf ? ` · Stand der Angaben: ${asOf}` : ""}.
+              </footer>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </article>
   );
 }

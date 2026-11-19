@@ -56,13 +56,13 @@ describe("P2.6 family letter", () => {
 });
 
 describe("P2.6 dates on documents", () => {
-  it("prints complete dates and reports an unfinished one instead of printing it silently", () => {
-    expect(dateForDocument("1962-07-03")).toEqual({ display: "03.07.1962", complete: true });
-    expect(dateForDocument("03.07.")).toEqual({ display: "03.07.", complete: false });
-    expect(dateForDocument("")).toEqual({ display: null, complete: true });
+  it("prints complete dates and reports an unfinished one instead of printing it", () => {
+    expect(dateForDocument("1962-07-03")).toMatchObject({ display: "03.07.1962", complete: true, problem: null });
+    expect(dateForDocument("03.07.")).toMatchObject({ display: null, complete: false, entered: "03.07.", problem: "incomplete" });
+    expect(dateForDocument("")).toMatchObject({ display: null, complete: true, problem: null });
     const d = empty();
     d.emergencyCard = { ...d.emergencyCard, name: "A", birthDate: "03.07." };
-    expect(buildNotfallkarte(d).warnings.join(" ")).toContain("Geburtsdatum ist unvollständig („03.07.“)");
+    expect(buildNotfallkarte(d).warnings.join(" ")).toContain("Geburtsdatum ist unvollständig („03.07.“) und wird deshalb nicht als Geburtsdatum gedruckt");
   });
 
   it("names different birth dates in emergency card and Janazah wishes", () => {

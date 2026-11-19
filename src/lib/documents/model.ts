@@ -1,5 +1,5 @@
 import type { AmanahOrdnerData, FamilyRole } from "@/lib/domain/types";
-import { formatDisplayDate } from "@/lib/utils/date-input";
+import { checkBirthDate, formatDisplayDate, toIsoDate } from "@/lib/utils/date-input";
 import { ASSET_TYPES, MORTGAGE, OWNERSHIP } from "@/lib/testament/asset-labels";
 import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS } from "@/lib/vorsorge/documents";
 import { debtTypeLabels, digitalTypeLabels } from "@/lib/vorsorge/labels";
@@ -200,19 +200,31 @@ const textContact = (raw: string | undefined, role: string): DocContact | null =
 };
 
 /**
- * A date as it is printed. ISO dates become TT.MM.JJJJ; anything else (an old free-text entry, or a
- * date left unfinished such as "03.07.") is printed as entered but reported as incomplete, so it is
- * never silently cut short on paper.
+ * A date as it is printed, checked with the same calendar check as the input field (toIsoDate).
+ * Only a real date is printed (as TT.MM.JJJJ). Anything else – an unfinished date such as "03.07.", an
+ * impossible one such as "31.02.1962" or old free text – is not printed but named as a problem
+ * (`entered`, `problem`), so it never reaches card or sheet unwarned (P2.6, F1). An empty date stays empty.
  */
-export function dateForDocument(raw: string | null | undefined): { display: string | null; complete: boolean } {
-  const display = docValue(formatDisplayDate(raw));
-  if (!display) return { display: null, complete: true };
-  return { display, complete: /^\d{2}\.\d{2}\.\d{4}$/.test(display) };
+export function dateForDocument(raw: string | null | undefined): { display: string | null; complete: boolean; entered: string | null; problem: "incomplete" | "invalid" | null } {
+  const entered = docValue(formatDisplayDate(raw));
+  if (!entered) return { display: null, complete: true, entered: null, problem: null };
+  const iso = toIsoDate(entered);
+  if (iso) return { display: formatDisplayDate(iso), complete: true, entered, problem: null };
+  return { display: null, complete: false, entered, problem: checkBirthDate(entered) === "incomplete" ? "incomplete" : "invalid" };
+}
+
+/** The warning for a birth date that is stored but cannot be printed; null when it is fine or empty. */
+export function birthDateWarning(raw: string | null | undefined, where: string): string | null {
+  const d = dateForDocument(raw);
+  if (!d.problem) return null;
+  return d.problem === "incomplete"
+    ? `Geburtsdatum ist unvollständig („${d.entered}“) und wird deshalb nicht als Geburtsdatum gedruckt. Bitte ${where} als TT.MM.JJJJ ergänzen.`
+    : `Geburtsdatum „${d.entered}“ gibt es nicht und wird deshalb nicht als Geburtsdatum gedruckt. Bitte ${where} korrigieren.`;
 }
 
 function dateWarnings(data: AmanahOrdnerData): string[] {
-  const birth = dateForDocument(data.emergencyCard.birthDate);
-  return birth.display && !birth.complete ? [`Geburtsdatum ist unvollständig („${birth.display}“). Bitte in der Notfallkarte als TT.MM.JJJJ ergänzen.`] : [];
+  const w = birthDateWarning(data.emergencyCard.birthDate, "in der Notfallkarte");
+  return w ? [w] : [];
 }
 
 function identityOf(name: string | null, birth: string | null): string | undefined {
@@ -476,6 +488,7 @@ export function buildJanazah(data: AmanahOrdnerData): DocModel {
     editPath: "/dashboard/janazah",
     missing: [j.islamicBurialDesired === null && "Ob eine islamische Bestattung gewünscht ist", !docValue(j.preferredFuneralDirector) && !docValue(j.preferredMosque) && "Bestatter oder Moschee"].filter(Boolean) as string[],
     warnings: [
+      ...[birthDateWarning(j.birthDate, "in den Janazah-Wünschen")].filter((w): w is string => Boolean(w)),
       ...(data.emergencyCard.hasJanazahWishes === false && j.islamicBurialDesired !== null ? ["Notfallkarte sagt „keine Janazah-Wünsche“, es sind aber Wünsche eingetragen."] : []),
       ...(() => {
         // Same person, two dates: say so instead of printing either silently.
@@ -652,7 +665,7 @@ export function buildLeitfaden(data: AmanahOrdnerData): DocModel {
     title: "Was soll meine Familie im Notfall tun?",
     status: "Ein Leitfaden mit meinen Angaben. Keine Rechtsberatung.",
     audience: "Für meine Familie und meine Vertrauenspersonen",
-    identity: identityOf(docValue(c.name), docValue(formatDisplayDate(c.birthDate))),
+    identity: identityOf(docValue(c.name), dateForDocument(c.birthDate).display),
     keyMessage: hasPeople ? "Bei Lebensgefahr: Notruf 112. Danach die Menschen in Schritt 1 anrufen." : undefined,
     editPath: "/dashboard/vorsorge",
     missing: [!docValue(c.emergencyContact1.name) && "Erster Notfallkontakt", !places.some(([, v]) => v) && "Ablageorte der Dokumente"].filter(Boolean) as string[],

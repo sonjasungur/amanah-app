@@ -68,7 +68,7 @@ test("empty letter: not offered as finished, leads to the editor", async ({ page
   await expect(page.getByTestId("doc-empty").getByRole("link", { name: "Angaben ergänzen" })).toHaveAttribute("href", "/dashboard/familie");
 });
 
-test("birth date: the full date reaches the document; an unfinished one is named in form and document", async ({ page }) => {
+test("birth date: the full date reaches the document; an unfinished or impossible one is never stored, only named (F1)", async ({ page }) => {
   await page.goto("/dashboard/notfallkarte");
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Name", { exact: true }).fill("Datumstest Beispiel");
@@ -81,18 +81,40 @@ test("birth date: the full date reaches the document; an unfinished one is named
   await expect(page.getByTestId("doc-print-notfallkarte")).toContainText("03.07.1962");
   await expect(page.locator(".doc-print-root .doc-card-body").first()).toContainText("geb. 03.07.1962");
 
+  // Overwritten with an unfinished and then an impossible date: marked at the field, not stored.
   await page.goto("/dashboard/notfallkarte");
   await page.waitForLoadState("networkidle");
-  await date.fill("");
-  await date.click();
-  await page.keyboard.type("0307");
-  await page.getByLabel("Name", { exact: true }).click();
+  for (const [digits, message] of [["0307", "Bitte vollständig als TT.MM.JJJJ eingeben"], ["31021962", "Dieses Datum gibt es nicht"]]) {
+    await date.click();
+    await page.keyboard.press("ControlOrMeta+a");
+    await page.keyboard.type(digits);
+    await page.getByLabel("Name", { exact: true }).click();
+    await expect(page.getByRole("alert").filter({ hasText: message })).toBeVisible();
+    await expect(date).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "korrektur");
+  }
   await page.reload();
   await page.waitForLoadState("networkidle");
-  // Shown at once after loading, not only while typing.
-  await expect(page.getByText("Bitte vollständig als TT.MM.JJJJ eingeben", { exact: false })).toBeVisible();
+  await expect(date).toHaveValue("03.07.1962");
+  await page.goto("/dashboard/pdf?dokument=notfallkarte");
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator(".doc-print-root .doc-card-body").first()).toContainText("geb. 03.07.1962");
+});
+
+test("birth date: an unfinished date stored by an older version is shown for correction and not printed (F1)", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("seeded")) return;
+    localStorage.setItem("amanah-ordner-data", JSON.stringify({ state: { emergencyCard: { name: "Datumstest Beispiel", birthDate: "03.07." } }, version: 0 }));
+    sessionStorage.setItem("seeded", "1");
+  });
+  await page.goto("/dashboard/notfallkarte");
+  await page.waitForLoadState("networkidle");
+  // Shown at once after loading at the field, and named in the save bar.
+  await expect(page.getByRole("alert").filter({ hasText: "Bitte vollständig als TT.MM.JJJJ eingeben" })).toBeVisible();
+  await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "korrektur");
   await page.goto("/dashboard/pdf?dokument=notfallkarte");
   await page.waitForLoadState("networkidle");
   await expect(page.getByTestId("doc-gaps")).toContainText("Geburtsdatum ist unvollständig");
   await expect(page.getByTestId("export-notfallkarte")).toContainText("Bitte prüfen");
+  await expect(page.locator(".doc-print-root .doc-card-body").first()).not.toContainText("geb.");
 });

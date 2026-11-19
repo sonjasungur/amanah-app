@@ -1,9 +1,10 @@
 "use client";
 
 import { cn } from "@/lib/utils/cn";
-import { type InputHTMLAttributes, forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { DATE_CHECK_MESSAGES, checkBirthDate, formatDateTyping, formatDisplayDate, toIsoDate } from "@/lib/utils/date-input";
+import { type InputHTMLAttributes, forwardRef, useEffect, useId, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { DATE_CHECK_MESSAGES, checkBirthDate, formatDateTyping, formatDisplayDate, storableDate, toIsoDate } from "@/lib/utils/date-input";
+import { useFieldCorrections } from "@/lib/store/field-corrections";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
@@ -124,8 +125,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, Omit<InputHTMLAttribut
 PasswordInput.displayName = "PasswordInput";
 
 /**
- * Date as TT.MM.JJJJ with dots added while typing. Reports ISO (JJJJ-MM-TT) once the date is valid,
- * otherwise the typed text, so that nothing typed is lost. Mobile keyboards show digits.
+ * Date as TT.MM.JJJJ with dots added while typing. Mobile keyboards show digits.
+ * Only a real calendar date (as ISO, JJJJ-MM-TT) or a deliberately emptied field is handed on to the
+ * folder (P2.6, F1). Unfinished or impossible text ("03.07.", "31.02.1962") stays in the field, marked
+ * as an error, and is reported to the save bar; the folder keeps its last valid value meanwhile.
  */
 export function DateInput({
   value,
@@ -155,11 +158,22 @@ export function DateInput({
   // editing: otherwise it would end up incomplete on the emergency card (P2.6).
   const storedIncomplete = !editing && Boolean(value.trim()) && check !== "ok" && check !== "empty";
   const problem = (touched || storedIncomplete) && check !== "ok" && check !== "empty" ? DATE_CHECK_MESSAGES[check] : null;
-  const errorId = id ? `${id}-error` : undefined;
+  const fallbackId = useId();
+  const fieldId = id ?? fallbackId;
+  const errorId = `${fieldId}-error`;
+  // The folder holds `value`; say what stays stored while the typed text cannot be stored.
+  const blocked = Boolean(problem) && (check === "incomplete" || check === "invalid");
+  const storedNow = toIsoDate(value);
+  const keeps = !blocked ? null : !value.trim() ? "Bis dahin bleibt das Feld leer gespeichert." : storedNow ? `Bis dahin bleibt ${formatDisplayDate(storedNow)} gespeichert.` : null;
+  const report = useFieldCorrections((s) => s.report);
+  useEffect(() => {
+    report(fieldId, blocked && problem ? `„${text}“: ${problem}` : null);
+  }, [report, fieldId, blocked, problem, text]);
+  useEffect(() => () => report(fieldId, null), [report, fieldId]);
   return (
     <div>
       <Input
-        id={id}
+        id={fieldId}
         value={text}
         inputMode="numeric"
         autoComplete="bday"
@@ -167,8 +181,10 @@ export function DateInput({
         maxLength={10}
         aria-invalid={problem ? true : undefined}
         aria-describedby={[describedBy, problem ? errorId : undefined].filter(Boolean).join(" ") || undefined}
-        className={className}
+        // Error state that does not rely on colour alone: thicker border, icon and the word "Fehler".
+        className={cn(problem && "border-[3px] border-destructive bg-destructive/5 focus:border-destructive focus:ring-destructive/30", className)}
         data-testid={testId}
+        data-error={problem ? "true" : undefined}
         onFocus={() => {
           focused.current = true;
           setEditing(true);
@@ -181,12 +197,17 @@ export function DateInput({
         onChange={(e) => {
           const next = formatDateTyping(e.target.value, text);
           setText(next);
-          onValueChange(toIsoDate(next) ?? next);
+          const storable = storableDate(next);
+          if (storable !== null && storable !== value) onValueChange(storable);
         }}
       />
       {problem && (
-        <p id={errorId} className="text-xs text-destructive mt-1" role="alert">
-          {problem}
+        <p id={errorId} className="mt-1.5 flex items-start gap-2 border-l-4 border-destructive pl-2.5 text-base font-medium leading-snug text-destructive" role="alert" data-testid={testId ? `${testId}-error` : undefined}>
+          <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden />
+          <span>
+            <strong>Fehler:</strong> {problem}
+            {keeps && <span className="block text-sm font-normal text-foreground/80">{keeps}</span>}
+          </span>
         </p>
       )}
     </div>

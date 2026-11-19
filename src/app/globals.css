@@ -379,6 +379,15 @@ body {
 @page amanah-doc:first {
   margin: 0;
 }
+/* Firefox prints its own headers and footers (title, URL, page, date) on every page that has a page
+   margin, and its print dialog has them switched on by default. It has no @page margin boxes either,
+   so in Firefox every document page has no margin at all; the repeated table head and foot of the
+   document frame keep the white border instead (P2.6, F2/F3). */
+@supports (-moz-appearance: none) {
+  @page amanah-doc {
+    margin: 0;
+  }
+}
 @media print {
   .amanah-doc, .doc-wallet { page: amanah-doc; }
   /* Documents with the table frame: thead and tfoot repeat on every page and carry the top and bottom
@@ -391,8 +400,8 @@ body {
      offset (head 13 mm + foot 13 mm) a document that just fills its last page opens a blank page. */
   .amanah-doc .doc-frame { margin-bottom: -26mm; }
   .amanah-doc[data-doc-id="notfallkarte"] { padding-top: 15mm; padding-bottom: 0; }
-  /* The letter has no table: its own padding repeats on every page instead. */
-  .amanah-letter { padding-top: 16mm; padding-bottom: 14mm; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  /* The letter uses the same frame: 13 mm head on every page plus 3 mm on page 1 (16 mm, DIN 5008 grid). */
+  .amanah-letter { padding-top: 3mm; padding-bottom: 0; }
   .amanah-doc .doc-section h2 { break-after: avoid; }
   .amanah-doc .doc-warn, .amanah-doc .doc-missing { color: #000; }
   .amanah-doc .doc-cover { break-after: page; }
@@ -403,7 +412,13 @@ body {
 @media print {
   body[data-print-doc] *:not(:has(.doc-print-root)):not(.doc-print-root):not(.doc-print-root *),
   body:has(.doc-print-root[data-print-always]) *:not(:has(.doc-print-root)):not(.doc-print-root):not(.doc-print-root *) { display: none !important; }
+  /* The ancestors become plain blocks: Firefox ignores forced page breaks (the fold card's own page)
+     inside grid and flex containers (P2.6, F3). */
   body[data-print-doc] :has(.doc-print-root),
-  body:has(.doc-print-root[data-print-always]) :has(.doc-print-root) { padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; max-width: none !important; gap: 0 !important; }
-  body[data-print-doc], body:has(.doc-print-root[data-print-always]) { background: #fff !important; }
+  body:has(.doc-print-root[data-print-always]) :has(.doc-print-root) { display: block !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: none !important; max-width: none !important; gap: 0 !important; }
+  body[data-print-doc], body:has(.doc-print-root[data-print-always]) { display: block !important; overflow: visible !important; background: #fff !important; }
+  /* Every box is on a document page. Firefox otherwise takes a page that starts inside the repeated
+     table frame (here the letter's last page) for a plain page and prints its headers there (F2). */
+  html:has(body[data-print-doc]), html:has(body[data-print-doc]) *,
+  html:has(.doc-print-root[data-print-always]), html:has(.doc-print-root[data-print-always]) * { page: amanah-doc !important; }
 }
