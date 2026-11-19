@@ -5,6 +5,7 @@ import { FolderProblemGate } from "@/components/dashboard/folder-problem-gate";
 import { StorageModeBanner } from "@/components/auth/storage-mode-banner";
 import { EmailVerificationNotice } from "@/components/dashboard/email-verification-notice";
 import { PlusAreaNotice } from "@/components/billing/plus-area-notice";
+import { DateDraftLeaveGuard, DateDraftNotice } from "@/components/storage/date-drafts";
 
 export default function DashboardRootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,8 @@ export default function DashboardRootLayout({ children }: { children: React.Reac
           <StorageModeBanner />
         </div>
         <PlusAreaNotice />
+        <DateDraftNotice />
+        <DateDraftLeaveGuard />
         <FolderProblemGate>
           <ConsentGate>{children}</ConsentGate>
         </FolderProblemGate>

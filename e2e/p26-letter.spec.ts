@@ -68,7 +68,8 @@ test("empty letter: not offered as finished, leads to the editor", async ({ page
   await expect(page.getByTestId("doc-empty").getByRole("link", { name: "Angaben ergänzen" })).toHaveAttribute("href", "/dashboard/familie");
 });
 
-test("birth date: the full date reaches the document; an unfinished or impossible one is never stored, only named (F1)", async ({ page }) => {
+test("birth date: the full date reaches the document; an unfinished or impossible draft stays open until corrected or discarded (F1, owner acceptance)", async ({ page }) => {
+  page.on("dialog", (d) => void d.accept()); // the browser's own "leave page?" on reload
   await page.goto("/dashboard/notfallkarte");
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Name", { exact: true }).fill("Datumstest Beispiel");
@@ -81,10 +82,10 @@ test("birth date: the full date reaches the document; an unfinished or impossibl
   await expect(page.getByTestId("doc-print-notfallkarte")).toContainText("03.07.1962");
   await expect(page.locator(".doc-print-root .doc-card-body").first()).toContainText("geb. 03.07.1962");
 
-  // Overwritten with an unfinished and then an impossible date: marked at the field, not stored.
+  // Overwritten with an unfinished and then an impossible date: named at the field, not stored.
   await page.goto("/dashboard/notfallkarte");
   await page.waitForLoadState("networkidle");
-  for (const [digits, message] of [["0307", "Bitte vollständig als TT.MM.JJJJ eingeben"], ["31021962", "Dieses Datum gibt es nicht"]]) {
+  for (const [digits, message] of [["0307", "Geburtsdatum noch unvollständig"], ["31021962", "Bitte gib ein gültiges Geburtsdatum ein"]]) {
     await date.click();
     await page.keyboard.press("ControlOrMeta+a");
     await page.keyboard.type(digits);
@@ -93,12 +94,22 @@ test("birth date: the full date reaches the document; an unfinished or impossibl
     await expect(date).toHaveAttribute("aria-invalid", "true");
     await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "korrektur");
   }
+  // The draft stays the person's input, also after a reload; the old date is neither shown nor exported.
   await page.reload();
   await page.waitForLoadState("networkidle");
-  await expect(date).toHaveValue("03.07.1962");
+  await expect(date).toHaveValue("31.02.1962");
   await page.goto("/dashboard/pdf?dokument=notfallkarte");
   await page.waitForLoadState("networkidle");
+  await expect(page.getByTestId("draft-notice")).toBeVisible();
+  await expect(page.getByTestId("doc-preview-notfallkarte")).not.toContainText("03.07.1962");
+  await expect(page.getByTestId("doc-pdf")).toBeDisabled();
+  // Only an explicit discard brings the stored date back.
+  await page.getByTestId("draft-notice").getByTestId("draft-discard").click();
+  await expect(page.getByTestId("draft-notice")).toHaveCount(0);
   await expect(page.locator(".doc-print-root .doc-card-body").first()).toContainText("geb. 03.07.1962");
+  await page.goto("/dashboard/notfallkarte");
+  await page.waitForLoadState("networkidle");
+  await expect(date).toHaveValue("03.07.1962");
 });
 
 test("birth date: an unfinished date stored by an older version is shown for correction and not printed (F1)", async ({ page }) => {
@@ -109,9 +120,9 @@ test("birth date: an unfinished date stored by an older version is shown for cor
   });
   await page.goto("/dashboard/notfallkarte");
   await page.waitForLoadState("networkidle");
-  // Shown at once after loading at the field, and named in the save bar.
-  await expect(page.getByRole("alert").filter({ hasText: "Bitte vollständig als TT.MM.JJJJ eingeben" })).toBeVisible();
-  await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "korrektur");
+  // Shown at once after loading at the field. It is the stored value, not an open draft: nothing to discard.
+  await expect(page.getByRole("alert").filter({ hasText: "Geburtsdatum noch unvollständig" })).toBeVisible();
+  await expect(page.getByTestId("date-discard")).toHaveCount(0);
   await page.goto("/dashboard/pdf?dokument=notfallkarte");
   await page.waitForLoadState("networkidle");
   await expect(page.getByTestId("doc-gaps")).toContainText("Geburtsdatum ist unvollständig");

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useFieldCorrections } from "@/lib/store/field-corrections";
 import { usePathname, useRouter } from "next/navigation";
 import { useI18n, locales } from "@/lib/i18n/context";
 import { localeNames, type Locale } from "@/lib/i18n/translations";
@@ -40,6 +41,9 @@ export function Header() {
   const showRegister = isPublicRegistrationEnabled();
 
   const handleLogout = async () => {
+    // An open date draft is the person's input: signing out says so instead of dropping it silently.
+    const drafts = Object.values(useFieldCorrections.getState().open);
+    if (drafts.length && !window.confirm(`${drafts.map((d) => `${d.label} „${d.text}“`).join(", ")} ist noch nicht gespeichert. Trotzdem abmelden? Die Eingabe wird dann verworfen.`)) return;
     const result = await logout();
     if (!result.ok && result.unsaved) {
       // The account may not hold the newest changes: the person decides, the logout does not drop them silently.

@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils/cn";
 import { type InputHTMLAttributes, forwardRef, useEffect, useId, useImperativeHandle, useLayoutEffect, useRef, useState } from "react";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
-import { DATE_CHECK_MESSAGES, checkBirthDate, formatDateTyping, formatDisplayDate, storableDate, toIsoDate } from "@/lib/utils/date-input";
+import { DATE_CHECK_MESSAGES, checkBirthDate, dateDraftMessage, formatDateTyping, formatDisplayDate, storableDate } from "@/lib/utils/date-input";
 import { useFieldCorrections } from "@/lib/store/field-corrections";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
@@ -127,8 +127,10 @@ PasswordInput.displayName = "PasswordInput";
 /**
  * Date as TT.MM.JJJJ with dots added while typing. Mobile keyboards show digits.
  * Only a real calendar date (as ISO, JJJJ-MM-TT) or a deliberately emptied field is handed on to the
- * folder (P2.6, F1). Unfinished or impossible text ("03.07.", "31.02.1962") stays in the field, marked
- * as an error, and is reported to the save bar; the folder keeps its last valid value meanwhile.
+ * folder. Unfinished or impossible text ("03.07.", "31.02.1962") is an open draft (P2.6 owner
+ * acceptance): it stays in the field, also after leaving the page, is named at the field and in the save
+ * bar, keeps old dates out of previews and blocks exports, until it is corrected or explicitly discarded.
+ * With `draftKey` the draft outlives the field (navigation, reload); without it, it ends with the field.
  */
 export function DateInput({
   value,
@@ -137,6 +139,10 @@ export function DateInput({
   className,
   describedBy,
   testId,
+  draftKey,
+  path = "",
+  label = "Datum",
+  birth = false,
 }: {
   value: string;
   onValueChange: (value: string) => void;
@@ -144,35 +150,85 @@ export function DateInput({
   className?: string;
   describedBy?: string;
   testId?: string;
+  /** Stable key of this field (e.g. "emergencyCard.birthDate"), so an open draft survives leaving the page. */
+  draftKey?: string;
+  /** Folder path the draft stands in for in documents, e.g. "emergencyCard.birthDate". */
+  path?: string;
+  /** Field name for notices, e.g. "Geburtsdatum". */
+  label?: string;
+  /** A birth date: the hints say "Geburtsdatum". */
+  birth?: boolean;
 }) {
-  const [text, setText] = useState(() => formatDisplayDate(value));
-  const [touched, setTouched] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const focused = useRef(false);
-  // A value that arrives later (loading the account) shows up unless the person is typing.
-  useEffect(() => {
-    if (!focused.current) setText(formatDisplayDate(value));
-  }, [value]);
-  const check = checkBirthDate(text);
-  // A stored value that is no full date (e.g. "03.07.") is shown as a problem at once, not only after
-  // editing: otherwise it would end up incomplete on the emergency card (P2.6).
-  const storedIncomplete = !editing && Boolean(value.trim()) && check !== "ok" && check !== "empty";
-  const problem = (touched || storedIncomplete) && check !== "ok" && check !== "empty" ? DATE_CHECK_MESSAGES[check] : null;
   const fallbackId = useId();
   const fieldId = id ?? fallbackId;
-  const errorId = `${fieldId}-error`;
-  // The folder holds `value`; say what stays stored while the typed text cannot be stored.
-  const blocked = Boolean(problem) && (check === "incomplete" || check === "invalid");
-  const storedNow = toIsoDate(value);
-  const keeps = !blocked ? null : !value.trim() ? "Bis dahin bleibt das Feld leer gespeichert." : storedNow ? `Bis dahin bleibt ${formatDisplayDate(storedNow)} gespeichert.` : null;
+  const key = draftKey ?? fieldId;
+  const stored = formatDisplayDate(value);
+  const [text, setText] = useState(() => useFieldCorrections.getState().open[key]?.text ?? stored);
+  const [touched, setTouched] = useState(() => Boolean(useFieldCorrections.getState().open[key]));
+  const [editing, setEditing] = useState(false);
+  const focused = useRef(false);
+  const input = useRef<HTMLInputElement>(null);
   const report = useFieldCorrections((s) => s.report);
+  const discardCount = useFieldCorrections((s) => s.discarded[key] ?? 0);
+  const focusKey = useFieldCorrections((s) => s.focusKey);
+  // A value that arrives later (loading the account) shows up unless the person is typing or a draft is open.
   useEffect(() => {
-    report(fieldId, blocked && problem ? `„${text}“: ${problem}` : null);
-  }, [report, fieldId, blocked, problem, text]);
-  useEffect(() => () => report(fieldId, null), [report, fieldId]);
+    if (!focused.current && !useFieldCorrections.getState().open[key]) setText(formatDisplayDate(value));
+  }, [value, key]);
+  // Discarded (here or from a notice elsewhere): the stored value is shown again.
+  const seenDiscard = useRef(discardCount);
+  useEffect(() => {
+    if (discardCount === seenDiscard.current) return;
+    seenDiscard.current = discardCount;
+    setText(formatDisplayDate(value));
+    setTouched(false);
+  }, [discardCount, value]);
+  // "Zum Feld" from another page: focus this field once it is there.
+  useEffect(() => {
+    if (focusKey !== key || !input.current) return;
+    input.current.scrollIntoView({ block: "center" });
+    input.current.focus();
+    useFieldCorrections.getState().requestFocus(null);
+  }, [focusKey, key]);
+
+  const check = checkBirthDate(text);
+  const isDraft = text.trim() !== stored.trim();
+  // A stored value that is no real date (older folders, e.g. "03.07.") is named at once, not only after editing.
+  const storedInvalid = !editing && !isDraft && Boolean(value.trim()) && (check === "incomplete" || check === "invalid");
+  const problem =
+    (touched || storedInvalid) && check !== "ok" && check !== "empty"
+      ? check === "future"
+        ? DATE_CHECK_MESSAGES.future
+        : dateDraftMessage(check, birth)
+      : null;
+  const errorId = `${fieldId}-error`;
+  // An open draft: typed, not storable, not yet discarded. The folder still holds `value`.
+  const blocked = (check === "incomplete" || check === "invalid") && isDraft;
+  const hint = !problem || check === "future" ? null : check === "incomplete" ? "Bitte als TT.MM.JJJJ eingeben, zum Beispiel 15.03.1980." : "Bitte Tag und Monat prüfen.";
+
+  useEffect(() => {
+    // Reported while typing already, so leaving right after typing is caught as well.
+    if (blocked) {
+      report(key, { text, message: dateDraftMessage(check as "incomplete" | "invalid", birth), label, path, href: typeof window === "undefined" ? "" : window.location.pathname + window.location.search });
+    } else {
+      report(key, null);
+    }
+  }, [report, key, blocked, text, check, birth, label, path]);
+  // Without a stable key the draft ends with the field; with one it stays open until corrected or discarded.
+  useEffect(() => () => {
+    if (!draftKey) report(key, null);
+  }, [report, key, draftKey]);
+
+  const discard = () => {
+    useFieldCorrections.getState().discard(key);
+    setText(stored);
+    setTouched(false);
+  };
+
   return (
     <div>
       <Input
+        ref={input}
         id={fieldId}
         value={text}
         inputMode="numeric"
@@ -181,10 +237,11 @@ export function DateInput({
         maxLength={10}
         aria-invalid={problem ? true : undefined}
         aria-describedby={[describedBy, problem ? errorId : undefined].filter(Boolean).join(" ") || undefined}
-        // Error state that does not rely on colour alone: thicker border, icon and the word "Fehler".
+        // Error state that does not rely on colour alone: thicker border, icon and a bold hint.
         className={cn(problem && "border-[3px] border-destructive bg-destructive/5 focus:border-destructive focus:ring-destructive/30", className)}
         data-testid={testId}
         data-error={problem ? "true" : undefined}
+        data-draft-key={key}
         onFocus={() => {
           focused.current = true;
           setEditing(true);
@@ -202,13 +259,21 @@ export function DateInput({
         }}
       />
       {problem && (
-        <p id={errorId} className="mt-1.5 flex items-start gap-2 border-l-4 border-destructive pl-2.5 text-base font-medium leading-snug text-destructive" role="alert" data-testid={testId ? `${testId}-error` : undefined}>
-          <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden />
-          <span>
-            <strong>Fehler:</strong> {problem}
-            {keeps && <span className="block text-sm font-normal text-foreground/80">{keeps}</span>}
-          </span>
-        </p>
+        <div id={errorId} className="mt-1.5 border-l-4 border-destructive pl-2.5 text-destructive" role="alert" data-testid={testId ? `${testId}-error` : undefined}>
+          <p className="flex items-start gap-2 text-base font-semibold leading-snug">
+            <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden />
+            <span>{problem}</span>
+          </p>
+          {hint && <p className="text-sm text-foreground/80">{hint}</p>}
+          {blocked && (
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 text-sm text-foreground/80">
+              <span>Noch nicht gespeichert.</span>
+              <button type="button" onClick={discard} className="font-semibold text-primary underline min-h-[44px]" data-testid={testId ? `${testId}-discard` : "date-discard"}>
+                Änderung verwerfen
+              </button>
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

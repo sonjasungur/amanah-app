@@ -152,21 +152,26 @@ const fmt = (d: Date) => d.toLocaleDateString("de-DE", { day: "2-digit", month: 
 const longDate = (d: Date) => d.toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
 
 /**
- * The family letter, set as a letter (P2.6, DIN 5008 grid): small letterhead, sender, place and date,
- * optional Basmala, salutation, paragraphs, closing, room for the signature, printed name. No numbered
- * sections, no form look.
+ * The family letter, set as personal letter paper (P2.6, owner acceptance): a large serif title in deep
+ * green with a fine matt-gold rule, room around the Basmala, the full text, and closing and signature as
+ * one composed ending. Pages 2+ carry a quiet running head (sender · title); on page 1 the letterhead
+ * covers it. Gold is only ever a line, never text, so the letter reads well in black and white.
  */
 function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; createdAt: Date; dataAsOf: string | null; testId: string }) {
   const l = model.letter!;
   const asOf = dataAsOf && !Number.isNaN(Date.parse(dataAsOf)) ? fmt(new Date(dataAsOf)) : null;
+  const running = [l.sender, model.title].filter(Boolean).join(" · ");
   return (
     <article className="amanah-doc amanah-letter" data-doc-variant="editorial" data-doc-id={model.id} data-testid={testId} lang="de">
-      {/* The same frame as the other documents: its empty head and foot repeat on every printed page and
-          keep the top and bottom margins. Firefox does not repeat a cloned padding (P2.6, F2). */}
+      {/* The same frame as the other documents: head and foot repeat on every printed page and keep the
+          top and bottom margins (Firefox does not repeat a cloned padding, P2.6, F2). The head carries
+          the running head of the following pages. */}
       <table className="doc-frame" role="presentation">
         <thead aria-hidden>
           <tr>
-            <td className="doc-running" />
+            <td className="doc-running letter-running">
+              <span className="letter-running-text">{running}</span>
+            </td>
           </tr>
         </thead>
         <tfoot aria-hidden>
@@ -178,14 +183,18 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
           <tr>
             <td>
               <header className="letter-head">
-                <div className="doc-brand">
-                  <DocumentLogoMark size={22} />
+                <p className="letter-brand">
+                  <DocumentLogoMark size={14} />
                   <span>Amanah</span>
-                  <span className="doc-audience">{model.title}</span>
-                </div>
-                {l.sender && <p className="letter-sender">{l.sender}</p>}
+                </p>
+                <h1 className="letter-title">{model.title}</h1>
+                {l.sender && (
+                  <p className="letter-from">
+                    von <span className="letter-sender">{l.sender}</span>
+                  </p>
+                )}
+                <div className="letter-rule" aria-hidden />
                 <p className="letter-date">{[l.place, longDate(createdAt)].filter(Boolean).join(", ")}</p>
-                <h1 className="sr-only">{model.title}</h1>
               </header>
               {l.bismillah && (
                 <p className="letter-basmala" lang="ar" dir="rtl">
@@ -199,6 +208,7 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
                 ))}
               </div>
               <div className="letter-sign">
+                <div className="letter-sign-rule" aria-hidden />
                 {l.closing && <p className="letter-closing">{l.closing}</p>}
                 <div className="letter-sign-space" aria-hidden />
                 {l.signature && <p className="letter-name">{l.signature}</p>}
@@ -390,7 +400,7 @@ export function WalletCard({ model, variant }: { model: DocModel; variant?: DocV
         <span>Notfallkarte zum Ausschneiden</span>
       </h2>
       <p className="doc-wallet-hint">
-        An den Ecken ausschneiden, in der Mitte falten und ins Portemonnaie stecken. Die zweite Karte ist für eine Vertrauensperson.
+        An den Ecken ausschneiden, an der Falzlinie in der Mitte falten und ins Portemonnaie stecken. Die zweite Karte ist für eine Vertrauensperson.
         Mit „Tatsächliche Größe“ drucken. Bei Änderungen bitte neu drucken.
       </p>
       {[0, 1].map((n) => (
@@ -399,6 +409,12 @@ export function WalletCard({ model, variant }: { model: DocModel; variant?: DocV
           <span className="doc-cut doc-cut-tr" aria-hidden />
           <span className="doc-cut doc-cut-bl" aria-hidden />
           <span className="doc-cut doc-cut-br" aria-hidden />
+          <span className="doc-fold doc-fold-top" aria-hidden>
+            Falz
+          </span>
+          <span className="doc-fold doc-fold-bottom" aria-hidden>
+            Falz
+          </span>
           <CardSide lines={card.front} className="doc-card-front" band />
           <CardSide lines={card.back} className="doc-card-back" />
         </div>

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Eye, FileDown, Printer, ShieldAlert } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
+import { useFieldCorrections, withDateDrafts } from "@/lib/store/field-corrections";
+import { DateDraftExportBlock } from "@/components/storage/date-drafts";
 import { DOCUMENTS, documentFileTitle, type DocumentId } from "@/lib/documents/model";
 import { DocumentView, WalletCard, variantFor, type DocVariant } from "@/components/documents/document-view";
 import { Button } from "@/components/ui/button";
@@ -16,7 +18,10 @@ import { Button } from "@/components/ui/button";
  */
 export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }: { id: DocumentId; variant?: DocVariant; previewOpen?: boolean }) {
   const store = useAmanahStore();
-  const data = pickDataFields(store);
+  // An open date draft stands in for the stored value: the preview shows no old date (P2.6).
+  const drafts = useFieldCorrections((s) => s.open);
+  const blocked = Object.keys(drafts).length > 0;
+  const data = withDateDrafts(pickDataFields(store), drafts);
   const info = DOCUMENTS.find((d) => d.id === id)!;
   const [includeHealth, setIncludeHealth] = useState(false);
   const [askHealth, setAskHealth] = useState(false);
@@ -26,6 +31,7 @@ export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }
   const createdAt = new Date();
 
   const print = () => {
+    if (blocked) return;
     const title = document.title;
     document.title = documentFileTitle(model, createdAt);
     // Only the document goes on paper: forms, menus and notices around it are left out (see globals.css).
@@ -76,14 +82,15 @@ export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }
 
         {model.hasContent ? (
           <div>
+            {blocked && <div className="mb-3"><DateDraftExportBlock /></div>}
             <div className="flex flex-wrap gap-2">
               <Button type="button" variant="outline" onClick={() => setShowPreview((v) => !v)} aria-expanded={showPreview} data-testid="doc-preview-toggle">
                 <Eye size={16} className="mr-2" aria-hidden /> {showPreview ? "Vorschau ausblenden" : "Vorschau anzeigen"}
               </Button>
-              <Button type="button" variant="secondary" onClick={print} data-testid="doc-pdf">
+              <Button type="button" variant="secondary" onClick={print} disabled={blocked} data-testid="doc-pdf">
                 <FileDown size={16} className="mr-2" aria-hidden /> Als PDF speichern
               </Button>
-              <Button type="button" variant="secondary" onClick={print} data-testid="doc-print">
+              <Button type="button" variant="secondary" onClick={print} disabled={blocked} data-testid="doc-print">
                 <Printer size={16} className="mr-2" aria-hidden /> Drucken
               </Button>
             </div>
@@ -129,7 +136,7 @@ export function DocumentPanel({ id, variant: chosenVariant, previewOpen = true }
         </>
         )}
       </div>
-      {model.hasContent && (
+      {model.hasContent && !blocked && (
         <div className="print-only doc-print-root">
           <DocumentView model={model} createdAt={createdAt} dataAsOf={data.lastSaved} variant={variant} testId={`doc-print-${id}`} />
           <WalletCard model={model} variant={variant} />

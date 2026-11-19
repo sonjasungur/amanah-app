@@ -63,7 +63,7 @@ function TalkCard({ talk, index }: { talk: FamilyTalk; index: number }) {
           <label htmlFor={`${base}-date`} className="text-sm font-medium block mb-1">
             Wann (TT.MM.JJJJ)
           </label>
-          <DateInput id={`${base}-date`} value={talk.date} onValueChange={(date) => update({ date })} testId="talk-date" />
+          <DateInput id={`${base}-date`} value={talk.date} onValueChange={(date) => update({ date })} testId="talk-date" draftKey={`talk.${talk.id}.date`} label="Gesprächsdatum" />
         </div>
         <div>
           <label htmlFor={`${base}-explained`} className="text-sm font-medium block mb-1">

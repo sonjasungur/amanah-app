@@ -7,6 +7,7 @@ import { apiAuthProvider, rememberSession, SESSION_HINT_KEY, sessionUserId } fro
 import { getStorageMode } from "./config";
 import { discardDeviceDataWithoutSession, syncStoreWithRemoteAfterAuth } from "@/lib/storage/store-sync";
 import { wipeDeviceData } from "@/lib/storage/device-data";
+import { clearDateDrafts } from "@/lib/store/field-corrections";
 import { answerSaveRequests, askOtherTabsToSave } from "@/lib/storage/tab-coordination";
 import { cancelPendingSave, flushBeforeSignOut } from "@/lib/store/use-amanah-store";
 import type { AuthProvider, AuthSession, LoginInput, RegisterInput } from "./types";
@@ -150,6 +151,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       await provider.logout();
       if (wipe) wipeDeviceData();
+      // Open date drafts belong to this person's session; they are not left for the next one.
+      clearDateDrafts();
       sessionVersion.current += 1;
       setSession(null);
       return { ok: true };

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AlertCircle, CheckCircle2, ClipboardList, FileText, FolderOpen, Printer } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
+import { useFieldCorrections, withDateDrafts } from "@/lib/store/field-corrections";
 import { DOCUMENTS, type DocumentId } from "@/lib/documents/model";
 import { DocumentPanel } from "@/components/documents/document-panel";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -144,7 +145,8 @@ function StatusChip({ ready, missing, warnings = 0 }: { ready: boolean; missing:
 
 function DocumentsPage() {
   const store = useAmanahStore();
-  const data = pickDataFields(store);
+  const drafts = useFieldCorrections((s) => s.open);
+  const data = withDateDrafts(pickDataFields(store), drafts);
   const printouts = printoutStates(data);
   // "?dokument=janazah" opens that preview, e.g. from the Janazah page.
   const requested = useSearchParams()?.get("dokument");

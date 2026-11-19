@@ -26,7 +26,7 @@ interface ModuleFormProps {
   onChange: (field: string, value: unknown) => void;
 }
 
-export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
+export function ModuleForm({ section, fields, values, onChange }: ModuleFormProps) {
   const { t } = useI18n();
   const formId = useId();
   return (
@@ -63,6 +63,11 @@ export function ModuleForm({ fields, values, onChange }: ModuleFormProps) {
               describedBy={control["aria-describedby"]}
               value={(values[field.key] as string) || ""}
               onValueChange={(v) => onChange(field.key, v)}
+              draftKey={`${section}.${field.key}`}
+              path={`${section}.${field.key}`}
+              label={field.label}
+              birth={field.key === "birthDate"}
+              testId={field.testId ? `${field.testId}-input` : undefined}
             />
           )}
           {field.type === "number" && (

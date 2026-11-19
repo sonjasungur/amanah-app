@@ -11,12 +11,13 @@ import { buildGesamt, buildJanazah, buildLeitfaden, buildNotfallinfo, buildNotfa
 import { checkBirthDate, storableDate, toIsoDate } from "@/lib/utils/date-input";
 import { DateInput } from "@/components/ui/input";
 import { saveBarState } from "@/components/storage/save-bar";
-import { useFieldCorrections } from "@/lib/store/field-corrections";
+import { useFieldCorrections, withDateDrafts } from "@/lib/store/field-corrections";
 import { buildPackage, defaultSelection } from "@/lib/vorsorge/emergency-package";
 
 afterEach(() => {
   cleanup();
-  useFieldCorrections.setState({ open: {} });
+  useFieldCorrections.setState({ open: {}, discarded: {}, focusKey: null });
+  sessionStorage.clear();
 });
 const empty = (): AmanahOrdnerData => structuredClone(defaultAmanahData);
 const withBirth = (birthDate: string) => {
@@ -105,7 +106,7 @@ describe("F1: an impossible stored date never reaches paper unwarned", () => {
 describe("F1: the field stores only real dates and marks errors clearly", () => {
   const setup = (value = "") => {
     const values: string[] = [];
-    render(<DateInput id="geb" value={value} onValueChange={(v) => values.push(v)} testId="geb" />);
+    render(<DateInput id="geb" value={value} onValueChange={(v) => values.push(v)} testId="geb" birth label="Geburtsdatum" />);
     return { values, input: screen.getByRole("textbox") as HTMLInputElement };
   };
 
@@ -129,33 +130,74 @@ describe("F1: the field stores only real dates and marks errors clearly", () => 
     expect(useFieldCorrections.getState().open).toEqual({});
   });
 
-  it("an impossible date: readable message with icon and the word Fehler, thick border, what stays stored, reported to the save bar", () => {
+  it("an impossible date: the owner's hint, icon, thick border, not stored, reported as open draft", () => {
     const { input } = setup("1962-07-03");
     fireEvent.focus(input);
     fireEvent.change(input, { target: { value: "31.02.1962" } });
     fireEvent.blur(input);
     const alert = screen.getByRole("alert");
-    expect(alert.textContent).toContain("Fehler:");
-    expect(alert.textContent).toContain("Dieses Datum gibt es nicht");
-    expect(alert.textContent).toContain("Bis dahin bleibt 03.07.1962 gespeichert.");
-    expect(alert.className).toContain("text-base");
-    expect(alert.className).toContain("border-l-4");
+    expect(alert.textContent).toContain("Bitte gib ein gültiges Geburtsdatum ein");
+    expect(alert.textContent).toContain("Noch nicht gespeichert.");
+    // While the draft is open the old date is not shown again.
+    expect(alert.textContent).not.toContain("03.07.1962");
+    expect(input.value).toBe("31.02.1962");
     expect(alert.querySelector("svg")).not.toBeNull();
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.className).toContain("border-[3px]");
-    expect(input.dataset.error).toBe("true");
-    expect(useFieldCorrections.getState().open.geb).toContain("„31.02.1962“");
-    // Correcting it clears the report.
+    expect(useFieldCorrections.getState().open.geb).toMatchObject({ text: "31.02.1962", message: "Bitte gib ein gültiges Geburtsdatum ein", label: "Geburtsdatum" });
+    // Correcting it clears the draft.
     act(() => {
       fireEvent.change(input, { target: { value: "03.07.1962" } });
     });
     expect(useFieldCorrections.getState().open).toEqual({});
   });
 
-  it("an impossible date already stored is shown for correction at once", () => {
+  it("an unfinished date says so", () => {
+    const { input } = setup("1962-07-03");
+    fireEvent.change(input, { target: { value: "03.07." } });
+    fireEvent.blur(input);
+    expect(input.value).toBe("03.07.");
+    expect(screen.getByRole("alert").textContent).toContain("Geburtsdatum noch unvollständig");
+  });
+
+  it("only an explicit discard brings the stored value back", () => {
+    const { values, input } = setup("1962-07-03");
+    fireEvent.change(input, { target: { value: "03.07." } });
+    fireEvent.blur(input);
+    act(() => {
+      fireEvent.click(screen.getByTestId("geb-discard"));
+    });
+    expect(input.value).toBe("03.07.1962");
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(useFieldCorrections.getState().open).toEqual({});
+    expect(values).toEqual([]);
+  });
+
+  it("with a stable key the draft survives leaving the page and is shown again on return", () => {
+    const { unmount } = render(<DateInput value="1962-07-03" onValueChange={() => undefined} draftKey="emergencyCard.birthDate" path="emergencyCard.birthDate" birth label="Geburtsdatum" testId="k" />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "03.07." } });
+    unmount();
+    expect(useFieldCorrections.getState().open["emergencyCard.birthDate"]?.text).toBe("03.07.");
+    render(<DateInput value="1962-07-03" onValueChange={() => undefined} draftKey="emergencyCard.birthDate" path="emergencyCard.birthDate" birth label="Geburtsdatum" testId="k" />);
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("03.07.");
+    expect(screen.getByRole("alert").textContent).toContain("Geburtsdatum noch unvollständig");
+    // Discarded from a notice elsewhere: the mounted field shows the stored value again.
+    act(() => useFieldCorrections.getState().discard("emergencyCard.birthDate"));
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("03.07.1962");
+  });
+
+  it("an open draft keeps the old date out of every document", () => {
+    const d = withBirth("1962-07-03");
+    const shown = withDateDrafts(d, { "emergencyCard.birthDate": { text: "03.07.", message: "Geburtsdatum noch unvollständig", label: "Geburtsdatum", path: "emergencyCard.birthDate", href: "/dashboard/notfallkarte" } });
+    expect(printedText(shown)).not.toContain("03.07.1962");
+    expect(buildNotfallkarte(shown).warnings.join(" ")).toContain("unvollständig");
+    expect(d.emergencyCard.birthDate).toBe("1962-07-03");
+  });
+
+  it("an impossible date already stored is shown for correction at once (no draft: nothing to discard)", () => {
     setup("31.02.1962");
-    expect(screen.getByRole("alert").textContent).toContain("Dieses Datum gibt es nicht");
-    expect(useFieldCorrections.getState().open.geb).toBeDefined();
+    expect(screen.getByRole("alert").textContent).toContain("Bitte gib ein gültiges Geburtsdatum ein");
+    expect(screen.queryByTestId("geb-discard")).toBeNull();
   });
 
   it("the save bar does not report 'saved' while a date is open", () => {

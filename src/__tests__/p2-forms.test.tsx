@@ -58,7 +58,7 @@ describe("P2 date input TT.MM.JJJJ", () => {
     expect(values.at(-1)).toBe("1985-03-15");
     fireEvent.change(input, { target: { value: "31.02.1985" } });
     fireEvent.blur(input);
-    expect(screen.getByRole("alert").textContent).toContain("Dieses Datum gibt es nicht");
+    expect(screen.getByRole("alert").textContent).toContain("Bitte gib ein gültiges Datum ein");
     expect(input.getAttribute("aria-invalid")).toBe("true");
   });
 

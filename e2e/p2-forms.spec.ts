@@ -21,7 +21,7 @@ test("birth date: dots appear while typing, paste of an ISO date works, a wrong 
   await expect(page.getByLabel("Geburtsdatum")).toHaveValue("01.12.1979");
   await page.getByLabel("Geburtsdatum").fill("31.02.1980");
   await page.getByLabel("Name", { exact: true }).click();
-  await expect(page.getByRole("alert").filter({ hasText: "Dieses Datum gibt es nicht" })).toBeVisible();
+  await expect(page.getByRole("alert").filter({ hasText: "Bitte gib ein gültiges Geburtsdatum ein" })).toBeVisible();
   const size = await page.getByLabel("Geburtsdatum").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
   expect(size).toBeGreaterThanOrEqual(16);
 });

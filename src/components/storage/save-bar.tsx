@@ -6,6 +6,7 @@ import { useAmanahStore, cancelPendingSave } from "@/lib/store/use-amanah-store"
 import { flushPendingSave } from "@/lib/storage/store-sync";
 import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { useFieldCorrections } from "@/lib/store/field-corrections";
+import { draftSummary, useGoToDraft } from "@/components/storage/date-drafts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
@@ -39,10 +40,9 @@ export function SaveBar({ className, overviewHref = "/dashboard", compact = fals
   const correctionIds = Object.keys(corrections);
   const [running, setRunning] = useState(false);
   const state = saveBarState(saveStatus, lastSaved, correctionIds.length);
+  const goToDraft = useGoToDraft();
   const focusCorrection = () => {
-    const el = correctionIds[0] ? document.getElementById(correctionIds[0]) : null;
-    el?.scrollIntoView({ block: "center" });
-    el?.focus();
+    if (correctionIds[0]) goToDraft(correctionIds[0]);
   };
 
   const save = async (thenOverview: boolean) => {
@@ -55,8 +55,9 @@ export function SaveBar({ className, overviewHref = "/dashboard", compact = fals
       setRunning(false);
     }
     // Everything else is saved; the open date is not, so the person is taken to it instead of away.
-    if (Object.keys(useFieldCorrections.getState().open).length) {
-      focusCorrection();
+    const openKeys = Object.keys(useFieldCorrections.getState().open);
+    if (openKeys.length) {
+      goToDraft(openKeys[0]);
       return;
     }
     const after = useAmanahStore.getState().saveStatus;
@@ -95,7 +96,7 @@ export function SaveBar({ className, overviewHref = "/dashboard", compact = fals
           {state === "fehlgeschlagen" && saveError && <p className="text-xs text-destructive mt-1">{saveError}</p>}
           {state === "korrektur" && (
             <p className="text-sm text-destructive mt-1" data-testid="save-bar-correction">
-              {Object.values(corrections)[0]} Alles andere wird gespeichert.{" "}
+              {draftSummary(Object.values(corrections)[0])}: {Object.values(corrections)[0].message}. Alles andere wird gespeichert.{" "}
               <button type="button" className="underline font-semibold" onClick={focusCorrection}>
                 Zum Feld
               </button>

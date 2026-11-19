@@ -168,6 +168,8 @@ body {
   --doc-tint: #eef3ef;
   --doc-red: #a1221c;
   --doc-redtint: #fbedeb;
+  /* Matt gold, only for fine lines and small accents (P2.6 owner acceptance); prints as a mid grey. */
+  --doc-gold: #9a7d45;
   --doc-sans: var(--font-doc-sans), var(--font-arabic), "Noto Naskh Arabic", system-ui, sans-serif;
   --doc-serif: var(--font-doc-serif), var(--font-arabic), "Noto Naskh Arabic", Georgia, serif;
   color: var(--doc-ink);
@@ -289,7 +291,7 @@ body {
 .amanah-doc[data-doc-variant="klinisch"] .doc-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 /* Emergency sheet: one A4 page, 15 mm margins, body 11 pt, nothing smaller than 9.5 pt. */
-.amanah-doc[data-doc-id="notfallkarte"] { padding: 15mm; font-size: 11pt; line-height: 1.35; }
+.amanah-doc[data-doc-id="notfallkarte"] { padding: 12mm 15mm 15mm; font-size: 11pt; line-height: 1.35; }
 .amanah-doc[data-doc-id="notfallkarte"] .doc-frame > thead, .amanah-doc[data-doc-id="notfallkarte"] .doc-frame > tfoot { display: none; }
 .amanah-doc[data-doc-id="notfallkarte"] .doc-head { margin-bottom: 4mm; padding-top: 3mm; }
 .amanah-doc[data-doc-id="notfallkarte"] .doc-title { font-size: 20pt; margin: 3mm 0 1mm; }
@@ -308,20 +310,59 @@ body {
 .amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-critical] { padding: 2.5mm 3.5mm 1.5mm; }
 .amanah-doc[data-doc-id="notfallkarte"] .doc-note { font-size: 9.5pt; margin-bottom: 1.5mm; }
 .amanah-doc[data-doc-id="notfallkarte"] .doc-foot { margin-top: 4mm; padding-top: 2mm; }
+/* Owner acceptance (P2.6): name and numbers carry the sheet; contacts and the time after death are
+   visibly grouped; one small gold accent under the head. */
+.amanah-doc[data-doc-id="notfallkarte"] .doc-head::after { content: ""; display: block; width: 22mm; border-top: 1mm solid var(--doc-gold); margin-top: 3mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-identity { font-size: 17pt; font-weight: 700; line-height: 1.2; color: var(--doc-ink); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="phone"] { border: 1.2pt solid var(--doc-forest); border-radius: 2mm; padding: 2.5mm 3.5mm 1mm; break-inside: avoid; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="mosque"] { border: 0.8pt solid var(--doc-line); border-left: 1.2mm solid var(--doc-grey); border-radius: 2mm; padding: 2.5mm 3.5mm 1mm; break-inside: avoid; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="mosque"] .doc-contact { background: #fff; border: 0.6pt solid var(--doc-line); border-left: 1.2mm solid var(--doc-grey); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="mosque"] .doc-contact-phone { color: var(--doc-ink); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact-phone { font-size: 16pt; color: var(--doc-ink); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact-role { font-size: 9pt; color: var(--doc-ink); }
+/* Two contacts per row: names and numbers stay on one line. Plain text entries (practice, mosque,
+   undertaker) are set smaller than a person's name, so long addresses do not push the sheet to a second page. */
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact:not(:has(.doc-contact-phone)) .doc-contact-name { font-size: 11pt; font-weight: 600; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section { margin-bottom: 3.5mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section h2 { margin-bottom: 1.5mm; }
+/* The practice (text without a separate number) as one slim line under the two people to call. */
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="phone"] .doc-contact:not(:has(.doc-contact-phone)) { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 0.5mm 3mm; padding-top: 1.6mm; padding-bottom: 1.6mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-contact-name { font-size: 12.5pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-head::after { margin-top: 2mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-title { font-size: 18pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-key { margin-bottom: 3mm; padding-top: 2mm; padding-bottom: 2mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-identity { font-size: 16pt; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-section { margin-bottom: 3mm; }
+.amanah-doc[data-doc-id="notfallkarte"] .doc-foot { margin-top: 2.5mm; padding-top: 1.5mm; }
+/* The full name gets the wide column, so it stays on one line. */
+@media print, (min-width: 641px) {
+  .amanah-doc[data-doc-id="notfallkarte"] .doc-section[data-section-icon="person"] .doc-rows { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); }
+}
 
-/* ── The family letter (DIN 5008 grid): left 25 mm, text width about 145 mm. ── */
-.amanah-letter { font-family: var(--doc-serif); font-size: 12.5pt; line-height: 1.6; padding: 16mm 40mm 18mm 25mm; }
-.amanah-letter .letter-head { margin-bottom: 12mm; }
-.amanah-letter .doc-brand { font-family: var(--doc-sans); font-size: 9.5pt; }
-.amanah-letter .letter-sender { font-size: 14pt; font-weight: 600; color: var(--doc-forest); margin: 10mm 0 0; }
-.amanah-letter .letter-date { font-family: var(--doc-sans); font-size: 10.5pt; color: var(--doc-grey); text-align: right; margin: 6mm 0 0; }
-.amanah-letter .letter-basmala { text-align: center; font-family: var(--font-arabic), "Noto Naskh Arabic", serif; font-size: 16pt; line-height: 1.9; color: var(--doc-forest); margin: 0 0 8mm; }
+/* ── The family letter: personal letter paper (P2.6 owner acceptance). DIN 5008 grid: left 25 mm,
+   text width about 145 mm. Large serif title in deep green, fine matt-gold rules, room around the
+   Basmala, closing and signature as one ending. Gold is only ever a line: black-and-white prints read. ── */
+.amanah-letter { font-family: var(--doc-serif); font-size: 12.5pt; line-height: 1.62; padding: 16mm 40mm 18mm 25mm; }
+/* Running head of pages 2+ (sender · title). On page 1 the letterhead lies over it. */
+.amanah-letter .letter-running { justify-content: flex-start; font-family: var(--doc-serif); font-style: italic; font-size: 9.5pt; color: var(--doc-grey); padding-bottom: 2mm; border-bottom: 0.5pt solid var(--doc-gold); }
+.amanah-letter .letter-head { position: relative; z-index: 1; background: #fff; margin: -11mm 0 9mm; padding-top: 11mm; }
+.amanah-letter .letter-brand { display: flex; align-items: center; justify-content: flex-end; gap: 1.5mm; margin: 0 0 9mm; font-family: var(--doc-sans); font-size: 8.5pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--doc-grey); }
+.amanah-letter .letter-title { margin: 0; font-family: var(--doc-serif); font-weight: 600; font-size: 28pt; line-height: 1.1; letter-spacing: -0.005em; color: var(--doc-forest); text-wrap: balance; }
+.amanah-letter .letter-from { margin: 2.5mm 0 0; font-style: italic; font-size: 13pt; color: var(--doc-ink); }
+.amanah-letter .letter-sender { font-style: normal; font-weight: 600; color: var(--doc-forest); }
+.amanah-letter .letter-rule { margin: 6mm 0 0; border-top: 0.6pt solid var(--doc-gold); }
+.amanah-letter .letter-date { font-family: var(--doc-sans); font-size: 10.5pt; color: var(--doc-grey); text-align: right; margin: 4mm 0 0; }
+.amanah-letter .letter-basmala { text-align: center; font-family: var(--font-arabic), "Noto Naskh Arabic", serif; font-size: 18pt; line-height: 2; color: var(--doc-forest); margin: 3mm 0 12mm; break-after: avoid; }
+.amanah-letter .letter-basmala::after { content: ""; display: block; width: 14mm; margin: 3mm auto 0; border-top: 0.6pt solid var(--doc-gold); }
 .amanah-letter .letter-greeting { margin: 0 0 5mm; }
 .amanah-letter .letter-body p { margin: 0 0 4.5mm; white-space: pre-wrap; overflow-wrap: break-word; orphans: 3; widows: 3; }
-.amanah-letter .letter-sign { break-inside: avoid; margin-top: 7mm; }
-.amanah-letter .letter-closing { margin: 0; }
+.amanah-letter .letter-body p:last-child { break-after: avoid; }
+.amanah-letter .letter-sign { break-inside: avoid; margin-top: 10mm; }
+.amanah-letter .letter-sign-rule { width: 18mm; margin: 0 0 5mm; border-top: 0.6pt solid var(--doc-gold); }
+.amanah-letter .letter-closing { margin: 0; font-style: italic; font-size: 13.5pt; }
 .amanah-letter .letter-sign-space { height: 16mm; }
-.amanah-letter .letter-name { margin: 0; font-weight: 600; }
+.amanah-letter .letter-name { margin: 0; font-size: 15pt; font-weight: 600; color: var(--doc-forest); }
 .amanah-letter .letter-summary { margin-top: 12mm; padding-top: 4mm; border-top: 0.5pt solid var(--doc-line); break-inside: avoid; }
 .amanah-letter .letter-summary h2 { font-family: var(--doc-sans); font-size: 10pt; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--doc-green); margin: 0 0 2mm; }
 .amanah-letter .letter-summary p { margin: 0; font-size: 11.5pt; }
@@ -332,24 +373,29 @@ body {
 .doc-wallet { max-width: 210mm; margin: 0 auto; padding: 12mm 15mm 14mm; font-size: 10.5pt; line-height: 1.4; }
 .doc-wallet-title { font-size: 16pt; font-weight: 700; margin: 0 0 2mm; color: var(--doc-forest); }
 .doc-wallet-hint { margin: 0 0 9mm; color: var(--doc-grey); font-size: 10.5pt; }
-.doc-card { position: relative; display: flex; width: 171.2mm; max-width: 100%; height: 54mm; margin: 0 auto 14mm; outline: 0.25mm solid #b9c4bd; }
+.doc-card { position: relative; display: flex; width: 171.2mm; max-width: 100%; height: 54mm; margin: 0 auto 14mm; outline: 0.25mm solid #6b746f; color: #000; }
 .doc-card-face { width: 85.6mm; height: 54mm; overflow: hidden; display: flex; flex-direction: column; font-size: 9pt; line-height: 1.22; }
-.doc-card-back { border-left: 0.3mm dashed #8a938e; }
+.doc-card-back { border-left: 0.35mm dashed #2b322e; }
 .doc-card-band { background: var(--doc-forest); color: #fff; padding: 1.8mm 3.2mm; font-weight: 700; font-size: 10pt; letter-spacing: 0.08em; }
 .doc-card-body { display: flex; flex-direction: column; gap: 0.6mm; padding: 2.4mm 3.2mm; flex: 1; min-height: 0; overflow-wrap: break-word; }
-.doc-card-body .card-name { font-size: 11pt; font-weight: 700; line-height: 1.15; }
+.doc-card-body .card-name { font-size: 12pt; font-weight: 700; line-height: 1.15; }
 .doc-card-body .card-text { font-size: 9pt; }
-.doc-card-body .card-strong { font-size: 10.5pt; font-weight: 700; color: var(--doc-forest); font-variant-numeric: tabular-nums; white-space: nowrap; margin-bottom: 0.6mm; }
-.doc-card-body .card-label { font-size: 9pt; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--doc-grey); }
+.doc-card-body .card-strong { font-size: 11.5pt; font-weight: 700; color: #000; font-variant-numeric: tabular-nums; white-space: nowrap; margin-bottom: 0.6mm; }
+.doc-card-body .card-label { font-size: 9pt; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #2b322e; }
 .doc-card-body .card-critical-label { margin-top: 1mm; font-size: 9pt; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--doc-red); }
 .doc-card-body .card-critical { font-size: 9pt; border-left: 0.9mm solid var(--doc-red); padding-left: 1.6mm; }
-.doc-card-body .card-note { font-size: 9pt; color: var(--doc-grey); }
+.doc-card-body .card-note { font-size: 9pt; color: #2b322e; }
 .doc-card-back .doc-card-body > .card-note:last-child { margin-top: auto; }
 .doc-cut { position: absolute; width: 4mm; height: 4mm; border-color: #555; border-style: solid; border-width: 0; }
 .doc-cut-tl { top: -6mm; left: -6mm; border-right-width: 0.3mm; border-bottom-width: 0.3mm; }
 .doc-cut-tr { top: -6mm; right: -6mm; border-left-width: 0.3mm; border-bottom-width: 0.3mm; }
 .doc-cut-bl { bottom: -6mm; left: -6mm; border-right-width: 0.3mm; border-top-width: 0.3mm; }
 .doc-cut-br { bottom: -6mm; right: -6mm; border-left-width: 0.3mm; border-top-width: 0.3mm; }
+/* The fold line: dashed between the halves, marked "Falz" with a tick above and below the card. */
+.doc-fold { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.6mm; font: 700 7.5pt/1 var(--doc-sans); letter-spacing: 0.12em; text-transform: uppercase; color: #2b322e; }
+.doc-fold::after { content: ""; display: block; width: 0; height: 2.6mm; border-left: 0.3mm solid #2b322e; }
+.doc-fold-top { top: -6.2mm; }
+.doc-fold-bottom { bottom: -6.2mm; flex-direction: column-reverse; }
 
 @media screen and (max-width: 640px) {
   .amanah-doc, .amanah-letter { padding: 6mm 5mm; font-size: 11pt; }
@@ -359,7 +405,8 @@ body {
   .amanah-doc[data-doc-variant="editorial"] .doc-cover .doc-title { margin-top: 4mm; font-size: 26pt; }
   .doc-wallet { padding: 6mm 5mm; }
   .doc-card { flex-direction: column; height: auto; width: 85.6mm; }
-  .doc-card-back { border-left: 0; border-top: 0.3mm dashed #8a938e; }
+  .doc-card-back { border-left: 0; border-top: 0.35mm dashed #2b322e; }
+  .doc-fold { display: none; }
 }
 
 /* Print. Page 1 has no @page margin: Chrome then shows no own headers and footers (URL, date) on any
@@ -399,7 +446,7 @@ body {
   /* Chrome reserves room for a repeated head and the closing footer after the last row; without this
      offset (head 13 mm + foot 13 mm) a document that just fills its last page opens a blank page. */
   .amanah-doc .doc-frame { margin-bottom: -26mm; }
-  .amanah-doc[data-doc-id="notfallkarte"] { padding-top: 15mm; padding-bottom: 0; }
+  .amanah-doc[data-doc-id="notfallkarte"] { padding-top: 12mm; padding-bottom: 0; }
   /* The letter uses the same frame: 13 mm head on every page plus 3 mm on page 1 (16 mm, DIN 5008 grid). */
   .amanah-letter { padding-top: 3mm; padding-bottom: 0; }
   .amanah-doc .doc-section h2 { break-after: avoid; }

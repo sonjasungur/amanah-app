@@ -95,3 +95,12 @@ export const DATE_CHECK_MESSAGES: Record<Exclude<DateCheck, "empty" | "ok">, str
   invalid: "Dieses Datum gibt es nicht. Bitte Tag und Monat prüfen.",
   future: "Das Datum liegt in der Zukunft. Bitte prüfen.",
 };
+
+/**
+ * The hint at a date field whose draft cannot be stored (P2.6 owner acceptance): short and in the
+ * person's words. A birth date names itself; other date fields say "Datum".
+ */
+export function dateDraftMessage(check: "incomplete" | "invalid", birth: boolean): string {
+  if (check === "incomplete") return birth ? "Geburtsdatum noch unvollständig" : "Datum noch unvollständig";
+  return birth ? "Bitte gib ein gültiges Geburtsdatum ein" : "Bitte gib ein gültiges Datum ein";
+}

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Printer, ShieldAlert } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
+import { useFieldCorrections, withDateDrafts } from "@/lib/store/field-corrections";
+import { DateDraftExportBlock } from "@/components/storage/date-drafts";
 import {
   PACKAGE_ITEMS,
   PACKAGE_NOTICE,
@@ -64,7 +66,9 @@ function PackageDocument({ parts, name, createdAt }: { parts: Record<PackagePart
 /** The offline emergency package: chosen by the person, previewed, printed or saved as PDF by the browser. */
 export default function NotfallpaketPage() {
   const store = useAmanahStore();
-  const data = pickDataFields(store);
+  const drafts = useFieldCorrections((s) => s.open);
+  const draftOpen = Object.keys(drafts).length > 0;
+  const data = withDateDrafts(pickDataFields(store), drafts);
   const [selected, setSelected] = useState<Set<PackageItemId>>(defaultSelection);
   const [confirmed, setConfirmed] = useState<Set<PackageItemId>>(() => new Set());
   const [pending, setPending] = useState<PackageItemId | null>(null);
@@ -100,6 +104,7 @@ export default function NotfallpaketPage() {
   };
 
   const print = () => {
+    if (draftOpen) return;
     const title = document.title;
     document.title = PRINT_TITLE;
     window.print();
@@ -163,7 +168,8 @@ export default function NotfallpaketPage() {
                 </div>
               </fieldset>
             ))}
-            <Button type="button" size="lg" className="w-full mt-4" onClick={print} data-testid="package-print">
+            {draftOpen && <div className="mt-4"><DateDraftExportBlock /></div>}
+            <Button type="button" size="lg" className="w-full mt-4" onClick={print} disabled={draftOpen} data-testid="package-print">
               <Printer size={18} className="mr-2" aria-hidden /> Drucken oder als PDF speichern
             </Button>
             <p className="text-xs text-muted mt-2">Im Druckdialog kannst du „Als PDF speichern“ wählen.</p>
@@ -178,7 +184,7 @@ export default function NotfallpaketPage() {
         </div>
       </div>
       <div className="print-only">
-        <PackageDocument parts={parts} name={name} createdAt={createdAt} />
+        {!draftOpen && <PackageDocument parts={parts} name={name} createdAt={createdAt} />}
       </div>
     </div>
   );

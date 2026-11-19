@@ -25,6 +25,8 @@ const arabic = Noto_Naskh_Arabic({
 const docSerif = Source_Serif_4({
   variable: "--font-doc-serif",
   subsets: ["latin", "latin-ext"],
+  // Real italics for the family letter's closing (P2.6 owner acceptance), not a slanted roman.
+  style: ["normal", "italic"],
   display: "swap",
   preload: false,
 });
