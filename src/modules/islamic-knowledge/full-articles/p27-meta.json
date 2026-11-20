@@ -1,0 +1,161 @@
+{
+  "_note": "P2.7 (Wissenszentrum): Leserfrage, Rubrik, Kurzantwort und nächster Schritt je vorhandenem Entwurf. Die Kurzantwort fasst nur zusammen, was der Artikel selbst belegt (redaktionelle Erklärung, kein eigener Beleg). Artikel, die in p27-articles.json neu gefasst sind, stehen hier nicht.",
+  "articles": {
+    "p25-a-erbverse": {
+      "rubric": 4,
+      "readerQuestion": "Was sagen die Erbverse des Qurʾān über die Anteile von Kindern, Eltern und Ehepartnern?",
+      "leadAnswer": "Die Verse 4:11, 4:12 und 4:176 legen die meisten festen Erbanteile fest: für Kinder, Eltern, Ehepartner und Geschwister. Ihr Wortlaut beantwortet viele Fälle direkt; einige Fragen, etwa zwei Töchter, die Mutter neben Ehepartner und Vater oder die Kalāla, haben die Gelehrten unterschiedlich ausgelegt. Die Lernbeispiele im Artikel zeigen den Rechenweg, ersetzen aber keine Berechnung für deine Familie.",
+      "nextStep": "Schreibe deine Familiensituation auf (Ehepartner, Kinder, Eltern, Geschwister, Religion der Angehörigen) und lass die Anteile von einer fachkundigen Person berechnen, bevor du ein Testament formulierst."
+    },
+    "p25-a-grundlagen": {
+      "rubric": 4,
+      "readerQuestion": "Wie funktioniert das islamische Erbrecht im Grundsatz?",
+      "leadAnswer": "Der Qurʾān legt für nahe Angehörige feste Anteile fest, für Männer und Frauen. Vor jeder Verteilung werden die Schulden beglichen und ein etwaiges Vermächtnis bis zu einem Drittel erfüllt; erst der Rest wird verteilt. Ob die Bestattungskosten noch vor den Schulden stehen, führt der Artikel als offene Frage. Religionsverschiedenheit ist nach einem Hadith bei al-Buḫārī ein Erbhindernis.",
+      "nextStep": "Halte in Amanah fest, wer zu deiner Familie gehört und welche Schulden und Vermächtnisse bestehen. Das ist die Grundlage jeder Berechnung."
+    },
+    "p25-a-missverstaendnisse-rechtsschulen": {
+      "rubric": 4,
+      "readerQuestion": "Welche Aussagen zum islamischen Erbrecht sind Missverständnisse, und wo unterscheiden sich die Rechtsschulen?",
+      "leadAnswer": "Viele verbreitete Sätze über das Erbrecht vereinfachen zu stark. Der Artikel stellt sie dem Wortlaut von Qurʾān und Sunna gegenüber und zeigt die Fragen, in denen sich Gelehrte nach Tafsīr Ibn Kaṯīr nachweislich unterscheiden. Verschiedene Antworten in Einzelfragen sind kein Widerspruch, sondern Teil der Gelehrsamkeit.",
+      "nextStep": "Sprich mit deiner Familie ab, nach welcher Rechtsschule oder welchem Gelehrten im Erbfall verteilt werden soll, und halte das schriftlich fest."
+    },
+    "p25-a-schulden": {
+      "rubric": 5,
+      "readerQuestion": "Warum werden Schulden vor dem Erbe beglichen?",
+      "leadAnswer": "Die Erbverse nennen die Anteile ausdrücklich „nach Abzug eines Vermächtnisses oder einer Schuld“. Nach Ibn Kaṯīr gehen Schulden dem Vermächtnis und der Erbteilung vor, und die Sunna zeigt, wie ernst offene Schulden genommen werden. Wer seine Schulden aufschreibt, schützt Gläubiger und Familie.",
+      "nextStep": "Lege in Amanah eine Liste deiner Schulden und Forderungen an: Betrag, Gläubiger oder Schuldner, Fälligkeit und wo die Unterlagen liegen."
+    },
+    "p25-b-begleitung-sterbender": {
+      "rubric": 2,
+      "readerQuestion": "Wie begleite ich einen kranken oder sterbenden Menschen im Sinne der Sunna?",
+      "leadAnswer": "Der Krankenbesuch gehört nach al-Buḫārī und Muslim zu den Rechten der Muslime untereinander. Die Sunna zeigt eine schlichte Begleitung: Bittgebet, gute Worte, Hoffnung auf Allahs Barmherzigkeit und das sanfte Erinnern an das Glaubensbekenntnis. Verbreitete Bräuche ohne Beleg in diesen Sammlungen werden nicht verurteilt, sondern als offene Fragen geführt.",
+      "nextStep": "Frag vor einem Besuch bei Angehörigen oder Pflegepersonal, ob er gerade passt, und lerne das Bittgebet für Kranke aus al-Buḫārī 5675."
+    },
+    "p25-b-geduld-trauer-beileid": {
+      "rubric": 2,
+      "readerQuestion": "Wie darf ich trauern, und wie spreche ich Beileid aus?",
+      "leadAnswer": "Tränen und ein trauerndes Herz sind nach al-Buḫārī und Muslim Barmherzigkeit; der Prophet ﷺ selbst weinte. Abgelehnt wird die Totenklage mit Schlagen, Zerreißen der Kleider und Klagerufen. Für das Beileid gibt die Sunna einfache Worte: Allah gehört, was Er nimmt und was Er gibt.",
+      "nextStep": "Biete Trauernden neben dem Beileid konkrete Hilfe an, etwa Essen, Kinderbetreuung oder Behördengänge."
+    },
+    "p25-b-krankheit-tod": {
+      "rubric": 2,
+      "readerQuestion": "Wie gehe ich als Muslim mit schwerer Krankheit und dem Gedanken an den Tod um?",
+      "leadAnswer": "Der Qurʾān erinnert daran, dass jedes Leben endet; Ibn Kaṯīr versteht das auch als Trost. In al-Buḫārī und Muslim ist Krankheit keine Strafe, sondern Prüfung, in der Behandlung, Bittgebet und Geduld ihren Platz haben. Fragen zu Behandlungsgrenzen am Lebensende gehören zu Gelehrten und Ärzten.",
+      "nextStep": "Sprich mit deiner Familie über deine Wünsche für die letzte Lebensphase und halte sie in einer Patientenverfügung fest."
+    },
+    "p25-b-nach-dem-tod": {
+      "rubric": 2,
+      "readerQuestion": "Was ist in den ersten Stunden nach dem Tod zu tun?",
+      "leadAnswer": "Die Sunna nennt wenige, schlichte Handlungen: die Augen schließen, für den Verstorbenen bitten, nur Gutes sagen, Abschied nehmen und die Bestattung nicht unnötig verzögern. In Deutschland stellt zuerst eine Ärztin oder ein Arzt den Tod fest; die Anzeige beim Standesamt ist gesetzlich geregelt.",
+      "nextStep": "Halte in Amanah fest, welche Moschee oder welcher Bestatter im Todesfall angerufen werden soll, und lege die Nummern in die Notfallkarte."
+    },
+    "p25-c-angehoerige": {
+      "rubric": 2,
+      "readerQuestion": "Was gilt für Angehörige im Trauerfall?",
+      "leadAnswer": "Trauer ist im Islam erlaubt; der Prophet ﷺ weinte selbst um seinen Sohn. Die Sunna nennt zugleich Grenzen der Trauerbekundung, ein Maß für die Trauerzeit und Pflichten der Angehörigen, etwa beim Begleichen von Schulden.",
+      "nextStep": "Verteile die Aufgaben nach einem Todesfall in der Familie, damit die engsten Trauernden nicht alles allein organisieren."
+    },
+    "p25-c-beisetzung-friedhof": {
+      "rubric": 3,
+      "readerQuestion": "Wie wird ein Muslim beigesetzt, und darf man Gräber besuchen?",
+      "leadAnswer": "Die Sunna zeigt ein schlichtes Grab mit seitlicher Nische, eingeebnet und ohne Bauten. Den Besuch der Gräber erlaubt sie ausdrücklich, weil er an den Tod erinnert. In Deutschland hängen Grabfeld, Sarg oder Tuch und Ruhezeit vom Bundesland und von der Friedhofssatzung ab.",
+      "nextStep": "Frag die Friedhofsverwaltung deines Wohnorts, ob es ein muslimisches Grabfeld gibt und welche Ruhezeit dort gilt."
+    },
+    "p25-c-ghusl-kafan": {
+      "rubric": 3,
+      "readerQuestion": "Wie werden die Waschung und das Leichentuch durchgeführt?",
+      "leadAnswer": "Die Waschung (Ġusl) und das Einhüllen in schlichte weiße Tücher (Kafan) sind in Ṣaḥīḥ al-Buḫārī und Ṣaḥīḥ Muslim ausführlich überliefert, vor allem durch Umm ʿAṭiyya und ʿĀʾiša. In Deutschland übernehmen meist Moscheegemeinden, muslimische Bestatter oder Waschteams diese Aufgabe.",
+      "nextStep": "Halte fest, wer deine Waschung übernehmen soll, und frag deine Gemeinde, ob sie ein Waschteam hat."
+    },
+    "p25-c-salat-al-janaza": {
+      "rubric": 3,
+      "readerQuestion": "Wie wird das Totengebet (Ṣalāt al-Janāza) verrichtet?",
+      "leadAnswer": "Das Totengebet ist ein gemeinsames Bittgebet der Gemeinde für den Verstorbenen. Al-Buḫārī und Muslim überliefern die Takbīrs, die Reihen, Bittgebete, die Bedeutung vieler Betender und den Lohn der Teilnehmenden.",
+      "nextStep": "Bitte im Todesfall die Gemeinde, das Totengebet nach einem der täglichen Gebete anzukündigen, damit viele teilnehmen können."
+    },
+    "p25-c-vorbereitung": {
+      "rubric": 3,
+      "readerQuestion": "Was ist bei der Vorbereitung einer islamischen Bestattung zu beachten?",
+      "leadAnswer": "Waschung, Leichentuch, Gebet und Beisetzung sollen nach der Sunna zügig geschehen, ohne unnötiges Warten. In Deutschland liegen dazwischen Leichenschau, Totenschein, Beurkundung und Absprachen mit dem Friedhof; die Eile bedeutet deshalb, nicht unnötig zu warten, nicht Unmögliches zu verlangen.",
+      "nextStep": "Notiere einen Bestatter mit Erfahrung in islamischen Bestattungen und eine Moscheegemeinde, die im Todesfall angerufen werden."
+    },
+    "p26-c-faq": {
+      "rubric": 6,
+      "readerQuestion": "Welche Fragen stellen Muslime in Deutschland im Trauerfall am häufigsten?",
+      "leadAnswer": "Fünfzehn häufige Fragen von den ersten Handgriffen über Waschung, Obduktion und Sarg bis zu Trauerzeit, Schulden und nichtmuslimischen Angehörigen. Jede Antwort zeigt, was Qurʾān, Ibn Kaṯīr, al-Buḫārī und Muslim dazu sagen und wo sie schweigen; einschlägige Fatwas stehen im Artikel „Was sagen Gelehrte zu Vorsorge, Erbe und Bestattung in Deutschland?“.",
+      "nextStep": "Wenn deine Frage hier nicht beantwortet ist, notiere sie und bespreche sie mit einem Imam oder Gelehrten deines Vertrauens."
+    },
+    "p26-e-bestattungsrecht": {
+      "rubric": 3,
+      "readerQuestion": "Was erlaubt das Bestattungsrecht meines Bundeslandes bei einer islamischen Bestattung?",
+      "leadAnswer": "Die religiösen Grundsätze – Eile, Einhüllen in Tücher, Erdbestattung – treffen auf sechzehn Landesbestattungsgesetze. Der Artikel stellt für jedes Land Sargpflicht und Tuchbestattung, Fristen, Friedhofszwang und Leichenschau nach dem gelesenen Gesetzestext dar; die Rechtsangaben sind juristisch zu prüfen.",
+      "nextStep": "Lies den Abschnitt zu deinem Bundesland und halte deinen Wunsch zu Tuch oder Sarg schriftlich fest, wenn dein Land das verlangt."
+    },
+    "p25-d-persoenliche-wuensche": {
+      "rubric": 1,
+      "readerQuestion": "Welche persönlichen Wünsche kann ich festhalten, und was bewirken sie?",
+      "leadAnswer": "Ibrāhīm und Yaʿqūb gaben ihren Kindern ein geistiges Vermächtnis mit, und Gefährten äußerten vor ihrem Tod klare Wünsche zu Grab und Leichentuch. Religiös gestützt sind Wünsche, die der Sunna entsprechen; ihre rechtliche Wirkung in Deutschland ist getrennt zu prüfen.",
+      "nextStep": "Schreib deine Wünsche datiert und unterschrieben auf, besprich sie mit deiner Familie und leg sie an einen Ort, den sie kennt."
+    },
+    "p25-d-schulden-amana": {
+      "rubric": 5,
+      "readerQuestion": "Wie dokumentiere ich Schulden und anvertraute Güter?",
+      "leadAnswer": "Der Qurʾān leitet dazu an, Schulden mit Frist aufzuschreiben (2:282), und befiehlt, anvertraute Güter zurückzugeben (4:58). Nach dem Konsens, den Ibn Kaṯīr nennt, gehen Schulden der Erbteilung vor. Eine einfache, regelmäßig aktualisierte Liste schützt Familie und Gläubiger.",
+      "nextStep": "Erstelle heute eine Liste aller Kredite, privaten Darlehen und anvertrauten Gegenstände und speichere sie in Amanah."
+    },
+    "p25-d-testament-wasiyya": {
+      "rubric": 5,
+      "readerQuestion": "Warum soll ich mein Testament und meine Waṣiyya schriftlich bereithalten?",
+      "leadAnswer": "Nach der Sunna soll ein Muslim, der etwas zu vermachen hat, sein Vermächtnis schriftlich bei sich haben (al-Buḫārī 2738). Das Drittel für Vermächtnisse und wohltätige Zwecke ist durch die Sunna begrenzt; in Deutschland wirkt das alles nur in einem formwirksamen Testament.",
+      "nextStep": "Lies den Artikel „Wie errichte ich in Deutschland ein wirksames Testament?“ und plane, wo dein Testament verwahrt werden soll."
+    },
+    "p25-d-verantwortung-kinder": {
+      "rubric": 1,
+      "readerQuestion": "Wie sorge ich für meine Familie und minderjährigen Kinder vor?",
+      "leadAnswer": "Jeder Mensch ist nach einem Hadith ein Hirte und für die ihm Anvertrauten verantwortlich, und der Qurʾān mahnt, an die schwachen Nachkommen zu denken (4:9). Für Eltern in Deutschland heißt das vor allem: einen Vormund benennen, Versorgung klären und mit der Familie sprechen.",
+      "nextStep": "Frag die Person, die du dir als Vormund wünschst, und halte die Benennung in einer Sorgerechtsverfügung fest."
+    },
+    "p25-e-anwalt-notar": {
+      "rubric": 1,
+      "readerQuestion": "Wann brauche ich einen Anwalt oder Notar?",
+      "leadAnswer": "Nicht jede Vorsorge braucht ein Notariat, aber manche Schritte sind ohne Notar nicht möglich und manche Situationen ohne fachlichen Rat riskant: etwa eine Verteilung nach islamischen Anteilen, Immobilien, Auslandsvermögen, Kinder aus mehreren Ehen oder Angehörige einer anderen Religion.",
+      "nextStep": "Prüfe anhand der Liste im Artikel, ob einer dieser Fälle auf dich zutrifft, und vereinbare dann einen Beratungstermin."
+    },
+    "p25-e-bestattung-deutschland": {
+      "rubric": 3,
+      "readerQuestion": "Ist eine islamische Bestattung in Deutschland möglich?",
+      "leadAnswer": "Ja, aber sie folgt dem Bestattungsrecht der Länder, Friedhofssatzungen und behördlichen Abläufen. Viele Fragen – Grabfeld, Tuch oder Sarg, Ruhezeit, Überführung – lassen sich zu Lebzeiten klären.",
+      "nextStep": "Halte in den Janazah-Wünschen fest, ob du hier oder im Herkunftsland beigesetzt werden möchtest und welcher Friedhof in Frage kommt."
+    },
+    "p25-e-erbrecht-vergleich": {
+      "rubric": 4,
+      "readerQuestion": "Wie verhalten sich islamisches und deutsches Erbrecht zueinander?",
+      "leadAnswer": "Für Muslime in Deutschland gelten zwei Ordnungen nebeneinander: die festen Anteile des Qurʾān als religiöser Maßstab und das BGB als staatliches Recht. Ohne Testament wird nach dem BGB vererbt; wer islamisch verteilen möchte, muss im Rahmen von Testierfreiheit und Pflichtteil selbst tätig werden.",
+      "nextStep": "Kläre zuerst mit einem Gelehrten die Anteile für deine Familie und danach mit Notar oder Anwalt, wie sich das im Rahmen des Pflichtteils umsetzen lässt."
+    },
+    "p25-f-barzakh": {
+      "rubric": 2,
+      "readerQuestion": "Was geschieht nach islamischem Glauben zwischen Tod und Auferstehung?",
+      "leadAnswer": "Der Qurʾān nennt die Zeit zwischen Tod und Auferweckung Barzakh, ein trennendes Hindernis (23:100). Al-Buḫārī und Muslim berichten in Grundzügen von der Befragung im Grab und der Zuflucht vor der Strafe des Grabes; Einzelheiten bleiben dem Wissen Allahs überlassen.",
+      "nextStep": "Wenn du mit Kindern über einen Verstorbenen sprichst, nutze die ruhige Sprache aus dem Abschnitt „Praktische Bedeutung“."
+    },
+    "p25-f-bittgebete-verstorbene": {
+      "rubric": 2,
+      "readerQuestion": "Welche Bittgebete kann ich für Verstorbene sprechen?",
+      "leadAnswer": "Für Verstorbene zu bitten ist in Qurʾān und Sunna fest verankert: Bittgebete für die Eltern und die vorausgegangenen Gläubigen im Qurʾān, Bittgebete nach dem Tod, beim Totengebet und beim Grabbesuch bei Muslim und al-Buḫārī. Sie sind an keinen Ort gebunden.",
+      "nextStep": "Lerne eines der überlieferten Bittgebete aus dem Artikel und sprich es für einen verstorbenen Angehörigen."
+    },
+    "p25-f-rechenschaft": {
+      "rubric": 1,
+      "readerQuestion": "Was hat Rechenschaft vor Allah mit Vorsorge zu tun?",
+      "leadAnswer": "Der Qurʾān fordert jede Seele auf zu schauen, was sie für morgen vorausschickt (59:18). Al-Buḫārī und Muslim betonen die Rechte anderer Menschen. Daraus folgt eine praktische Vorsorge: Schulden, Anvertrautes und Konflikte zu Lebzeiten ordnen.",
+      "nextStep": "Nimm dir eine Stunde Zeit und schreibe auf, wem du etwas schuldest oder wer dir etwas anvertraut hat."
+    },
+    "p25-f-sadaqa-jariya-wissen": {
+      "rubric": 5,
+      "readerQuestion": "Was wirkt nach dem Tod weiter, und wie richte ich eine Ṣadaqa Ǧāriya ein?",
+      "leadAnswer": "Nach Muslim 1631 endet das Handeln eines Menschen mit dem Tod – außer fortlaufender Wohltat, nützlichem Wissen und einem rechtschaffenen Kind, das für ihn bittet. Gefährten richteten dauerhafte Wohltaten ein, und Angehörige können für Verstorbene spenden.",
+      "nextStep": "Überlege, welche dauerhafte Wohltat du unterstützen möchtest, und halte sie als Vermächtnis im Drittel fest."
+    }
+  }
+}

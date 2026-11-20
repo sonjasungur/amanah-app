@@ -3,12 +3,14 @@ import { notFound } from "next/navigation";
 import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
 import { getKnowledgeArea } from "@/modules/islamic-knowledge";
 import {
+  HADITH_COLLECTION_LABELS,
   PARAGRAPH_KIND_LABELS,
   SOURCE_LEVEL_LABELS,
   allSources,
   fullArticleIssues,
   getFullArticle,
   manualChecks,
+  paragraphReview,
   requiredFullArticleReviews,
   type FullArticle,
   type SourceStatus,
@@ -17,7 +19,7 @@ import { OwnerReviewSummary, OwnerSourceCheck } from "@/components/knowledge/own
 
 export const metadata = { title: "Artikelentwurf prüfen — intern", robots: { index: false, follow: false } };
 
-const COLLECTION = { bukhari: "Sahih al-Bukhari", muslim: "Sahih Muslim" } as const;
+const COLLECTION = HADITH_COLLECTION_LABELS;
 const REVIEW = { source: "Quellenprüfung", scholar: "Prüfung durch islamische Fachperson", legal: "Juristische Prüfung" } as const;
 const FOR = { gelehrte: "An Gelehrte", jurist: "An Juristen", redaktion: "An die Redaktion" } as const;
 const KIND_TONE: Record<string, string> = {
@@ -64,7 +66,17 @@ function SourceList({ a }: { a: FullArticle }) {
           <p className="text-xs font-semibold text-muted">
             [{t.ref}] {t.edition}
           </p>
-          <p className="text-xs">Fundstelle: {t.locator} · Gelesen: {t.readExtent}</p>
+          <p className="text-xs" data-testid="tafsir-locator">
+            Fundstelle: {t.locator} · Gelesen: {t.readExtent}
+            {t.printLocator ? (
+              <>
+                {" · "}
+                <a href={t.printLocator.digitalCopy} className="text-primary underline" rel="noreferrer">
+                  Digitalisat der Seite
+                </a>
+              </>
+            ) : null}
+          </p>
           <p className="mt-1">{t.summary}</p>
           <a href={t.url} className="text-xs text-primary underline" rel="noreferrer">
             {t.url}
@@ -84,7 +96,13 @@ function SourceList({ a }: { a: FullArticle }) {
               {h.arabicExcerpt}
             </p>
           )}
+          {h.germanRendering && <p className="mt-1 italic">{h.germanRendering}</p>}
           <p className="mt-1">{h.summary}</p>
+          {(h.grading ?? []).length > 0 && (
+            <p className="text-xs mt-1" data-testid="hadith-grading">
+              Einstufung: {(h.grading ?? []).map((g) => `${g.by}: ${g.grade}`).join(" · ")}
+            </p>
+          )}
           <p className="text-xs">
             <a href={h.sunnahComUrl} className="text-primary underline" rel="noreferrer">
               {h.sunnahComUrl}
@@ -100,6 +118,26 @@ function SourceList({ a }: { a: FullArticle }) {
           </p>
           <Status status={h.status} />
           <OwnerSourceCheck articleId={a.id} sourceRef={h.ref} />
+        </div>
+      ))}
+      {(a.sources.fatwa ?? []).map((f) => (
+        <div key={f.ref} id={`src-${f.ref}`} className="rounded-xl border border-border p-3 scroll-mt-20" data-testid="source-card">
+          <p className="text-xs font-semibold text-muted">
+            [{f.ref}] {f.author} · {f.work} · {f.locator}
+            {f.date ? ` · ${f.date}` : ""}
+          </p>
+          <p className="mt-1 text-sm">Frage: {f.question}</p>
+          {f.arabicExcerpt && (
+            <p dir="rtl" lang="ar" className="text-lg mt-1" style={{ fontFamily: "var(--font-arabic), serif" }}>
+              {f.arabicExcerpt}
+            </p>
+          )}
+          <p className="mt-1">{f.summary}</p>
+          <a href={f.url} className="text-xs text-primary underline" rel="noreferrer">
+            {f.url}
+          </a>
+          <Status status={f.status} />
+          <OwnerSourceCheck articleId={a.id} sourceRef={f.ref} />
         </div>
       ))}
       {a.sources.law.map((l) => (
@@ -174,6 +212,18 @@ export default async function FullArticleReviewPage({ params }: { params: Promis
                 )}
               </p>
               <p className="whitespace-pre-wrap">{p.text}</p>
+              {(() => {
+                const r = paragraphReview(a, p);
+                return (
+                  <p
+                    className={`mt-1 text-[11px] ${r.contentChecked ? "text-muted" : "font-semibold text-amber-900"}`}
+                    data-testid="paragraph-review"
+                    data-checked={r.contentChecked ? "true" : "false"}
+                  >
+                    {r.contentChecked ? "✓" : "⚠"} {r.label} · {r.detail}
+                  </p>
+                );
+              })()}
               {(p.seeAlso ?? []).length > 0 && (
                 <p className="text-[11px] text-muted">
                   Siehe auch (eigene Quellenart, gesondert geprüft):{" "}

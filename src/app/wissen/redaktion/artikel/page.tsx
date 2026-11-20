@@ -14,7 +14,7 @@ import {
   sourceLevelCounts,
   type SourceLevel,
 } from "@/modules/islamic-knowledge/full-articles";
-import { OwnerReviewExport, OwnerReviewSummary } from "@/components/knowledge/owner-review";
+import { OwnerReviewExport, OwnerReviewImport, OwnerReviewSummary } from "@/components/knowledge/owner-review";
 
 export const metadata = { title: "Prüfbereich Wissensartikel — intern", robots: { index: false, follow: false } };
 
@@ -43,8 +43,13 @@ export default async function FullArticleDraftsPage() {
           Hadith-Nummern {VERIFICATION.hadith.numberFound} von {VERIFICATION.hadith.total} im Spiegel, arabischer Auszug {VERIFICATION.hadith.arabicMatches} von {VERIFICATION.hadith.total} wörtlich gefunden.
         </p>
       )}
-      <div className="mb-8">
+      <div className="mb-8 flex flex-wrap items-start gap-3" data-testid="owner-review-tools">
         <OwnerReviewExport />
+        <OwnerReviewImport knownKeys={FULL_ARTICLES.flatMap((a) => allSources(a).map((s) => `${a.id}#${s.ref}`))} />
+        <p className="basis-full text-xs text-muted">
+          Ihr Prüfstand liegt nur in diesem Browser. Bitte nach jeder Sitzung exportieren; „Prüfung aus Datei laden“ führt eine
+          Exportdatei wieder zusammen, ohne etwas zu löschen.
+        </p>
       </div>
       {OPEN_EDITORIAL_TASKS.length > 0 && (
         <section className="mb-8 rounded-xl border border-border bg-card p-4" data-testid="editorial-tasks">

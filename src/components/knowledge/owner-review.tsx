@@ -71,12 +71,64 @@ export function OwnerReviewSummary({ articleId, refs }: { articleId: string; ref
   );
 }
 
+const EXPORT_FORMAT = "amanah-quellenpruefung";
+
+/**
+ * Reads an exported file back. Accepts this format (version 1) and the first export without a format
+ * field. Every entry needs a key "article#ref" and an ISO date; anything else is skipped and counted.
+ * Merging never deletes: an entry already in the browser stays, and for the same source the later
+ * date wins. `knownKeys`, if given, flags entries whose source no longer exists (kept, but reported).
+ */
+export function parseReviewExport(
+  text: string,
+  current: ReviewState,
+  knownKeys?: Set<string>,
+): { ok: true; merged: ReviewState; added: number; updated: number; skipped: number; unknown: number } | { ok: false; error: string } {
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return { ok: false, error: "Die Datei ist kein gültiges JSON." };
+  }
+  const obj = data as { format?: unknown; version?: unknown; checks?: unknown };
+  if (!obj || typeof obj !== "object" || !obj.checks || typeof obj.checks !== "object") {
+    return { ok: false, error: "Die Datei enthält keinen Prüfstand (Feld „checks“ fehlt)." };
+  }
+  if (obj.format !== undefined && obj.format !== EXPORT_FORMAT) return { ok: false, error: "Die Datei stammt nicht aus der Amanah-Quellenprüfung." };
+  if (obj.version !== undefined && obj.version !== 1) return { ok: false, error: `Unbekannte Version ${String(obj.version)}.` };
+  const merged: ReviewState = { ...current };
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+  let unknown = 0;
+  for (const [key, value] of Object.entries(obj.checks as Record<string, unknown>)) {
+    const v = value as { checkedAt?: unknown; note?: unknown };
+    const valid = /^[^#\s]+#[^#\s]+$/.test(key) && v && typeof v.checkedAt === "string" && !Number.isNaN(Date.parse(v.checkedAt));
+    if (!valid) {
+      skipped += 1;
+      continue;
+    }
+    if (knownKeys && !knownKeys.has(key)) unknown += 1;
+    const entry = { checkedAt: v.checkedAt as string, ...(typeof v.note === "string" ? { note: v.note } : {}) };
+    const have = merged[key];
+    if (!have) {
+      merged[key] = entry;
+      added += 1;
+    } else if (Date.parse(entry.checkedAt) > Date.parse(have.checkedAt)) {
+      merged[key] = entry;
+      updated += 1;
+    }
+  }
+  return { ok: true, merged, added, updated, skipped, unknown };
+}
+
 /** Downloads the owner's checks as a file, to be handed over and recorded in the repository. */
 export function OwnerReviewExport() {
   const [state] = useReview();
   const count = Object.keys(state).length;
   const download = () => {
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), checks: state }, null, 1)], { type: "application/json" });
+    const payload = { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), count, checks: state };
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -88,5 +140,45 @@ export function OwnerReviewExport() {
     <button type="button" onClick={download} className="rounded-lg border border-border px-3 py-2 text-sm min-h-[44px] print:hidden" data-testid="owner-review-export">
       Meine Prüfung exportieren ({count} Quellen)
     </button>
+  );
+}
+
+/** Loads an exported file back into this browser (e.g. after clearing data or on another device). */
+export function OwnerReviewImport({ knownKeys }: { knownKeys: string[] }) {
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const onFile = async (file: File | undefined) => {
+    if (!file) return;
+    const result = parseReviewExport(await file.text(), read(), new Set(knownKeys));
+    if (!result.ok) {
+      setMessage({ ok: false, text: `Nicht importiert: ${result.error}` });
+      return;
+    }
+    write(result.merged);
+    const parts = [`${result.added} neu`, `${result.updated} aktualisiert`];
+    if (result.skipped) parts.push(`${result.skipped} ungültige Einträge übersprungen`);
+    if (result.unknown) parts.push(`${result.unknown} zu Quellen, die es nicht mehr gibt (behalten)`);
+    setMessage({ ok: true, text: `Importiert: ${parts.join(", ")}. Nichts wurde gelöscht.` });
+  };
+  return (
+    <div className="print:hidden">
+      <label className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm min-h-[44px] cursor-pointer">
+        Prüfung aus Datei laden
+        <input
+          type="file"
+          accept="application/json,.json"
+          className="sr-only"
+          data-testid="owner-review-import"
+          onChange={(e) => {
+            void onFile(e.target.files?.[0]);
+            e.target.value = "";
+          }}
+        />
+      </label>
+      {message && (
+        <p role="status" className={`mt-2 text-sm ${message.ok ? "" : "text-danger"}`} data-testid="owner-review-import-result">
+          {message.text}
+        </p>
+      )}
+    </div>
   );
 }

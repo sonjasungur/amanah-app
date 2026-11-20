@@ -26,17 +26,18 @@ function files(dir: string): string[] {
 }
 
 describe("P2.6 knowledge articles: nothing can be published", () => {
-  it("all 26 reworked and the 2 new articles are DRAFT version 2, without reviews, never publishable", () => {
-    expect(FULL_ARTICLES).toHaveLength(28);
-    for (const extra of ["p26-c-faq", "p26-e-bestattungsrecht"]) expect(ids).toContain(extra);
+  it("the 28 P2.6 drafts (two of them rewritten as version 3 in P2.7) and the P2.7 articles are DRAFT, without reviews, never publishable", () => {
+    // P2.7: 26 version-2 drafts, 2 of them rewritten as version 3, plus 5 new version-3 articles.
+    expect(FULL_ARTICLES).toHaveLength(33);
+    for (const extra of ["p26-c-faq", "p26-e-bestattungsrecht", "p25-a-wasiyya", "p25-e-testament-form-international"]) expect(ids).toContain(extra);
     for (const a of FULL_ARTICLES) {
       expect(a.status, a.id).toBe("DRAFT");
-      expect(a.version, a.id).toBe(2);
+      expect([2, 3], a.id).toContain(a.version);
       expect(a.reviews, a.id).toEqual([]);
       expect(fullArticleReviewsComplete(a), a.id).toBe(false);
       expect(isFullArticlePublishable(a), a.id).toBe(false);
     }
-    const reviewed = { ...FULL_ARTICLES[0], reviews: requiredFullArticleReviews(FULL_ARTICLES[0]).map((kind) => ({ kind, reviewer: "Prüfer", reviewedAt: "2026-11-18", version: 2 })) };
+    const reviewed = { ...FULL_ARTICLES[0], reviews: requiredFullArticleReviews(FULL_ARTICLES[0]).map((kind) => ({ kind, reviewer: "Prüfer", reviewedAt: "2026-11-18", version: FULL_ARTICLES[0].version })) };
     expect(fullArticleReviewsComplete(reviewed)).toBe(true);
     expect(isFullArticlePublishable(reviewed)).toBe(false);
   });
@@ -52,13 +53,22 @@ describe("P2.6 knowledge articles: nothing can be published", () => {
       .filter((f) => /\.(ts|tsx)$/.test(f) && !f.includes("__tests__"))
       .filter((f) => /full-articles|p26-articles\.json|p25-drafts/.test(readFileSync(f, "utf8")));
     expect(importers.sort()).toEqual(
-      ["src/app/wissen/redaktion/artikel/[id]/page.tsx", "src/app/wissen/redaktion/artikel/page.tsx", "src/modules/islamic-knowledge/full-articles/index.ts"].sort(),
+      [
+        "src/app/wissen/redaktion/artikel/[id]/page.tsx",
+        "src/app/wissen/redaktion/artikel/page.tsx",
+        "src/modules/islamic-knowledge/full-articles/index.ts",
+        // P2.7: the knowledge centre preview (switch AMANAH_KNOWLEDGE_PREVIEW, off on staging and production).
+        "src/app/wissen/zentrum/page.tsx",
+        "src/app/wissen/zentrum/rubrik/[nr]/page.tsx",
+        "src/app/wissen/zentrum/artikel/[id]/page.tsx",
+        "src/components/knowledge/zentrum/article-view.tsx",
+      ].sort(),
     );
     for (const f of importers) {
       const src = readFileSync(f, "utf8");
       expect(src, f).not.toMatch(/^["']use client["']/m);
       if (f.startsWith("src/app/")) {
-        expect(src, f).toContain("if (!isInternalToolsEnabled()) notFound();");
+        expect(src, f).toMatch(/if \(!(isInternalToolsEnabled|isKnowledgePreviewEnabled)\(\)\) notFound\(\);/);
         expect(src, f).toContain("index: false");
       }
     }
