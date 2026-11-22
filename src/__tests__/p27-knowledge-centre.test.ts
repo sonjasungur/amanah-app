@@ -37,6 +37,12 @@ describe("P2.7 knowledge centre: preview only, nothing published", () => {
     }
   });
 
+  it("production never passes the switch; staging passes it through with default off", () => {
+    expect(readFileSync("docker-compose.prod.yml", "utf8")).not.toContain("AMANAH_KNOWLEDGE_PREVIEW");
+    expect(readFileSync("docker-compose.staging.yml", "utf8")).toContain("AMANAH_KNOWLEDGE_PREVIEW: ${AMANAH_KNOWLEDGE_PREVIEW:-false}");
+    expect(readFileSync(".env.staging.example", "utf8")).toMatch(/^AMANAH_KNOWLEDGE_PREVIEW=false$/m);
+  });
+
   it("every centre page checks the switch first, is dynamic and never indexed", () => {
     const pages = files("src/app/wissen/zentrum").filter((f) => f.endsWith("page.tsx"));
     expect(pages.length).toBe(4);

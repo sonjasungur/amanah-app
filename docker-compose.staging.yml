@@ -97,6 +97,9 @@ services:
       # Outbox endpoint for synthetic test accounts only; editorial/review pages stay unreachable
       AMANAH_DEV_OUTBOX: "true"
       AMANAH_INTERNAL_TOOLS: "false"
+      # P2.7 knowledge centre preview (unpublished drafts). Off unless .env.staging sets it to true; staging is
+      # only reachable behind the Caddy password (owner decision 22.11.2026). Production never passes it.
+      AMANAH_KNOWLEDGE_PREVIEW: ${AMANAH_KNOWLEDGE_PREVIEW:-false}
       # sandbox (built-in test checkout) or stripe_test (Stripe test mode of the Amanah account, docs 25)
       AMANAH_BILLING_MODE: ${AMANAH_BILLING_MODE:-sandbox}
       AMANAH_BILLING_ENFORCE: "false"
