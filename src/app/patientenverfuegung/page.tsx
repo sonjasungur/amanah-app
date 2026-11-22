@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Patientenverfügung — Amanah – Mein Wille",
+  title: "Patientenverfügung — Wasiyya",
   description: "Wünsche zur medizinischen Vorsorge festhalten. Wissensartikel erscheinen erst nach fachlicher Prüfung.",
 };
 

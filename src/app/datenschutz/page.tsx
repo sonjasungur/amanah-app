@@ -3,8 +3,8 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
-  title: "Datenschutz — Amanah – Mein Wille",
-  description: "Datenschutzerklärung für Amanah – Mein Wille — lokale und serverseitige Speicherung, KI, Export und Löschung.",
+  title: "Datenschutz — Wasiyya",
+  description: "Datenschutzerklärung für Wasiyya — lokale und serverseitige Speicherung, KI, Export und Löschung.",
 };
 
 export default function DatenschutzPage() {
@@ -29,7 +29,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">2. Welche Daten gespeichert werden</h2>
           <p className="leading-relaxed mb-3">
-            Amanah verarbeitet sehr sensible Vorsorgedaten. Typischerweise speicherst du unter anderem:
+            Wasiyya verarbeitet sehr sensible Vorsorgedaten. Typischerweise speicherst du unter anderem:
           </p>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Profil- und Notfallkontaktdaten</li>
@@ -71,7 +71,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">5. Keine Passwort-Speicherung für private Konten</h2>
           <p className="leading-relaxed">
-            Amanah – Mein Wille speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
+            Wasiyya speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
             persönlichen Konten (E-Mail, Banking, Social Media). Im Modul „Digitaler Nachlass“ dokumentierst du
             nur Hinweise, wo Zugangsdaten sicher aufbewahrt werden — nicht die Passwörter selbst.
           </p>
@@ -100,7 +100,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">8. Kein Ersatz für Fachberatung</h2>
           <p className="leading-relaxed">
-            Amanah bietet Orientierung und Vorbereitung — keine Rechtsberatung, keine medizinische Beratung,
+            Wasiyya bietet Orientierung und Vorbereitung — keine Rechtsberatung, keine medizinische Beratung,
             keine Fatwa und keine Garantie auf rechtliche Wirksamkeit. Fachliche Prüfung empfohlen.
           </p>
         </section>
@@ -108,7 +108,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">9. Cookies & Analytics</h2>
           <p className="leading-relaxed">
-            Amanah – Mein Wille verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
+            Wasiyya verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
             Technisch notwendige Speicherung im Browser (Local Storage) ist für die Funktion erforderlich.
           </p>
         </section>

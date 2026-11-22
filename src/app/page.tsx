@@ -11,10 +11,12 @@ import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
 import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 import { featuresByTier } from "@/lib/billing/plan-matrix";
-import { Button, linkButtonClassName } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
+import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
 import {
   Activity,
+  ArrowRight,
   ClipboardCheck,
   Compass,
   FileSignature,
@@ -102,7 +104,7 @@ function HeroCheckInfoCard({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 md:p-7 shadow-2xl",
+        "relative rounded-2xl border border-[#C9A04A]/35 bg-white/[0.07] backdrop-blur-sm p-6 md:p-7 shadow-2xl before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:bg-[#C9A04A] before:rounded-full",
         className
       )}
     >
@@ -128,32 +130,38 @@ export default function HomePage() {
   return (
     <div>
       <section
-        className="relative text-white py-10 md:py-16 overflow-hidden"
-        style={{
-          background: `radial-gradient(ellipse 80% 60% at 70% 0%, ${COLORS.primary}35 0%, transparent 55%), linear-gradient(165deg, ${COLORS.navy} 0%, ${COLORS.brandDark} 100%)`,
-        }}
+        className="on-dark wasiyya-hero relative text-white pt-8 pb-12 md:pt-20 md:pb-24 overflow-hidden"
+        data-testid="home-hero"
       >
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid lg:grid-cols-[1fr_320px] gap-8 lg:gap-10 items-start">
-            <div className="max-w-xl">
-              <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-emerald mb-3 md:mb-4">
+        <div className="relative max-w-6xl mx-auto px-4">
+          <div className="grid lg:grid-cols-[1fr_340px] gap-8 lg:gap-12 items-start">
+            <div className="max-w-xl min-w-0">
+              {/* Phones show the descriptor here, because the compact header leaves it out. */}
+              <p className="md:hidden flex items-center gap-2.5 mb-4 text-[15px] font-medium text-[#E2C98F]" data-testid="home-hero-descriptor">
+                <WasiyyaMark height={26} inverted />
+                {BRAND.descriptor}
+              </p>
+              <p className="hidden md:flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald mb-4">
+                <span className="h-px w-8 bg-[#C9A04A]" aria-hidden />
                 {BRAND.heroEyebrow}
               </p>
-              <p className="text-sm text-white/80 mb-3">{BRAND.positioning}</p>
-              <h1 className="text-display font-bold mb-3 md:mb-4">{BRAND.heroTitle}</h1>
+              <h1 className="text-display mb-4 md:mb-5 text-balance">{BRAND.heroTitle}</h1>
               <p className="text-body-lg text-white/90 leading-relaxed mb-6 md:mb-7 max-w-lg hidden sm:block">{BRAND.heroDescription}</p>
               <p className="text-base text-white/90 leading-relaxed mb-6 max-w-lg sm:hidden">{BRAND.heroDescriptionMobile}</p>
               <div className="flex flex-col gap-3 max-w-md">
                 <Link
                   href="/check"
-                  className={linkButtonClassName({ size: "lg", className: "w-full font-bold min-h-[52px] text-lg shadow-lg shadow-emerald/30 ring-2 ring-emerald/20" })}
+                  className="wasiyya-cta group inline-flex items-center justify-center w-full rounded-xl font-bold min-h-[58px] text-base sm:text-lg px-2.5 sm:px-7 py-3 text-center leading-snug sm:whitespace-nowrap"
+                  data-testid="home-hero-cta"
                 >
-                  <ClipboardCheck size={20} className="mr-2" aria-hidden /> {BRAND.ctaPrimary}
+                  <ClipboardCheck size={20} className="mr-2 shrink-0" aria-hidden /> {BRAND.ctaPrimary}
+                  <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[400px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
                 </Link>
-                <Link href="#so-funktioniert" className="text-center sm:text-left">
-                  <span className="inline-flex items-center justify-center w-full sm:w-auto min-h-[44px] text-base text-white/90 underline-offset-4 hover:text-emerald hover:underline font-medium">
-                    {BRAND.ctaSecondary}
-                  </span>
+                <Link
+                  href="#so-funktioniert"
+                  className="inline-flex items-center justify-center w-full sm:w-auto sm:self-start min-h-[48px] px-5 rounded-xl border border-[#C9A04A]/60 text-base font-semibold text-white hover:bg-white/5 hover:border-[#DDBB66]"
+                >
+                  {BRAND.ctaSecondary}
                 </Link>
               </div>
               <div className="mt-6 lg:hidden">
@@ -164,7 +172,7 @@ export default function HomePage() {
               </div>
               <p className="text-sm md:text-base text-white/75 mt-4 md:mt-5 italic max-w-lg hidden sm:block">{BRAND.claim}</p>
             </div>
-            <HeroCheckInfoCard className="hidden lg:block" />
+            <HeroCheckInfoCard className="hidden lg:block lg:mt-10" />
           </div>
         </div>
       </section>
@@ -209,7 +217,7 @@ export default function HomePage() {
       <section id="so-funktioniert" className="py-14 md:py-18 bg-accent-soft border-y border-border scroll-mt-24">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
-            title="So funktioniert Amanah – Mein Wille"
+            title="So funktioniert Wasiyya"
             description="Du musst nicht alles heute erledigen. Der erste Überblick dauert nur wenige Minuten."
             accent={COLORS.primary}
           />
@@ -288,7 +296,7 @@ export default function HomePage() {
               <ul className="mt-4 space-y-2 text-sm text-muted">
                 <li className="flex gap-2"><span aria-hidden>–</span>Islamische Fachartikel (Themen sind angelegt, Inhalte erst nach Prüfung durch Gelehrte)</li>
                 <li className="flex gap-2"><span aria-hidden>–</span>Vorbereitung des Testaments und Hinweise zum Erbe (nach juristischer Prüfung)</li>
-                <li className="flex gap-2"><span aria-hidden>–</span>Digitaler Zugang für Angehörige (Konzept in Prüfung, bis dahin teilt Amanah nichts online)</li>
+                <li className="flex gap-2"><span aria-hidden>–</span>Digitaler Zugang für Angehörige (Konzept in Prüfung, bis dahin teilt Wasiyya nichts online)</li>
               </ul>
             </article>
           </div>
@@ -296,6 +304,22 @@ export default function HomePage() {
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               Alle Preise ansehen
             </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Closing call to action: one clear next step before the footer. */}
+      <section className="on-dark wasiyya-hero relative overflow-hidden text-white py-14 md:py-20" data-testid="home-final-cta">
+        <div className="relative max-w-3xl mx-auto px-4 text-center">
+          <WasiyyaMark height={56} inverted className="mx-auto mb-5" />
+          <h2 className="text-section-title text-balance">Heute festhalten, was deiner Familie später Klarheit gibt.</h2>
+          <p className="mt-3 text-body-lg text-white/85">Der kostenlose Vorsorge-Check zeigt in wenigen Minuten, was noch fehlt. Ohne Konto und ohne KI.</p>
+          <Link
+            href="/check"
+            className="wasiyya-cta group mt-8 inline-flex items-center justify-center w-full sm:w-auto rounded-xl font-bold min-h-[58px] text-base sm:text-lg px-6 sm:px-9 py-3 text-center leading-snug sm:whitespace-nowrap"
+          >
+            <ClipboardCheck size={20} className="mr-2 shrink-0" aria-hidden /> {BRAND.ctaPrimary}
+            <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[400px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </div>
       </section>

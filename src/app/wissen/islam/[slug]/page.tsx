@@ -26,9 +26,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const article = getPublishedArticleBySlug(slug);
-  if (!article) return { title: "Nicht gefunden — Amanah – Mein Wille", robots: { index: false } };
+  if (!article) return { title: "Nicht gefunden — Wasiyya", robots: { index: false } };
   return {
-    title: `${article.title} — Islamisches Wissen | Amanah – Mein Wille`,
+    title: `${article.title} — Islamisches Wissen | Wasiyya`,
     description: article.summary,
     alternates: { canonical: `/wissen/islam/${article.slug}` },
     openGraph: { title: article.title, description: article.summary, type: "article" },

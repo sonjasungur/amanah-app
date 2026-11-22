@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Testament & Erbe — Amanah – Mein Wille",
+  title: "Testament & Erbe — Wasiyya",
   description: "Islamisches Erbrecht: Farāʾiḍ, Waṣiyya und deutsches Recht für Muslime in Deutschland.",
 };
 

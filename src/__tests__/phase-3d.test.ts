@@ -90,7 +90,7 @@ describe("Readable emergency export", () => {
 
   it("builds HTML without token-like content from demo data", () => {
     const html = buildReadableEmergencyHtml(demoAmanahData);
-    expect(html).toContain("Amanah Notfallmappe");
+    expect(html).toContain("Wasiyya Notfallmappe");
     expect(html).toContain("Orientierung und Vorbereitung");
     expect(html).not.toMatch(/passwordHash/i);
     expect(html).not.toMatch(/sk-[a-zA-Z0-9]{10,}/);
@@ -98,7 +98,7 @@ describe("Readable emergency export", () => {
 
   it("builds markdown with disclaimer", () => {
     const md = buildReadableEmergencyMarkdown(demoAmanahData);
-    expect(md).toContain("# Amanah Notfallmappe");
+    expect(md).toContain("# Wasiyya Notfallmappe");
     expect(md).toContain("Fachliche Prüfung");
     expect(md).not.toContain("passwordHash");
   });

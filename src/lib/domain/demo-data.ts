@@ -138,7 +138,7 @@ export const demoAmanahData: AmanahOrdnerData = {
     letterClosing: "In Liebe",
     letterSignature: "Ahmed",
     familyLetter: "Liebe Familie, dieser Ordner ist meine Vorbereitung — bitte mit Imam und Anwalt fachlich prüfen lassen.",
-    whatsappMessage: "Meine Vorsorge in Amanah – Mein Wille liegt im Schreibtisch. Bitte Notfallkontakt Fatima anrufen.",
+    whatsappMessage: "Meine Vorsorge in Wasiyya liegt im Schreibtisch. Bitte Notfallkontakt Fatima anrufen.",
     conversationGuide: "1. Notfallkontakt informieren\n2. Patientenverfügung zeigen\n3. Imam kontaktieren",
     keyWishesSummary: "Islamische Bestattung in Berlin, keine Verzögerung.",
   },

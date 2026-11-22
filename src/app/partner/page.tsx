@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Partner werden — Amanah – Mein Wille",
+  title: "Partner werden — Wasiyya",
   description: "Partnerschaften für Bestatter, Moscheen/Vereine und Anwälte/Notare.",
 };
 
@@ -17,7 +17,7 @@ const sections = [
     features: [
       "Kostenloser Basiseintrag mit regionalem Profil",
       "Partner-Badge erst nach realer Prüfung und Freigabe",
-      "Direkte Verknüpfung mit den Wünschen der Nutzer von Amanah – Mein Wille",
+      "Direkte Verknüpfung mit den Wünschen der Nutzer von Wasiyya",
     ],
     cta: { label: "Hinweis zum Verzeichnis", href: "/bestatter" },
     buttonLabel: "Interesse anmelden",
@@ -59,7 +59,7 @@ export default function PartnerPage() {
         <p className="text-accent font-medium mb-2">Gemeinsam stärker</p>
         <h1 className="text-3xl font-bold text-primary mb-3">Partner werden</h1>
         <p className="text-muted max-w-2xl mx-auto leading-relaxed">
-          Amanah – Mein Wille verbindet Muslime in Deutschland mit vertrauenswürdigen Partnern —
+          Wasiyya verbindet Muslime in Deutschland mit vertrauenswürdigen Partnern —
           im Alltag und im schwersten Moment.
         </p>
       </div>

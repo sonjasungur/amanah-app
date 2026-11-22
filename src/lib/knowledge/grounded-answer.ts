@@ -35,7 +35,7 @@ export function buildGroundedKnowledgeAnswer(
       usedEntryIds: [],
       safetyLevel,
       blocked: true,
-      suggestedNextStep: "Nutze den Amanah – Mein Wille zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
+      suggestedNextStep: "Nutze den Wasiyya zur Dokumentation — Entscheidungen bitte fachlich prüfen lassen.",
       noSource: false,
       disclaimer,
     };
@@ -54,7 +54,7 @@ export function buildGroundedKnowledgeAnswer(
       usedEntryIds: [],
       safetyLevel: "general_allowed",
       blocked: false,
-      suggestedNextStep: "Ergänze deinen Amanah – Mein Wille im passenden Modul oder konsultiere eine Fachperson.",
+      suggestedNextStep: "Ergänze deinen Wasiyya im passenden Modul oder konsultiere eine Fachperson.",
       noSource: true,
       disclaimer,
     };
@@ -69,7 +69,7 @@ export function buildGroundedKnowledgeAnswer(
     usedEntryIds: entries.map((e) => e.id),
     safetyLevel: "general_allowed",
     blocked: false,
-    suggestedNextStep: "Dokumentiere passende Angaben in Amanah – Mein Wille und lasse sie fachlich prüfen.",
+    suggestedNextStep: "Dokumentiere passende Angaben in Wasiyya und lasse sie fachlich prüfen.",
     noSource: false,
     disclaimer: `${disclaimer} Keine Fatwa, keine Rechtsberatung.`,
   };

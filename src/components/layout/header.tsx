@@ -58,12 +58,12 @@ export function Header() {
       className="sticky top-0 z-40 bg-card/98 backdrop-blur-md border-b border-border no-print shadow-sm"
       dir={isRtl ? "rtl" : "ltr"}
     >
-      <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 py-3 md:py-3.5 flex items-center justify-between gap-4">
         <div className="shrink-0">
           <Logo />
         </div>
 
-        <nav className="hidden xl:flex items-center gap-1">
+        <nav className="hidden xl:flex items-center gap-0.5 min-w-0">
           {navLinks.map((link) => {
             const active = isNavActive(pathname, link.href);
             return (
@@ -71,7 +71,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "px-3 py-2 rounded-lg text-[15px] font-semibold whitespace-nowrap transition-colors min-h-[44px] flex items-center",
+                  "px-2 2xl:px-2.5 py-2 rounded-lg text-[14px] 2xl:text-[15px] font-semibold whitespace-nowrap transition-colors min-h-[44px] flex items-center",
                   active
                     ? "text-primary-dark bg-accent-soft ring-2 ring-primary/25 font-bold"
                     : "text-muted hover:text-primary-dark hover:bg-accent-soft/60"
@@ -85,7 +85,7 @@ export function Header() {
           <select
             value={locale}
             onChange={(e) => setLocale(e.target.value as Locale)}
-            className="text-[15px] border border-border rounded-lg px-2.5 py-2 bg-white ml-2 min-h-[44px]"
+            className="text-[14px] 2xl:text-[15px] border border-border rounded-lg px-1.5 py-2 bg-white ml-1 min-h-[44px]"
             aria-label="Sprache wählen"
           >
             {locales.map((l) => (
@@ -110,11 +110,11 @@ export function Header() {
             ) : (
               <div className="flex items-center gap-2 ml-1">
                 {showRegister && (
-                  <Link href="/register" className={linkButtonClassName({ size: "sm", variant: "outline", className: "min-w-[7.5rem]" })}>
+                  <Link href="/register" className={linkButtonClassName({ size: "sm", variant: "outline", className: "px-3" })}>
                     Registrieren
                   </Link>
                 )}
-                <Link href="/login" className={linkButtonClassName({ size: "sm", className: "min-w-[7.5rem]" })}>
+                <Link href="/login" className={linkButtonClassName({ size: "sm", className: "px-3" })}>
                   Anmelden
                 </Link>
               </div>

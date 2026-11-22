@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Islam oder Kultur? — Amanah – Mein Wille",
+  title: "Islam oder Kultur? — Wasiyya",
   description: "Unterscheide islamische Pflichten von kulturellen Gewohnheiten bei Janazah und Trauer.",
 };
 

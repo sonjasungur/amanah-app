@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Janazah-Kompass — Amanah – Mein Wille",
+  title: "Janazah-Kompass — Wasiyya",
   description: "Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung in Deutschland.",
 };
 

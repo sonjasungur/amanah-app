@@ -94,7 +94,7 @@ export function parseReviewExport(
   if (!obj || typeof obj !== "object" || !obj.checks || typeof obj.checks !== "object") {
     return { ok: false, error: "Die Datei enthält keinen Prüfstand (Feld „checks“ fehlt)." };
   }
-  if (obj.format !== undefined && obj.format !== EXPORT_FORMAT) return { ok: false, error: "Die Datei stammt nicht aus der Amanah-Quellenprüfung." };
+  if (obj.format !== undefined && obj.format !== EXPORT_FORMAT) return { ok: false, error: "Die Datei stammt nicht aus der Wasiyya-Quellenprüfung." };
   if (obj.version !== undefined && obj.version !== 1) return { ok: false, error: `Unbekannte Version ${String(obj.version)}.` };
   const merged: ReviewState = { ...current };
   let added = 0;

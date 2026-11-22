@@ -26,7 +26,7 @@ export const CONSENT_PURPOSES: Record<ConsentPurpose, ConsentPurposeDefinition> 
     title: "Speicherung meines Vorsorgeordners im Konto",
     text:
       "Ich willige ausdrücklich ein, dass meine Angaben im Vorsorgeordner – einschließlich Angaben zu meiner Gesundheit " +
-      "und Angaben, aus denen sich meine Religionszugehörigkeit ergibt – verschlüsselt auf dem Server von Amanah – Mein Wille " +
+      "und Angaben, aus denen sich meine Religionszugehörigkeit ergibt – verschlüsselt auf dem Server von Wasiyya " +
       "gespeichert werden, damit ich sie geräteübergreifend nutzen und exportieren kann. Die Daten werden nicht an Dritte " +
       "weitergegeben und nicht für Werbung genutzt. Ich kann die Einwilligung jederzeit in den Einstellungen widerrufen.",
     onWithdraw:
@@ -40,7 +40,7 @@ export const CONSENT_PURPOSES: Record<ConsentPurpose, ConsentPurposeDefinition> 
     title: "Optionale KI-Unterstützung durch einen externen Anbieter",
     text:
       "Ich willige ein, dass für die von mir ausgelöste KI-Funktion die dafür nötigen Ausschnitte meiner Angaben an einen " +
-      "externen KI-Anbieter übermittelt werden. Ohne diese Einwilligung funktioniert Amanah – Mein Wille vollständig ohne externe KI.",
+      "externen KI-Anbieter übermittelt werden. Ohne diese Einwilligung funktioniert Wasiyya vollständig ohne externe KI.",
     onWithdraw: "Nach dem Widerruf werden keine Angaben mehr an den KI-Anbieter übermittelt.",
     requiredFor: "externe KI-Funktionen (derzeit deaktiviert)",
     draftForLegalReview: true,

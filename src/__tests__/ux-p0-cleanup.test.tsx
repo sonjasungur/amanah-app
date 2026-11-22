@@ -61,7 +61,7 @@ describe("P0 UX cleanup", () => {
   });
 
   it("one product name and one name for the check", () => {
-    expect(read("src/lib/brand.ts")).toContain('name: "Amanah – Mein Wille"');
+    expect(read("src/lib/brand.ts")).toContain('name: "Wasiyya"');
     expect(JSON.stringify(de)).not.toMatch(/Amanah-Check|Amanah-Daten/);
     expect(read("src/app/page.tsx")).not.toContain("Amanah-Check");
   });

@@ -11,7 +11,7 @@ import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
 
 export const metadata = {
   title: `Preise — ${BRAND.name}`,
-  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vorsorge Plus als Einmalkauf in Vorbereitung — Amanah – Mein Wille.",
+  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vorsorge Plus als Einmalkauf in Vorbereitung — Wasiyya.",
 };
 
 /** Derived from the plan matrix and catalog, so the page cannot drift from what the code enforces. */

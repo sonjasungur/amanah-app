@@ -177,7 +177,7 @@ function PreparationSummary({ onEdit }: { onEdit: () => void }) {
 
       <Card>
         <CardTitle className="text-base">5. Rechtlich freigegebene Dokumente</CardTitle>
-        <p className="text-sm text-muted">Keine. Amanah – Mein Wille erstellt keine Testamente und prüft keine Rechtslage.</p>
+        <p className="text-sm text-muted">Keine. Wasiyya erstellt keine Testamente und prüft keine Rechtslage.</p>
       </Card>
 
       {/* Printed on its own page: what exists is not connected to who should receive it. */}

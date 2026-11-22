@@ -1,5 +1,5 @@
 export const IMPRINT = {
-  productName: "Amanah – Mein Wille",
+  productName: "Wasiyya",
   operatorLegalName: "MSC Engineering GmbH",
   street: "Karlstraße 14",
   city: "74336 Brackenheim",

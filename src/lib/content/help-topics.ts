@@ -81,7 +81,7 @@ export const HELP_TOPICS = {
     title: "Patientenverfügung",
     meaning: "Ein eigenes Dokument, in dem du festlegst, welche ärztlichen Behandlungen du wünschst oder ablehnst, wenn du selbst nicht mehr entscheiden kannst.",
     why: "Ärzte und Familie müssen wissen, ob es eine Patientenverfügung gibt und wo sie liegt.",
-    enter: "Hier nur, ob es sie gibt und wo das Original liegt, und deine Wünsche in eigenen Worten. Amanah – Mein Wille erstellt keine Patientenverfügung.",
+    enter: "Hier nur, ob es sie gibt und wo das Original liegt, und deine Wünsche in eigenen Worten. Wasiyya erstellt keine Patientenverfügung.",
     ask: `Zur medizinischen Seite berät dein Arzt. ${ASK_LAWYER} ${ASK_IMAM}`,
   },
   vorsorgevollmacht: {
@@ -139,7 +139,7 @@ export const HELP_TOPICS = {
     title: "Dokumente und Aufbewahrung",
     meaning: "Wichtige Unterlagen wie Ausweis, Versicherungen, Vollmachten und Testament.",
     why: "Im Ernstfall verliert deine Familie sonst viel Zeit mit Suchen.",
-    enter: "Ob es das Dokument gibt und wo das Original liegt. Amanah – Mein Wille speichert keine Dateien.",
+    enter: "Ob es das Dokument gibt und wo das Original liegt. Wasiyya speichert keine Dateien.",
     example: "„Ordner ‚Vorsorge‘ im Arbeitszimmer, Kopie bei meiner Schwester.“",
     ask: "Wie ein Testament sicher verwahrt werden kann, weiß ein Notar oder das Nachlassgericht.",
   },

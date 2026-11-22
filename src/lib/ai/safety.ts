@@ -96,7 +96,7 @@ export function safeResponseTemplate(intent: UserIntent): string {
   switch (intent) {
     case "legal":
     case "validity":
-      return `${BLOCKED_REDIRECT}\n\nDer Amanah-Assistent kann bei rechtlichen Fragen nur beim Ordnen und Formulieren helfen — keine Rechtsberatung.`;
+      return `${BLOCKED_REDIRECT}\n\nDer Wasiyya-Assistent kann bei rechtlichen Fragen nur beim Ordnen und Formulieren helfen — keine Rechtsberatung.`;
     case "medical":
     case "diagnosis":
     case "treatment":

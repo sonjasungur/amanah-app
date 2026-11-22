@@ -21,7 +21,8 @@ test.describe("Homepage guided path", () => {
   test("homepage has no anonymous dashboard module jumps", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("home-area-janazah")).toHaveCount(0);
-    await expect(page.getByTestId("document-logo-mark")).toBeVisible();
+    // Brand since 22.11.2026: Wasiyya, book with seal (Y2) in the header.
+    await expect(page.locator('header [data-testid="wasiyya-mark"]:visible')).toHaveCount(1);
   });
 });
 

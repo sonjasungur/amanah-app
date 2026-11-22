@@ -27,7 +27,7 @@ function PackageDocument({ parts, name, createdAt }: { parts: Record<PackagePart
     <article className="package-document" data-testid="package-document">
       <header className="package-head">
         <h1>Notfallpaket{name ? ` von ${name}` : ""}</h1>
-        <p>Erstellt am {createdAt}. Spätere Änderungen in Amanah – Mein Wille sind in diesem Ausdruck nicht enthalten.</p>
+        <p>Erstellt am {createdAt}. Spätere Änderungen in Wasiyya sind in diesem Ausdruck nicht enthalten.</p>
         <p className="package-notice">{PACKAGE_NOTICE}</p>
       </header>
       {empty && <p>Noch nichts ausgewählt.</p>}

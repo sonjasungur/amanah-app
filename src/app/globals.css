@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F4F7F6;
-  --foreground: #101828;
-  --primary: #087A4E;
-  --primary-light: #10A865;
-  --primary-dark: #075E3B;
-  --primary-hover: #06663F;
-  --accent: #10A865;
-  --accent-light: #10A865;
-  --accent-soft: #E8F7F0;
-  --sand: #E8F7F0;
+  /* Wasiyya (owner approval 22.11.2026): navy and gold on warm ivory, from the Y2 preview. */
+  --background: #F8F5EE;
+  --foreground: #141B2D;
+  --primary: #22325A;
+  --primary-light: #2E4A85;
+  --primary-dark: #1A2440;
+  --primary-hover: #1A2747;
+  --accent: #8A6A22;
+  --accent-light: #C9A04A;
+  --accent-soft: #F3EEE1;
+  --sand: #F3EEE1;
   --card: #FFFFFF;
-  --muted: #3D4F5F;
-  --border: #C5D4CF;
+  --muted: #4A5468;
+  --border: #DCD5C6;
   --danger: #C4314B;
   --warning: #B7791F;
-  --success: #10A865;
-  --navy: #071A16;
-  --emerald: #10A865;
-  --mint: #E8F7F0;
-  --cat-notfall: #2563EB;
-  --cat-janazah: #6D28D9;
-  --cat-vermoegen: #0F6470;
-  --cat-akhira: #087A4E;
+  --success: #2F7A5B;
+  --navy: #1A2440;
+  /* Gold accent: dark gold text on light ground; .on-dark switches to the light gold. */
+  --emerald: #8A6A22;
+  --mint: #F3EEE1;
+  --cat-notfall: #2E4A85;
+  --cat-janazah: #22325A;
+  --cat-vermoegen: #8A6A22;
+  --cat-akhira: #8A6A22;
 }
 
 @theme inline {
@@ -54,6 +56,25 @@
   --font-sans: var(--font-geist-sans);
 }
 
+/* Wasiyya hero: navy with a gold glow (star pattern removed on owner request, 22.11.2026). */
+.wasiyya-hero {
+  background:
+    radial-gradient(ellipse 60% 70% at 88% 8%, rgba(201, 160, 74, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(46, 74, 133, 0.45) 0%, transparent 65%),
+    linear-gradient(165deg, #1A2440 0%, #1F2C4A 55%, #22325A 100%);
+}
+.wasiyya-cta {
+  background: linear-gradient(180deg, #DDBB66 0%, #C9A04A 100%);
+  color: #1A2440;
+  box-shadow: 0 12px 32px -10px rgba(221, 187, 102, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.wasiyya-cta:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 16px 36px -10px rgba(221, 187, 102, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.wasiyya-cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+/* Dark sections (hero, footer): the gold accent turns light so it keeps its contrast. */
+.on-dark { --emerald: #D9BA74; --accent: #D9BA74; }
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -65,20 +86,27 @@ body {
 
 /* Typography scale */
 .text-display {
-  font-size: clamp(1.75rem, 5vw + 0.5rem, 3.75rem);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  word-break: break-word;
-  hyphens: auto;
+  font-family: var(--font-doc-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw + 0.5rem, 4rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  overflow-wrap: break-word;
+  /* No automatic hyphenation in display titles: Firefox split "Fa-milie" with the serif (22.11.). */
+  hyphens: manual;
 }
 
 .text-page-title {
+  font-family: var(--font-doc-serif), Georgia, serif;
+  font-weight: 600;
   font-size: clamp(1.75rem, 3vw, 2.625rem);
   line-height: 1.2;
   letter-spacing: -0.015em;
 }
 
 .text-section-title {
+  font-family: var(--font-doc-serif), Georgia, serif;
+  font-weight: 600;
   font-size: clamp(1.625rem, 2.5vw, 2rem);
   line-height: 1.25;
 }
@@ -159,17 +187,17 @@ body {
    (docs: Gestaltungsspezifikation): body 12 pt, labels 10 pt, key values 14 pt, card ≥ 9 pt, red only
    for medically critical content, no table look, no text cut off. */
 .amanah-doc, .doc-wallet {
-  --doc-ink: #1b2420;
-  --doc-forest: #1e4a37;
-  --doc-green: #2e6a50;
-  --doc-grey: #4d5752;
-  --doc-sage: #8ead9a;
-  --doc-line: #c8d5cc;
-  --doc-tint: #eef3ef;
+  --doc-ink: #1a1f2b;
+  --doc-forest: #1f2c4a;
+  --doc-green: #33456e;
+  --doc-grey: #4f5566;
+  --doc-sage: #a6adbf;
+  --doc-line: #d3d0c6;
+  --doc-tint: #f4f1e8;
   --doc-red: #a1221c;
   --doc-redtint: #fbedeb;
   /* Matt gold, only for fine lines and small accents (P2.6 owner acceptance); prints as a mid grey. */
-  --doc-gold: #9a7d45;
+  --doc-gold: #a9842f;
   --doc-sans: var(--font-doc-sans), var(--font-arabic), "Noto Naskh Arabic", system-ui, sans-serif;
   --doc-serif: var(--font-doc-serif), var(--font-arabic), "Noto Naskh Arabic", Georgia, serif;
   color: var(--doc-ink);
@@ -346,7 +374,9 @@ body {
 .amanah-letter { font-family: var(--doc-serif); font-size: 12.5pt; line-height: 1.62; padding: 16mm 40mm 18mm 25mm; }
 /* Running head of pages 2+ (sender · title). On page 1 the letterhead lies over it. */
 .amanah-letter .letter-running { justify-content: flex-start; font-family: var(--doc-serif); font-style: italic; font-size: 9.5pt; color: var(--doc-grey); padding-bottom: 2mm; border-bottom: 0.5pt solid var(--doc-gold); }
-.amanah-letter .letter-head { position: relative; z-index: 1; background: #fff; margin: -11mm 0 9mm; padding-top: 11mm; }
+/* The letterhead covers the running head on page 1. It reaches 4 mm past the text column on both sides, so the
+   overhang of the italic first letter of the running head cannot show at the left edge (dot fixed 22.11.). */
+.amanah-letter .letter-head { position: relative; z-index: 1; background: #fff; margin: -11mm -4mm 9mm; padding: 11mm 4mm 0; }
 .amanah-letter .letter-brand { display: flex; align-items: center; justify-content: flex-end; gap: 1.5mm; margin: 0 0 9mm; font-family: var(--doc-sans); font-size: 8.5pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--doc-grey); }
 .amanah-letter .letter-title { margin: 0; font-family: var(--doc-serif); font-weight: 600; font-size: 28pt; line-height: 1.1; letter-spacing: -0.005em; color: var(--doc-forest); text-wrap: balance; }
 .amanah-letter .letter-from { margin: 2.5mm 0 0; font-style: italic; font-size: 13pt; color: var(--doc-ink); }
@@ -357,8 +387,9 @@ body {
 .amanah-letter .letter-basmala::after { content: ""; display: block; width: 14mm; margin: 3mm auto 0; border-top: 0.6pt solid var(--doc-gold); }
 .amanah-letter .letter-greeting { margin: 0 0 5mm; }
 .amanah-letter .letter-body p { margin: 0 0 4.5mm; white-space: pre-wrap; overflow-wrap: break-word; orphans: 3; widows: 3; }
-.amanah-letter .letter-body p:last-child { break-after: avoid; }
+.amanah-letter .letter-ending { break-inside: avoid; }
 .amanah-letter .letter-sign { break-inside: avoid; margin-top: 10mm; }
+.amanah-letter .letter-sign p { margin: 0; }
 .amanah-letter .letter-sign-rule { width: 18mm; margin: 0 0 5mm; border-top: 0.6pt solid var(--doc-gold); }
 .amanah-letter .letter-closing { margin: 0; font-style: italic; font-size: 13.5pt; }
 .amanah-letter .letter-sign-space { height: 16mm; }
@@ -469,3 +500,55 @@ body {
   html:has(body[data-print-doc]), html:has(body[data-print-doc]) *,
   html:has(.doc-print-root[data-print-always]), html:has(.doc-print-root[data-print-always]) * { page: amanah-doc !important; }
 }
+
+/* ── P2.7 Wissenszentrum, Gestaltungsmuster (Einstieg und Musterartikel 3:185) ──
+   Farben nach dem Wasiyya-Logo (22.11.): Nachtblau, Gold nur als Akzent (Linien, Symbole), Creme als Grund.
+   Helles Elfenbein, leuchtendes Gold (21.11.). Kontraste: Fließtext #1c2233 auf #fdfaf3 ≈ 15:1,
+   gedämpfter Text #555c6b ≈ 6:1, Goldtext #7a571b ≈ 6,3:1.
+   Gold #c9a04a nur für Linien, Flächen und Symbole, nie als Textfarbe (zu wenig Kontrast). */
+.wz {
+  --wz-green: #1f2c4a;
+  --wz-green-dark: #1a2440;
+  --wz-green-soft: #eceff5;
+  --wz-gold: #c9a04a;
+  --wz-gold-text: #7a571b;
+  --wz-gold-soft: #f8edd4;
+  --wz-cream: #fdfaf3;
+  --wz-paper: #ffffff;
+  --wz-ink: #1c2233;
+  --wz-muted: #555c6b;
+  --wz-line: #ece3cf;
+  background: var(--wz-cream);
+  color: var(--wz-ink);
+  font-family: var(--font-doc-sans), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+.wz-serif { font-family: var(--font-doc-serif), Georgia, serif; }
+.wz-arabic { font-family: var(--font-arabic), "Noto Naskh Arabic", serif; }
+.wz-measure { max-width: 68ch; }
+.wz-eyebrow { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--wz-gold-text); }
+.wz-rule { width: 3.5rem; height: 2px; background: var(--wz-gold); border-radius: 2px; }
+.wz-card { background: var(--wz-paper); border: 1px solid var(--wz-line); border-radius: 1.25rem; }
+.wz-card-link { transition: border-color .15s, box-shadow .15s, transform .15s; }
+.wz-card-link:hover { border-color: var(--wz-gold); box-shadow: 0 6px 24px -12px rgba(31, 44, 74, .35); }
+.wz-card-link:focus-visible { outline: 3px solid var(--wz-gold); outline-offset: 2px; }
+.wz a.wz-text-link { color: var(--wz-green); text-decoration: underline; text-decoration-color: var(--wz-gold); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.wz a.wz-text-link:hover { color: var(--wz-green-dark); }
+.wz-button { display: inline-flex; align-items: center; gap: .5rem; min-height: 48px; padding: .75rem 1.25rem; border-radius: 999px; font-weight: 600; }
+.wz-button-primary { background: var(--wz-green); color: #fff; }
+.wz-button-primary:hover { background: var(--wz-green-dark); }
+.wz-button-ghost { border: 1.5px solid var(--wz-green); color: var(--wz-green); background: transparent; }
+.wz-icon { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: var(--wz-gold-soft); color: var(--wz-green); flex-shrink: 0; }
+/* Arabic verse: right to left, generous size and line height, own space on phones. */
+.wz-verse { font-size: clamp(1.65rem, 1.2rem + 1.6vw, 2.25rem); line-height: 2.3; text-align: right; color: var(--wz-green-dark); word-spacing: .08em; }
+.wz-verse-end { color: var(--wz-gold-text); white-space: nowrap; }
+.wz details > summary { list-style: none; cursor: pointer; }
+.wz details > summary::-webkit-details-marker { display: none; }
+.wz-hairline { border: 0; border-top: 1px solid var(--wz-line); }
+.wz-hero { background: radial-gradient(1200px 400px at 85% -10%, rgba(201, 154, 62, .16), transparent 60%), linear-gradient(180deg, #fffdf8 0%, var(--wz-cream) 100%); }
+.wz-topic { position: relative; overflow: hidden; }
+.wz-topic::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--wz-gold); opacity: .85; }
+.wz-verse-panel { background: linear-gradient(180deg, #fffdf7, #fbf3e2); border-top: 2px solid var(--wz-gold); border-bottom: 1px solid var(--wz-line); }
+.wz-prose { max-width: 38rem; margin-inline: auto; }
+.wz-prose p + p { margin-top: 1.1rem; }

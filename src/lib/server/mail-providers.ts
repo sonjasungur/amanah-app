@@ -33,7 +33,7 @@ export function readProviderConfig(provider: MailProvider, env: NodeJS.ProcessEn
   const apiKey = env.AMANAH_MAIL_API_KEY?.trim();
   const fromEmail = env.AMANAH_MAIL_FROM?.trim();
   if (!apiKey || !fromEmail) return null;
-  return { provider, apiKey, fromEmail, fromName: env.AMANAH_MAIL_FROM_NAME?.trim() || "Amanah – Mein Wille" };
+  return { provider, apiKey, fromEmail, fromName: env.AMANAH_MAIL_FROM_NAME?.trim() || "Wasiyya" };
 }
 
 export function buildProviderRequest(config: ProviderConfig, mail: ProviderMail): { url: string; init: RequestInit } {

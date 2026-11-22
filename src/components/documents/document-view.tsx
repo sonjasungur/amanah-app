@@ -20,7 +20,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
-import { DocumentLogoMark } from "@/components/layout/logo";
+import { WasiyyaMark, WasiyyaWordmark } from "@/components/layout/wasiyya-logo";
 import type { CardLine, DocBlock, DocIcon, DocModel } from "@/lib/documents/model";
 
 /**
@@ -184,8 +184,9 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
             <td>
               <header className="letter-head">
                 <p className="letter-brand">
-                  <DocumentLogoMark size={14} />
-                  <span>Amanah</span>
+                  {/* Wasiyya, print variant: navy book with gold seal on white paper (22.11.2026). */}
+                  <WasiyyaMark height={20} />
+                  <WasiyyaWordmark height={15} aria-label="Wasiyya" />
                 </p>
                 <h1 className="letter-title">{model.title}</h1>
                 {l.sender && (
@@ -203,15 +204,24 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
               )}
               {l.greeting && <p className="letter-greeting">{l.greeting}</p>}
               <div className="letter-body">
-                {l.paragraphs.map((p, i) => (
+                {l.paragraphs.slice(0, -1).map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
-              <div className="letter-sign">
-                <div className="letter-sign-rule" aria-hidden />
-                {l.closing && <p className="letter-closing">{l.closing}</p>}
-                <div className="letter-sign-space" aria-hidden />
-                {l.signature && <p className="letter-name">{l.signature}</p>}
+              {/* The last paragraph, the closing and the signature stay on one page: a closing never ends a
+                  page alone and a signature never starts one alone (multi-page letter, 22.11.2026). */}
+              <div className="letter-ending">
+                {l.paragraphs.length > 0 && (
+                  <div className="letter-body">
+                    <p>{l.paragraphs[l.paragraphs.length - 1]}</p>
+                  </div>
+                )}
+                <div className="letter-sign">
+                  <div className="letter-sign-rule" aria-hidden />
+                  {l.closing && <p className="letter-closing">{l.closing}</p>}
+                  <div className="letter-sign-space" aria-hidden />
+                  {l.signature && <p className="letter-name">{l.signature}</p>}
+                </div>
               </div>
               {l.summary && (
                 <section className="letter-summary">
@@ -281,8 +291,8 @@ export function DocumentView({
             <td>
               <header className={showCover ? "doc-head doc-cover" : "doc-head"}>
                 <div className="doc-brand">
-                  <DocumentLogoMark size={26} />
-                  <span>Amanah</span>
+                  <WasiyyaMark height={30} />
+                  <WasiyyaWordmark height={19} aria-label="Wasiyya" />
                   {model.audience && <span className="doc-audience">{model.audience}</span>}
                 </div>
                 <h1 className="doc-title">{model.title}</h1>
@@ -356,7 +366,7 @@ export function DocumentView({
               )}
 
               <footer className="doc-foot">
-                Bitte sicher aufbewahren: Dieses Blatt kann private Angaben enthalten. Amanah ersetzt keinen Imam, Gelehrten, Arzt,
+                Bitte sicher aufbewahren: Dieses Blatt kann private Angaben enthalten. Wasiyya ersetzt keinen Imam, Gelehrten, Arzt,
                 Anwalt oder Notar.
               </footer>
             </td>

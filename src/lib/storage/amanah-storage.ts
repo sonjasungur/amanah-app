@@ -40,12 +40,12 @@ export async function clearAmanahData(): Promise<void> {
 
 export function exportToJson(data: AmanahOrdnerData): void {
   const bundle = createExportBundle(data);
-  downloadJson(bundle, `amanah-ordner-${new Date().toISOString().split("T")[0]}.json`);
+  downloadJson(bundle, `wasiyya-ordner-${new Date().toISOString().split("T")[0]}.json`);
 }
 
 export function exportEmergencyFolder(data: AmanahOrdnerData): void {
   const bundle = createEmergencyExportBundle(data);
-  downloadJson(bundle, `amanah-notfallmappe-${new Date().toISOString().split("T")[0]}.json`);
+  downloadJson(bundle, `wasiyya-notfallmappe-${new Date().toISOString().split("T")[0]}.json`);
 }
 
 function downloadJson(data: unknown, filename: string): void {

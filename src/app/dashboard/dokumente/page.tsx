@@ -13,7 +13,7 @@ export default function DokumentePage() {
         <div>
           <h1 className="text-2xl font-bold text-primary mb-2 flex flex-wrap items-center">Wichtige Dokumente <HelpTip topic="dokumente-ablage" /></h1>
           <p className="text-muted max-w-2xl">
-            Halte fest, ob ein Dokument vorhanden ist und wo das Original liegt. Amanah – Mein Wille speichert keine Dateien.
+            Halte fest, ob ein Dokument vorhanden ist und wo das Original liegt. Wasiyya speichert keine Dateien.
           </p>
         </div>
       </header>

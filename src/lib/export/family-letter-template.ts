@@ -34,7 +34,7 @@ export function buildFamilyLetterTemplate(data: AmanahOrdnerData): string {
   const lines: string[] = [
     `Liebe Familie,`,
     ``,
-    `ich schreibe euch diesen Brief, damit ihr im Notfall oder nach meinem Tod nicht ratlos seid. Mit Amanah – Mein Wille halte ich meine persönlichen Wünsche für Vorsorge, Janazah und Notfall fest — als Orientierung für euch, nicht als rechtsgültiges Testament.`,
+    `ich schreibe euch diesen Brief, damit ihr im Notfall oder nach meinem Tod nicht ratlos seid. Mit Wasiyya halte ich meine persönlichen Wünsche für Vorsorge, Janazah und Notfall fest — als Orientierung für euch, nicht als rechtsgültiges Testament.`,
     ``,
     `## Im Notfall — wen zuerst kontaktieren`,
     contact1 ? `- Hauptkontakt: ${contact1}` : `- Hauptkontakt: [bitte im Ordner ergänzen — Notfallkarte]`,
@@ -49,7 +49,7 @@ export function buildFamilyLetterTemplate(data: AmanahOrdnerData): string {
     moduleText("letter-janazah"),
     ``,
     `## Unterlagen & digitaler Nachlass`,
-    `- Alle Details, Dokumente und Kontakte stehen in Amanah – Mein Wille (Dashboard / Export).`,
+    `- Alle Details, Dokumente und Kontakte stehen in Wasiyya (Dashboard / Export).`,
     digital > 0 ? `- Digitale Konten: ${digital} Einträge dokumentiert — Zugangsanweisung im Ordner.` : `- Digitaler Nachlass: [noch nicht vollständig erfasst]`,
     schulden > 0 ? `- Schulden & Amanah: ${schulden} Punkte dokumentiert — ${moduleText("letter-schulden")}` : `- Schulden & Amanah: [bitte prüfen, ob noch offen]`,
     ``,

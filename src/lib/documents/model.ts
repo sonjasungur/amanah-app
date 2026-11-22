@@ -780,7 +780,7 @@ export function buildGesamt(data: AmanahOrdnerData, options: DocOptions = {}): D
       {
         title: "Rechtlich noch zu klären",
         icon: "legal",
-        note: "Diese Dokumente wirken nur in ihrer eigenen rechtlichen Form. Amanah hält nur fest, ob es sie gibt und wo sie liegen.",
+        note: "Diese Dokumente wirken nur in ihrer eigenen rechtlichen Form. Wasiyya hält nur fest, ob es sie gibt und wo sie liegen.",
         blocks: [
           { kind: "list", items: legal.map((l) => ({ title: `${l.title}: ${l.label}`, detail: [l.location && `Ort: ${l.location}`, `Ansprechpartner: ${l.who}`].filter(Boolean).join(" · ") })) },
           { kind: "callout", tone: "info", text: `${moduleText("testament-form-print")} ${moduleText("vorsorge-documents-print")}` },
@@ -830,5 +830,5 @@ export const DOCUMENTS: readonly DocumentInfo[] = [
 /** File name suggestion: what and when, never a person's name. */
 export function documentFileTitle(model: DocModel, date: Date = new Date()): string {
   const slug = model.title.normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  return `Amanah-${slug}-${date.toISOString().slice(0, 10)}`;
+  return `Wasiyya-${slug}-${date.toISOString().slice(0, 10)}`;
 }

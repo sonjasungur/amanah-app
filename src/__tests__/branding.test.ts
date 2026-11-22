@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { BRAND } from "@/lib/brand";
 import { CHECK_LABELS } from "@/lib/design-tokens";
@@ -37,23 +38,34 @@ const USER_FACING_FILES = [
   "src/components/print/print-views.tsx",
 ];
 
-describe("branding — Amanah – Mein Wille", () => {
+describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
   it("exports brand constants", () => {
-    expect(BRAND.name).toBe("Amanah – Mein Wille");
+    expect(BRAND.name).toBe("Wasiyya");
+    expect(BRAND.descriptor).toBe("Islamische Vorsorge und Testament");
+    expect(BRAND.fullName).toBe("Wasiyya – Islamische Vorsorge und Testament");
     expect(BRAND.subtitle).toBe("Islamische Vorsorge für Notfall, Janazah und Akhira");
     expect(BRAND.claim).toBe("Ich entscheide heute, was später wichtig ist.");
     expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
     expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
     expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
-    expect(BRAND.metadataTitle).toBe("Amanah – Mein Wille | Islamische Vorsorge");
-    expect(BRAND.themeColor).toBe("#071A16");
+    expect(BRAND.metadataTitle).toBe("Wasiyya – Islamische Vorsorge und Testament");
+    expect(BRAND.themeColor).toBe("#1F2C4A");
   });
 
   it("has no legacy visible brand in key UI files", () => {
     for (const file of USER_FACING_FILES) {
       expect(hasOldBrand(read(file)), `${file} still contains legacy brand`).toBe(false);
     }
+  });
+
+  it("no visible text carries the old brand name „Amanah – Mein Wille“ (renamed to Wasiyya 22.11.2026)", () => {
+    const hits = execSync("grep -rlI 'Amanah – Mein Wille' src public --include=*.ts --include=*.tsx --include=*.json || true", { encoding: "utf8" })
+      .split("\n")
+      .filter((f) => f && !f.includes("__tests__") && !f.endsWith("amanah-seal.tsx") && !f.endsWith("logo-candidates.tsx"));
+    expect(hits).toEqual([]);
+    expect(read("src/app/page.tsx")).not.toMatch(/Mein Wille/);
+    expect(read("src/components/layout/wasiyya-logo.tsx")).toContain("BRAND.descriptor");
   });
 
   it("homepage uses hero without duplicate logo block", () => {
@@ -79,20 +91,20 @@ describe("branding — Amanah – Mein Wille", () => {
     expect(CHECK_LABELS.pageTitle).toBe("Dein islamischer Vorsorge-Check");
   });
 
-  it("wordmark in header uses document logo mark", () => {
+  it("header uses the Wasiyya book-and-seal lockup (Y2, 22.11.); printed documents carry the same mark", () => {
     const logo = read("src/components/layout/logo.tsx");
-    expect(logo).toContain("DocumentLogoMark");
-    expect(logo).toContain("Mein ");
-    expect(logo).toContain("Wille");
+    expect(logo).toContain("WasiyyaLockup");
+    expect(logo).toContain("BRAND.fullName");
+    expect(read("src/components/documents/document-view.tsx")).toContain("WasiyyaMark");
     expect(logo).not.toContain("MW");
     expect(logo).not.toContain("Mihrab");
   });
 
-  it("uses strengthened green palette without orange brand color", () => {
+  it("uses the navy and gold palette without orange brand color", () => {
     const css = read("src/app/globals.css");
-    expect(css).toContain("#087A4E");
-    expect(css).toContain("#10A865");
-    expect(css).toContain("#071A16");
+    expect(css).toContain("--primary: #22325A;");
+    expect(css).toContain("--navy: #1A2440;");
+    expect(css).toContain("--accent-light: #C9A04A;");
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
@@ -129,11 +141,11 @@ describe("branding — Amanah – Mein Wille", () => {
     expect(PROVISIONAL_LOGO_VARIANT).toBe("A");
   });
 
-  it("manifest uses Amanah – Mein Wille and new theme color", () => {
+  it("manifest uses Wasiyya and the navy theme color", () => {
     const manifest = JSON.parse(read("public/manifest.json"));
-    expect(manifest.name).toBe("Amanah – Mein Wille | Islamische Vorsorge");
-    expect(manifest.short_name).toBe("Amanah");
-    expect(manifest.theme_color).toBe("#071A16");
+    expect(manifest.name).toBe("Wasiyya – Islamische Vorsorge und Testament");
+    expect(manifest.short_name).toBe("Wasiyya");
+    expect(manifest.theme_color).toBe("#1F2C4A");
   });
 
   it("icon assets exist and are non-empty", () => {

@@ -82,9 +82,9 @@ describe("P2.2 health details and file names", () => {
   it("file names say what and when, never who", () => {
     const d = structuredClone(demoAmanahData);
     const name = documentFileTitle(buildNotfallkarte(d), new Date("2026-11-18T10:00:00Z"));
-    expect(name).toBe("Amanah-Notfallkarte-2026-11-18");
+    expect(name).toBe("Wasiyya-Notfallkarte-2026-11-18");
     expect(name).not.toContain(d.emergencyCard.name.split(" ")[0]);
-    expect(documentFileTitle(DOCUMENTS.find((x) => x.id === "erbprofil")!.build(d))).toMatch(/^Amanah-Erbprofil-fur-das-Gesprach-\d{4}-\d{2}-\d{2}$/);
+    expect(documentFileTitle(DOCUMENTS.find((x) => x.id === "erbprofil")!.build(d))).toMatch(/^Wasiyya-Erbprofil-fur-das-Gesprach-\d{4}-\d{2}-\d{2}$/);
   });
 });
 

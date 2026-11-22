@@ -37,7 +37,7 @@ export function isIndividualDecisionQuestion(question: string): boolean {
 export function knowledgeRedirectMessage(level: KnowledgeSafetyLevel): string {
   switch (level) {
     case "legal_sensitive":
-      return "Bei individuellen Rechtsfragen bitte Anwalt, Notar oder eine qualifizierte Beratungsstelle konsultieren. Der Amanah-Assistent kann nur allgemeine Orientierung aus geprüften Einträgen geben — keine Rechtsberatung.";
+      return "Bei individuellen Rechtsfragen bitte Anwalt, Notar oder eine qualifizierte Beratungsstelle konsultieren. Der Wasiyya-Assistent kann nur allgemeine Orientierung aus geprüften Einträgen geben — keine Rechtsberatung.";
     case "medical_sensitive":
       return "Bei medizinischen Entscheidungen bitte Arzt oder Fachperson konsultieren. Der Assistent hilft nur beim Dokumentieren deiner Wünsche — keine medizinische Beratung.";
     case "religious_sensitive":

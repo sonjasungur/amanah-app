@@ -115,7 +115,7 @@ export const FLOW_STEPS: readonly FlowStep[] = [
     id: "dokumente",
     area: "dokumente",
     title: "Wo liegen deine wichtigsten Dokumente?",
-    help: "Halte fest, ob es ein Dokument gibt und wo das Original liegt. Amanah – Mein Wille speichert keine Dateien.",
+    help: "Halte fest, ob es ein Dokument gibt und wo das Original liegt. Wasiyya speichert keine Dateien.",
     kind: "documents",
   },
   {

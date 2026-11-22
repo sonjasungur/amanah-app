@@ -92,7 +92,7 @@ function FolderOverview({ data }: { data: ReturnType<typeof pickDataFields> }) {
           <FileText size={20} className="text-primary" aria-hidden /> Meine Unterlagen und wo sie liegen
         </h2>
         <p className="text-sm text-muted mt-1">
-          Die Originale bleiben bei dir. Amanah hält nur fest, ob es sie gibt und wo sie liegen; Dateien werden nicht hochgeladen.
+          Die Originale bleiben bei dir. Wasiyya hält nur fest, ob es sie gibt und wo sie liegen; Dateien werden nicht hochgeladen.
         </p>
         <ul className="mt-2 divide-y divide-border text-sm">
           {DOCUMENT_CHECKLIST.map((c) => {

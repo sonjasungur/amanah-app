@@ -46,7 +46,7 @@ test.describe("Vorsorgeplan dashboard", () => {
     await page.goto("/dashboard");
     const greeting = page.getByTestId("dashboard-greeting");
     await expect(greeting).toBeVisible();
-    await expect(greeting).toHaveText("Willkommen bei Amanah – Mein Wille");
+    await expect(greeting).toHaveText("Willkommen bei Wasiyya");
     await expect(greeting).not.toContainText("dort");
     await expect(page.getByTestId("dashboard-next-step")).toBeVisible();
     await expect(page.getByTestId("dashboard-next-step-cta")).toBeVisible();

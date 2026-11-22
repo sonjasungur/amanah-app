@@ -1,8 +1,8 @@
 import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
-  title: "Impressum — Amanah – Mein Wille",
-  description: "Impressum und Anbieterkennzeichnung für Amanah – Mein Wille.",
+  title: "Impressum — Wasiyya",
+  description: "Impressum und Anbieterkennzeichnung für Wasiyya.",
 };
 
 export default function ImpressumPage() {
@@ -65,7 +65,7 @@ export default function ImpressumPage() {
           <p className="leading-relaxed text-sm">
             Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
-            Amanah – Mein Wille ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
+            Wasiyya ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
           </p>
         </section>
 

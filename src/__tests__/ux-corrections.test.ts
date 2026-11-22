@@ -13,16 +13,14 @@ function read(rel: string): string {
 }
 
 describe("UX corrections — wordmark, buttons, wissen", () => {
-  it("header and footer use document mark and Mein Wille wordmark", () => {
+  it("header and footer use the Wasiyya lockup", () => {
     const logo = read("src/components/layout/logo.tsx");
     const header = read("src/components/layout/header.tsx");
     const footer = read("src/components/layout/footer.tsx");
-    expect(logo).toContain("DocumentLogoMark");
-    expect(logo).toContain("Mein ");
-    expect(logo).toContain("Wille");
+    expect(logo).toContain("WasiyyaLockup");
     expect(header).toContain("<Logo");
-    expect(footer).toContain("Mein ");
-    expect(footer).toContain("Wille");
+    expect(footer).toContain("WasiyyaLockup");
+    expect(footer).not.toContain("Mein Wille");
   });
 
   it("header shows Anmelden and the account link once; care areas live in the dashboard navigation", () => {

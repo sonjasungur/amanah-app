@@ -1,7 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
 
 export const metadata = {
-  title: "Barzakh — Amanah – Mein Wille",
+  title: "Barzakh — Wasiyya",
   description: "Was ist Barzakh? Orientierung zu Sadaqa Jariya, Schulden und dem Leben nach dem Tod.",
 };
 

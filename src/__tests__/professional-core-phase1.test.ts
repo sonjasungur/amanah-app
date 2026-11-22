@@ -115,10 +115,10 @@ describe("professional core phase 1 — check persistence", () => {
 
 describe("professional core phase 1 — dashboard greeting and next step", () => {
   it("never greets with dort", () => {
-    expect(getDashboardGreeting("")).toBe("Willkommen bei Amanah – Mein Wille");
-    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Amanah – Mein Wille");
-    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Amanah – Mein Wille");
-    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Amanah – Mein Wille");
+    expect(getDashboardGreeting("")).toBe("Willkommen bei Wasiyya");
+    expect(getDashboardGreeting("   ")).toBe("Willkommen bei Wasiyya");
+    expect(getDashboardGreeting("dort")).toBe("Willkommen bei Wasiyya");
+    expect(getDashboardGreeting("Dort")).toBe("Willkommen bei Wasiyya");
     expect(getDashboardGreeting("Amina")).toBe("Willkommen, Amina");
     expect(getDashboardGreeting("Amina")).not.toMatch(/dort/i);
   });

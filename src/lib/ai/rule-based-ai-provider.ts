@@ -95,10 +95,10 @@ export class RuleBasedAIProvider implements AmanahAIProvider {
     const fd = (ctx.funeralDirector as string) || "den von mir benannten Bestatter";
 
     const templates: Record<FamilyMessageTone, string> = {
-      liebevoll: `Liebe Familie,\n\nmit Amanah – Mein Wille bereite ich meine Wünsche vor, damit ihr im schwersten Moment Orientierung habt. Bitte kontaktiert im Notfall zuerst ${contact}. Mir ist eine würdevolle islamische Bestattung wichtig — ${fd} und unsere Moschee können euch unterstützen.\n\nDies ist mein Entwurf zur Vorbereitung — bitte mit Imam/Gelehrten und ggf. Anwalt fachlich prüfen lassen.\n\nIn Liebe,\n${name}`,
-      sachlich: `An meine Angehörigen,\n\nim Notfall bitte ${contact} informieren. Bestattung: islamische Grundsätze, zeitnahe Beisetzung. Bestatter: ${fd}.\n\nDetails in Amanah – Mein Wille. Keine Rechtsberatung — fachliche Prüfung empfohlen.\n\n${name}`,
-      kurz: `Im Notfall: ${contact} anrufen. Janazah-Wünsche und Details in Amanah – Mein Wille. — ${name}`,
-      ausfuehrlich: `Liebe Familie,\n\nmit Amanah – Mein Wille möchte ich euch im Fall meines Todes oder einer schweren Krankheit Orientierung geben — nicht Entscheidungen abnehmen.\n\nNotfallkontakt: ${contact}\nBestattung: islamische Grundsätze, ${fd}\n\nBitte keine aufwendigen kulturellen Trauerfeiern, die finanziell belasten. Stattdessen Dua und einfache Sadaqa Jariya.\n\nAlle Details im Ordner. Bitte Imam/Gelehrte und Anwalt/Notar zur fachlichen Prüfung hinzuziehen.\n\n${name}`,
+      liebevoll: `Liebe Familie,\n\nmit Wasiyya bereite ich meine Wünsche vor, damit ihr im schwersten Moment Orientierung habt. Bitte kontaktiert im Notfall zuerst ${contact}. Mir ist eine würdevolle islamische Bestattung wichtig — ${fd} und unsere Moschee können euch unterstützen.\n\nDies ist mein Entwurf zur Vorbereitung — bitte mit Imam/Gelehrten und ggf. Anwalt fachlich prüfen lassen.\n\nIn Liebe,\n${name}`,
+      sachlich: `An meine Angehörigen,\n\nim Notfall bitte ${contact} informieren. Bestattung: islamische Grundsätze, zeitnahe Beisetzung. Bestatter: ${fd}.\n\nDetails in Wasiyya. Keine Rechtsberatung — fachliche Prüfung empfohlen.\n\n${name}`,
+      kurz: `Im Notfall: ${contact} anrufen. Janazah-Wünsche und Details in Wasiyya. — ${name}`,
+      ausfuehrlich: `Liebe Familie,\n\nmit Wasiyya möchte ich euch im Fall meines Todes oder einer schweren Krankheit Orientierung geben — nicht Entscheidungen abnehmen.\n\nNotfallkontakt: ${contact}\nBestattung: islamische Grundsätze, ${fd}\n\nBitte keine aufwendigen kulturellen Trauerfeiern, die finanziell belasten. Stattdessen Dua und einfache Sadaqa Jariya.\n\nAlle Details im Ordner. Bitte Imam/Gelehrte und Anwalt/Notar zur fachlichen Prüfung hinzuziehen.\n\n${name}`,
     };
 
     return {

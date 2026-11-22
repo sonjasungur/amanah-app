@@ -15,7 +15,7 @@ export default function ErrorPage({
   return (
     <div className="max-w-2xl mx-auto px-4 py-16">
       <div className="rounded-2xl border border-warning/30 bg-card p-8 text-center space-y-4">
-        <p className="text-sm font-semibold uppercase tracking-wide text-muted">Amanah</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-muted">Wasiyya</p>
         <h1 className="text-2xl font-bold text-primary">{t("error.runtime.title")}</h1>
         <p className="text-muted">{t("error.runtime.body")}</p>
         <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">

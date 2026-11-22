@@ -1,7 +1,7 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
 
 export const metadata = {
-  title: "Bestatter — Amanah – Mein Wille",
+  title: "Bestatter — Wasiyya",
   description: "Hinweis zum Bestatter-Verzeichnis. Derzeit keine geprüften Partnereinträge.",
 };
 

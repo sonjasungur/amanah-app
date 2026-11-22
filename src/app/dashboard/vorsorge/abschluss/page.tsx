@@ -176,7 +176,7 @@ export default function AbschlussPage() {
                 Noch niemand als Notfallkontakt oder Vertrauensperson markiert. <Link href="/dashboard/personen" className="text-primary underline">Familie &amp; Kontakte</Link>
               </p>
             )}
-            <p className="text-xs text-muted mt-3">Amanah – Mein Wille benachrichtigt niemanden. Du entscheidest, wem du was gibst.</p>
+            <p className="text-xs text-muted mt-3">Wasiyya benachrichtigt niemanden. Du entscheidest, wem du was gibst.</p>
           </Card>
           <Card className="p-5 md:p-6" data-testid="completion-family-talks">
             <CardTitle className="text-lg text-foreground flex items-center gap-2">
@@ -251,7 +251,7 @@ export default function AbschlussPage() {
             <ul className="text-sm mt-3 space-y-1 list-disc pl-5">
               <li>Die Faltkarte der Notfallkarte gehört ins Portemonnaie, die zweite Karte zu einer Vertrauensperson.</li>
               <li>Notfallblatt und Leitfaden dorthin legen, wo die Familie zuerst sucht, und sagen, wo sie liegen.</li>
-              <li>Die Originale bleiben, wo du sie eingetragen hast. Amanah lädt keine Dateien hoch.</li>
+              <li>Die Originale bleiben, wo du sie eingetragen hast. Wasiyya lädt keine Dateien hoch.</li>
             </ul>
             <div className="flex flex-wrap gap-2 mt-4">
               <Link href="/dashboard/pdf?dokument=notfallkarte" className={linkButtonClassName({ size: "sm" })} data-testid="completion-card-cta">
@@ -271,7 +271,7 @@ export default function AbschlussPage() {
               <li>Die Originale deiner rechtlichen Dokumente an den Orten, die du in Schritt 2 eingetragen hast.</li>
               <li>
                 {HANDOVER_LABELS.freigegeben}: <span className="font-medium">noch nicht verfügbar</span>. Ein sicherer digitaler
-                Zugang für benannte Personen wird geprüft; bis dahin teilt Amanah online nichts.
+                Zugang für benannte Personen wird geprüft; bis dahin teilt Wasiyya online nichts.
               </li>
             </ul>
           </Card>
@@ -288,7 +288,7 @@ export default function AbschlussPage() {
             {nextReview && (
               <p className="text-sm mt-2" data-testid="completion-next-review">
                 Nächste Durchsicht empfohlen bis <span className="font-semibold">{nextReview}</span>. Trage dir den Termin selbst ein;
-                Amanah verschickt keine Erinnerungen.
+                Wasiyya verschickt keine Erinnerungen.
               </p>
             )}
             <Button type="button" variant="outline" size="sm" className="mt-3" onClick={markReviewed} data-testid="completion-mark-reviewed">

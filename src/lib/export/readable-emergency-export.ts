@@ -119,7 +119,7 @@ export function buildReadableEmergencyMarkdown(data: AmanahOrdnerData): string {
     "Orientierung und Vorbereitung — keine Garantie auf Vollständigkeit oder rechtliche/medizinische/religiöse Wirksamkeit. Fachliche Prüfung empfohlen.";
   const sections = buildReadableEmergencySections(data);
   const lines = [
-    "# Amanah Notfallmappe",
+    "# Wasiyya Notfallmappe",
     "",
     `Exportiert: ${new Date().toLocaleString("de-DE")}`,
     "",
@@ -163,7 +163,7 @@ export function buildReadableEmergencyHtml(data: AmanahOrdnerData): string {
 <html lang="de">
 <head>
   <meta charset="utf-8"/>
-  <title>Amanah Notfallmappe</title>
+  <title>Wasiyya Notfallmappe</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; line-height: 1.5; }
     h1 { color: #1e4d3a; border-bottom: 2px solid #c9a227; padding-bottom: 0.5rem; }
@@ -177,7 +177,7 @@ export function buildReadableEmergencyHtml(data: AmanahOrdnerData): string {
   </style>
 </head>
 <body>
-  <h1>Amanah Notfallmappe</h1>
+  <h1>Wasiyya Notfallmappe</h1>
   <p><small>Exportiert: ${escapeHtml(new Date().toLocaleString("de-DE"))}</small></p>
   <div class="disclaimer">${escapeHtml(disclaimer)}</div>
   ${sectionHtml}
@@ -210,7 +210,7 @@ export function downloadReadableEmergencyMarkdown(data: AmanahOrdnerData): void 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `amanah-notfallmappe-${new Date().toISOString().split("T")[0]}.md`;
+  a.download = `wasiyya-notfallmappe-${new Date().toISOString().split("T")[0]}.md`;
   a.click();
   URL.revokeObjectURL(url);
 }

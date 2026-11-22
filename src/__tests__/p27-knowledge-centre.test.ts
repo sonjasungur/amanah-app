@@ -39,7 +39,7 @@ describe("P2.7 knowledge centre: preview only, nothing published", () => {
 
   it("every centre page checks the switch first, is dynamic and never indexed", () => {
     const pages = files("src/app/wissen/zentrum").filter((f) => f.endsWith("page.tsx"));
-    expect(pages.length).toBe(3);
+    expect(pages.length).toBe(4);
     for (const f of pages) {
       const src = readFileSync(f, "utf8");
       expect(src, f).toContain("if (!isKnowledgePreviewEnabled()) notFound();");
