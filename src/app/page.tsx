@@ -151,11 +151,11 @@ export default function HomePage() {
               <div className="flex flex-col gap-3 max-w-md">
                 <Link
                   href="/check"
-                  className="wasiyya-cta group inline-flex items-center justify-center w-full rounded-xl font-bold min-h-[58px] text-base sm:text-lg px-2.5 sm:px-7 py-3 text-center leading-snug sm:whitespace-nowrap"
+                  className="wasiyya-cta group inline-flex items-center justify-center w-full rounded-xl font-bold min-h-[58px] text-[14px] tracking-tight min-[370px]:text-[15px] min-[400px]:text-base min-[400px]:tracking-normal sm:text-lg px-2 min-[340px]:px-2.5 sm:px-7 py-3 text-center leading-snug sm:whitespace-nowrap"
                   data-testid="home-hero-cta"
                 >
-                  <ClipboardCheck size={20} className="mr-2 shrink-0" aria-hidden /> {BRAND.ctaPrimary}
-                  <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[400px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  <ClipboardCheck size={20} className="mr-2 shrink-0 hidden min-[360px]:inline" aria-hidden /> {BRAND.ctaPrimary}
+                  <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[420px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
                 </Link>
                 <Link
                   href="#so-funktioniert"
@@ -316,10 +316,10 @@ export default function HomePage() {
           <p className="mt-3 text-body-lg text-white/85">Der kostenlose Vorsorge-Check zeigt in wenigen Minuten, was noch fehlt. Ohne Konto und ohne KI.</p>
           <Link
             href="/check"
-            className="wasiyya-cta group mt-8 inline-flex items-center justify-center w-full sm:w-auto rounded-xl font-bold min-h-[58px] text-base sm:text-lg px-6 sm:px-9 py-3 text-center leading-snug sm:whitespace-nowrap"
+            className="wasiyya-cta group mt-8 inline-flex items-center justify-center w-full sm:w-auto rounded-xl font-bold min-h-[58px] text-[14px] tracking-tight min-[370px]:text-[15px] min-[400px]:text-base min-[400px]:tracking-normal sm:text-lg px-2 min-[340px]:px-2.5 sm:px-9 py-3 text-center leading-snug sm:whitespace-nowrap"
           >
-            <ClipboardCheck size={20} className="mr-2 shrink-0" aria-hidden /> {BRAND.ctaPrimary}
-            <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[400px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
+            <ClipboardCheck size={20} className="mr-2 shrink-0 hidden min-[360px]:inline" aria-hidden /> {BRAND.ctaPrimary}
+            <ArrowRight size={20} className="ml-2 shrink-0 hidden min-[420px]:inline transition-transform group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </div>
       </section>

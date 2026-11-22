@@ -83,3 +83,30 @@ test.describe("Mobile layout smoke", () => {
     await expect(page.getByRole("button", { name: /Navigation öffnen/i })).toHaveCount(0);
   });
 });
+
+test.describe("Homepage main buttons on small phones", () => {
+  for (const width of [320, 350, 360, 375, 400, 412]) {
+    test(`both Vorsorge-Check buttons stay on one line at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 740 });
+      await page.goto("/");
+      const lines = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('[data-testid="home-hero-cta"], [data-testid="home-final-cta"] a.wasiyya-cta')].map((a) => {
+          const range = document.createRange();
+          const tops = new Set<number>();
+          const walker = document.createTreeWalker(a, NodeFilter.SHOW_TEXT);
+          for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            if (!n.textContent?.trim()) continue;
+            range.selectNodeContents(n);
+            for (const r of range.getClientRects()) if (r.width > 0) tops.add(Math.round(r.top / 4));
+          }
+          return { lines: tops.size, right: a.getBoundingClientRect().right };
+        }),
+      );
+      expect(lines).toHaveLength(2);
+      for (const l of lines) {
+        expect(l.lines).toBe(1);
+        expect(l.right).toBeLessThanOrEqual(width);
+      }
+    });
+  }
+});
