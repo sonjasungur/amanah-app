@@ -188,3 +188,14 @@ describe("Start mode without the knowledge centre (switch off, owner order 23.11
     }
   });
 });
+
+describe("No leftovers of old names on public pages (owner order 23.11.2026)", () => {
+  it("partner contact uses the imprint address, the export file carries the Wasiyya name", () => {
+    const partner = readFileSync("src/app/partner/page.tsx", "utf8");
+    expect(partner).not.toContain("amanahordner");
+    expect(partner).toContain("mailto:${IMPRINT.email}");
+    const exportRoute = readFileSync("src/app/api/account/export/route.ts", "utf8");
+    expect(exportRoute).toContain('filename="wasiyya-konto-');
+    expect(exportRoute).not.toContain("mein-wille");
+  });
+});

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
   title: "Partner werden — Wasiyya",
@@ -99,8 +100,10 @@ export default function PartnerPage() {
       <div className="mt-12 rounded-2xl bg-sand border border-primary/10 p-6 text-center">
         <p className="text-sm text-muted">
           Partner-Anfragen werden derzeit manuell bearbeitet. Schreib uns an{" "}
-          <a href="mailto:partner@amanahordner.de" className="text-primary-light underline">
-            partner@amanahordner.de
+          {/* The imprint address is the only contact route that is set up (owner order 23.11.2026); the old
+              partner address used a domain that was never registered. */}
+          <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
+            {IMPRINT.email}
           </a>
         </p>
       </div>
