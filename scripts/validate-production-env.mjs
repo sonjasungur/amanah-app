@@ -88,6 +88,20 @@ export function validateProductionEnv(env = process.env) {
       errors.push("AMANAH_MAIL_FROM is required for the configured mail provider");
     }
   }
+  if (env.AMANAH_MAIL_TRANSPORT === "smtp") {
+    if (!env.AMANAH_SMTP_USER?.trim() || isPlaceholderValue(env.AMANAH_SMTP_USER)) {
+      errors.push("AMANAH_SMTP_USER is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_SMTP_PASSWORD?.trim() || isPlaceholderValue(env.AMANAH_SMTP_PASSWORD)) {
+      errors.push("AMANAH_SMTP_PASSWORD is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+  }
+  if (env.AMANAH_MAIL_ALLOWLIST?.trim()) {
+    errors.push("AMANAH_MAIL_ALLOWLIST must not be set in production (staging test only)");
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }
@@ -144,6 +158,7 @@ export function sanitizeEnvForLogs(env = process.env) {
     "AMANAH_AI_ENABLED",
     "AMANAH_KNOWLEDGE_RETRIEVAL",
     "AMANAH_BILLING_MODE",
+    "AMANAH_MAIL_TRANSPORT",
   ];
   const out = {};
   for (const key of keys) {
@@ -153,6 +168,7 @@ export function sanitizeEnvForLogs(env = process.env) {
   if (env.SESSION_SECRET) out.SESSION_SECRET = "[set]";
   if (env.AMANAH_DATA_KEYS) out.AMANAH_DATA_KEYS = "[set]";
   if (env.OPENAI_API_KEY) out.OPENAI_API_KEY = "[set]";
+  if (env.AMANAH_SMTP_PASSWORD) out.AMANAH_SMTP_PASSWORD = "[set]";
   if (env.AMANAH_STRIPE_SECRET_KEY) out.AMANAH_STRIPE_SECRET_KEY = "[set]";
   if (env.AMANAH_STRIPE_WEBHOOK_SECRET) out.AMANAH_STRIPE_WEBHOOK_SECRET = "[set]";
   return out;

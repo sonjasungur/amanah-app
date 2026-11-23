@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { IMPRINT } from "@/lib/legal/imprint";
 
 export const metadata = {
@@ -35,6 +36,12 @@ export default function ImpressumPage() {
             <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
               {IMPRINT.email}
             </a>
+          </p>
+          <p className="leading-relaxed mt-2">
+            Kontaktformular:{" "}
+            <Link href="/kontakt" className="text-primary-light underline">
+              Kontaktformular öffnen
+            </Link>
           </p>
         </section>
 

@@ -104,7 +104,12 @@ export default function PartnerPage() {
               partner address used a domain that was never registered. */}
           <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
             {IMPRINT.email}
-          </a>
+          </a>{" "}
+          oder nutze das{" "}
+          <Link href="/kontakt" className="text-primary-light underline">
+            Kontaktformular
+          </Link>
+          .
         </p>
       </div>
     </div>

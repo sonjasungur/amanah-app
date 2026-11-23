@@ -85,7 +85,7 @@ describe("staging env validation", () => {
   });
 
   it.each([
-    ["real mail provider", { AMANAH_MAIL_TRANSPORT: "brevo", AMANAH_MAIL_API_KEY: "k", AMANAH_MAIL_FROM: "a@b.de" }, "must not send real mail"],
+    ["real mail provider", { AMANAH_MAIL_TRANSPORT: "brevo", AMANAH_MAIL_API_KEY: "k", AMANAH_MAIL_FROM: "a@b.de" }, "other than the owner's SMTP"],
     ["real registration domain", { AMANAH_REGISTRATION_ALLOWED_DOMAINS: "staging.invalid,gmail.com" }, "reserved domains"],
     ["no allow-list", { AMANAH_REGISTRATION_ALLOWED_DOMAINS: "" }, "AMANAH_REGISTRATION_ALLOWED_DOMAINS is required"],
     ["shared database", { DATABASE_URL: "postgresql://amanah:pw-7f3a9c@postgres:5432/amanah" }, "separate staging database"],
@@ -131,7 +131,7 @@ describe("staging compose file", () => {
   });
 
   it("passes every security-relevant variable to the app", () => {
-    for (const key of ["AMANAH_DATA_KEYS", "AMANAH_DATA_KEY_ACTIVE", "AMANAH_DATA_ENCRYPTION: required", "AMANAH_PUBLIC_BASE_URL", "AMANAH_REGISTRATION_ALLOWED_DOMAINS", "AMANAH_MAIL_TRANSPORT: outbox", "AMANAH_DEPLOYMENT_ENV: staging", "NEXT_PUBLIC_AMANAH_ENVIRONMENT: staging", "AMANAH_SANDBOX_WEBHOOK_SECRET"]) {
+    for (const key of ["AMANAH_DATA_KEYS", "AMANAH_DATA_KEY_ACTIVE", "AMANAH_DATA_ENCRYPTION: required", "AMANAH_PUBLIC_BASE_URL", "AMANAH_REGISTRATION_ALLOWED_DOMAINS", "AMANAH_MAIL_TRANSPORT: ${AMANAH_MAIL_TRANSPORT:-outbox}", "AMANAH_DEPLOYMENT_ENV: staging", "NEXT_PUBLIC_AMANAH_ENVIRONMENT: staging", "AMANAH_SANDBOX_WEBHOOK_SECRET"]) {
       expect(compose, key).toContain(key);
     }
   });

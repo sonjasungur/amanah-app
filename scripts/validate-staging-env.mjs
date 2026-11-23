@@ -2,7 +2,8 @@
 /**
  * Staging env validation: every production rule, except that the dev outbox (AMANAH_DEV_OUTBOX)
  * and sandbox / Stripe test billing are allowed — plus rules that keep staging synthetic and closed:
- * no real mail provider, registration only for reserved test domains, a database of its own,
+ * real mail only to the owner's allowlisted addresses (AMANAH_MAIL_ALLOWLIST, owner 23.11.2026),
+ * registration only for reserved test domains (plus those addresses), a database of its own,
  * no external AI. See docs/strategy/22-staging-und-pilot.md.
  *
  *   set -a; source .env.staging; set +a; node scripts/validate-staging-env.mjs
@@ -14,6 +15,7 @@ const RESERVED_TLDS = [".invalid", ".test", ".example"];
 
 const ALLOWED_IN_STAGING = [
   "AMANAH_MAIL_TRANSPORT=outbox",
+  "AMANAH_MAIL_ALLOWLIST must not",
   "AMANAH_BILLING_MODE=sandbox",
   "AMANAH_BILLING_MODE=stripe_test",
   "AMANAH_DEV_OUTBOX must not",
@@ -39,8 +41,19 @@ export function validateStagingEnv(env = process.env) {
   }
 
   const mail = env.AMANAH_MAIL_TRANSPORT ?? "disabled";
-  if (mail !== "outbox" && mail !== "disabled") {
-    errors.push("Staging must not send real mail: AMANAH_MAIL_TRANSPORT must be outbox or disabled");
+  const allowlist = (env.AMANAH_MAIL_ALLOWLIST ?? "").split(",").map((a) => a.trim()).filter(Boolean);
+  if (mail === "smtp") {
+    if (allowlist.length === 0) {
+      errors.push("Staging may send real mail only to AMANAH_MAIL_ALLOWLIST (owner addresses); set it or use outbox");
+    }
+    if (allowlist.length > 5 || !allowlist.every((a) => /^[^@\s,]+@[^@\s,]+\.[a-z]{2,}$/i.test(a))) {
+      errors.push("AMANAH_MAIL_ALLOWLIST must list at most 5 exact addresses");
+    }
+    if (env.AMANAH_DEV_OUTBOX !== "true") {
+      errors.push("AMANAH_DEV_OUTBOX=true is required with the allowlist, so test accounts keep their outbox");
+    }
+  } else if (mail !== "outbox" && mail !== "disabled") {
+    errors.push("Staging must not use a mail provider other than the owner's SMTP with an allowlist");
   }
 
   const domains = (env.AMANAH_REGISTRATION_ALLOWED_DOMAINS ?? "")

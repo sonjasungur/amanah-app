@@ -60,7 +60,7 @@ describe("mailer with a provider", () => {
     vi.stubEnv("AMANAH_MAIL_API_KEY", KEY);
     vi.stubEnv("AMANAH_MAIL_FROM", "noreply@app.test");
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
-    await expect(sendMail(mail, vi.fn(async () => new Response("", { status: 500 })) as unknown as typeof fetch)).resolves.toBeUndefined();
+    await expect(sendMail(mail, vi.fn(async () => new Response("", { status: 500 })) as unknown as typeof fetch)).resolves.toBe(false);
     const logged = log.mock.calls.flat().join(" ");
     expect(logged).toContain("status 500");
     expect(logged).not.toContain(mail.to);

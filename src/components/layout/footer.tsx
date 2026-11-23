@@ -51,6 +51,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/kontakt" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                  Kontakt
+                </Link>
+              </li>
+              <li>
                 <Link href="/dashboard" className="text-white/75 hover:text-[#E2C98F] transition-colors">
                   Mein Vorsorgeplan
                 </Link>

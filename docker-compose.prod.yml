@@ -69,6 +69,13 @@ services:
       AMANAH_MAIL_API_KEY: ${AMANAH_MAIL_API_KEY:-}
       AMANAH_MAIL_FROM: ${AMANAH_MAIL_FROM:-}
       AMANAH_MAIL_FROM_NAME: ${AMANAH_MAIL_FROM_NAME:-}
+      # SMTP through the operator's mailbox (owner 23.11.2026: Zoho, contact@mscisystems.com)
+      AMANAH_SMTP_HOST: ${AMANAH_SMTP_HOST:-smtp.zoho.eu}
+      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-465}
+      AMANAH_SMTP_USER: ${AMANAH_SMTP_USER:-}
+      AMANAH_SMTP_PASSWORD: ${AMANAH_SMTP_PASSWORD:-}
+      # Contact form recipient (default: imprint address)
+      AMANAH_CONTACT_TO: ${AMANAH_CONTACT_TO:-}
       AMANAH_LEGACY_VERIFICATION_GRACE_DAYS: ${AMANAH_LEGACY_VERIFICATION_GRACE_DAYS:-60}
       # Billing stays off (no live provider implemented; docs 17, 20)
       AMANAH_BILLING_MODE: ${AMANAH_BILLING_MODE:-disabled}

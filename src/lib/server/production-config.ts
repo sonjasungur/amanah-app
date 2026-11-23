@@ -86,6 +86,20 @@ export function validateProductionEnv(
       errors.push("AMANAH_MAIL_FROM is required for the configured mail provider");
     }
   }
+  if (env.AMANAH_MAIL_TRANSPORT === "smtp") {
+    if (!env.AMANAH_SMTP_USER?.trim() || isPlaceholderValue(env.AMANAH_SMTP_USER)) {
+      errors.push("AMANAH_SMTP_USER is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_SMTP_PASSWORD?.trim() || isPlaceholderValue(env.AMANAH_SMTP_PASSWORD)) {
+      errors.push("AMANAH_SMTP_PASSWORD is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+  }
+  if (env.AMANAH_MAIL_ALLOWLIST?.trim()) {
+    errors.push("AMANAH_MAIL_ALLOWLIST must not be set in production (staging test only)");
+  }
   if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
     errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
   }

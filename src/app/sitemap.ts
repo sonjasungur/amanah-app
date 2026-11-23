@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/seo/site-url";
 import { getPublishedArticles, lastReviewDate } from "@/modules/islamic-knowledge";
 
-const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/datenschutz", "/impressum", "/sicherheit"];
+const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/datenschutz", "/impressum", "/sicherheit", "/kontakt"];
 
 /** Only public pages and reviewed, published knowledge articles — never drafts. */
 export default function sitemap(): MetadataRoute.Sitemap {

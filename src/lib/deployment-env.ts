@@ -17,12 +17,16 @@ export function isStagingBuild(): boolean {
 
 /**
  * Optional allow-list (AMANAH_REGISTRATION_ALLOWED_DOMAINS, comma-separated). Staging uses
- * reserved test domains such as staging.invalid, so real addresses cannot be registered there.
+ * reserved test domains such as staging.invalid, so real addresses cannot be registered there —
+ * except the owner's own addresses in AMANAH_MAIL_ALLOWLIST, for the real mail test (owner 23.11.2026).
  */
 export function isRegistrationDomainAllowed(email: string, env: NodeJS.ProcessEnv = process.env): boolean {
   const raw = env.AMANAH_REGISTRATION_ALLOWED_DOMAINS?.trim();
   if (!raw) return true;
-  const domain = email.trim().toLowerCase().split("@").at(-1) ?? "";
+  const address = email.trim().toLowerCase();
+  const allowlisted = (env.AMANAH_MAIL_ALLOWLIST ?? "").split(",").map((a) => a.trim().toLowerCase()).filter(Boolean);
+  if (allowlisted.includes(address)) return true;
+  const domain = address.split("@").at(-1) ?? "";
   return raw
     .split(",")
     .map((d) => d.trim().toLowerCase())

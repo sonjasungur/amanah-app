@@ -93,7 +93,17 @@ services:
       NEXT_PUBLIC_STORAGE_MODE: api
       AMANAH_PUBLIC_REGISTRATION_ENABLED: "true"
       AMANAH_REGISTRATION_ALLOWED_DOMAINS: ${AMANAH_REGISTRATION_ALLOWED_DOMAINS:-staging.invalid}
-      AMANAH_MAIL_TRANSPORT: outbox
+      # outbox by default. smtp only together with AMANAH_MAIL_ALLOWLIST (owner addresses); every other
+      # address, e.g. @staging.invalid test accounts, stays in the outbox (owner 23.11.2026).
+      AMANAH_MAIL_TRANSPORT: ${AMANAH_MAIL_TRANSPORT:-outbox}
+      AMANAH_MAIL_ALLOWLIST: ${AMANAH_MAIL_ALLOWLIST:-}
+      AMANAH_MAIL_FROM: ${AMANAH_MAIL_FROM:-}
+      AMANAH_MAIL_FROM_NAME: ${AMANAH_MAIL_FROM_NAME:-Wasiyya}
+      AMANAH_SMTP_HOST: ${AMANAH_SMTP_HOST:-smtp.zoho.eu}
+      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-465}
+      AMANAH_SMTP_USER: ${AMANAH_SMTP_USER:-}
+      AMANAH_SMTP_PASSWORD: ${AMANAH_SMTP_PASSWORD:-}
+      AMANAH_CONTACT_TO: ${AMANAH_CONTACT_TO:-}
       # Outbox endpoint for synthetic test accounts only; editorial/review pages stay unreachable
       AMANAH_DEV_OUTBOX: "true"
       AMANAH_INTERNAL_TOOLS: "false"
