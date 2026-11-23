@@ -228,14 +228,17 @@ describe("professional core phase 1 — registration, funeral, brand-review, nav
 });
 
 describe("professional core phase 1 — pricing teaser and checkout safety", () => {
-  it("homepage teaser and /preise show the owner-confirmed split: free + Vorsorge Plus (39 € test price)", () => {
+  it("homepage teaser and /preise show the start split: Basis free, Vorsorge Plus in preparation without price (owner 23.11.2026)", () => {
     const home = read("src/app/page.tsx");
     expect(home).toContain("Kostenlos");
-    expect(home).toContain("Vorsorge Plus · geplant {PLUS_PRICE} einmalig");
+    expect(home).toContain("Vorsorge Plus · ohne Preis, noch nicht buchbar");
     const preise = read("src/app/preise/page.tsx");
-    expect(preise).toContain('featuresByTier("plus")');
-    expect(preise).toContain('statusNote="In Vorbereitung"');
-    expect(preise).not.toMatch(/"(29|79|99) €"/);
+    expect(preise).toContain("START_PLUS_PLANNED");
+    expect(preise).toContain("In Vorbereitung");
+    for (const src of [home, preise, read("src/components/marketing/marketing-ui.tsx"), read("src/components/auth/auth-form.tsx")]) {
+      expect(src).not.toMatch(/getTestPriceCents|PLUS_PRICE|\d+\s?€/);
+    }
+    // The 39 € stays the internal test price for sandbox and Stripe test mode only.
     expect(formatPrice(getTestPriceCents())).toBe("39 €");
   });
 

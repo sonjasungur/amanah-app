@@ -98,3 +98,23 @@ describe("internal concept page", () => {
     for (const f of PLAN_FEATURES) expect(html).toContain(`plan-feature-${f.id}`);
   });
 });
+
+describe("start offer (owner order 23.11.2026)", () => {
+  it("Basis lists only free features that are switched on at the start; Plus names no price", async () => {
+    const { START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } = await import("@/lib/billing/start-offer");
+    const free = new Set(featuresByTier("free").map((f) => f.id));
+    for (const item of START_BASIS) for (const id of item.features) {
+      expect(free.has(id), id).toBe(true);
+      // Closed at the start: knowledge centre (preview switch) and history (privacy review).
+      expect(["knowledge_centre", "free_section_history"]).not.toContain(id);
+    }
+    expect([...START_PLUS_PLANNED, START_PLUS_STATUS].join(" ")).not.toMatch(/\d+\s?€|Euro/i);
+    expect(START_PLUS_STATUS).toContain("noch nicht kaufen");
+  });
+
+  it("account settings show the test price only where test payments run", () => {
+    const src = readFileSync("src/components/billing/billing-controls.tsx", "utf8");
+    expect(src).toContain('status.mode !== "disabled" && plus?.testPriceCents');
+    expect(src).toContain('status.mode === "disabled" ? "in Vorbereitung"');
+  });
+});

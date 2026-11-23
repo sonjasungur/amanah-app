@@ -9,8 +9,7 @@ import {
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
-import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
-import { featuresByTier } from "@/lib/billing/plan-matrix";
+import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED } from "@/lib/billing/start-offer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
@@ -90,10 +89,8 @@ const AREAS = [
   { icon: Users, title: "Familie und Akhira", text: "Gespräch mit Angehörigen, Familienbrief und Sadaqa Jariya.", accent: COLORS.catAkhira },
 ] as const;
 
-/** From the plan matrix, so the homepage cannot promise more than the code enforces. */
-const FREE_TITLES = featuresByTier("free").map((f) => f.title);
-const PLUS_TITLES = featuresByTier("plus").map((f) => f.title);
-const PLUS_PRICE = formatPrice(getTestPriceCents());
+/** Start offer (owner order 23.11.2026): only free features that are on at the start; Plus without price. */
+const FREE_TITLES = START_BASIS.map((f) => f.title);
 
 function HeroCheckInfoCard({ className }: { className?: string }) {
   const points = [
@@ -266,7 +263,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
             title="Was du heute nutzen kannst"
-            description="Klar getrennt: was kostenlos ist, was zu Vorsorge Plus gehört und was noch auf eine fachliche Freigabe wartet."
+            description="Was kostenlos ist, was in Vorbereitung ist und was noch auf eine fachliche Prüfung wartet."
             accent={COLORS.emerald}
           />
           <div className="grid gap-5 md:grid-cols-3">
@@ -277,15 +274,15 @@ export default function HomePage() {
                 {FREE_TITLES.map((t) => (
                   <li key={t} className="flex gap-2"><span className="text-emerald font-bold" aria-hidden>✓</span>{t}</li>
                 ))}
-                <li className="flex gap-2"><span className="text-emerald font-bold" aria-hidden>✓</span>Notfallpaket zum Ausdrucken (vorläufig kostenlos)</li>
+                <li className="flex gap-2 pt-2 border-t border-border"><span aria-hidden /> {START_ALWAYS_FREE}</li>
               </ul>
             </article>
             <article className="rounded-2xl border-2 border-border bg-card p-6" data-testid="home-plus">
-              <p className="text-xs font-bold uppercase tracking-wide text-primary">Vorsorge Plus · geplant {PLUS_PRICE} einmalig</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-primary">Vorsorge Plus · ohne Preis, noch nicht buchbar</p>
               <h3 className="text-card-title font-bold text-foreground mt-1">In Vorbereitung</h3>
               <p className="text-sm text-muted mt-1">Kauf ist noch nicht möglich. Bis zum Start nutzt du diese Bereiche ohne Einschränkung.</p>
               <ul className="mt-4 space-y-2 text-sm text-muted">
-                {PLUS_TITLES.map((t) => (
+                {START_PLUS_PLANNED.map((t) => (
                   <li key={t} className="flex gap-2"><span aria-hidden>•</span>{t}</li>
                 ))}
               </ul>
@@ -302,7 +299,7 @@ export default function HomePage() {
           </div>
           <Link href="/preise" className="inline-block mt-8">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              Alle Preise ansehen
+              Pakete ansehen
             </Button>
           </Link>
         </div>

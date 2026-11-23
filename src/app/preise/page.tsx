@@ -1,84 +1,102 @@
 import Link from "next/link";
 import { BRAND } from "@/lib/brand";
-import { CHECK_LABELS } from "@/lib/design-tokens";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
-import { PageHeader, PricingCard } from "@/components/marketing/marketing-ui";
+import { PageHeader } from "@/components/marketing/marketing-ui";
 import { linkButtonClassName } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { featuresByTier } from "@/lib/billing/plan-matrix";
-import { formatPrice, getTestPriceCents } from "@/lib/billing/products";
+import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } from "@/lib/billing/start-offer";
 
 export const metadata = {
-  title: `Preise — ${BRAND.name}`,
-  description: "Kostenlos starten mit Vorsorge-Check und Wissen. Vorsorge Plus als Einmalkauf in Vorbereitung — Wasiyya.",
+  title: `Pakete — ${BRAND.name}`,
+  description: "Wasiyya startet kostenlos: Vorsorge-Check, Notfallkarte und Vermögensübersicht. Vorsorge Plus ist in Vorbereitung.",
 };
 
-/** Derived from the plan matrix and catalog, so the page cannot drift from what the code enforces. */
-const PLUS_PRICE = formatPrice(getTestPriceCents());
-const FREE_FEATURES = featuresByTier("free").map((f) => f.title);
-const PLUS_FEATURES = featuresByTier("plus").map((f) => f.title);
+/**
+ * Start version (owner order 23.11.2026, staging draft): Basis free, Vorsorge Plus in preparation.
+ * No price and no purchase button until the owner releases price, terms and payment.
+ */
+const FAQ: readonly { q: string; a: string }[] = [
+  {
+    q: "Muss ich etwas bezahlen, um anzufangen?",
+    a: "Nein. Vorsorge-Check, Notfallkarte und Vermögensübersicht sind kostenlos. Für den Check brauchst du kein Konto.",
+  },
+  {
+    q: "Was passiert mit meinen Angaben, wenn Vorsorge Plus kommt?",
+    a: "Was du gespeichert hast, bleibt lesbar. Export und Löschen bleiben immer kostenlos. Bestehende Konten behalten die Funktionen, die vor der Einführung von Vorsorge Plus verfügbar waren.",
+  },
+  {
+    q: "Erstellt Wasiyya ein Testament?",
+    a: "Nein. Wasiyya hilft dir, Wünsche und Unterlagen zu ordnen. Ein Testament und die Berechnung von Erbanteilen gehören zu Anwalt, Notar und islamischer Fachperson.",
+  },
+];
 
 export default function PreisePage() {
   const showRegister = isPublicRegistrationEnabled();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14 pb-16">
+    <div className="max-w-6xl mx-auto px-4 py-10 md:py-14 pb-16" data-testid="pricing-start">
       <PageHeader
-        eyebrow="Transparent & fair"
-        title="Preise"
-        description="Einmalzahlung geplant — kein Abo. Der kostenlose Check braucht kein Konto."
+        eyebrow="Pakete"
+        title="Was Wasiyya kostet"
+        description="Wasiyya startet kostenlos. Du brauchst für den Vorsorge-Check kein Konto, und es gibt kein Abo."
       />
 
-      <div className="rounded-xl border border-border bg-accent-soft p-5 mb-12 text-body text-muted">
-        Vorsorge Plus ist in Vorbereitung. Kauf ist noch nicht möglich. Der kostenlose {CHECK_LABELS.nav} ist bereits verfügbar — ohne KI und ohne Serverkonto.
-      </div>
-
-      <section className="mb-16">
-        <h2 className="text-section-title font-bold text-foreground mb-6">Kostenlos starten</h2>
-        <Card className="border-2 border-emerald/40 bg-card p-8 md:p-10 max-w-2xl shadow-sm">
-          <div className="inline-block px-3 py-1 rounded-full bg-emerald/15 text-emerald text-xs font-bold uppercase tracking-wide mb-4">
-            Kostenlos
-          </div>
-          <h3 className="text-3xl md:text-4xl font-bold text-foreground">{CHECK_LABELS.freeCard}</h3>
-          <ul className="mt-6 space-y-3 text-body text-muted">
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Persönlicher Vorsorge-Check</li>
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Überblick über offene Bereiche</li>
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Wissensartikel mit sichtbarem Prüfstatus</li>
-            <li className="flex gap-2"><span className="text-emerald font-bold">✓</span> Genau eine Empfehlung für den nächsten Schritt</li>
+      <div className="grid gap-6 md:grid-cols-2 max-w-5xl">
+        <Card className="border-2 border-emerald/40 bg-card p-7 md:p-8 shadow-sm" data-testid="pricing-basis">
+          <p className="inline-block px-3 py-1 rounded-full bg-emerald/15 text-emerald text-xs font-bold uppercase tracking-wide">Kostenlos</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">Basis</h2>
+          <p className="text-body text-muted mt-1">Für alle, die jetzt beginnen wollen.</p>
+          <ul className="mt-6 space-y-4">
+            {START_BASIS.map((item) => (
+              <li key={item.title} className="flex gap-3">
+                <span className="text-emerald font-bold mt-0.5" aria-hidden>✓</span>
+                <span>
+                  <span className="font-semibold text-foreground">{item.title}</span>
+                  <span className="block text-sm text-muted">{item.text}</span>
+                </span>
+              </li>
+            ))}
           </ul>
-          <Link href="/check" className={linkButtonClassName({ size: "lg", className: "inline-block mt-8" })}>
+          <p className="mt-6 text-sm text-muted border-t border-border pt-4">{START_ALWAYS_FREE}</p>
+          <Link href="/check" className={linkButtonClassName({ size: "lg", className: "inline-block mt-6" })}>
             {BRAND.ctaPrimary}
           </Link>
         </Card>
+
+        <Card className="border-2 border-dashed border-border bg-card p-7 md:p-8" data-testid="pricing-plus">
+          <p className="inline-block px-3 py-1 rounded-full bg-accent-soft text-primary text-xs font-bold uppercase tracking-wide">In Vorbereitung</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-3">Vorsorge Plus</h2>
+          <p className="text-body text-muted mt-1">Für alle, die ihre Vorsorge vollständig an einem Ort festhalten wollen. Geplant sind:</p>
+          <ul className="mt-6 space-y-3 text-body text-muted">
+            {START_PLUS_PLANNED.map((t) => (
+              <li key={t} className="flex gap-3">
+                <span aria-hidden>•</span>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-sm text-foreground border-t border-border pt-4" data-testid="pricing-plus-status">
+            {START_PLUS_STATUS}
+          </p>
+        </Card>
+      </div>
+
+      <section className="mt-14 max-w-3xl" aria-labelledby="pricing-faq">
+        <h2 id="pricing-faq" className="text-section-title font-bold text-foreground mb-5">Häufige Fragen</h2>
+        <dl className="space-y-5">
+          {FAQ.map((f) => (
+            <div key={f.q}>
+              <dt className="font-semibold text-foreground">{f.q}</dt>
+              <dd className="text-body text-muted mt-1">{f.a}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
-      <section className="mb-16">
-        <h2 className="text-section-title font-bold text-foreground mb-8">Deine vollständige Vorsorge</h2>
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl">
-          <PricingCard
-            name="Kostenlos"
-            price="0 €"
-            description="Dauerhaft frei, ohne Paket."
-            features={FREE_FEATURES}
-          />
-          <PricingCard
-            name="Vorsorge Plus"
-            price={PLUS_PRICE}
-            description="Einmalzahlung, kein Abo. Alles aus „Kostenlos“ und dazu:"
-            features={PLUS_FEATURES}
-            highlighted
-            statusNote="In Vorbereitung"
-          />
-        </div>
-        <ul className="mt-8 space-y-2 text-body text-muted max-w-3xl">
-          <li>Das islamische Wissenszentrum bleibt immer kostenlos und ist nie Teil eines Pakets.</li>
-          <li>Bestehende Konten behalten die Funktionen, die vor der Einführung von Vorsorge Plus verfügbar waren. Später neu hinzukommende Plus-Funktionen sind davon nicht automatisch umfasst.</li>
-          <li>Deine Daten kannst du jederzeit exportieren und löschen, auch ohne Vorsorge Plus.</li>
-        </ul>
-      </section>
-
-      <Disclaimer />
+      <div className="mt-12">
+        <Disclaimer />
+      </div>
       <section className="mt-12 rounded-2xl border-2 border-emerald/30 bg-accent-soft p-6 md:p-8">
         <h2 className="text-section-title font-bold text-foreground mb-3">Bereit für deine Vorsorge?</h2>
         <p className="text-body text-muted mb-6 max-w-2xl">

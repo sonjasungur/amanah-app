@@ -47,7 +47,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/preise" className="text-white/75 hover:text-[#E2C98F] transition-colors">
-                  Preise
+                  Pakete
                 </Link>
               </li>
               <li>

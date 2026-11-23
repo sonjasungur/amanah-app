@@ -110,9 +110,10 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
 
   it("homepage shows the free offer, Vorsorge Plus in preparation and what still waits for review, no purchase button", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('featuresByTier("free")');
-    expect(home).toContain('featuresByTier("plus")');
-    expect(home).toContain("formatPrice(getTestPriceCents())");
+    // Start offer (owner 23.11.2026): shared lists, Plus without price.
+    expect(home).toContain("START_BASIS");
+    expect(home).toContain("START_PLUS_PLANNED");
+    expect(home).not.toContain("getTestPriceCents");
     expect(home).toContain("In Vorbereitung");
     expect(home).toContain("Kauf ist noch nicht möglich");
     expect(home).toContain("Wartet auf fachliche Freigabe");

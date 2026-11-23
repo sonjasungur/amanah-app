@@ -22,7 +22,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "nav.home": "Startseite",
     "nav.check": "Vorsorge-Check",
     "nav.dashboard": "Mein Vorsorgeplan",
-    "nav.prices": "Preise",
+    "nav.prices": "Pakete",
     "nav.knowledge": "Islamisches Wissen",
     "nav.vorsorge": "Meine Vorsorge",
     "nav.testament": "Mein Testament",

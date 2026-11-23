@@ -156,8 +156,8 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         {mode === "register" && (
           <p className="text-xs text-muted mt-4 text-center">
-            Kostenloser Einstieg — kostenpflichtige Pakete sind klar gekennzeichnet unter{" "}
-            <Link href="/preise" className="text-primary font-semibold hover:underline">Preise</Link>.
+            Wasiyya startet kostenlos. Mehr unter{" "}
+            <Link href="/preise" className="text-primary font-semibold hover:underline">Pakete</Link>.
           </p>
         )}
 

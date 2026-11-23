@@ -54,8 +54,10 @@ export function BillingControls() {
   return (
     <div className="space-y-3 text-sm" data-testid="billing-controls">
       <p>
-        <span className="font-semibold">Vorsorge Plus:</span> {hasPlus ? "freigeschaltet (Test)" : "nicht gebucht"}
-        {plus?.testPriceCents ? ` · Testpreis ${formatPrice(plus.testPriceCents)} einmalig` : ""}
+        <span className="font-semibold">Vorsorge Plus:</span>{" "}
+        {status.mode === "disabled" ? "in Vorbereitung" : hasPlus ? "freigeschaltet (Test)" : "nicht gebucht"}
+        {/* The test price only appears where test payments run (sandbox, Stripe test mode), never at the start. */}
+        {status.mode !== "disabled" && plus?.testPriceCents ? ` · Testpreis ${formatPrice(plus.testPriceCents)} einmalig` : ""}
       </p>
       {status.mode === "disabled" && <p className="text-muted">Buchung ist noch nicht möglich. Es werden keine Zahlungen verarbeitet.</p>}
       {status.mode === "sandbox" && !hasPlus && (
