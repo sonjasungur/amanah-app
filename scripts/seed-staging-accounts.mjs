@@ -4,7 +4,11 @@
  * (register → dev outbox link → confirm → consent → synthetic folder). Never against production:
  * the target must report environment "staging" (or "development" for local tests) in /api/health.
  *
- *   STAGING_BASE_URL=https://staging.example.test STAGING_BASIC_AUTH=user:pass \
+ * The test mailbox answers only on the loopback interface (owner 23.11.2026), so run it through an SSH
+ * tunnel to the staging container port, never through the public proxy:
+ *
+ *   ssh -N -L 3201:127.0.0.1:3201 <staging-host> &
+ *   STAGING_BASE_URL=http://127.0.0.1:3201 \
  *   node scripts/seed-staging-accounts.mjs --count 5 --out /secure/path/staging-accounts.json
  *
  * Passwords are random and written only to the --out file (mode 600, outside the repository),

@@ -8,7 +8,7 @@ import { POST as resetConfirmPOST } from "@/app/api/auth/password-reset/confirm/
 import { GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
 import { DELETE as consentDELETE, GET as consentGET, POST as consentPOST } from "@/app/api/consent/route";
 import { GET as exportGET } from "@/app/api/account/export/route";
-import { GET as outboxGET } from "@/app/api/dev/outbox/route";
+import { DELETE as outboxDELETE, GET as outboxGET } from "@/app/api/dev/outbox/route";
 import { CONSENT_PURPOSES } from "@/lib/consent/purposes";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { resetRateLimits } from "@/lib/ai/rate-limit";
@@ -203,11 +203,14 @@ describe("password reset", () => {
   });
 });
 
-describe("dev outbox", () => {
+describe("dev outbox (Testbriefkasten)", () => {
+  const direct = (host = "127.0.0.1:3201", extra: Record<string, string> = {}) =>
+    new Request(`http://${host}/api/dev/outbox`, { headers: { host, ...extra } });
+
   it("is not reachable unless internal tools are enabled", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("AMANAH_INTERNAL_TOOLS", "");
-    expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(404);
+    expect((await outboxGET(direct())).status).toBe(404);
   });
 
   it("AMANAH_DEV_OUTBOX opens only the outbox (staging), never with a real mail transport", async () => {
@@ -215,8 +218,26 @@ describe("dev outbox", () => {
     vi.stubEnv("AMANAH_INTERNAL_TOOLS", "");
     vi.stubEnv("AMANAH_DEV_OUTBOX", "true");
     vi.stubEnv("AMANAH_MAIL_TRANSPORT", "outbox");
-    expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(200);
+    expect((await outboxGET(direct())).status).toBe(200);
+    expect((await outboxGET(direct("localhost:3000"))).status).toBe(200);
     vi.stubEnv("AMANAH_MAIL_TRANSPORT", "brevo");
-    expect((await outboxGET(new Request(`${BASE}/api/dev/outbox`))).status).toBe(404);
+    expect((await outboxGET(direct())).status).toBe(404);
+  });
+
+  it("answers 404 through the public proxy, also for signed-in users and spoofed headers (owner 23.11.2026)", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AMANAH_INTERNAL_TOOLS", "");
+    vi.stubEnv("AMANAH_DEV_OUTBOX", "true");
+    vi.stubEnv("AMANAH_MAIL_TRANSPORT", "outbox");
+    const publicHost = "amanah-test.mscisystems.com";
+    const viaProxy = { "x-forwarded-host": publicHost, "x-forwarded-for": "203.0.113.7", "x-forwarded-proto": "https" };
+    // Ordinary visitor and signed-in user (session cookie) through the proxy.
+    expect((await outboxGET(direct(publicHost, viaProxy))).status).toBe(404);
+    expect((await outboxGET(direct(publicHost, { ...viaProxy, cookie: "amanah_session=abc" }))).status).toBe(404);
+    // The proxy keeps the public Host; a forged X-Forwarded-Host or a missing Host does not open it.
+    expect((await outboxGET(direct(publicHost, { "x-forwarded-host": "localhost" }))).status).toBe(404);
+    expect((await outboxGET(direct("127.0.0.1:3201", { "x-forwarded-host": publicHost }))).status).toBe(404);
+    expect((await outboxGET(new Request("http://127.0.0.1:3201/api/dev/outbox"))).status).toBe(404);
+    expect((await outboxDELETE(direct(publicHost, viaProxy))).status).toBe(404);
   });
 });

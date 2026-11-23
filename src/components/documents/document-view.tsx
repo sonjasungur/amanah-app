@@ -184,9 +184,10 @@ function LetterView({ model, createdAt, dataAsOf, testId }: { model: DocModel; c
             <td>
               <header className="letter-head">
                 <p className="letter-brand">
-                  {/* Wasiyya, print variant: navy book with gold seal on white paper (22.11.2026). */}
-                  <WasiyyaMark height={20} />
-                  <WasiyyaWordmark height={15} aria-label="Wasiyya" />
+                  {/* Wasiyya, print variant: navy book with gold seal on white paper (22.11.2026). Same size as
+                      on the other documents (30/19), owner request 23.11.2026. */}
+                  <WasiyyaMark height={30} />
+                  <WasiyyaWordmark height={19} aria-label="Wasiyya" />
                 </p>
                 <h1 className="letter-title">{model.title}</h1>
                 {l.sender && (

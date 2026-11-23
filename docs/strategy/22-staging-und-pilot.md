@@ -42,7 +42,7 @@ App-Änderungen dafür:
 2. `.env.staging` mit frischen Secrets anlegen (Befehle in der Vorlage), dann `node scripts/validate-staging-env.mjs`.
 3. `docker compose -p amanah-staging -f docker-compose.staging.yml --env-file .env.staging up -d --build`.
 4. Caddy-Block aus `deploy/Caddyfile.staging-snippet` mit eigenem Basic-Auth-Hash einsetzen und Caddy neu laden. Der Block nimmt nur `/api/billing/webhook` von der Basic Auth aus, damit Stripe-Testereignisse ankommen. Das ändert den gemeinsamen Webserver und braucht deshalb eine eigene Freigabe.
-5. Testkonten: `STAGING_BASE_URL=… STAGING_BASIC_AUTH=… node scripts/seed-staging-accounts.mjs --count 5 --out <sicherer Pfad>`.
+5. Testkonten: per SSH-Tunnel (`ssh -N -L 3201:127.0.0.1:3201 <Staging-Host>`) `STAGING_BASE_URL=http://127.0.0.1:3201 node scripts/seed-staging-accounts.mjs --count 5 --out <sicherer Pfad>`. Der Testbriefkasten antwortet seit 23.11.2026 nur auf direkte Loopback-Anfragen, über den öffentlichen Proxy immer 404.
 6. Cron (Vorschlag):
    - `*/5 * * * *` Health-Check
    - `15 3 * * *` Backup: `ENV_FILE=.env.staging POSTGRES_CONTAINER=amanah-staging-postgres BACKUP_DIR=/srv/backups/amanah-staging BACKUP_REQUIRE_ENCRYPTION=true scripts/backup-postgres.sh`

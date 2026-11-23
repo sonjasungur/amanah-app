@@ -37,7 +37,7 @@ Offene Fragen für die Datenschutzberatung: endgültiger Einwilligungstext; Rech
 
 - `src/lib/server/mailer.ts`: `outbox` (Speicher, nur Entwicklung/Test) oder `disabled` (Standard in Produktion). **Kein echter Anbieter angebunden** → REQUIRES_OWNER (Anbieter, AVV, Absenderdomain, SPF/DKIM).
 - Produktionsprüfung verbietet `outbox` und `AMANAH_INTERNAL_TOOLS=true`, verlangt Basis-URL, warnt ohne Mailversand.
-- Dev-Postausgang `GET /api/dev/outbox` nur mit internen Werkzeugen und `outbox`, sonst 404.
+- Dev-Postausgang („Testbriefkasten“) `GET/DELETE /api/dev/outbox` nur mit internen Werkzeugen oder `AMANAH_DEV_OUTBOX=true`, Transport `outbox` und direkter Loopback-Anfrage (Host `localhost`/`127.0.0.1`/`::1`, seit 23.11.2026); über den öffentlichen Proxy immer 404, auch mit Konto.
 
 ## 5. Tests [geprüft 2026-10-30]
 

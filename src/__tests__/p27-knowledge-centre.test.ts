@@ -136,3 +136,55 @@ describe("P2.7 source line", () => {
     }
   });
 });
+
+describe("Start mode without the knowledge centre (switch off, owner order 23.11.2026)", () => {
+  const off = () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("AMANAH_KNOWLEDGE_PREVIEW", "false");
+  };
+  const ids = FULL_ARTICLES.map((a) => a.id);
+  const titles = FULL_ARTICLES.map((a) => a.title);
+
+  it("every centre page answers 404 for every article, rubric and verse link", async () => {
+    off();
+    const { default: Entry } = await import("@/app/wissen/zentrum/page");
+    const { default: Article } = await import("@/app/wissen/zentrum/artikel/[id]/page");
+    const { default: Rubric } = await import("@/app/wissen/zentrum/rubrik/[nr]/page");
+    const { default: Verse } = await import("@/app/wissen/zentrum/vers/[ref]/page");
+    const notFound = /NEXT_HTTP_ERROR_FALLBACK;404|NEXT_NOT_FOUND/;
+    await expect(Promise.resolve().then(() => (Entry as () => unknown)())).rejects.toThrow(notFound);
+    for (const id of ids) await expect(Article({ params: Promise.resolve({ id }) })).rejects.toThrow(notFound);
+    for (const r of RUBRICS) await expect(Rubric({ params: Promise.resolve({ nr: String(r.nr) }) })).rejects.toThrow(notFound);
+    await expect(Verse({ params: Promise.resolve({ ref: "3-185" }) })).rejects.toThrow(notFound);
+  });
+
+  it("sitemap, published links and the public knowledge APIs deliver none of the centre drafts", async () => {
+    off();
+    const { default: sitemap } = await import("@/app/sitemap");
+    const urls = sitemap().map((e) => e.url);
+    expect(urls.filter((u) => u.includes("/wissen/zentrum"))).toEqual([]);
+    const { GET: links } = await import("@/app/api/knowledge/published-links/route");
+    const linked = (await (await links()).json()) as { articles: { id: string; title: string }[] };
+    expect(linked.articles.filter((a) => ids.includes(a.id) || titles.includes(a.title))).toEqual([]);
+    const { GET: entries } = await import("@/app/api/knowledge/entries/route");
+    const listed = JSON.stringify(await (await entries(new Request("http://localhost/api/knowledge/entries"))).json());
+    const { GET: search } = await import("@/app/api/knowledge/search/route");
+    for (const t of titles) {
+      expect(listed, t).not.toContain(t);
+      const q = encodeURIComponent(t.split(/\s+/).slice(0, 3).join(" "));
+      const found = (await (await search(new Request(`http://localhost/api/knowledge/search?q=${q}`))).json()) as { results: { title: string }[] };
+      expect(found.results.map((r) => r.title), t).not.toContain(t);
+    }
+  });
+
+  it("the public knowledge page shows no entry into the centre", async () => {
+    off();
+    expect(readFileSync("src/app/wissen/page.tsx", "utf8")).toContain("{isKnowledgePreviewEnabled() && <KnowledgeCentrePreviewEntry />}");
+    for (const f of files("src/components").filter((p) => /\.(tsx|ts)$/.test(p))) {
+      const src = readFileSync(f, "utf8");
+      if (!src.includes('href="/wissen/zentrum')) continue;
+      // Only components that are rendered by the gated centre pages or the gated preview entry may link there.
+      expect(f, f).toMatch(/knowledge\/zentrum\//);
+    }
+  });
+});

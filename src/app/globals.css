@@ -377,7 +377,7 @@ body {
 /* The letterhead covers the running head on page 1. It reaches 4 mm past the text column on both sides, so the
    overhang of the italic first letter of the running head cannot show at the left edge (dot fixed 22.11.). */
 .amanah-letter .letter-head { position: relative; z-index: 1; background: #fff; margin: -11mm -4mm 9mm; padding: 11mm 4mm 0; }
-.amanah-letter .letter-brand { display: flex; align-items: center; justify-content: flex-end; gap: 1.5mm; margin: 0 0 9mm; font-family: var(--doc-sans); font-size: 8.5pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--doc-grey); }
+.amanah-letter .letter-brand { display: flex; align-items: center; justify-content: flex-end; gap: 2mm; margin: 0 0 9mm; font-family: var(--doc-sans); font-size: 8.5pt; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--doc-grey); }
 .amanah-letter .letter-title { margin: 0; font-family: var(--doc-serif); font-weight: 600; font-size: 28pt; line-height: 1.1; letter-spacing: -0.005em; color: var(--doc-forest); text-wrap: balance; }
 .amanah-letter .letter-from { margin: 2.5mm 0 0; font-style: italic; font-size: 13pt; color: var(--doc-ink); }
 .amanah-letter .letter-sender { font-style: normal; font-weight: 600; color: var(--doc-forest); }

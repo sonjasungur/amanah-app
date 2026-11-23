@@ -31,6 +31,24 @@ describe("P2.6 family letter", () => {
     expect(screen.getByTestId("doc-status").textContent).toContain("Kein rechtliches Dokument");
   });
 
+  it("carries the Wasiyya book and wordmark at the same size as the other documents (owner 23.11.2026)", () => {
+    const d = empty();
+    d.emergencyCard = { ...d.emergencyCard, name: "Amina Rahman" };
+    d.familyMessage = { ...d.familyMessage, letterGreeting: "Meine Lieben,", familyLetter: "x".repeat(LETTER_MIN_CHARS), letterClosing: "In Liebe", letterSignature: "Eure Mutter" };
+    const sizes = (el: Element | null) => {
+      const mark = el?.querySelector('[data-testid="wasiyya-mark"]');
+      const word = el?.querySelector('svg[aria-label="Wasiyya"]');
+      return [mark?.getAttribute("height"), word?.getAttribute("height")];
+    };
+    render(<DocumentView model={buildFamilienbrief(d)} createdAt={new Date("2026-11-23")} dataAsOf={null} />);
+    const letter = sizes(screen.getByTestId("document-view").querySelector(".letter-brand"));
+    cleanup();
+    render(<DocumentView model={buildNotfallkarte(d)} createdAt={new Date("2026-11-23")} dataAsOf={null} />);
+    const card = sizes(screen.getByTestId("document-view").querySelector(".doc-brand"));
+    expect(letter).toEqual(["30", "19"]);
+    expect(letter).toEqual(card);
+  });
+
   it("is only ready with a real text: empty, very short, without salutation or closing count as missing", () => {
     expect(buildFamilienbrief(empty()).hasContent).toBe(false);
     const d = empty();
