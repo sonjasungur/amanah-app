@@ -76,6 +76,23 @@ export function ArabicText({ text, suffix }: { text: string; suffix?: string }) 
   );
 }
 
+/**
+ * Attribution required by the QuranEnc terms (translators as QuranEnc names them, source QuranEnc.com,
+ * version number) plus the origin of the Arabic text. Owner order 23.11.2026; see the source matrix.
+ */
+export const QURAN_TRANSLATORS = "ʿAbdullah as-Sāmit (Frank Bubenheim) und Dr. Nadim Elias";
+export function quranEncVersion(edition: string): string | null {
+  return edition.match(/german_bubenheim v(\d+(?:\.\d+)+)/)?.[1] ?? null;
+}
+export function quranAttribution(q: { edition: string; arabic?: string }): string {
+  const version = quranEncVersion(q.edition);
+  return (
+    `Übersetzung: ${QURAN_TRANSLATORS}. Quelle: QuranEnc.com${version ? `, Version ${version}` : ""}.` +
+    (q.arabic ? " Arabischer Text: QuranEnc.com (Rasm des König-Fahd-Komplexes)." : "") +
+    " Unveränderte Wiedergabe."
+  );
+}
+
 export function QuranCard({ q }: { q: QuranSource }) {
   return (
     <figure className="wz-verse-panel rounded-2xl px-5 py-6 sm:px-8 sm:py-7 space-y-4" data-testid="quran-card">
@@ -90,10 +107,13 @@ export function QuranCard({ q }: { q: QuranSource }) {
         <blockquote className="wz-serif text-[1.125rem] leading-relaxed text-[var(--wz-ink)]">„{q.germanVerbatim}“</blockquote>
       </div>
       <figcaption className="text-sm text-[var(--wz-muted)] border-t border-[var(--wz-line)] pt-3">
-        <bdi>Sure {q.surah}, Vers {q.ayah}</bdi> · Übersetzung: ʿAbdullāh Frank Bubenheim und Nadeem Elyas ·{" "}
+        <bdi>Sure {q.surah}, Vers {q.ayah}</bdi> ·{" "}
         <a href={q.url} className="wz-text-link" rel="noreferrer">
           vollständige Übersetzung
         </a>
+        <span className="block mt-1 text-xs" data-testid="quran-attribution">
+          {quranAttribution(q)}
+        </span>
       </figcaption>
     </figure>
   );

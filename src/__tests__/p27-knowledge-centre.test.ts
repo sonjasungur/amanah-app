@@ -199,3 +199,19 @@ describe("No leftovers of old names on public pages (owner order 23.11.2026)", (
     expect(exportRoute).not.toContain("mein-wille");
   });
 });
+
+describe("QuranEnc attribution on every verse (owner order 23.11.2026)", () => {
+  it("names translators as QuranEnc does, QuranEnc.com, the version and the Arabic text's origin", async () => {
+    const { quranAttribution, quranEncVersion } = await import("@/components/knowledge/zentrum/article-view");
+    const verses = [...FULL_ARTICLES, ...(ENTRY_ARTICLE ? [ENTRY_ARTICLE] : [])].flatMap((a) => a.sources?.quran ?? []);
+    expect(verses.length).toBeGreaterThan(80);
+    for (const q of verses) {
+      expect(quranEncVersion(q.edition), q.ref).toBe("1.1.5");
+      const text = quranAttribution(q);
+      expect(text).toContain("ʿAbdullah as-Sāmit (Frank Bubenheim) und Dr. Nadim Elias");
+      expect(text).toContain("Quelle: QuranEnc.com, Version 1.1.5");
+      if (q.arabic) expect(text).toContain("Arabischer Text: QuranEnc.com");
+    }
+    expect(readFileSync("src/components/knowledge/zentrum/article-view.tsx", "utf8")).not.toContain("Nadeem Elyas");
+  });
+});

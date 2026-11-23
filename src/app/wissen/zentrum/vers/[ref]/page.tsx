@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { isKnowledgePreviewEnabled } from "@/lib/flags/knowledge-preview";
+import { quranAttribution } from "@/components/knowledge/zentrum/article-view";
 import { HADITH_COLLECTION_LABELS, getFullArticle, type FullArticle, type Paragraph } from "@/modules/islamic-knowledge/full-articles";
 import { MixedText, anchor } from "@/components/knowledge/zentrum/article-view";
 import { PreviewNote } from "@/components/knowledge/zentrum/preview-note";
@@ -99,10 +100,12 @@ export default async function VerseSamplePage({ params }: { params: Promise<{ re
             <div className="mx-auto mt-8 max-w-[34rem] border-t border-[var(--wz-line)] pt-6" data-testid="sample-translation">
               <blockquote className="wz-serif text-center text-[1.2rem] leading-relaxed sm:text-[1.35rem] text-[var(--wz-ink)]">„{verse.germanVerbatim}“</blockquote>
               <figcaption className="mt-4 text-center text-sm text-[var(--wz-muted)]">
-                Bedeutungsübersetzung: ʿAbdullāh Frank Bubenheim und Nadeem Elyas ·{" "}
                 <a href={verse.url} className="wz-text-link" rel="noreferrer">
                   vollständige Übersetzung
                 </a>
+                <span className="block mt-1 text-xs" data-testid="quran-attribution">
+                  {quranAttribution(verse)}
+                </span>
               </figcaption>
             </div>
           </figure>
