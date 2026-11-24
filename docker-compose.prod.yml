@@ -71,7 +71,7 @@ services:
       AMANAH_MAIL_FROM_NAME: ${AMANAH_MAIL_FROM_NAME:-}
       # SMTP through the operator's mailbox (owner 23.11.2026: Zoho, contact@mscisystems.com)
       AMANAH_SMTP_HOST: ${AMANAH_SMTP_HOST:-smtp.zoho.eu}
-      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-465}
+      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-587}
       AMANAH_SMTP_USER: ${AMANAH_SMTP_USER:-}
       AMANAH_SMTP_PASSWORD: ${AMANAH_SMTP_PASSWORD:-}
       # Contact form recipient (default: imprint address)

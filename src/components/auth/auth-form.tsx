@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
@@ -14,6 +14,7 @@ import { Disclaimer } from "@/components/ui/disclaimer";
 import { Logo } from "@/components/layout/logo";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/config";
+import { isStagingBuild } from "@/lib/deployment-env";
 
 interface AuthFormProps {
   mode: "login" | "register";
@@ -33,6 +34,30 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [unverified, setUnverified] = useState(false);
   const [resent, setResent] = useState(false);
+  const [directLogin, setDirectLogin] = useState<string | null>(null);
+
+  // Staging only: one-tap login as the acceptance account (owner 24.11.2026). The server answers 404
+  // everywhere else, so the button never appears outside staging.
+  useEffect(() => {
+    if (mode !== "login" || authMode !== "api" || !isStagingBuild()) return;
+    fetch("/api/dev/staging-login")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: { email?: string } | null) => setDirectLogin(b?.email ?? null))
+      .catch(() => undefined);
+  }, [mode, authMode]);
+
+  const loginAsAcceptanceAccount = async () => {
+    setError("");
+    setLoading(true);
+    const res = await fetch("/api/dev/staging-login", { method: "POST" }).catch(() => null);
+    if (!res?.ok) {
+      setLoading(false);
+      setError("Direktanmeldung war nicht möglich.");
+      return;
+    }
+    // Full reload so the session is read fresh from the server.
+    window.location.assign(returnUrl);
+  };
 
   const resendVerification = async () => {
     await fetch("/api/auth/verify-email/resend", {
@@ -122,6 +147,17 @@ export function AuthForm({ mode }: AuthFormProps) {
         <p className="text-sm text-muted mt-2 mb-6">
           {authMode === "api" ? null : t("auth.mode.localHint")}
         </p>
+
+        {directLogin && (
+          <div className="mb-6 rounded-xl border-2 border-primary/30 bg-accent-soft p-4" data-testid="staging-direct-login">
+            <p className="text-sm text-foreground mb-3">
+              Nur auf Staging: ohne Passwort als Abnahmekonto <span className="font-semibold break-all">{directLogin}</span> weiter.
+            </p>
+            <Button type="button" className="w-full" disabled={loading} onClick={() => void loginAsAcceptanceAccount()}>
+              Als Abnahmekonto weiter
+            </Button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === "register" && (

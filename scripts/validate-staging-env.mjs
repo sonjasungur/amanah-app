@@ -20,6 +20,7 @@ const ALLOWED_IN_STAGING = [
   "AMANAH_BILLING_MODE=stripe_test",
   "AMANAH_DEV_OUTBOX must not",
   "AMANAH_INTERNAL_TOOLS must not",
+  "AMANAH_STAGING_DIRECT_LOGIN must not",
 ];
 
 function databaseName(url) {
@@ -38,6 +39,11 @@ export function validateStagingEnv(env = process.env) {
   if (env.AMANAH_DEPLOYMENT_ENV !== "staging") errors.push("AMANAH_DEPLOYMENT_ENV must be staging");
   if (env.NEXT_PUBLIC_AMANAH_ENVIRONMENT !== "staging") {
     errors.push("NEXT_PUBLIC_AMANAH_ENVIRONMENT must be staging (banner, noindex)");
+  }
+  // One-tap login (owner 24.11.2026): only a reserved .invalid test address, never a real account.
+  const direct = env.AMANAH_STAGING_DIRECT_LOGIN?.trim();
+  if (direct && !/^[a-z0-9._+-]+@[a-z0-9.-]+\.invalid$/i.test(direct)) {
+    errors.push("AMANAH_STAGING_DIRECT_LOGIN must be a single address on a .invalid test domain");
   }
 
   const mail = env.AMANAH_MAIL_TRANSPORT ?? "disabled";

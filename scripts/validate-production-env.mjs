@@ -111,6 +111,9 @@ export function validateProductionEnv(env = process.env) {
   if (env.AMANAH_DEV_OUTBOX === "true") {
     errors.push("AMANAH_DEV_OUTBOX must not be enabled in production");
   }
+  if (env.AMANAH_STAGING_DIRECT_LOGIN?.trim()) {
+    errors.push("AMANAH_STAGING_DIRECT_LOGIN must not be set in production (staging acceptance only)");
+  }
   if (!env.AMANAH_PUBLIC_BASE_URL?.trim() && !env.NEXT_PUBLIC_SITE_URL?.trim() && !env.NEXT_PUBLIC_APP_URL?.trim()) {
     errors.push("AMANAH_PUBLIC_BASE_URL (or NEXT_PUBLIC_SITE_URL) is required for links in e-mails");
   }

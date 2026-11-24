@@ -100,10 +100,12 @@ services:
       AMANAH_MAIL_FROM: ${AMANAH_MAIL_FROM:-}
       AMANAH_MAIL_FROM_NAME: ${AMANAH_MAIL_FROM_NAME:-Wasiyya}
       AMANAH_SMTP_HOST: ${AMANAH_SMTP_HOST:-smtp.zoho.eu}
-      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-465}
+      AMANAH_SMTP_PORT: ${AMANAH_SMTP_PORT:-587}
       AMANAH_SMTP_USER: ${AMANAH_SMTP_USER:-}
       AMANAH_SMTP_PASSWORD: ${AMANAH_SMTP_PASSWORD:-}
       AMANAH_CONTACT_TO: ${AMANAH_CONTACT_TO:-}
+      # One-tap login as the acceptance account behind the basic auth (owner 24.11.2026); .invalid address only.
+      AMANAH_STAGING_DIRECT_LOGIN: ${AMANAH_STAGING_DIRECT_LOGIN:-}
       # Outbox endpoint for synthetic test accounts only; editorial/review pages stay unreachable
       AMANAH_DEV_OUTBOX: "true"
       AMANAH_INTERNAL_TOOLS: "false"

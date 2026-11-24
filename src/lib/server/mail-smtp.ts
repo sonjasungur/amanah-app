@@ -6,7 +6,8 @@ import nodemailer from "nodemailer";
  * app-specific password that only the owner enters in the server env; it is never logged.
  *
  *   AMANAH_MAIL_TRANSPORT=smtp
- *   AMANAH_SMTP_HOST (default smtp.zoho.eu), AMANAH_SMTP_PORT (default 465, implicit TLS; 587 = STARTTLS)
+ *   AMANAH_SMTP_HOST (default smtp.zoho.eu), AMANAH_SMTP_PORT (default 587 with required STARTTLS; 465 = implicit TLS).
+ *   587 because the Hetzner host blocks outgoing 465 (tested 24.11.2026)
  *   AMANAH_SMTP_USER, AMANAH_SMTP_PASSWORD, AMANAH_MAIL_FROM, AMANAH_MAIL_FROM_NAME
  */
 export interface SmtpConfig {
@@ -38,8 +39,8 @@ export function readSmtpConfig(env: NodeJS.ProcessEnv = process.env): SmtpConfig
   const password = env.AMANAH_SMTP_PASSWORD ?? "";
   const fromEmail = env.AMANAH_MAIL_FROM?.trim();
   if (!user || !password.trim() || !fromEmail) return null;
-  const port = Number.parseInt(env.AMANAH_SMTP_PORT ?? "465", 10);
-  const safePort = Number.isFinite(port) && port > 0 ? port : 465;
+  const port = Number.parseInt(env.AMANAH_SMTP_PORT ?? "587", 10);
+  const safePort = Number.isFinite(port) && port > 0 ? port : 587;
   return {
     host: env.AMANAH_SMTP_HOST?.trim() || "smtp.zoho.eu",
     port: safePort,

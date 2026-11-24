@@ -58,18 +58,18 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("SMTP through the operator's mailbox", () => {
-  it("defaults to Zoho EU with implicit TLS and needs user, password and sender", () => {
+  it("defaults to Zoho EU on 587 with required STARTTLS and needs user, password and sender", () => {
     expect(readSmtpConfig({ AMANAH_SMTP_USER: "a@b.de", AMANAH_MAIL_FROM: "a@b.de" } as unknown as NodeJS.ProcessEnv)).toBeNull();
     const c = readSmtpConfig({ AMANAH_SMTP_USER: "a@b.de", AMANAH_SMTP_PASSWORD: "x", AMANAH_MAIL_FROM: "a@b.de" } as unknown as NodeJS.ProcessEnv)!;
-    expect(c).toMatchObject({ host: "smtp.zoho.eu", port: 465, secure: true, fromName: "Wasiyya" });
-    expect(readSmtpConfig({ AMANAH_SMTP_USER: "a", AMANAH_SMTP_PASSWORD: "x", AMANAH_MAIL_FROM: "a@b.de", AMANAH_SMTP_PORT: "587" } as unknown as NodeJS.ProcessEnv)).toMatchObject({ port: 587, secure: false });
+    expect(c).toMatchObject({ host: "smtp.zoho.eu", port: 587, secure: false, fromName: "Wasiyya" });
+    expect(readSmtpConfig({ AMANAH_SMTP_USER: "a", AMANAH_SMTP_PASSWORD: "x", AMANAH_MAIL_FROM: "a@b.de", AMANAH_SMTP_PORT: "465" } as unknown as NodeJS.ProcessEnv)).toMatchObject({ port: 465, secure: true });
   });
 
   it("sends from the configured sender, keeps Reply-To, strips line breaks and never puts the password into errors", async () => {
     const config = readSmtpConfig({ AMANAH_SMTP_USER: "contact@mscisystems.com", AMANAH_SMTP_PASSWORD: SECRET, AMANAH_MAIL_FROM: "contact@mscisystems.com" } as unknown as NodeJS.ProcessEnv)!;
     await sendViaSmtp(config, { to: "x@example.org", subject: "Hallo\r\nBcc: evil@example.org", text: "t", replyTo: "r@example.org" });
     expect(sent[0]).toMatchObject({ from: { name: "Wasiyya", address: "contact@mscisystems.com" }, to: "x@example.org", subject: "Hallo Bcc: evil@example.org", replyTo: "r@example.org" });
-    expect(transportOptions).toMatchObject({ host: "smtp.zoho.eu", port: 465, secure: true, logger: false, debug: false });
+    expect(transportOptions).toMatchObject({ host: "smtp.zoho.eu", port: 587, secure: false, requireTLS: true, logger: false, debug: false });
     failWith = Object.assign(new Error(`Invalid login for ${SECRET}`), { code: "EAUTH" });
     const err = await sendViaSmtp(config, { to: "x@example.org", subject: "s", text: "t" }).catch((e: Error) => e);
     expect(String(err)).toContain("EAUTH");
