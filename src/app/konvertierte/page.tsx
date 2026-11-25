@@ -3,10 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { Users, HeartHandshake, FileText, Phone } from "lucide-react";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Für Konvertierte & alleinstehende Muslime — Wasiyya",
-};
+export const metadata = publicPageMetadata("/konvertierte");
 
 const checklist = [
   "Muslimischer Notfallkontakt benennen",

@@ -5,6 +5,9 @@ import { WissenHubView } from "@/components/wissen/wissen-hub-view";
 import { getPublishedArticles, plannedTopics } from "@/modules/islamic-knowledge";
 import { isKnowledgePreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { KnowledgeCentrePreviewEntry } from "@/components/knowledge/zentrum/preview-entry";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
+
+export const metadata = publicPageMetadata("/wissen");
 
 /** The preview entry depends on a runtime switch (P2.7), so the page is rendered per request. */
 export const dynamic = "force-dynamic";

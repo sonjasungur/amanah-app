@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Impressum — Wasiyya",
-  description: "Impressum und Anbieterkennzeichnung für Wasiyya.",
-};
+export const metadata = publicPageMetadata("/impressum");
 
 export default function ImpressumPage() {
   return (

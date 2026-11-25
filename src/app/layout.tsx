@@ -1,3 +1,4 @@
+import { getSiteUrl } from "@/lib/seo/site-url";
 import type { Metadata, Viewport } from "next";
 import { Geist, Noto_Naskh_Arabic, Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
@@ -40,6 +41,7 @@ const docSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: BRAND.metadataTitle,
   description: BRAND.metadataDescription,
   manifest: "/manifest.json",
@@ -55,7 +57,10 @@ export const metadata: Metadata = {
     title: BRAND.metadataTitle,
     description: BRAND.metadataDescription,
     siteName: BRAND.name,
+    type: "website",
+    locale: "de_DE",
   },
+  twitter: { card: "summary_large_image", title: BRAND.metadataTitle, description: BRAND.metadataDescription },
 };
 
 export const viewport: Viewport = {

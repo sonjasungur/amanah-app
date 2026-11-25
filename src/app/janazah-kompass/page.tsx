@@ -1,9 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Janazah-Kompass — Wasiyya",
-  description: "Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung in Deutschland.",
-};
+export const metadata = publicPageMetadata("/janazah-kompass");
 
 /** Religious content is shown only through the knowledge-centre publication gate. */
 export default function JanazahKompassPage() {

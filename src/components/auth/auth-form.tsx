@@ -127,7 +127,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div className="max-w-md mx-auto px-4 py-12">
         <Logo className="mb-8 justify-center w-full" />
         <Card>
-          <CardTitle>Registrierung derzeit nicht geöffnet</CardTitle>
+          <h1 className="text-lg font-semibold text-primary mb-2">Registrierung derzeit nicht geöffnet</h1>
           <p className="text-sm text-muted mt-3 mb-6">
             Der kostenlose Vorsorge-Check benötigt kein Konto. Öffentliche Serverkonten sind derzeit nicht freigeschaltet.
           </p>
@@ -143,7 +143,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     <div className="max-w-md mx-auto px-4 py-12">
       <Logo className="mb-8 justify-center w-full" />
       <Card>
-        <CardTitle>{mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</CardTitle>
+        <h1 className="text-lg font-semibold text-primary mb-2">{mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}</h1>
         <p className="text-sm text-muted mt-2 mb-6">
           {authMode === "api" ? null : t("auth.mode.localHint")}
         </p>

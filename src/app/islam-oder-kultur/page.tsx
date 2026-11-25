@@ -1,9 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Islam oder Kultur? — Wasiyya",
-  description: "Unterscheide islamische Pflichten von kulturellen Gewohnheiten bei Janazah und Trauer.",
-};
+export const metadata = publicPageMetadata("/islam-oder-kultur");
 
 /** Religious content is shown only through the knowledge-centre publication gate. */
 export default function IslamOderKulturPage() {

@@ -233,17 +233,6 @@ export const islamicSources: Record<string, IslamicSource> = {
     auditCategory: "LEGAL_GERMANY",
   },
 
-  "partner-gemeinsam1-sadaqa": {
-    id: "partner-gemeinsam1-sadaqa",
-    type: "official",
-    title: "Gemeinsam1 e.V. — Partner für Sadaqa Jariya",
-    reference: "Partnerorganisation",
-    url: "https://gemeinsam1.de/?utm_source=meinwille&utm_medium=partner&utm_campaign=sadaqa-jariya",
-    translationDe:
-      "Gemeinsam1 e.V. unterstützt Bildungs- und Hilfsprojekte als dauerhafte Sadaqa Jariya. Partnerlink — keine religiöse Bewertung der Organisation durch Wasiyya.",
-    note: "Partnerkennzeichnung — Spendenentscheidung liegt bei dir.",
-    auditCategory: "GENERAL_GUIDANCE",
-  },
 };
 
 /** @deprecated use hadith-janazah-hasten — kept for migration tests */

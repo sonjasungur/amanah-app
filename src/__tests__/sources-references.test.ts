@@ -76,11 +76,11 @@ describe("verified source references", () => {
     expect(primary).toHaveLength(0);
   });
 
-  it("sadaqa includes muslim 1631 and partner link", () => {
+  it("sadaqa includes muslim 1631 and names no partner organisation (owner 25.11.2026)", () => {
     const sadaqa = wissenTopics.find((t) => t.slug === "sadaqa-jariya");
     expect(sadaqa?.sourceIds).toContain("hadith-sadaqa-jariya");
-    expect(sadaqa?.sourceIds).toContain("partner-gemeinsam1-sadaqa");
-    expect(islamicSources["partner-gemeinsam1-sadaqa"].url).toMatch(/utm_source=meinwille/);
+    expect(sadaqa?.sourceIds.some((id) => id.startsWith("partner-"))).toBe(false);
+    expect(JSON.stringify(islamicSources)).not.toMatch(/gemeinsam1|utm_source=meinwille/i);
   });
 
   it("detects duplicate content via normalized text", () => {

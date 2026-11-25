@@ -35,7 +35,7 @@
   "readerQuestion": "Was passiert, wenn ich in Deutschland nichts geregelt habe?",
   "title": "Was passiert, wenn ich in Deutschland nichts geregelt habe?",
   "summary": "Ohne Regelung gilt in Deutschland die gesetzliche Erbfolge, über die Bestattung entscheiden Angehörige nach Landesrecht, für Kinder bestellt das Gericht einen Vormund. Fünf Familienbeispiele zeigen, was das konkret bedeutet und wie es sich von den Anteilen in 4:11 und 4:12 unterscheidet. Zu jedem Thema gibt es einen nächsten Schritt.",
-  "nextStep": "Notiere heute deine Schulden und anvertrauten Güter sowie deine Janāza-Wünsche in Amanah und prüfe, ob ein vorhandenes Testament eigenhändig geschrieben und unterschrieben ist.",
+  "nextStep": "Notiere heute deine Schulden und anvertrauten Güter sowie deine Janāza-Wünsche in Wasiyya und prüfe, ob ein vorhandenes Testament eigenhändig geschrieben und unterschrieben ist.",
   "sections": [
    {
     "key": "einleitung",
@@ -326,11 +326,11 @@
    },
    {
     "key": "amanah",
-    "title": "Bezug zur Vorsorge in Amanah",
+    "title": "Bezug zur Vorsorge in Wasiyya",
     "paragraphs": [
      {
       "kind": "amanah",
-      "text": "In Amanah kannst du jeden dieser Punkte einzeln festhalten: Schulden und anvertraute Güter, Janāza-Wünsche, die Notfallkarte, den Hinweis, wo Testament, Vollmacht und Patientenverfügung liegen, und einen Familienbrief mit persönlichen Worten. Amanah ersetzt kein formwirksames Testament und keine Beratung, hilft aber, dass deine Familie im Ernstfall weiß, was du wolltest."
+      "text": "In Wasiyya kannst du jeden dieser Punkte einzeln festhalten: Schulden und anvertraute Güter, Janāza-Wünsche, die Notfallkarte, den Hinweis, wo Testament, Vollmacht und Patientenverfügung liegen, und einen Familienbrief mit persönlichen Worten. Wasiyya ersetzt kein formwirksames Testament und keine Beratung, hilft aber, dass deine Familie im Ernstfall weiß, was du wolltest."
      }
     ]
    }
@@ -1074,7 +1074,7 @@
    "readerQuestion": "Was sagt der Qurʾān über den Tod?",
    "title": "Was sagt der Qurʾān über den Tod?",
    "summary": "Der Qurʾān sagt klar: Jede Seele wird den Tod kosten, die Frist ist von Allah festgesetzt und dem Menschen verborgen, und nach dem Tod folgt die Rückkehr zu Allah. Der Artikel stellt die zentralen Verse im arabischen Wortlaut und auf Deutsch vor, fasst Ibn Kaṯīrs Erklärungen zusammen und zeigt, warum das Gedenken an den Tod zur Vorsorge führt.",
-   "nextStep": "Lies 63:10–11 in Ruhe und schreibe danach eine Sache auf, die du nicht aufschieben willst – zum Beispiel eine offene Schuld oder deinen Wunsch zur Janāza. Halte sie in Amanah fest.",
+   "nextStep": "Lies 63:10–11 in Ruhe und schreibe danach eine Sache auf, die du nicht aufschieben willst – zum Beispiel eine offene Schuld oder deinen Wunsch zur Janāza. Halte sie in Wasiyya fest.",
    "sections": [
     {
      "key": "einleitung",
@@ -1413,15 +1413,15 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "Amanah soll helfen, das Gedenken an den Tod in konkrete Schritte zu übersetzen. Du kannst Schulden und anvertraute Güter dokumentieren, deine Wünsche zur Waschung, zum Totengebet und zur Bestattung festhalten, Vertrauenspersonen benennen und vermerken, wo dein Testament liegt. So weiß deine Familie im Ernstfall, was dir wichtig war."
+       "text": "Wasiyya soll helfen, das Gedenken an den Tod in konkrete Schritte zu übersetzen. Du kannst Schulden und anvertraute Güter dokumentieren, deine Wünsche zur Waschung, zum Totengebet und zur Bestattung festhalten, Vertrauenspersonen benennen und vermerken, wo dein Testament liegt. So weiß deine Familie im Ernstfall, was dir wichtig war."
       },
       {
        "kind": "amanah",
-       "text": "Amanah ersetzt weder ein formwirksames Testament noch den Rat eines Gelehrten oder Juristen. Es kann dir aber helfen, nichts zu vergessen."
+       "text": "Wasiyya ersetzt weder ein formwirksames Testament noch den Rat eines Gelehrten oder Juristen. Es kann dir aber helfen, nichts zu vergessen."
       }
      ]
     }
@@ -2952,15 +2952,15 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In den Janāza-Wünschen von Amanah kannst du festhalten, wer dich waschen soll, welche Moschee, welches Bestattungsinstitut und welchen Friedhof du bevorzugst, ob du eine Überführung wünschst und was gelten soll, wenn sie nicht möglich ist."
+       "text": "In den Janāza-Wünschen von Wasiyya kannst du festhalten, wer dich waschen soll, welche Moschee, welches Bestattungsinstitut und welchen Friedhof du bevorzugst, ob du eine Überführung wünschst und was gelten soll, wenn sie nicht möglich ist."
       },
       {
        "kind": "amanah",
-       "text": "Auf der Notfallkarte kannst du angeben, wer zuerst angerufen werden soll und wo deine unterschriebene Bestattungsverfügung liegt. Die Einträge in Amanah ersetzen kein unterschriebenes Dokument; Amanah gibt keine Rechtsberatung."
+       "text": "Auf der Notfallkarte kannst du angeben, wer zuerst angerufen werden soll und wo deine unterschriebene Bestattungsverfügung liegt. Die Einträge in Wasiyya ersetzen kein unterschriebenes Dokument; Wasiyya gibt keine Rechtsberatung."
       }
      ]
     }
@@ -3785,15 +3785,15 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In Amanah kannst du festhalten, welche dieser Dokumente es bei dir gibt, wo sie liegen und wer davon weiß. Die Janāza-Wünsche helfen dir, deine Bestattungsverfügung vorzubereiten; die Notfallkarte nennt die Person, die im Ernstfall zuerst angerufen wird."
+       "text": "In Wasiyya kannst du festhalten, welche dieser Dokumente es bei dir gibt, wo sie liegen und wer davon weiß. Die Janāza-Wünsche helfen dir, deine Bestattungsverfügung vorzubereiten; die Notfallkarte nennt die Person, die im Ernstfall zuerst angerufen wird."
       },
       {
        "kind": "amanah",
-       "text": "Amanah ersetzt keines der rechtlichen Dokumente und gibt keine Rechtsberatung. Was rechtlich wirken soll, braucht die gesetzliche Form – bei Zweifeln hilft ein Anwalt oder Notar."
+       "text": "Wasiyya ersetzt keines der rechtlichen Dokumente und gibt keine Rechtsberatung. Was rechtlich wirken soll, braucht die gesetzliche Form – bei Zweifeln hilft ein Anwalt oder Notar."
       }
      ]
     }
@@ -4233,7 +4233,7 @@
    "readerQuestion": "Wer erbt, wenn ich kein Testament habe?",
    "title": "Wer erbt, wenn ich kein Testament habe?",
    "summary": "Ohne wirksames Testament verteilt in Deutschland das BGB den Nachlass nach Ordnungen; der Ehepartner und der Güterstand spielen eine große Rolle, Söhne und Töchter erben gleich. Die Erbverse 4:11, 4:12 und 4:176 setzen andere Anteile fest. Vier durchgerechnete Familienbeispiele zeigen die Unterschiede und warum ein formwirksames Testament nötig ist, wenn du dich an den islamischen Anteilen orientieren möchtest.",
-   "nextStep": "Halte in Amanah fest, wer heute zu deiner Familie gehört (Ehepartner und Güterstand, Söhne und Töchter, Eltern, Geschwister) und ob du ein Testament hast. Lass auf dieser Grundlage die islamischen Anteile von einer fachkundigen Person berechnen und besprich mit einem Notariat oder einer Fachanwältin bzw. einem Fachanwalt für Erbrecht, wie ein formwirksames Testament sie innerhalb des Pflichtteils umsetzen kann.",
+   "nextStep": "Halte in Wasiyya fest, wer heute zu deiner Familie gehört (Ehepartner und Güterstand, Söhne und Töchter, Eltern, Geschwister) und ob du ein Testament hast. Lass auf dieser Grundlage die islamischen Anteile von einer fachkundigen Person berechnen und besprich mit einem Notariat oder einer Fachanwältin bzw. einem Fachanwalt für Erbrecht, wie ein formwirksames Testament sie innerhalb des Pflichtteils umsetzen kann.",
    "sections": [
     {
      "key": "einleitung",
@@ -4576,11 +4576,11 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In Amanah kannst du deine Familienangaben, deinen Güterstand, Staatsangehörigkeiten und Vermögen im Ausland festhalten und notieren, ob und wo ein Testament liegt. Amanah berechnet keine verbindlichen Erbanteile, prüft keine Testamente und ersetzt keine Rechtsberatung."
+       "text": "In Wasiyya kannst du deine Familienangaben, deinen Güterstand, Staatsangehörigkeiten und Vermögen im Ausland festhalten und notieren, ob und wo ein Testament liegt. Wasiyya berechnet keine verbindlichen Erbanteile, prüft keine Testamente und ersetzt keine Rechtsberatung."
       }
      ]
     }
@@ -5137,7 +5137,7 @@
    "readerQuestion": "Wie errichte ich in Deutschland ein wirksames Testament?",
    "title": "Wie errichte ich in Deutschland ein wirksames Testament?",
    "summary": "Ein Testament wirkt in Deutschland nur in der gesetzlichen Form: ganz eigenhändig geschrieben und unterschrieben, beim Notar oder als gemeinschaftliches Testament von Ehegatten. Der Artikel erklärt Formen, Verwahrung, Widerruf, Pflichtteil, internationale Fälle und häufige Formfehler, verbindet sie mit den Belegen zur schriftlichen Waṣiyya und rechnet ein Testament durch, das sich an den islamischen Anteilen orientiert.",
-   "nextStep": "Notiere in Amanah, ob du ein Testament hast, in welcher Form und wo es liegt. Wenn nicht: Lass die islamischen Anteile deiner Familie berechnen und vereinbare einen Termin bei einem Notariat oder einer Fachanwältin bzw. einem Fachanwalt für Erbrecht, um ein formwirksames Testament vorzubereiten und amtlich verwahren zu lassen.",
+   "nextStep": "Notiere in Wasiyya, ob du ein Testament hast, in welcher Form und wo es liegt. Wenn nicht: Lass die islamischen Anteile deiner Familie berechnen und vereinbare einen Termin bei einem Notariat oder einer Fachanwältin bzw. einem Fachanwalt für Erbrecht, um ein formwirksames Testament vorzubereiten und amtlich verwahren zu lassen.",
    "sections": [
     {
      "key": "einleitung",
@@ -5463,11 +5463,11 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In Amanah kannst du festhalten, welche Art von Testament du hast, wann es errichtet und zuletzt geprüft wurde, wo es verwahrt ist und wer davon weiß. Staatsangehörigkeiten, Vermögen im Ausland, eine Rechtswahl und die Kontaktdaten deiner Beraterinnen und Berater gehören ebenfalls dazu. Familienbrief, Schuldenliste und Bestattungswünsche ergänzen das Testament, ersetzen es aber nicht. Amanah gibt keine Rechtsberatung und prüft keine Testamente."
+       "text": "In Wasiyya kannst du festhalten, welche Art von Testament du hast, wann es errichtet und zuletzt geprüft wurde, wo es verwahrt ist und wer davon weiß. Staatsangehörigkeiten, Vermögen im Ausland, eine Rechtswahl und die Kontaktdaten deiner Beraterinnen und Berater gehören ebenfalls dazu. Familienbrief, Schuldenliste und Bestattungswünsche ergänzen das Testament, ersetzen es aber nicht. Wasiyya gibt keine Rechtsberatung und prüft keine Testamente."
       }
      ]
     }
@@ -6355,7 +6355,7 @@
    "readerQuestion": "Was ist eine Waṣiyya?",
    "title": "Was ist eine Waṣiyya?",
    "summary": "Eine Waṣiyya ist ein Vermächtnis, das nach den Schulden und vor der Erbteilung erfüllt wird – höchstens ein Drittel und nicht an einen Erben. Der Artikel erklärt die Belege, welche Rolle die Zustimmung der übrigen Erben nach den Gelehrten spielt und was in Deutschland für Testament und Pflichtteil gilt.",
-   "nextStep": "Notiere in Amanah, wofür und in welcher Höhe du ein Vermächtnis machen möchtest, und prüfe, dass es ein Drittel nicht übersteigt und keinen Erben bedenkt. Lass es dann in einem formgültigen Testament festhalten – im Zweifel mit Gelehrten und einem Notar.",
+   "nextStep": "Notiere in Wasiyya, wofür und in welcher Höhe du ein Vermächtnis machen möchtest, und prüfe, dass es ein Drittel nicht übersteigt und keinen Erben bedenkt. Lass es dann in einem formgültigen Testament festhalten – im Zweifel mit Gelehrten und einem Notar.",
    "sections": [
     {
      "key": "einleitung",
@@ -6744,11 +6744,11 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In Amanah kannst du notieren, ob du ein Vermächtnis wünschst, an wen oder für welchen Zweck und in welcher ungefähren Höhe, und dabei die Grenze von einem Drittel im Blick behalten. Du kannst festhalten, wo dein Testament liegt und wer davon weiß, und im Familienbrief deine Beweggründe erklären. Amanah ersetzt kein Testament und prüft nicht, ob ein Vermächtnis islamisch oder rechtlich zulässig ist."
+       "text": "In Wasiyya kannst du notieren, ob du ein Vermächtnis wünschst, an wen oder für welchen Zweck und in welcher ungefähren Höhe, und dabei die Grenze von einem Drittel im Blick behalten. Du kannst festhalten, wo dein Testament liegt und wer davon weiß, und im Familienbrief deine Beweggründe erklären. Wasiyya ersetzt kein Testament und prüft nicht, ob ein Vermächtnis islamisch oder rechtlich zulässig ist."
       }
      ]
     }
@@ -7722,7 +7722,7 @@
    "readerQuestion": "Was sagen Gelehrte zu Vorsorge, Erbe und Bestattung in Deutschland?",
    "title": "Was sagen Gelehrte zu Vorsorge, Erbe und Bestattung in Deutschland?",
    "summary": "Dieser Artikel sammelt Fatwas und Gelehrtenaussagen zu Fragen, die Muslime in Deutschland bei Testament, Erbe, Schulden, Bestattung und Trauer häufig stellen – jeweils mit der ursprünglichen Frage, der Institution oder dem Gelehrten, Nummer bzw. Band und Seite. Wo Gelehrte unterschiedlicher Meinung sind, zeigt er, worin genau sie sich unterscheiden.",
-   "nextStep": "Wähle aus den Fragen unten die zwei oder drei, die deine Familie betreffen, und halte in Amanah fest, wie du es halten möchtest – etwa ob ein Testament die islamische Teilung absichern soll und wo du beigesetzt werden möchtest. Lass das Testament anschließend von einem Notar oder Fachanwalt prüfen und bespreche offene religiöse Fragen mit einer Gelehrten oder einem Gelehrten deines Vertrauens.",
+   "nextStep": "Wähle aus den Fragen unten die zwei oder drei, die deine Familie betreffen, und halte in Wasiyya fest, wie du es halten möchtest – etwa ob ein Testament die islamische Teilung absichern soll und wo du beigesetzt werden möchtest. Lass das Testament anschließend von einem Notar oder Fachanwalt prüfen und bespreche offene religiöse Fragen mit einer Gelehrten oder einem Gelehrten deines Vertrauens.",
    "sections": [
     {
      "key": "einleitung",
@@ -8033,11 +8033,11 @@
     },
     {
      "key": "amanah",
-     "title": "Bezug zur Vorsorge in Amanah",
+     "title": "Bezug zur Vorsorge in Wasiyya",
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "In Amanah kannst du festhalten, ob ein Testament existiert und wo es liegt, welche Schulden und Zakat-Rückstände bestehen, wo du beigesetzt werden möchtest und ob du eine Überführung wünschst. Im Familienbrief kannst du erklären, welchen Gelehrten oder welcher Institution du in strittigen Fragen folgst. Amanah ersetzt weder Testament noch Fatwa und prüft nicht, ob deine Wünsche religiös oder rechtlich zulässig sind."
+       "text": "In Wasiyya kannst du festhalten, ob ein Testament existiert und wo es liegt, welche Schulden und Zakat-Rückstände bestehen, wo du beigesetzt werden möchtest und ob du eine Überführung wünschst. Im Familienbrief kannst du erklären, welchen Gelehrten oder welcher Institution du in strittigen Fragen folgst. Wasiyya ersetzt weder Testament noch Fatwa und prüft nicht, ob deine Wünsche religiös oder rechtlich zulässig sind."
       }
      ]
     }

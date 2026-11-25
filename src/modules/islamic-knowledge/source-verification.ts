@@ -50,7 +50,6 @@ export const SOURCE_CHECKS: Record<string, SourceCheck> = {
   "official-patientenverfuegung-bmj": fix("URL liefert 404."),
   "official-patientenverfuegung-vz": fix("URL liefert 404; Ersatz nicht ermittelt."),
   "official-vorsorgevollmacht": fix("URL liefert 404."),
-  "partner-gemeinsam1-sadaqa": ok("URL erreichbar; Partnerlink, keine Behördenquelle."),
 };
 
 export function getSourceCheck(sourceId: string): SourceCheck | undefined {

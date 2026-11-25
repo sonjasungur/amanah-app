@@ -215,7 +215,7 @@ const EDITORIAL_NOTES: Record<string, string[]> = {
   "ik-barzakh-sadaqa": ["Beispiele (Brunnen, Schulen …) stehen nicht im Hadith — als Erläuterung kennzeichnen."],
   "ik-sj-what": ["Beispiele stehen nicht in Muslim 1631 — als Erläuterung kennzeichnen."],
   "ik-sj-examples": ["Beispiele stehen nicht in Muslim 1631 — als Erläuterung kennzeichnen."],
-  "ik-sj-foerderkreis": ["Partnerbezug (Gemeinsam1) gehört nicht in religiöse Lehrinhalte — Trennung prüfen."],
+  "ik-sj-foerderkreis": ["Partnerbezug entfernt (Owner 25.11.2026); keine Organisation in religiösen Lehrinhalten nennen."],
 };
 
 function applyCorrections(record: KnowledgeArticleRecord): KnowledgeArticleRecord {

@@ -18,7 +18,7 @@ export function Footer() {
             <p className="text-sm text-white/60 mt-3 italic">{BRAND.claim}</p>
           </div>
           <div>
-            <h4 className="font-bold text-white text-base mb-4">Wissen</h4>
+            <h2 className="font-bold text-white text-base mb-4">Wissen</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
                 <Link href="/wissen" className="text-white/75 hover:text-[#E2C98F] transition-colors">
@@ -38,7 +38,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-white text-base mb-4">Service</h4>
+            <h2 className="font-bold text-white text-base mb-4">Service</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
                 <Link href="/check" className="text-white/75 hover:text-[#E2C98F] transition-colors">
@@ -63,7 +63,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-white text-base mb-4">Rechtliches</h4>
+            <h2 className="font-bold text-white text-base mb-4">Rechtliches</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
                 <Link href="/datenschutz" className="text-white/75 hover:text-[#E2C98F] transition-colors">

@@ -6,11 +6,9 @@ import { linkButtonClassName } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } from "@/lib/billing/start-offer";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: `Pakete — ${BRAND.name}`,
-  description: "Wasiyya startet kostenlos: Vorsorge-Check, Notfallkarte und Vermögensübersicht. Vorsorge Plus ist in Vorbereitung.",
-};
+export const metadata = publicPageMetadata("/preise");
 
 /**
  * Start version (owner order 23.11.2026, staging draft): Basis free, Vorsorge Plus in preparation.

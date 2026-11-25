@@ -111,9 +111,9 @@ export const demoAmanahData: AmanahOrdnerData = {
     {
       id: "don-1",
       type: "sadaqa_jariya",
-      description: "Brunnen-Projekt über Gemeinsam1 e.V.",
+      description: "Brunnen-Projekt (Beispiel)",
       amount: "500 EUR",
-      recipient: "Gemeinsam1 e.V.",
+      recipient: "Gemeinnütziger Verein (Beispiel)",
     },
   ],
   importantInstructions: [

@@ -1,15 +1,14 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/seo/site-url";
-import { isStagingBuild } from "@/lib/deployment-env";
+import { NOINDEX_PATH_PREFIXES, isSearchIndexingEnabled } from "@/lib/seo/indexing";
+
+/** Read at request time: indexing is a runtime switch of the deployment (owner order 25.11.2026). */
+export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
-  if (isStagingBuild()) return { rules: { userAgent: "*", disallow: "/" } };
+  if (!isSearchIndexingEnabled()) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/dashboard", "/api/", "/kasse/", "/intern/", "/wissen/redaktion", "/konto/", "/passwort-vergessen", "/passwort-zuruecksetzen", "/login", "/register"],
-    },
+    rules: { userAgent: "*", allow: "/", disallow: NOINDEX_PATH_PREFIXES.map((p) => (p === "/api" ? "/api/" : p)) },
     sitemap: `${getSiteUrl()}/sitemap.xml`,
   };
 }

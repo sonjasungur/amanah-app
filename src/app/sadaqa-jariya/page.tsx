@@ -1,9 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Sadaqa Jariya — Wasiyya",
-  description: "Fortlaufende Wohltätigkeit für den Barzakh — Wissen und Projekte über Gemeinsam1 e.V.",
-};
+export const metadata = publicPageMetadata("/sadaqa-jariya");
 
 /** Religious content is shown only through the knowledge-centre publication gate. */
 export default function SadaqaJariyaPage() {

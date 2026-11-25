@@ -13,6 +13,8 @@ import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED } from "@/lib/billin
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
+import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
 import {
   Activity,
   ArrowRight,
@@ -123,9 +125,12 @@ function HeroCheckInfoCard({ className }: { className?: string }) {
   );
 }
 
+export const metadata = publicPageMetadata("/");
+
 export default function HomePage() {
   return (
     <div>
+      <OrganizationJsonLd />
       <section
         className="on-dark wasiyya-hero relative text-white pt-8 pb-12 md:pt-20 md:pb-24 overflow-hidden"
         data-testid="home-hero"

@@ -2,11 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Partner werden — Wasiyya",
-  description: "Partnerschaften für Bestatter, Moscheen/Vereine und Anwälte/Notare.",
-};
+export const metadata = publicPageMetadata("/partner");
 
 const sections = [
   {

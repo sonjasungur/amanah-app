@@ -1,18 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/lib/seo/site-url";
-import { getPublishedArticles, lastReviewDate } from "@/modules/islamic-knowledge";
+import { isSearchIndexingEnabled } from "@/lib/seo/indexing";
+import { sitemapEntries } from "@/lib/seo/sitemap-entries";
 
-const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/datenschutz", "/impressum", "/sicherheit", "/kontakt"];
+/** Read at request time: while indexing is closed (owner order 25.11.2026), the sitemap announces nothing. */
+export const dynamic = "force-dynamic";
 
-/** Only public pages and reviewed, published knowledge articles — never drafts. */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = getSiteUrl();
-  return [
-    ...PUBLIC_PAGES.map((path) => ({ url: `${base}${path}`, changeFrequency: "monthly" as const })),
-    ...getPublishedArticles().map((a) => ({
-      url: `${base}/wissen/islam/${a.slug}`,
-      lastModified: lastReviewDate(a),
-      changeFrequency: "monthly" as const,
-    })),
-  ];
+  return isSearchIndexingEnabled() ? sitemapEntries() : [];
 }

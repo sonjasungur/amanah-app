@@ -107,13 +107,16 @@ test.describe("Islamic knowledge centre", () => {
 });
 
 test.describe("SEO", () => {
-  test("sitemap contains no draft articles; robots blocks private areas", async ({ request }) => {
+  // Closed until the public start (owner order 25.11.2026): no indexing switch set in tests. The open
+  // state (public pages listed, private areas disallowed) is covered in src/__tests__/seo*.test.ts.
+  test("search engines stay locked out: empty sitemap, robots disallows all, noindex header", async ({ request }) => {
     const sitemapXml = await (await request.get("/sitemap.xml")).text();
-    expect(sitemapXml).toContain("/wissen");
+    expect(sitemapXml).not.toContain("<url>");
     expect(sitemapXml).not.toContain("/wissen/islam/");
     const robotsTxt = await (await request.get("/robots.txt")).text();
-    expect(robotsTxt).toContain("Disallow: /dashboard");
-    expect(robotsTxt).toContain("Disallow: /wissen/redaktion");
+    expect(robotsTxt).toMatch(/Disallow: \/\s*$/m);
+    const home = await request.get("/");
+    expect(home.headers()["x-robots-tag"]).toBe("noindex, nofollow");
   });
 });
 

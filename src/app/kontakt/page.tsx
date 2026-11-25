@@ -1,10 +1,8 @@
 import { ContactForm } from "@/components/contact/contact-form";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Kontakt — Wasiyya",
-  description: "Schreib uns: Fragen zu Wasiyya, zu deinem Konto oder zur Zusammenarbeit.",
-};
+export const metadata = publicPageMetadata("/kontakt");
 
 export default function KontaktPage() {
   return (

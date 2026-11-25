@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicWissenTopics } from "@/lib/knowledge/wissen-topics";
@@ -11,6 +12,20 @@ import { ArrowLeft } from "lucide-react";
 
 export function generateStaticParams() {
   return getPublicWissenTopics().map((t) => ({ slug: t.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getPublicWissenTopics().find((t) => t.slug === slug);
+  if (!article) return { title: "Nicht gefunden — Wasiyya", robots: { index: false } };
+  const title = `${article.title} — Wissen | Wasiyya`;
+  return {
+    title,
+    description: article.summary,
+    alternates: { canonical: `/wissen/${article.slug}` },
+    openGraph: { title, description: article.summary, url: `/wissen/${article.slug}`, type: "article", siteName: "Wasiyya", locale: "de_DE" },
+    twitter: { card: "summary_large_image", title, description: article.summary },
+  };
 }
 
 const JANAZAH_CTA = "Janazah-Wünsche jetzt festhalten";

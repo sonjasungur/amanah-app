@@ -1,8 +1,9 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = { title: "Akuter Todesfall — Wasiyya" };
+export const metadata = publicPageMetadata("/akuter-todesfall");
 
 const steps = [
   { num: 1, title: "Arzt / Totenschein", desc: "Hausarzt oder Notarzt kontaktieren. Totenschein ausstellen lassen." },

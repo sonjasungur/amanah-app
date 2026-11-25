@@ -43,7 +43,7 @@ export const PARAGRAPH_KIND_LABELS: Record<ParagraphKind, string> = {
   fiqh: "Rechtsschulen / Fiqh",
   fatwa: "Fatwa / Gelehrtenaussage",
   praxis: "Praktische Empfehlung",
-  amanah: "Bezug zu Amanah",
+  amanah: "Bezug zu Wasiyya",
   recht: "Deutsches Recht",
   beispiel: "Beispiel",
 };

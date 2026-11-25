@@ -132,7 +132,7 @@ export const sadaqaFields: FieldConfig[] = [
   { key: "monthlyAmount", label: "Monatlicher Wunschbetrag", type: "text" },
   { key: "oneTimeAmount", label: "Einmaliger Wunschbetrag", type: "text" },
   { key: "personToVerify", label: "Person, die nach Tod prüfen soll", type: "text" },
-  { key: "gemeinsam1Link", label: "Link zu Gemeinsam1-Projekt", type: "text" },
+  { key: "gemeinsam1Link", label: "Link zu einem Spendenprojekt (optional)", type: "text" },
 ];
 
 export const familyFields: FieldConfig[] = [

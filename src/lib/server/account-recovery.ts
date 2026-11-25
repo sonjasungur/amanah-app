@@ -1,3 +1,4 @@
+import { IMPRINT } from "@/lib/legal/imprint";
 import { generateSessionToken, hashSessionToken, normalizeEmail } from "./crypto";
 import { sendMail } from "./mailer";
 import type { AuthTokenPurpose, ServerRepository } from "./repository/types";
@@ -22,6 +23,11 @@ export function getPublicBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
   return "http://localhost:3000";
 }
 
+/** Sender line under every account mail: who writes and where the imprint is (owner order 25.11.2026, AP2). */
+export function mailFooter(): string {
+  return `\n\n—\nWasiyya · ${IMPRINT.operatorLegalName}\nImpressum: ${getPublicBaseUrl()}/impressum`;
+}
+
 async function issueToken(repo: ServerRepository, userId: string, purpose: AuthTokenPurpose, ttlMs: number): Promise<string> {
   await repo.invalidateAuthTokens(userId, purpose);
   const token = generateSessionToken();
@@ -38,7 +44,7 @@ export async function sendVerificationMail(repo: ServerRepository, user: { id: s
     text:
       "Assalamu alaikum,\n\nbitte bestätige deine E-Mail-Adresse für Wasiyya:\n" +
       `${getPublicBaseUrl()}/konto/bestaetigen?token=${encodeURIComponent(token)}\n\n` +
-      "Der Link ist 24 Stunden gültig und nur einmal nutzbar. Wenn du kein Konto angelegt hast, ignoriere diese E-Mail.",
+      "Der Link ist 24 Stunden gültig und nur einmal nutzbar. Wenn du kein Konto angelegt hast, ignoriere diese E-Mail." + mailFooter(),
   });
 }
 
@@ -50,7 +56,7 @@ export async function sendAccountExistsMail(email: string): Promise<void> {
     text:
       "Assalamu alaikum,\n\nfür diese E-Mail-Adresse besteht bereits ein Konto bei Wasiyya. " +
       `Falls du dein Passwort vergessen hast: ${getPublicBaseUrl()}/passwort-vergessen\n\n` +
-      "Wenn du keine Registrierung versucht hast, kannst du diese E-Mail ignorieren.",
+      "Wenn du keine Registrierung versucht hast, kannst du diese E-Mail ignorieren." + mailFooter(),
   });
 }
 
@@ -64,7 +70,7 @@ export async function sendPasswordResetMail(repo: ServerRepository, user: { id: 
       "Assalamu alaikum,\n\nüber diesen Link kannst du ein neues Passwort festlegen:\n" +
       `${getPublicBaseUrl()}/passwort-zuruecksetzen?token=${encodeURIComponent(token)}\n\n` +
       "Der Link ist 30 Minuten gültig und nur einmal nutzbar. Danach wirst du auf allen Geräten abgemeldet. " +
-      "Wenn du das nicht angefordert hast, ignoriere diese E-Mail – dein Passwort bleibt unverändert.",
+      "Wenn du das nicht angefordert hast, ignoriere diese E-Mail – dein Passwort bleibt unverändert." + mailFooter(),
   });
 }
 

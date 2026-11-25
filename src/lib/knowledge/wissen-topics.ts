@@ -249,7 +249,7 @@ export const wissenTopics: KnowledgeArticle[] = [
       nextStepLabel: "Sadaqa Jariya planen",
       nextStepHref: "/dashboard/sadaqa-jariya",
     },
-    ["hadith-sadaqa-jariya", "quran-al-muminun-23-99", "partner-gemeinsam1-sadaqa"]
+    ["hadith-sadaqa-jariya", "quran-al-muminun-23-99"]
   ),
   topic("w-familie", "familiengespraech", "Gespräch mit Angehörigen", "Der schwerste Moment ist leichter, wenn ihr vorher gesprochen habt.", "familie", {
     whyImportant: "Dokumente allein reichen nicht. Ein ruhiges Gespräch entlastet die Familie im Ernstfall.",

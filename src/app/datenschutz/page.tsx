@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Datenschutz — Wasiyya",
-  description: "Datenschutzerklärung für Wasiyya — lokale und serverseitige Speicherung, KI, Export und Löschung.",
-};
+export const metadata = publicPageMetadata("/datenschutz");
 
 export default function DatenschutzPage() {
   return (
@@ -78,13 +76,11 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-primary mb-3">6. KI-Assistent</h2>
+          <h2 className="text-xl font-semibold text-primary mb-3">6. Keine KI-Dienste</h2>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
-            <li><strong className="text-foreground">Standard:</strong> KI ist in der Produktionskonfiguration deaktiviert.</li>
-            <li><strong className="text-foreground">rules / mock:</strong> Keine externen KI-Dienste — Verarbeitung lokal bzw. regelbasiert auf dem Server.</li>
-            <li><strong className="text-foreground">openai (optional):</strong> Externe KI nur bei aktivierter Funktion und nach ausdrücklicher Zustimmung, mit Datenminimierung.</li>
-            <li>Sende keine vollständigen persönlichen oder medizinischen Daten in Freitextfragen.</li>
-            <li>Der Assistent ersetzt keine Beratung durch Imam, Arzt oder Anwalt.</li>
+            <li>Wasiyya nutzt derzeit keine Dienste künstlicher Intelligenz. Deine Angaben werden nicht an KI-Anbieter übermittelt und nicht zum Training von KI-Modellen verwendet.</li>
+            <li>Der KI-Assistent ist abgeschaltet.</li>
+            <li>Ausfüllhilfe und Vorsorge-Check werten deine Antworten nach festen Regeln aus — in deinem Browser bzw. auf unserem Server, ohne Weitergabe an Dritte.</li>
           </ul>
         </section>
 

@@ -118,6 +118,9 @@ export function validateProductionEnv(
   if ((env.AMANAH_MAIL_TRANSPORT ?? "disabled") === "disabled") {
     warnings.push("No mail transport configured: registration, e-mail confirmation and password reset are unavailable");
   }
+  if (env.AMANAH_SEARCH_INDEXING === "true") {
+    warnings.push("AMANAH_SEARCH_INDEXING=true: public pages are open to search engines (only after the public-start release)");
+  }
 
   if (env.NEXT_PUBLIC_AUTH_MODE !== "api") {
     errors.push("NEXT_PUBLIC_AUTH_MODE must be api in production");

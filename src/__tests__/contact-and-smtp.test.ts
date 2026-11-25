@@ -175,6 +175,6 @@ describe("contact form", () => {
     expect(readFileSync("src/components/layout/footer.tsx", "utf8")).toContain('href="/kontakt"');
     expect(readFileSync("src/app/impressum/page.tsx", "utf8")).toContain('href="/kontakt"');
     expect(readFileSync("src/app/partner/page.tsx", "utf8")).toContain('href="/kontakt"');
-    expect(readFileSync("src/app/sitemap.ts", "utf8")).toContain('"/kontakt"');
+    expect(readFileSync("src/lib/seo/public-pages.ts", "utf8")).toContain('"/kontakt"');
   });
 });

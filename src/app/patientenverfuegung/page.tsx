@@ -1,9 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Patientenverfügung — Wasiyya",
-  description: "Wünsche zur medizinischen Vorsorge festhalten. Wissensartikel erscheinen erst nach fachlicher Prüfung.",
-};
+export const metadata = publicPageMetadata("/patientenverfuegung");
 
 /** Legal, medical and religious statements appear only through the knowledge-centre publication gate. */
 export default function PatientenverfuegungPage() {

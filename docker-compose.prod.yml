@@ -76,6 +76,8 @@ services:
       AMANAH_SMTP_PASSWORD: ${AMANAH_SMTP_PASSWORD:-}
       # Contact form recipient (default: imprint address)
       AMANAH_CONTACT_TO: ${AMANAH_CONTACT_TO:-}
+      # Search engines: closed until the owner releases the public start (owner order 25.11.2026).
+      AMANAH_SEARCH_INDEXING: ${AMANAH_SEARCH_INDEXING:-false}
       AMANAH_LEGACY_VERIFICATION_GRACE_DAYS: ${AMANAH_LEGACY_VERIFICATION_GRACE_DAYS:-60}
       # Billing stays off (no live provider implemented; docs 17, 20)
       AMANAH_BILLING_MODE: ${AMANAH_BILLING_MODE:-disabled}
@@ -84,6 +86,8 @@ services:
       AMANAH_AI_ENABLED: ${AMANAH_AI_ENABLED:-false}
       NEXT_PUBLIC_AMANAH_AI_ENABLED: ${NEXT_PUBLIC_AMANAH_AI_ENABLED:-false}
       AMANAH_PUBLIC_REGISTRATION_ENABLED: ${AMANAH_PUBLIC_REGISTRATION_ENABLED:-false}
+      # Optional, e.g. for the closed production mail test: only these domains may register.
+      AMANAH_REGISTRATION_ALLOWED_DOMAINS: ${AMANAH_REGISTRATION_ALLOWED_DOMAINS:-}
       NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED: ${NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED:-false}
       AMANAH_AI_PROVIDER: ${AMANAH_AI_PROVIDER:-rules}
       AMANAH_KNOWLEDGE_RETRIEVAL: ${AMANAH_KNOWLEDGE_RETRIEVAL:-keyword}

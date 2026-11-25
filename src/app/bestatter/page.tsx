@@ -1,9 +1,7 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Bestatter — Wasiyya",
-  description: "Hinweis zum Bestatter-Verzeichnis. Derzeit keine geprüften Partnereinträge.",
-};
+export const metadata = publicPageMetadata("/bestatter");
 
 export default function BestatterPage() {
   return (

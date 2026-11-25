@@ -1,9 +1,7 @@
 import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Testament & Erbe — Wasiyya",
-  description: "Islamisches Erbrecht: Farāʾiḍ, Waṣiyya und deutsches Recht für Muslime in Deutschland.",
-};
+export const metadata = publicPageMetadata("/testament-erbe");
 
 /** Religious content is shown only through the knowledge-centre publication gate. */
 export default function TestamentErbePage() {
