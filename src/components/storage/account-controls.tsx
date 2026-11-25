@@ -59,7 +59,8 @@ export function AccountControls() {
       ) : (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3" role="alert">
           <p className="text-sm text-destructive">
-            Konto, Anmeldungen und alle gespeicherten Angaben werden endgültig gelöscht. Lade vorher deine Daten herunter,
+            Konto, Anmeldungen und alle gespeicherten Angaben werden endgültig gelöscht. Verschlüsselte Sicherungskopien
+            werden spätestens nach 30 Tagen automatisch entfernt. Lade vorher deine Daten herunter,
             wenn du sie behalten möchtest.
           </p>
           <label className="block text-sm font-medium">

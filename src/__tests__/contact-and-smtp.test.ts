@@ -171,10 +171,10 @@ describe("contact form", () => {
     expect((await res.json()).error).toContain(IMPRINT.email);
   });
 
-  it("is linked from footer, imprint and partner page and listed in the sitemap", () => {
+  it("is linked from footer, imprint and the (hidden) partner content and listed in the sitemap", () => {
     expect(readFileSync("src/components/layout/footer.tsx", "utf8")).toContain('href="/kontakt"');
     expect(readFileSync("src/app/impressum/page.tsx", "utf8")).toContain('href="/kontakt"');
-    expect(readFileSync("src/app/partner/page.tsx", "utf8")).toContain('href="/kontakt"');
+    expect(readFileSync("src/components/partner/partner-page-content.tsx", "utf8")).toContain('href="/kontakt"');
     expect(readFileSync("src/lib/seo/public-pages.ts", "utf8")).toContain('"/kontakt"');
   });
 });

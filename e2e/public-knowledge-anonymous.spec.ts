@@ -25,7 +25,7 @@ const UNREVIEWED = [
   "Allah entscheidet",
   "bevor der Nachlass verteilt wird",
 ];
-const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/patientenverfuegung", "/janazah-kompass", "/barzakh", "/sadaqa-jariya", "/testament-erbe", "/islam-oder-kultur", "/konvertierte", "/sicherheit", "/partner", "/bestatter"];
+const PUBLIC_PAGES = ["/", "/wissen", "/check", "/preise", "/akuter-todesfall", "/patientenverfuegung", "/janazah-kompass", "/barzakh", "/sadaqa-jariya", "/testament-erbe", "/islam-oder-kultur", "/konvertierte", "/sicherheit", "/bestatter"];
 const DRAFT_URLS = ["/wissen/janazah-wuensche", "/wissen/ghusl-kafan", "/wissen/islam/was-ist-janazah", "/wissen/islam/ghusl-des-verstorbenen", "/wissen/islam/kafan-und-janazah-gebet", "/wissen/islam/sadaqa-jariya-und-vermaechtnisse", "/wissen/redaktion"];
 
 const hitsIn = (text: string) => UNREVIEWED.filter((phrase) => text.includes(phrase));

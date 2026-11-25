@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Encrypted production backup. Runs on the server from /opt/amanah-prod (see docs/strategy/45).
 # Encrypts to public age recipients only; the private key is never on this server. Refuses to
-# write anything unencrypted. A failure leaves no file and exits non-zero. Deletes nothing.
+# write anything unencrypted. A failure leaves no file and exits non-zero. After a successful backup
+# only, backup-retention.sh removes own dumps older than BACKUP_RETENTION_DAYS (default 30, owner
+# 25.11.2026, pending legal review) and always keeps the 7 newest.
 set -euo pipefail
 
 BASE=/opt/amanah-prod
@@ -38,3 +40,9 @@ if [[ "$BACKUP_DIR" == "$BASE/backups" ]]; then
   printf 'date=%s\nbackup=%s\nbytes=%s\n' "$(date -Iseconds)" "$(basename "$OUT")" "$(stat -c %s "$OUT")" > "$BASE/state-backup.ok"
 fi
 echo "Encrypted backup complete: $(basename "$OUT") ($(du -h "$OUT" | cut -f1))"
+RETENTION="$(dirname "$0")/backup-retention.sh"
+if [[ -x "$RETENTION" ]]; then
+  "$RETENTION" "$BACKUP_DIR" "${BACKUP_RETENTION_DAYS:-30}" 7
+else
+  echo "Retention script missing, nothing removed: $RETENTION" >&2
+fi

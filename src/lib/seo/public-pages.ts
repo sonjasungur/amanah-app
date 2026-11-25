@@ -73,10 +73,6 @@ export const PUBLIC_PAGES = {
     title: "Kontakt — Wasiyya",
     description: "Schreib uns: Fragen zu Wasiyya, zu deinem Konto oder zur Zusammenarbeit.",
   },
-  "/partner": {
-    title: "Partner werden — Wasiyya",
-    description: "Partnerschaften für Bestatter, Moscheen/Vereine und Anwälte/Notare.",
-  },
 } as const satisfies Record<string, { title: string; description: string }>;
 
 export type PublicPath = keyof typeof PUBLIC_PAGES;
