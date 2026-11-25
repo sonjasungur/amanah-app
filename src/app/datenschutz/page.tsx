@@ -18,8 +18,8 @@ export default function DatenschutzPage() {
             Verantwortlich für die Datenverarbeitung im Rahmen von {IMPRINT.productName} ist die{" "}
             {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}, vertreten durch{" "}
             {IMPRINT.representedBy}. Kontakt:{" "}
-            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
-              {IMPRINT.email}
+            <a href={`mailto:${IMPRINT.privacyEmail}`} className="text-primary-light underline">
+              {IMPRINT.privacyEmail}
             </a>
           </p>
         </section>
@@ -118,8 +118,8 @@ export default function DatenschutzPage() {
               Sicherheit
             </Link>
             . Bei Fragen:{" "}
-            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
-              {IMPRINT.email}
+            <a href={`mailto:${IMPRINT.privacyEmail}`} className="text-primary-light underline">
+              {IMPRINT.privacyEmail}
             </a>.
           </p>
         </section>

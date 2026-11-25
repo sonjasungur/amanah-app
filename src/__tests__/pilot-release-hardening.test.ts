@@ -163,7 +163,8 @@ describe("legal contact consistency", () => {
     expect(imprint).toContain("MSC Engineering GmbH");
     expect(imprint).toContain("Karlstraße 14");
     expect(imprint).toContain("74336 Brackenheim");
-    expect(imprint).toContain("contact@mscisystems.com");
+    expect(imprint).toContain('email: "kontakt@wasiyya.de"');
+    expect(imprint).toContain('privacyEmail: "datenschutz@wasiyya.de"');
     expect(imprint).toContain("HRB 738249");
     expect(imprint).not.toContain("launchBlocker");
   });
@@ -171,7 +172,7 @@ describe("legal contact consistency", () => {
   it("privacy page uses central imprint contact", () => {
     const privacy = read("src/app/datenschutz/page.tsx");
     expect(privacy).toContain("IMPRINT.operatorLegalName");
-    expect(privacy).toContain("mailto:${IMPRINT.email}");
+    expect(privacy).toContain("mailto:${IMPRINT.privacyEmail}");
     expect(privacy).not.toContain("datenschutz@amanahordner.de");
   });
 });
