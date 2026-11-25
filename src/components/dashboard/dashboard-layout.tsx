@@ -18,7 +18,7 @@ const MAIN_ICONS: Record<string, typeof Home> = {
 function MobileTabBar({ pathname }: { pathname: string }) {
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-card/98 backdrop-blur border-t border-border no-print"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-navy/[0.98] backdrop-blur border-t border-[#D4A537]/45 no-print"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label="Hauptbereiche"
       data-testid="dashboard-tabbar"
@@ -33,11 +33,11 @@ function MobileTabBar({ pathname }: { pathname: string }) {
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center justify-center gap-0.5 min-h-[60px] text-xs font-semibold",
-                  active ? "text-primary-dark" : "text-muted",
+                  active ? "text-white shadow-[inset_0_2px_0_#D4A537]" : "text-white/70",
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon size={22} aria-hidden className={active ? "text-emerald" : undefined} />
+                <Icon size={22} aria-hidden className={active ? "text-[#F2CF6C]" : undefined} />
                 {item.label}
               </Link>
             </li>
@@ -57,16 +57,16 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       "flex items-center gap-2 px-3 py-2 rounded-lg text-sm min-h-[44px]",
       isDashboardNavActive(pathname, href)
         ? strong
-          ? "bg-primary text-white font-semibold shadow-sm"
-          : "bg-accent-soft text-primary font-semibold"
-        : "text-muted hover:bg-accent-soft/60 hover:text-foreground",
+          ? "bg-white/10 text-white font-semibold shadow-[inset_3px_0_0_#D4A537]"
+          : "bg-white/10 text-white font-semibold shadow-[inset_3px_0_0_#D4A537]"
+        : "text-white/75 hover:bg-white/5 hover:text-white",
     );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="grid lg:grid-cols-4 gap-8">
         <aside id="dashboard-desktop-nav" className="hidden lg:block lg:col-span-1 space-y-4 no-print">
-          <nav className="rounded-2xl bg-card border border-primary/10 p-4 space-y-4 max-h-[80vh] overflow-y-auto" aria-label="Vorsorgeplan-Navigation">
+          <nav className="on-dark rounded-2xl bg-[linear-gradient(180deg,#0E1630,#070C1C)] ring-1 ring-[#D4A537]/40 shadow-[0_24px_50px_-24px_rgba(7,12,28,0.6)] p-4 space-y-4 max-h-[80vh] overflow-y-auto [scrollbar-color:#D4A537_transparent]" aria-label="Vorsorgeplan-Navigation">
             <div className="space-y-0.5">
               {mainNavItems.map((item) => {
                 const Icon = MAIN_ICONS[item.href];
@@ -83,7 +83,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               ))}
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted px-3 mb-1">Vorsorgebereiche</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#F2CF6C] px-3 mb-1">Vorsorgebereiche</p>
               <div className="space-y-0.5">
                 {areaNavItems.map((item) => (
                   <Link key={item.href} href={item.href} className={linkClass(item.href)}>
@@ -96,7 +96,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setMoreOpen(!moreOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted min-h-[44px]"
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#F2CF6C] min-h-[44px]"
                 aria-expanded={moreOpen}
               >
                 Weitere Themen
@@ -112,7 +112,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
             </div>
-            <div className="pt-2 border-t border-border/40">
+            <div className="pt-2 border-t border-white/15">
               <Link href="/dashboard/einstellungen" className={linkClass("/dashboard/einstellungen")} data-testid="nav-settings-link">
                 <Settings size={15} aria-hidden /> Einstellungen
               </Link>

@@ -1,3 +1,4 @@
+import { IMAGE_CREDIT } from "@/lib/content/topic-images";
 import Link from "next/link";
 import { IMPRINT } from "@/lib/legal/imprint";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
@@ -72,6 +73,11 @@ export default function ImpressumPage() {
             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
             Wasiyya ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
           </p>
+        </section>
+
+        <section data-testid="imprint-image-credits">
+          <h2 className="text-lg font-semibold text-primary mb-3">Bildnachweise</h2>
+          <p className="leading-relaxed text-sm">{IMAGE_CREDIT}</p>
         </section>
 
         <section>

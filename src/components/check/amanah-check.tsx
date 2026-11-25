@@ -148,17 +148,6 @@ export function AmanahCheck() {
     return <CheckResults state={state} onReset={reset} />;
   }
 
-  if (state.phase === "saving") {
-    const q = CHECK_QUESTIONS[state.index];
-    return (
-      <Card className="max-w-lg mx-auto p-8 text-center relative z-20" data-testid="check-saving" role="status" aria-live="polite">
-        <Loader2 className="mx-auto mb-3 animate-spin text-accent" size={28} aria-hidden />
-        <p className="text-muted text-sm">Antwort wird gespeichert…</p>
-        {q && <p className="sr-only">Frage: {q.text}</p>}
-      </Card>
-    );
-  }
-
   const q = CHECK_QUESTIONS[state.index];
   if (!q) {
     return (
@@ -169,59 +158,81 @@ export function AmanahCheck() {
     );
   }
 
+  return <CheckQuestion state={state} onAnswer={answer} onBack={back} />;
+}
+
+/**
+ * The question card (owner order 25.11.2026: absolutely calm). Saving an answer keeps this card in place:
+ * no spinner card, no remount, no scale or ring effects. Every row has a fixed height, so the question,
+ * the answer buttons and the progress bar never move when Ja or Nein is clicked; only colours and text change.
+ */
+function CheckQuestion({
+  state,
+  onAnswer,
+  onBack,
+}: {
+  state: CheckState;
+  onAnswer: (value: boolean) => void;
+  onBack: () => void;
+}) {
+  const q = CHECK_QUESTIONS[state.index]!;
+  const saving = state.phase === "saving";
   const progressPercent = Math.round(((state.index + 1) / CHECK_TOTAL) * 100);
   const currentAnswer = state.answers[q.id];
+  const answerClass = (selected: boolean) =>
+    `check-answer flex-1 h-16 sm:h-[72px] rounded-2xl font-semibold text-lg cursor-pointer touch-manipulation inline-flex items-center justify-center gap-3 ${
+      selected ? "is-selected" : ""
+    }`;
 
   return (
-    <div className="relative z-20" key={`check-q-${state.index}`}>
-      <Card className="max-w-lg mx-auto p-6 shadow-lg border-primary/15">
-        <div className="flex justify-between text-sm text-muted mb-2">
-          <span data-testid="check-progress-label">Frage {state.index + 1} von {CHECK_TOTAL}</span>
-          <span className="font-semibold text-accent">{progressPercent}%</span>
+    <div className="relative z-20" data-testid="check-question">
+      <Card className="check-card max-w-2xl mx-auto px-5 py-6 sm:px-10 sm:py-9">
+        <div className="flex justify-between items-center h-6 text-sm text-muted mb-2.5">
+          <span data-testid="check-progress-label" className="tabular-nums">Frage {state.index + 1} von {CHECK_TOTAL}</span>
+          <span className="font-semibold text-accent tabular-nums w-12 text-right">{progressPercent}%</span>
         </div>
-        <Progress value={progressPercent} className="mb-6" />
-        <p className="text-xs uppercase tracking-wide text-accent font-semibold mb-2">
+        <Progress value={progressPercent} className="mb-7" />
+        <p className="h-5 text-xs uppercase tracking-[0.16em] text-accent font-semibold mb-3">
           {q.category === "profil" ? "Deine Situation" : "Vorbereitung"}
         </p>
-        <h2 className="text-xl font-bold text-primary mb-2" data-testid="check-question-text">{q.text}</h2>
-        <p className="text-sm text-muted mb-6">Thema: {q.label}</p>
-        <div className="flex gap-3 sm:gap-4 mb-4">
+        <div className="h-[7.5rem] sm:h-[6.75rem] overflow-hidden">
+          <h2 className="check-question-text text-primary-dark" data-testid="check-question-text">{q.text}</h2>
+        </div>
+        <p className="h-6 text-sm text-muted mb-6 truncate">Thema: {q.label}</p>
+        <div className="flex gap-3 sm:gap-4 mb-5" role="group" aria-label="Antwort">
           <button
             type="button"
             data-testid="check-answer-yes"
-            onClick={() => answer(true)}
+            onClick={() => !saving && onAnswer(true)}
             aria-pressed={currentAnswer === true}
-            className={`flex-1 min-h-[52px] rounded-xl font-bold text-lg shadow-md active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
-              currentAnswer === true
-                ? "bg-emerald text-white ring-2 ring-emerald ring-offset-2"
-                : "bg-emerald text-white hover:bg-primary-hover"
-            }`}
+            aria-disabled={saving || undefined}
+            className={answerClass(currentAnswer === true)}
           >
-            Ja
+            <span className="check-answer-dot" aria-hidden /> Ja
           </button>
           <button
             type="button"
             data-testid="check-answer-no"
-            onClick={() => answer(false)}
+            onClick={() => !saving && onAnswer(false)}
             aria-pressed={currentAnswer === false}
-            className={`flex-1 min-h-[52px] rounded-xl border-2 font-bold text-lg active:scale-[0.98] transition-all cursor-pointer touch-manipulation ${
-              currentAnswer === false
-                ? "border-foreground/30 bg-foreground/5 text-foreground ring-2 ring-border ring-offset-2"
-                : "border-border bg-card text-muted hover:border-foreground/20 hover:bg-background"
-            }`}
+            aria-disabled={saving || undefined}
+            className={answerClass(currentAnswer === false)}
           >
-            Nein
+            <span className="check-answer-dot" aria-hidden /> Nein
           </button>
         </div>
-        <div className="flex justify-between items-center pt-2 border-t border-primary/5">
-          <Button type="button" variant="ghost" size="sm" onClick={back} data-testid="check-back">
+        <div className="flex justify-between items-center h-11 pt-2 border-t border-border">
+          <Button type="button" variant="ghost" size="sm" onClick={() => !saving && onBack()} data-testid="check-back">
             <ArrowLeft size={14} className="mr-1" /> Zurück
           </Button>
-          {state.index > 0 && currentAnswer !== undefined && (
-            <p className="text-xs text-muted">Vorherige Antwort gespeichert</p>
-          )}
+          <p className="text-xs text-muted">Du kannst jederzeit zurück.</p>
         </div>
       </Card>
+      {saving && (
+        <p className="sr-only" role="status" aria-live="polite" data-testid="check-saving">
+          Antwort wird gespeichert
+        </p>
+      )}
     </div>
   );
 }

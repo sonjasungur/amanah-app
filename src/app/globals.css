@@ -1,31 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  /* Wasiyya (owner approval 22.11.2026): navy and gold on warm ivory, from the Y2 preview. */
-  --background: #F8F5EE;
-  --foreground: #141B2D;
-  --primary: #22325A;
-  --primary-light: #2E4A85;
-  --primary-dark: #1A2440;
-  --primary-hover: #1A2747;
-  --accent: #8A6A22;
-  --accent-light: #C9A04A;
-  --accent-soft: #F3EEE1;
-  --sand: #F3EEE1;
+  /* Wasiyya design "Royal Imperial" (owner acceptance 25.11.2026): deep night blue, strong gold,
+     white content areas, no background patterns, no beige or champagne grounds. */
+  --background: #F6F7FA;
+  --foreground: #0E1630;
+  --primary: #142048;
+  --primary-light: #2A3B74;
+  --primary-dark: #0B1226;
+  --primary-hover: #0E1630;
+  --accent: #8A6014;
+  --accent-light: #D4A537;
+  --accent-soft: #F1F3F8;
+  --sand: #F1F3F8;
   --card: #FFFFFF;
-  --muted: #4A5468;
-  --border: #DCD5C6;
+  --muted: #48516F;
+  --border: #DCE0EA;
   --danger: #C4314B;
   --warning: #B7791F;
   --success: #2F7A5B;
-  --navy: #1A2440;
+  --navy: #0B1226;
   /* Gold accent: dark gold text on light ground; .on-dark switches to the light gold. */
-  --emerald: #8A6A22;
-  --mint: #F3EEE1;
-  --cat-notfall: #2E4A85;
-  --cat-janazah: #22325A;
-  --cat-vermoegen: #8A6A22;
-  --cat-akhira: #8A6A22;
+  --emerald: #8A6014;
+  --mint: #F1F3F8;
+  --gold: #D4A537;
+  --gold-frame: rgba(201, 150, 43, 0.38);
+  --cat-notfall: #2A3B74;
+  --cat-janazah: #142048;
+  --cat-vermoegen: #8A6014;
+  --cat-akhira: #8A6014;
 }
 
 @theme inline {
@@ -56,24 +59,64 @@
   --font-sans: var(--font-geist-sans);
 }
 
-/* Wasiyya hero: navy with a gold glow (star pattern removed on owner request, 22.11.2026). */
+/* Wasiyya hero (Royal Imperial): deep night blue with a soft gold light, no pattern. */
 .wasiyya-hero {
   background:
-    radial-gradient(ellipse 60% 70% at 88% 8%, rgba(201, 160, 74, 0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 60% at 0% 100%, rgba(46, 74, 133, 0.45) 0%, transparent 65%),
-    linear-gradient(165deg, #1A2440 0%, #1F2C4A 55%, #22325A 100%);
+    radial-gradient(ellipse 55% 65% at 80% 30%, rgba(242, 207, 108, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 70% at 0% 100%, rgba(42, 59, 116, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse at 70% 25%, #1F2C5C 0%, #0E1630 48%, #070C1C 100%);
 }
 .wasiyya-cta {
-  background: linear-gradient(180deg, #DDBB66 0%, #C9A04A 100%);
-  color: #1A2440;
-  box-shadow: 0 12px 32px -10px rgba(221, 187, 102, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  background: linear-gradient(135deg, #B98A24 0%, #EAC25C 36%, #FFF0B8 52%, #E2B54C 68%, #A97A18 100%);
+  color: #0B1226;
+  box-shadow: 0 10px 28px -8px rgba(212, 165, 55, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: box-shadow .15s ease, filter .15s ease;
 }
-.wasiyya-cta:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 16px 36px -10px rgba(221, 187, 102, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+.wasiyya-cta:hover { filter: brightness(1.05); box-shadow: 0 14px 34px -8px rgba(212, 165, 55, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
 .wasiyya-cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 
+/* Gold text and frames (Royal Imperial). */
+.gold-text {
+  background: linear-gradient(100deg, #8E6012 0%, #C99428 40%, #E0B34A 55%, #A87818 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.on-dark .gold-text { background-image: linear-gradient(100deg, #C9962B, #F2CF6C 40%, #FFF0B8 52%, #E2B54C 66%, #C9962B); }
+.gold-frame {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, #F2CF6C, #D4A537 40%, #8E6012 65%, #F2CF6C) border-box;
+}
+.gold-frame-strong {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, #FFF0B8, #E2B54C 40%, #8E6012 65%, #F2CF6C) border-box;
+}
+.wasiyya-photo { border-radius: 1.5rem; padding: 6px; background: linear-gradient(160deg, #FFF0B8, #E2B54C 35%, #8E6012 70%, #F2CF6C); box-shadow: 0 30px 70px -20px rgba(7, 12, 28, 0.55); }
+.wasiyya-photo > * { border-radius: calc(1.5rem - 6px); overflow: hidden; }
+
+/* Light topic header (knowledge and topic pages stay bright and calm). */
+.topic-hero { background: radial-gradient(ellipse 50% 70% at 88% 30%, rgba(226, 181, 76, 0.14), transparent 70%), #FFFFFF; }
+.wasiyya-arch { border-radius: 999px 999px 1.5rem 1.5rem; }
+.wasiyya-arch > * { border-radius: 999px 999px calc(1.5rem - 6px) calc(1.5rem - 6px); }
+
+/* Calm Vorsorge-Check (owner order 25.11.2026): fixed rows, only colour changes, no movement. */
+.check-card { border-radius: 1.5rem; border: 1px solid var(--gold-frame); box-shadow: 0 18px 44px rgba(11, 18, 38, 0.08); }
+.check-question-text { font-family: var(--font-display), Georgia, serif; font-weight: 400; font-synthesis: none; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2rem); line-height: 1.25; }
+.check-answer {
+  background: #fff; color: var(--primary-dark);
+  box-shadow: inset 0 0 0 1.5px var(--gold-frame);
+  transition: background-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+.check-answer:hover { box-shadow: inset 0 0 0 1.5px var(--gold); }
+.check-answer.is-selected { background: var(--primary-dark); color: #fff; box-shadow: inset 0 0 0 2px var(--gold); }
+.check-answer:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.check-answer-dot { width: 22px; height: 22px; border-radius: 9999px; flex: none; box-shadow: inset 0 0 0 1.5px var(--gold-frame); transition: background-color .15s ease, box-shadow .15s ease; }
+.check-answer.is-selected .check-answer-dot { background: var(--gold); box-shadow: inset 0 0 0 5px var(--primary-dark); }
+
 /* Dark sections (hero, footer): the gold accent turns light so it keeps its contrast. */
-.on-dark { --emerald: #D9BA74; --accent: #D9BA74; }
+.on-dark { --emerald: #F2CF6C; --accent: #F2CF6C; }
 
 body {
   background: var(--background);
@@ -86,8 +129,9 @@ body {
 
 /* Typography scale */
 .text-display {
-  font-family: var(--font-doc-serif), Georgia, serif;
-  font-weight: 600;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-synthesis: none;
   font-size: clamp(2rem, 5vw + 0.5rem, 4rem);
   line-height: 1.08;
   letter-spacing: -0.015em;
@@ -97,16 +141,18 @@ body {
 }
 
 .text-page-title {
-  font-family: var(--font-doc-serif), Georgia, serif;
-  font-weight: 600;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-synthesis: none;
   font-size: clamp(1.75rem, 3vw, 2.625rem);
   line-height: 1.2;
   letter-spacing: -0.015em;
 }
 
 .text-section-title {
-  font-family: var(--font-doc-serif), Georgia, serif;
-  font-weight: 600;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-synthesis: none;
   font-size: clamp(1.625rem, 2.5vw, 2rem);
   line-height: 1.25;
 }
@@ -128,7 +174,7 @@ body {
 
 @media (min-width: 768px) {
   body {
-    font-size: 17px;
+    font-size: 18px;
   }
 }
 

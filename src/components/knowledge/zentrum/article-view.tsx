@@ -326,7 +326,7 @@ export function ArticleBody({ article }: { article: FullArticle }) {
       ))}
       {article.nextStep && (
         <section className="rounded-2xl bg-[var(--wz-green)] text-white p-5 sm:p-7" data-testid="next-step">
-          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-[#E2C98F] mb-1.5">Für deine Vorsorge</p>
+          <p className="text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-[#F2CF6C] mb-1.5">Für deine Vorsorge</p>
           <h2 className="wz-serif text-[1.35rem] font-semibold mb-1">Dein nächster Schritt</h2>
           <p>{article.nextStep}</p>
         </section>

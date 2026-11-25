@@ -1,6 +1,7 @@
 import { Disclaimer } from "@/components/ui/disclaimer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { TopicFunctionLinks, TopicHero } from "@/components/marketing/topic-page";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
 
 export const metadata = publicPageMetadata("/akuter-todesfall");
@@ -18,28 +19,42 @@ const steps = [
 
 export default function AkuterTodesfallPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-primary mb-3">Jemand ist gestorben — was jetzt?</h1>
-      <p className="text-muted mb-8">Ruhe bewahren. Diese 24-Stunden-Schritte helfen dir und deiner Familie.</p>
+    <div>
+      <TopicHero
+        eyebrow="Soforthilfe für Angehörige"
+        title="Jemand ist gestorben — was jetzt?"
+        image="janazah"
+        intro={<p>Ruhe bewahren. Diese 24-Stunden-Schritte helfen dir und deiner Familie.</p>}
+      />
+      <div className="max-w-5xl mx-auto px-4 py-10 md:py-14">
+        <ol className="space-y-4">
+          {steps.map((step) => (
+            <li key={step.num} className="flex gap-4 md:gap-5 rounded-2xl bg-card gold-frame p-5 md:p-6">
+              <span className="flex-shrink-0 w-11 h-11 rounded-full wasiyya-cta flex items-center justify-center font-bold">{step.num}</span>
+              <div>
+                <h2 className="font-semibold text-primary-dark text-lg">{step.title}</h2>
+                <p className="text-muted mt-1">{step.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
 
-      <div className="space-y-4">
-        {steps.map((step) => (
-          <div key={step.num} className="flex gap-4 rounded-2xl bg-card border border-primary/10 p-5">
-            <span className="flex-shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">{step.num}</span>
-            <div>
-              <h2 className="font-semibold text-primary">{step.title}</h2>
-              <p className="text-sm text-muted mt-1">{step.desc}</p>
-            </div>
-          </div>
-        ))}
+        <TopicFunctionLinks
+          title="Vorsorgen, damit die Familie später nichts suchen muss"
+          actions={[
+            { href: "/dashboard/notfallkarte", label: "Notfallkarte", text: "Kontakte, Allergien und Medikamente für den Ernstfall." },
+            { href: "/dashboard/bestattung", label: "Bestattung oder Überführung", text: "Bestatter, Moschee und Wünsche zur Beisetzung." },
+            { href: "/dashboard/notfallpaket", label: "Notfallpaket", text: "Die wichtigsten Angaben für die Familie zum Ausdrucken." },
+          ]}
+        />
+
+        <div className="mt-10 rounded-2xl bg-sand p-6 text-center">
+          <p className="text-sm text-muted mb-4">Dieser Bereich ist kostenlos und ohne Verkaufsdruck.</p>
+          <Link href="/wissen"><Button variant="outline">Wissen zu Janazah</Button></Link>
+        </div>
+
+        <div className="mt-8"><Disclaimer type="islamic" /></div>
       </div>
-
-      <div className="mt-8 rounded-2xl bg-sand p-6 text-center">
-        <p className="text-sm text-muted mb-4">Dieser Bereich ist kostenlos und ohne Verkaufsdruck.</p>
-        <Link href="/wissen"><Button variant="outline">Wissen zu Janazah</Button></Link>
-      </div>
-
-      <div className="mt-8"><Disclaimer type="islamic" /></div>
     </div>
   );
 }

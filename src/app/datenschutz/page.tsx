@@ -16,8 +16,7 @@ export default function DatenschutzPage() {
           <h2 className="text-xl font-semibold text-primary mb-3">1. Verantwortlicher</h2>
           <p className="leading-relaxed">
             Verantwortlich für die Datenverarbeitung im Rahmen von {IMPRINT.productName} ist die{" "}
-            {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}, vertreten durch{" "}
-            {IMPRINT.representedBy}. Kontakt:{" "}
+            {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}. Kontakt:{" "}
             <a href={`mailto:${IMPRINT.privacyEmail}`} className="text-primary-light underline">
               {IMPRINT.privacyEmail}
             </a>

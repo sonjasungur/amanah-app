@@ -1,6 +1,6 @@
 import { getSiteUrl } from "@/lib/seo/site-url";
 import type { Metadata, Viewport } from "next";
-import { Geist, Noto_Naskh_Arabic, Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Geist, Marcellus, Noto_Naskh_Arabic, Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/header";
@@ -11,6 +11,14 @@ import { BRAND } from "@/lib/brand";
 const geist = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+/** Display serif for page headings (design "Royal Imperial", owner acceptance 25.11.2026; the logo wordmark is set in it). Self-hosted by next/font. */
+const display = Marcellus({
+  variable: "--font-display",
+  subsets: ["latin", "latin-ext"],
+  weight: "400",
+  display: "swap",
 });
 
 /** Arabic names and terms in documents and prints. Loaded only where Arabic characters appear. */
@@ -71,7 +79,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" className={`${geist.variable} ${arabic.variable} ${docSerif.variable} ${docSans.variable} h-full`}>
+    <html lang="de" className={`${geist.variable} ${display.variable} ${arabic.variable} ${docSerif.variable} ${docSans.variable} h-full`}>
       <body className="min-h-full flex flex-col antialiased">
         <Providers>
           <StagingBanner />

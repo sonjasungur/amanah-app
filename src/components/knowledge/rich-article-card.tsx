@@ -20,7 +20,7 @@ function Section({
 }) {
   const bg =
     variant === "legal"
-      ? "rounded-2xl border-2 border-cat-vermoegen/25 bg-[#FDF8F0] p-5 md:p-6"
+      ? "rounded-2xl border-2 border-cat-vermoegen/25 bg-accent-soft p-5 md:p-6"
       : variant === "risk"
         ? "rounded-2xl border-2 border-warning/30 bg-warning/5 p-5 md:p-6"
         : "space-y-3";

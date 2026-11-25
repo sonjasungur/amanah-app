@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { TOPIC_IMAGES } from "@/lib/content/topic-images";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
 import { HomeEntryPoints } from "@/components/marketing/home-entry-points";
 import {
@@ -103,7 +105,7 @@ function HeroCheckInfoCard({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "relative rounded-2xl border border-[#C9A04A]/35 bg-white/[0.07] backdrop-blur-sm p-6 md:p-7 shadow-2xl before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:bg-[#C9A04A] before:rounded-full",
+        "relative rounded-2xl border border-[#D4A537]/45 bg-[#0B1226]/80 backdrop-blur-md p-6 md:p-7 shadow-2xl before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:bg-[#D4A537] before:rounded-full",
         className
       )}
     >
@@ -135,19 +137,22 @@ export default function HomePage() {
         className="on-dark wasiyya-hero relative text-white pt-8 pb-12 md:pt-20 md:pb-24 overflow-hidden"
         data-testid="home-hero"
       >
-        <div className="relative max-w-6xl mx-auto px-4">
-          <div className="grid lg:grid-cols-[1fr_340px] gap-8 lg:gap-12 items-start">
-            <div className="max-w-xl min-w-0">
+        <div className="relative max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-14 items-center">
+            <div className="max-w-2xl min-w-0">
               {/* Phones show the descriptor here, because the compact header leaves it out. */}
-              <p className="md:hidden flex items-center gap-2.5 mb-4 text-[15px] font-medium text-[#E2C98F]" data-testid="home-hero-descriptor">
+              <p className="md:hidden flex items-center gap-2.5 mb-4 text-[15px] font-medium text-[#F2CF6C]" data-testid="home-hero-descriptor">
                 <WasiyyaMark height={26} inverted />
                 {BRAND.descriptor}
               </p>
               <p className="hidden md:flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.18em] text-emerald mb-4">
-                <span className="h-px w-8 bg-[#C9A04A]" aria-hidden />
+                <span className="h-px w-8 bg-[#D4A537]" aria-hidden />
                 {BRAND.heroEyebrow}
               </p>
-              <h1 className="text-display mb-4 md:mb-5 text-balance">{BRAND.heroTitle}</h1>
+              <h1 className="text-display mb-4 md:mb-5 text-balance">
+                {BRAND.heroTitle.slice(0, BRAND.heroTitle.indexOf(",") + 1)}{" "}
+                <span className="gold-text">{BRAND.heroTitle.slice(BRAND.heroTitle.indexOf(",") + 2)}</span>
+              </h1>
               <p className="text-body-lg text-white/90 leading-relaxed mb-6 md:mb-7 max-w-lg hidden sm:block">{BRAND.heroDescription}</p>
               <p className="text-base text-white/90 leading-relaxed mb-6 max-w-lg sm:hidden">{BRAND.heroDescriptionMobile}</p>
               <div className="flex flex-col gap-3 max-w-md">
@@ -174,7 +179,14 @@ export default function HomePage() {
               </div>
               <p className="text-sm md:text-base text-white/75 mt-4 md:mt-5 italic max-w-lg hidden sm:block">{BRAND.claim}</p>
             </div>
-            <HeroCheckInfoCard className="hidden lg:block lg:mt-10" />
+            <div className="hidden lg:block relative">
+              <figure className="wasiyya-photo wasiyya-arch">
+                <div className="relative aspect-[4/5]">
+                  <Image src={TOPIC_IMAGES.hero.src} alt={TOPIC_IMAGES.hero.alt} fill priority sizes="40vw" className="object-cover" />
+                </div>
+              </figure>
+              <HeroCheckInfoCard className="absolute -left-10 bottom-10 max-w-[330px]" />
+            </div>
           </div>
         </div>
       </section>

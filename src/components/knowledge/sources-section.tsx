@@ -84,7 +84,7 @@ export function SourcesSection({
         return (
           <div
             key={cat}
-            className={`rounded-xl border-2 p-4 ${isLegal ? "border-cat-vermoegen/30 bg-[#FDF8F0]" : "border-border bg-card"}`}
+            className={`rounded-xl border-2 p-4 ${isLegal ? "border-cat-vermoegen/30 bg-accent-soft" : "border-border bg-card"}`}
           >
             <h4 className="text-sm font-bold text-primary-dark mb-3">{SOURCE_SECTION_LABELS[cat]}</h4>
             <div className="grid gap-3">

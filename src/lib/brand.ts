@@ -25,7 +25,7 @@ export const BRAND = {
     "Islamische Vorsorge für Notfall, Janazah und Akhira. Halte heute fest, was deiner Familie später wichtig sein soll.",
   manifestName: "Wasiyya – Islamische Vorsorge und Testament",
   manifestShortName: "Wasiyya",
-  themeColor: "#1F2C4A",
+  themeColor: "#0B1226",
   ctaPrimary: "Kostenlosen Vorsorge-Check starten",
   ctaSecondary: "So funktioniert Wasiyya",
   ctaRegister: "Konto erstellen — Vorsorge beginnen",

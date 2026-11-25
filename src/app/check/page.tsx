@@ -10,7 +10,7 @@ import { CHECK_TOTAL } from "@/lib/check/questions";
 export default function CheckPage() {
   return (
     <>
-      <div className="max-w-3xl mx-auto px-4 py-10 md:py-14 pb-24">
+      <div className="max-w-4xl mx-auto px-4 py-10 md:py-14 pb-24">
         <StorageModeBanner className="mb-6 opacity-90" />
         <h1 className="text-page-title font-bold text-foreground text-center mb-4">
           {CHECK_LABELS.pageTitle}

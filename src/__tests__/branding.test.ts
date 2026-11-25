@@ -50,7 +50,7 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
     expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
     expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
     expect(BRAND.metadataTitle).toBe("Wasiyya – Islamische Vorsorge und Testament");
-    expect(BRAND.themeColor).toBe("#1F2C4A");
+    expect(BRAND.themeColor).toBe("#0B1226");
   });
 
   it("has no legacy visible brand in key UI files", () => {
@@ -100,11 +100,12 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
     expect(logo).not.toContain("Mihrab");
   });
 
-  it("uses the navy and gold palette without orange brand color", () => {
+  it("uses the Royal Imperial palette (owner acceptance 25.11.2026) without orange brand color or background patterns", () => {
     const css = read("src/app/globals.css");
-    expect(css).toContain("--primary: #22325A;");
-    expect(css).toContain("--navy: #1A2440;");
-    expect(css).toContain("--accent-light: #C9A04A;");
+    expect(css).toContain("--primary: #142048;");
+    expect(css).toContain("--navy: #0B1226;");
+    expect(css).toContain("--accent-light: #D4A537;");
+    expect(css).not.toMatch(/background-image:\s*url\(/);
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
@@ -146,7 +147,7 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
     const manifest = JSON.parse(read("public/manifest.json"));
     expect(manifest.name).toBe("Wasiyya – Islamische Vorsorge und Testament");
     expect(manifest.short_name).toBe("Wasiyya");
-    expect(manifest.theme_color).toBe("#1F2C4A");
+    expect(manifest.theme_color).toBe("#0B1226");
   });
 
   it("icon assets exist and are non-empty", () => {

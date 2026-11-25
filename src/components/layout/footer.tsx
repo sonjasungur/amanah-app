@@ -6,7 +6,7 @@ import { CHECK_LABELS } from "@/lib/design-tokens";
 
 export function Footer() {
   return (
-    <footer className="bg-navy text-white/90 mt-auto no-print">
+    <footer className="on-dark bg-[#070C1C] text-white/90 mt-auto no-print border-t border-[#D4A537]/40">
       <div className="max-w-6xl mx-auto px-4 py-14 md:py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10 md:gap-12 mb-10">
           <div className="md:col-span-2 lg:col-span-1">
@@ -21,17 +21,17 @@ export function Footer() {
             <h2 className="font-bold text-white text-base mb-4">Wissen</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
-                <Link href="/wissen" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/wissen" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Alle Themen
                 </Link>
               </li>
               <li>
-                <Link href="/konvertierte" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/konvertierte" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Für Konvertierte
                 </Link>
               </li>
               <li>
-                <Link href="/janazah-kompass" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/janazah-kompass" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Janazah-Kompass
                 </Link>
               </li>
@@ -41,22 +41,22 @@ export function Footer() {
             <h2 className="font-bold text-white text-base mb-4">Service</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
-                <Link href="/check" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/check" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   {CHECK_LABELS.nav}
                 </Link>
               </li>
               <li>
-                <Link href="/preise" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/preise" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Pakete
                 </Link>
               </li>
               <li>
-                <Link href="/kontakt" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/kontakt" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Kontakt
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/dashboard" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Mein Vorsorgeplan
                 </Link>
               </li>
@@ -66,17 +66,17 @@ export function Footer() {
             <h2 className="font-bold text-white text-base mb-4">Rechtliches</h2>
             <ul className="space-y-3 text-sm md:text-base">
               <li>
-                <Link href="/datenschutz" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/datenschutz" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Datenschutz
                 </Link>
               </li>
               <li>
-                <Link href="/sicherheit" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/sicherheit" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Sicherheit
                 </Link>
               </li>
               <li>
-                <Link href="/impressum" className="text-white/75 hover:text-[#E2C98F] transition-colors">
+                <Link href="/impressum" className="text-white/75 hover:text-[#F2CF6C] transition-colors">
                   Impressum
                 </Link>
               </li>
