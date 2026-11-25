@@ -6,6 +6,7 @@
 #   staging-https.sh enable <host>   DNS check, staging base URL, proxy network, shared Caddy, checks
 #   staging-https.sh disable         removes the block, back to loopback only
 #   staging-https.sh status
+#   staging-https.sh password        owner sets a short user name and password of her own (asked, never shown)
 #   staging-https.sh probe-up        throwaway Caddy on 127.0.0.1:3443 with its own certificate;
 #   staging-https.sh probe-check     does not touch the shared Caddy
 #   staging-https.sh probe-down
@@ -14,7 +15,7 @@ ROOT="${STAGING_ROOT:-/opt/amanah-staging}"
 CADDY="${CADDY_CONTAINER:-gemeinsam1-prod-caddy}"
 CADDYFILE="${CADDYFILE:-/opt/gemeinsam1/deploy/Caddyfile}"
 NET=amanah_staging_proxy
-ACCESS="$ROOT/state/https-access"
+ACCESS="${STAGING_ACCESS_FILE:-$ROOT/state/https-access}"
 ENVF="$ROOT/.env.staging"
 BEGIN='# BEGIN amanah-staging-https'; END='# END amanah-staging-https'
 PROBE_C=amanah-https-probe; PROBE_HOST=staging-probe.test.invalid; PROBE_PORT=3443; PROBE_F=/dev/shm/amanah-https-probe.Caddyfile
@@ -32,13 +33,15 @@ access_hash() { # caddy-container
   printf '%s\n%s\n' "$pw" "$pw" | docker exec -i "$1" caddy hash-password | tail -1
 }
 
-site_block() { # host hash extra-line
+access_user() { local u; u="$(grep -m1 '^user=' "$ACCESS" 2>/dev/null | cut -d= -f2-)"; echo "${u:-tester}"; }
+
+site_block() { # host hash extra-line [user]
   cat <<B
 $BEGIN
 $1 {
 	$3
 	basic_auth {
-		tester $2
+		${4:-tester} $2
 	}
 	@internal path /intern /intern/* /wissen/redaktion /wissen/redaktion/* /brand-review /brand-review/*
 	respond @internal 404
@@ -83,7 +86,7 @@ app_up() { compose up -d --no-deps app; for _ in $(seq 1 60); do [ "$(docker ins
 
 curl_auth() { # curl args; credentials through a config on stdin, never on the command line
   local pw; pw="$(grep -m1 '^password=' "$ACCESS" | cut -d= -f2-)"
-  printf 'user = "tester:%s"\n' "$pw" | curl -sS -K - "$@"
+  printf 'user = "%s:%s"\n' "$(access_user)" "$pw" | curl -sS -K - "$@"
 }
 
 check_access() { # base-url, extra curl args...
@@ -92,7 +95,7 @@ check_access() { # base-url, extra curl args...
     code="$(curl -sS -o /dev/null -m 15 -w '%{http_code}' "$@" "$base$p" || true)"
     if [ "$code" = 401 ]; then echo "OK   ohne Passwort 401: $p"; else echo "FAIL ohne Passwort $code: $p"; failed=1; fi
   done
-  code="$(printf 'user = "tester:falsch"\n' | curl -sS -K - -o /dev/null -m 15 -w '%{http_code}' "$@" "$base/" || true)"
+  code="$(printf 'user = "%s:falsch-%s"\n' "$(access_user)" "$RANDOM" | curl -sS -K - -o /dev/null -m 15 -w '%{http_code}' "$@" "$base/" || true)"
   if [ "$code" = 401 ]; then echo "OK   falsches Passwort 401"; else echo "FAIL falsches Passwort $code"; failed=1; fi
   code="$(curl_auth -o /dev/null -m 15 -w '%{http_code}' "$@" "$base/api/health" || true)"
   if [ "$code" = 200 ]; then echo "OK   mit Passwort 200"; else echo "FAIL mit Passwort $code"; failed=1; fi
@@ -138,6 +141,46 @@ case "${1:-}" in
     fi
     docker network disconnect "$NET" "$CADDY" </dev/null 2>/dev/null || true
     restore_base_url; app_up || exit 1; echo "OK   Staging wieder nur ueber 127.0.0.1"
+    ;;
+  password)
+    # Owner 24.11.2026: a short password she can type on a phone. Asked here, never printed or logged.
+    # A test run (PASSWORD_CHECK_BASE / a CADDYFILE of its own) must never reach the shared Caddy:
+    # on 24.11.2026 a test with the wrong variable name reloaded it with the test file (about 2 minutes).
+    if [ -n "${PASSWORD_CHECK_BASE:-}" ] || [ "$CADDYFILE" != /opt/gemeinsam1/deploy/Caddyfile ]; then
+      [ "$CADDY" != gemeinsam1-prod-caddy ] || { echo "FAIL Testlauf gegen den gemeinsamen Caddy abgelehnt (CADDY_CONTAINER setzen)" >&2; exit 1; }
+    fi
+    grep -qF "$BEGIN" "$CADDYFILE" || { echo "Kein Zugang eingetragen." >&2; exit 1; }
+    HOST="$(grep -A1 -F "$BEGIN" "$CADDYFILE" | tail -1 | cut -d' ' -f1)"
+    read -r -p "Benutzername [$(access_user)]: " NEW_USER || true; NEW_USER="${NEW_USER:-$(access_user)}"
+    [[ "$NEW_USER" =~ ^[A-Za-z0-9._-]{1,32}$ ]] || { echo "FAIL Benutzername: nur Buchstaben, Ziffern, . _ - (1-32)"; exit 2; }
+    read -r -s -p "Neues Passwort (mind. 6 Zeichen): " P1 || true; echo
+    read -r -s -p "Neues Passwort wiederholen: " P2 || true; echo
+    [ "$P1" = "$P2" ] || { echo "FAIL Passwoerter verschieden, nichts geaendert"; exit 2; }
+    [ "${#P1}" -ge 6 ] || { echo "FAIL zu kurz (mind. 6 Zeichen), nichts geaendert"; exit 2; }
+    [[ "$P1" != *[\"\\[:space:]]* ]] || { echo "FAIL ohne Leerzeichen, \" und \\, nichts geaendert"; exit 2; }
+    hash="$(printf '%s\n%s\n' "$P1" "$P1" | docker exec -i "$CADDY" caddy hash-password | tail -1)"
+    [[ "$hash" == \$2* ]] || { echo "FAIL Passwort-Hash"; exit 1; }
+    # Only the user line inside the staging block changes; every other site stays byte for byte.
+    new="$(mktemp)"
+    U="$NEW_USER" H="$hash" B="$BEGIN" E="$END" awk '
+      $0==ENVIRON["B"] {inb=1} $0==ENVIRON["E"] {inb=0}
+      inb && seen==1 {print "\t\t" ENVIRON["U"] " " ENVIRON["H"]; seen=2; next}
+      inb && $1=="basic_auth" {seen=1}
+      {print}' "$CADDYFILE" > "$new"
+    [ "$(diff "$CADDYFILE" "$new" | grep -c '^[<>]')" = 2 ] || { rm -f "$new"; echo "FAIL unerwartete Aenderung, nichts eingespielt"; exit 1; }
+    docker cp "$new" "$CADDY:/tmp/Caddyfile.new" </dev/null >/dev/null
+    docker exec "$CADDY" caddy validate --adapter caddyfile --config /tmp/Caddyfile.new </dev/null >/dev/null 2>&1 || { rm -f "$new"; echo "FAIL Caddyfile ungueltig, nichts eingespielt"; exit 1; }
+    other_before="$(curl -sS -m 15 https://gemeinsam1.com/ | wc -c)"
+    umask 077; old_cf="$(mktemp)"; old_ac="$(mktemp)"; cat "$CADDYFILE" > "$old_cf"; cat "$ACCESS" > "$old_ac"
+    undo() { cat "$old_cf" > "$CADDYFILE"; cat "$old_ac" > "$ACCESS"; caddy_reload_host_file || true; rm -f "$old_cf" "$old_ac" "$new"; }
+    cat "$new" > "$CADDYFILE"; printf 'user=%s\npassword=%s\n' "$NEW_USER" "$P1" > "$ACCESS"; unset P1 P2
+    caddy_reload_host_file || { undo; echo "FAIL Reload, altes Passwort gilt weiter"; exit 1; }
+    # PASSWORD_CHECK_* only for the test against a throwaway Caddy.
+    # shellcheck disable=SC2086
+    if ! check_access "${PASSWORD_CHECK_BASE:-https://$HOST}" ${PASSWORD_CHECK_ARGS:-}; then undo; echo "FAIL Pruefung, altes Passwort gilt weiter"; exit 1; fi
+    [ "$(curl -sS -m 15 https://gemeinsam1.com/ | wc -c)" = "$other_before" ] && echo "OK   gemeinsam1 unveraendert" || echo "WARN gemeinsam1 antwortet anders, bitte pruefen"
+    rm -f "$old_cf" "$old_ac" "$new"
+    echo "OK   Neuer Zugang aktiv fuer https://$HOST (Benutzer $NEW_USER)"
     ;;
   status)
     grep -A1 -F "$BEGIN" "$CADDYFILE" | tail -1 | cut -d' ' -f1 | grep . || echo "Kein HTTPS-Zugang eingetragen."
