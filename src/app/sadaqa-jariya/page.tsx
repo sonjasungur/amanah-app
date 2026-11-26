@@ -10,7 +10,7 @@ export default function SadaqaJariyaPage() {
       eyebrow={"Islamische Vorsorge"}
       title={"Sadaqa Jariya"}
       intro={"Islamisches Wissen zu fortwirkender Wohltätigkeit und wohltätigen Vermächtnissen — veröffentlicht erst nach fachlicher Prüfung."}
-      image="licht"
+      image="sadaqa"
       actions={[
         { href: "/dashboard/sadaqa-jariya", label: "Sadaqa Jariya", text: "Was nach dir weiterwirken soll – Projekte und Wünsche." },
         { href: "/dashboard/familie", label: "Familienbrief", text: "Persönliche Worte und Bitten an deine Familie." },

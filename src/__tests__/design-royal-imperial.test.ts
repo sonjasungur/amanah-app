@@ -60,3 +60,11 @@ describe("knowledge review on staging (owner order 26.11.2026)", () => {
     expect(validateProductionEnv({ AMANAH_KNOWLEDGE_PREVIEW: "true" } as unknown as NodeJS.ProcessEnv).errors.join(" ")).toContain("AMANAH_KNOWLEDGE_PREVIEW");
   });
 });
+
+describe("editorial navigation (owner order 26.11.2026)", () => {
+  it("shows the editorial navigation only behind the preview switch", () => {
+    const layout = read("src/app/wissen/redaktion/layout.tsx");
+    expect(layout).toContain("isEditorialPreviewEnabled() && <EditorialNav />");
+    expect(read("src/app/wissen/redaktion/page.tsx")).toContain('export const dynamic = "force-dynamic"');
+  });
+});

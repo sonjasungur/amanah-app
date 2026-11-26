@@ -4,14 +4,13 @@ import { TOPIC_IMAGES } from "@/lib/content/topic-images";
 import { AkhiraSection } from "@/components/marketing/akhira-section";
 import { HomeEntryPoints } from "@/components/marketing/home-entry-points";
 import {
-  FreeVsPaidSummary,
   SectionHeader,
   StepCard,
   TrustStrip,
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
-import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } from "@/lib/billing/start-offer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
@@ -21,8 +20,10 @@ import {
   Activity,
   ArrowRight,
   ClipboardCheck,
+  Clock3,
   Compass,
   FileSignature,
+  HeartHandshake,
   HeartPulse,
   ListChecks,
   Scale,
@@ -35,29 +36,29 @@ import {
 const OUTCOMES = [
   {
     icon: Users,
-    title: "Klarheit für meine Familie",
-    description: "Vertrauenspersonen, Kontakte und Wünsche an einem Ort — ohne Rätselraten im Ernstfall.",
+    title: "Deine Familie entlasten",
+    description: "Gib deinen Angehörigen Orientierung, wenn sie in einer schwierigen Situation Entscheidungen treffen müssen.",
     accent: COLORS.catNotfall,
     slug: "familie",
   },
   {
     icon: ListChecks,
-    title: "Meine Wünsche festhalten",
-    description: "Persönliche und islamische Entscheidungen dokumentieren, bevor es Zeitdruck gibt.",
+    title: "Deine Wünsche festhalten",
+    description: "Dokumentiere, was dir bei Krankheit, im Notfall und nach deinem Tod wichtig ist.",
     accent: COLORS.catJanazah,
     slug: "wuensche",
   },
   {
     icon: Compass,
-    title: "Islamische Orientierung",
-    description: "Wissen zur Einordnung — zwischen deutschem Recht und islamischen Grundsätzen. Inhalte tragen einen Prüfstatus.",
+    title: "Nach islamischen Grundsätzen vorsorgen",
+    description: "Verstehe deine religiösen Verpflichtungen und bereite deren Umsetzung im Rahmen des deutschen Rechts vor.",
     accent: COLORS.catAkhira,
     slug: "wissen",
   },
   {
     icon: Target,
-    title: "Schritt für Schritt vorbereiten",
-    description: "Check, ein nächster Schritt und persönlicher Vorsorgeplan — ohne alles auf einmal erledigen zu müssen.",
+    title: "Alles Wichtige an einem Ort",
+    description: "Organisiere deine Wünsche, Dokumente, Verpflichtungen und Informationen für deine Angehörigen.",
     accent: COLORS.catVermogen,
     slug: "plan",
   },
@@ -96,36 +97,27 @@ const AREAS = [
 /** Start offer (owner order 23.11.2026): only free features that are on at the start; Plus without price. */
 const FREE_TITLES = START_BASIS.map((f) => f.title);
 
-/** What the check tells you – a calm band below the hero, so it never covers the image (owner 26.11.2026). */
-function HeroCheckInfoCard({ className }: { className?: string }) {
-  const points = [
-    "Welche Bereiche noch offen sind",
-    "Was du zuerst klären solltest",
-    "Welchen einen Schritt du als Nächstes angehen kannst",
+/** Three compact benefits with gold symbols, no shared frame (owner 26.11.2026). */
+function HeroBenefits({ className }: { className?: string }) {
+  const items = [
+    { icon: Clock3, title: "Wenige Minuten", text: "15 kurze Fragen, ohne Konto." },
+    { icon: ListChecks, title: "Klare nächste Schritte", text: "Du siehst, was zuerst wichtig ist." },
+    { icon: HeartHandshake, title: "Kostenlos starten", text: "Kein Abo, keine Verpflichtung." },
   ];
   return (
-    <aside
-      className={cn(
-        "rounded-2xl border border-[#D4A537]/40 bg-white/[0.04] px-6 py-5 md:px-8 md:py-6 grid gap-4 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-10",
-        className
-      )}
-      data-testid="home-hero-check-info"
-    >
-      <h2 className="text-lg font-bold text-white leading-snug">Nach dem kostenlosen Check weißt du:</h2>
-      <div>
-        <ul className="grid gap-3 sm:grid-cols-3 sm:gap-6">
-          {points.map((point) => (
-            <li key={point} className="flex items-start gap-3 text-base text-white/90">
-              <span className="w-2 h-2 rounded-full bg-[#E2B54C] shrink-0 mt-2" aria-hidden />
-              {point}
-            </li>
-          ))}
-        </ul>
-        <p className="text-sm text-white/65 leading-relaxed mt-3">
-          Dein Ergebnis basiert auf deinen Antworten – ohne Bewertung. Ohne Konto und ohne KI.
-        </p>
-      </div>
-    </aside>
+    <ul className={cn("grid gap-6 sm:grid-cols-3", className)} data-testid="home-hero-benefits">
+      {items.map(({ icon: Icon, title, text }) => (
+        <li key={title} className="flex items-start gap-4">
+          <span className="w-12 h-12 rounded-full ring-1 ring-[#D4A537]/70 bg-white/[0.04] flex items-center justify-center shrink-0">
+            <Icon size={22} className="text-[#F2CF6C]" aria-hidden />
+          </span>
+          <span>
+            <span className="block text-lg font-semibold text-white">{title}</span>
+            <span className="block text-base text-white/75">{text}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -152,8 +144,8 @@ export default function HomePage() {
                 {BRAND.heroEyebrow}
               </p>
               <h1 className="text-display mb-4 md:mb-5 text-balance">
-                {BRAND.heroTitle.slice(0, BRAND.heroTitle.indexOf(",") + 1)}{" "}
-                <span className="gold-text">{BRAND.heroTitle.slice(BRAND.heroTitle.indexOf(",") + 2)}</span>
+                {BRAND.heroTitle.slice(0, BRAND.heroTitle.indexOf(".") + 1)}{" "}
+                <span className="gold-text">{BRAND.heroTitle.slice(BRAND.heroTitle.indexOf(".") + 2)}</span>
               </h1>
               <p className="text-body-lg text-white/90 leading-relaxed mb-6 md:mb-7 max-w-lg hidden sm:block">{BRAND.heroDescription}</p>
               <p className="text-base text-white/90 leading-relaxed mb-6 max-w-lg sm:hidden">{BRAND.heroDescriptionMobile}</p>
@@ -190,7 +182,7 @@ export default function HomePage() {
               />
             </figure>
           </div>
-          <HeroCheckInfoCard className="mt-10 md:mt-12" />
+          <HeroBenefits className="mt-10 md:mt-14" />
         </div>
       </section>
 
@@ -199,8 +191,7 @@ export default function HomePage() {
       <section className="py-10 md:py-18 bg-background">
         <div className="max-w-6xl mx-auto px-4">
           <SectionHeader
-            title="Was du damit erreichst"
-            description="Vier klare Ergebnisse — statt langer Listen."
+            title="Heute geregelt. Morgen eine Sorge weniger."
             accent={COLORS.emerald}
           />
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
@@ -220,13 +211,6 @@ export default function HomePage() {
                 <p className="text-body text-muted leading-relaxed flex-1">{o.description}</p>
               </article>
             ))}
-          </div>
-          <p className="text-body text-muted mt-8 max-w-3xl leading-relaxed">
-            Gedacht für Muslime in Deutschland — Eltern, Konvertierte, Alleinlebende und Familien mit unterschiedlichen
-            Hintergründen, die heute Klarheit schaffen wollen.
-          </p>
-          <div className="mt-10">
-            <FreeVsPaidSummary />
           </div>
         </div>
       </section>
@@ -271,53 +255,51 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <p className="text-sm text-muted mt-6">
-            Die einzelnen Bereiche öffnest du nach dem Check in deinem persönlichen Vorsorgeplan — nicht als gleichwertige Einstiege.
-          </p>
         </div>
       </section>
 
       <AkhiraSection />
 
       <section className="py-14 md:py-18 bg-background" data-testid="home-availability">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <SectionHeader
-            title="Was du heute nutzen kannst"
-            description="Was kostenlos ist, was in Vorbereitung ist und was noch auf eine fachliche Prüfung wartet."
+            title="Kostenlos beginnen. Einmal bezahlen, wenn du mehr brauchst."
+            description="Kein Abo. Wer später ein größeres Paket wählt, zahlt nur die Differenz."
             accent={COLORS.emerald}
           />
-          <div className="grid gap-5 md:grid-cols-3">
-            <article className="rounded-2xl border-2 border-emerald/40 bg-card p-6" data-testid="home-free">
-              <p className="text-xs font-bold uppercase tracking-wide text-emerald">Kostenlos</p>
-              <h3 className="text-card-title font-bold text-foreground mt-1">Dauerhaft frei</h3>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            <article className="gold-frame-strong rounded-2xl p-6" data-testid="home-free">
+              <p className="text-xs font-bold uppercase tracking-wider text-accent">Kostenlos</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">Basis</h3>
               <ul className="mt-4 space-y-2 text-sm text-muted">
                 {FREE_TITLES.map((t) => (
-                  <li key={t} className="flex gap-2"><span className="text-emerald font-bold" aria-hidden>✓</span>{t}</li>
-                ))}
-                <li className="flex gap-2 pt-2 border-t border-border"><span aria-hidden /> {START_ALWAYS_FREE}</li>
-              </ul>
-            </article>
-            <article className="rounded-2xl border-2 border-border bg-card p-6" data-testid="home-plus">
-              <p className="text-xs font-bold uppercase tracking-wide text-primary">Vorsorge Plus · ohne Preis, noch nicht buchbar</p>
-              <h3 className="text-card-title font-bold text-foreground mt-1">In Vorbereitung</h3>
-              <p className="text-sm text-muted mt-1">Kauf ist noch nicht möglich. Bis zum Start nutzt du diese Bereiche ohne Einschränkung.</p>
-              <ul className="mt-4 space-y-2 text-sm text-muted">
-                {START_PLUS_PLANNED.map((t) => (
-                  <li key={t} className="flex gap-2"><span aria-hidden>•</span>{t}</li>
+                  <li key={t} className="flex gap-2"><span className="text-accent font-bold" aria-hidden>✓</span>{t}</li>
                 ))}
               </ul>
+              <p className="text-xs text-muted mt-4 pt-3 border-t border-border">{START_ALWAYS_FREE}</p>
             </article>
-            <article className="rounded-2xl border-2 border-dashed border-border bg-card p-6" data-testid="home-pending">
-              <p className="text-xs font-bold uppercase tracking-wide text-muted">Noch nicht verfügbar</p>
-              <h3 className="text-card-title font-bold text-foreground mt-1">Wartet auf fachliche Freigabe</h3>
-              <ul className="mt-4 space-y-2 text-sm text-muted">
-                <li className="flex gap-2"><span aria-hidden>–</span>Islamische Fachartikel (Themen sind angelegt, Inhalte erst nach Prüfung durch Gelehrte)</li>
-                <li className="flex gap-2"><span aria-hidden>–</span>Vorbereitung des Testaments und Hinweise zum Erbe (nach juristischer Prüfung)</li>
-                <li className="flex gap-2"><span aria-hidden>–</span>Digitaler Zugang für Angehörige (Konzept in Prüfung, bis dahin teilt Wasiyya nichts online)</li>
+            <article className="on-dark rounded-2xl bg-navy text-white p-6 ring-1 ring-[#D4A537]/50" data-testid="home-plus">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#F2CF6C]">In Vorbereitung · einmalig</p>
+              <h3 className="text-card-title font-bold mt-1">Wasiyya Vorsorge</h3>
+              <ul className="mt-4 space-y-2 text-sm text-white/85">
+                {START_PLUS_PLANNED.slice(0, 3).map((t) => (
+                  <li key={t} className="flex gap-2"><span className="text-[#F2CF6C]" aria-hidden>✓</span>{t}</li>
+                ))}
               </ul>
+            </article>
+            <article className="gold-frame rounded-2xl p-6" data-testid="home-komplett">
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">In Vorbereitung · einmalig</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">Wasiyya Komplett</h3>
+              <p className="text-sm text-muted mt-3">Vorsorge und Testament vorbereiten. Die Testament-Vorbereitung folgt erst nach juristischer Prüfung.</p>
+            </article>
+            <article className="gold-frame rounded-2xl p-6" data-testid="home-pending">
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">Später · individuell</p>
+              <h3 className="text-card-title font-bold text-foreground mt-1">Premium – Rundum-sorglos</h3>
+              <p className="text-sm text-muted mt-3">Begleitet bis zum Notar, mit den Gesamtkosten vor dem Auftrag.</p>
             </article>
           </div>
-          <Link href="/preise" className="inline-block mt-8">
+          <p className="text-sm text-muted mt-6">{START_PLUS_STATUS}</p>
+          <Link href="/preise" className="inline-block mt-6">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               Pakete ansehen
             </Button>

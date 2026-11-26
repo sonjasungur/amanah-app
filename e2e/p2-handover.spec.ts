@@ -39,7 +39,9 @@ test("family guide is reachable from the completion page and prints as a documen
 test("homepage says what is free, what Plus is and what still waits for review", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByTestId("home-free")).toContainText("Kostenlos");
-  await expect(page.getByTestId("home-plus")).toContainText("Kauf ist noch nicht möglich");
-  await expect(page.getByTestId("home-pending")).toContainText("Wartet auf fachliche Freigabe");
+  await expect(page.getByTestId("home-plus")).toContainText("In Vorbereitung");
+  await expect(page.getByTestId("home-komplett")).toContainText("nach juristischer Prüfung");
+  await expect(page.getByTestId("home-pending")).toContainText("Später");
+  await expect(page.getByTestId("home-availability")).toContainText("noch nicht kaufen");
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
 });

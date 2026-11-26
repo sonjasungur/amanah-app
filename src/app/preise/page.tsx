@@ -3,7 +3,7 @@ import { BRAND } from "@/lib/brand";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { linkButtonClassName } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_KOMPLETT_PLANNED, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_PLANNED } from "@/lib/billing/start-offer";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
 import { Check } from "lucide-react";
 
@@ -17,8 +17,8 @@ export const metadata = publicPageMetadata("/preise");
  */
 const PRINCIPLES = [
   "Kein Abo",
-  "Keine Mitgliedsgebühr",
-  "Keine automatische Verlängerung",
+  "Einmal bezahlen",
+  "Upgrade: nur die Differenz zahlen",
   "Islamisches Wissen bleibt kostenlos",
 ] as const;
 
@@ -32,8 +32,12 @@ const FAQ: readonly { q: string; a: string }[] = [
     a: "Nein. Vorsorge-Check, Notfallkarte und Vermögensübersicht sind kostenlos. Für den Check brauchst du kein Konto.",
   },
   {
-    q: "Was passiert mit meinen Angaben, wenn Vorsorge Plus kommt?",
-    a: "Was du gespeichert hast, bleibt lesbar. Export und Löschen bleiben immer kostenlos. Bestehende Konten behalten die Funktionen, die vor der Einführung von Vorsorge Plus verfügbar waren.",
+    q: "Was passiert mit meinen Angaben, wenn die Pakete kommen?",
+    a: "Was du gespeichert hast, bleibt lesbar. Export und Löschen bleiben immer kostenlos. Bestehende Konten behalten die Funktionen, die vor der Einführung der Pakete verfügbar waren.",
+  },
+  {
+    q: "Kann ich später ein größeres Paket wählen?",
+    a: "Ja. Du zahlst dann nur die Differenz zu dem Paket, das du schon hast.",
   },
   {
     q: "Erstellt Wasiyya ein Testament?",
@@ -67,8 +71,8 @@ export default function PreisePage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        <div className="grid gap-6 lg:gap-7 lg:grid-cols-3 items-stretch">
-          <article className="gold-frame-strong rounded-3xl p-7 md:p-9 shadow-[0_24px_60px_-24px_rgba(11,18,38,0.35)] flex flex-col" data-testid="pricing-basis">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4 items-stretch">
+          <article className="gold-frame-strong rounded-3xl p-7 flex flex-col shadow-[0_24px_60px_-24px_rgba(11,18,38,0.35)]" data-testid="pricing-basis">
             <p className="inline-block self-start px-3 py-1 rounded-full wasiyya-cta text-xs font-bold uppercase tracking-wider">Kostenlos</p>
             <h2 className="text-section-title text-primary-dark mt-4">Basis</h2>
             <p className="text-body text-muted mt-1">Für alle, die jetzt beginnen wollen.</p>
@@ -84,15 +88,15 @@ export default function PreisePage() {
               ))}
             </ul>
             <p className="mt-6 text-sm text-muted border-t border-border pt-4">{START_ALWAYS_FREE}</p>
-            <Link href="/check" className="wasiyya-cta mt-6 inline-flex items-center justify-center rounded-xl font-bold min-h-[52px] px-6 text-center">
+            <Link href="/check" className="wasiyya-cta mt-6 inline-flex items-center justify-center rounded-xl font-bold min-h-[52px] px-5 text-center">
               {BRAND.ctaPrimary}
             </Link>
           </article>
 
-          <article className="on-dark rounded-3xl bg-[radial-gradient(ellipse_at_50%_0%,#24336B,#0E1630_60%,#0B1226)] text-white p-7 md:p-9 ring-1 ring-[#D4A537]/50 shadow-[0_30px_70px_-24px_rgba(11,18,38,0.6)] flex flex-col" data-testid="pricing-plus">
-            <p className="inline-block self-start px-3 py-1 rounded-full ring-1 ring-[#F2CF6C]/60 text-[#F2CF6C] text-xs font-bold uppercase tracking-wider">In Vorbereitung</p>
-            <h2 className="text-section-title mt-4">Vorsorgeordner</h2>
-            <p className="text-body text-white/80 mt-1">Vorsorge Plus – einmal bezahlt, ohne Abo. Geplant sind:</p>
+          <article className="on-dark rounded-3xl bg-[radial-gradient(ellipse_at_50%_0%,#24336B,#0E1630_60%,#0B1226)] text-white p-7 ring-1 ring-[#D4A537]/50 shadow-[0_30px_70px_-24px_rgba(11,18,38,0.6)] flex flex-col" data-testid="pricing-plus">
+            <p className="inline-block self-start px-3 py-1 rounded-full ring-1 ring-[#F2CF6C]/60 text-[#F2CF6C] text-xs font-bold uppercase tracking-wider">In Vorbereitung · einmalig</p>
+            <h2 className="text-section-title mt-4">Wasiyya Vorsorge</h2>
+            <p className="text-body text-white/80 mt-1">Dein vollständiger Vorsorgeordner.</p>
             <ul className="mt-6 space-y-3 flex-1">
               {START_PLUS_PLANNED.map((t) => (
                 <li key={t} className="flex gap-3 text-white/90">
@@ -106,14 +110,34 @@ export default function PreisePage() {
             </p>
           </article>
 
-          <article className="gold-frame rounded-3xl p-7 md:p-9 flex flex-col" data-testid="pricing-later">
-            <p className="inline-block self-start px-3 py-1 rounded-full bg-accent-soft text-primary text-xs font-bold uppercase tracking-wider">Später</p>
-            <h2 className="text-section-title text-primary-dark mt-4">Testament vorbereiten</h2>
-            <p className="text-body text-muted mt-1 flex-1">
-              Eine islamisch durchdachte Vorbereitung deines Testaments folgt erst nach juristischer Prüfung. Auch sie
-              wird kein Abo. Das Testament selbst entsteht immer bei dir, beim Notar oder mit einer Kanzlei.
-            </p>
-            <p className="mt-6 text-sm text-muted border-t border-border pt-4">Noch nicht verfügbar.</p>
+          <article className="gold-frame rounded-3xl p-7 flex flex-col" data-testid="pricing-komplett">
+            <p className="inline-block self-start px-3 py-1 rounded-full bg-accent-soft text-primary text-xs font-bold uppercase tracking-wider">In Vorbereitung · einmalig</p>
+            <h2 className="text-section-title text-primary-dark mt-4">Wasiyya Komplett</h2>
+            <p className="text-body text-muted mt-1">Vorsorge und Testament vorbereiten.</p>
+            <ul className="mt-6 space-y-3 flex-1">
+              {START_KOMPLETT_PLANNED.map((t) => (
+                <li key={t} className="flex gap-3 text-foreground">
+                  <Check size={20} className="text-accent shrink-0 mt-0.5" aria-hidden />
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-sm text-muted border-t border-border pt-4">Die Testament-Vorbereitung folgt erst nach juristischer Prüfung.</p>
+          </article>
+
+          <article className="gold-frame rounded-3xl p-7 flex flex-col" data-testid="pricing-later">
+            <p className="inline-block self-start px-3 py-1 rounded-full bg-accent-soft text-primary text-xs font-bold uppercase tracking-wider">Später · individuell</p>
+            <h2 className="text-section-title text-primary-dark mt-4">Premium – Rundum-sorglos</h2>
+            <p className="text-body text-muted mt-1">Begleitet bis zum Notar.</p>
+            <ul className="mt-6 space-y-3 flex-1">
+              {START_PREMIUM_PLANNED.map((t) => (
+                <li key={t} className="flex gap-3 text-foreground">
+                  <Check size={20} className="text-accent shrink-0 mt-0.5" aria-hidden />
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-sm text-muted border-t border-border pt-4">Das Testament selbst entsteht immer bei dir, beim Notar oder mit einer Kanzlei. Noch nicht verfügbar.</p>
           </article>
         </div>
 

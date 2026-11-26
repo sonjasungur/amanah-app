@@ -39,10 +39,13 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
     expect(read("src/components/check/amanah-check.tsx")).not.toContain("Amanah-Check");
   });
 
-  it("homepage replaces fake progress hero card with check outcome info", () => {
+  it("homepage shows three hero benefits instead of a fake progress card (owner order 26.11.2026)", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain("Nach dem kostenlosen Check weißt du:");
-    expect(home).toContain("Dein Ergebnis basiert auf deinen Antworten");
+    expect(home).toContain("Klare nächste Schritte");
+    expect(home).toContain("Wenige Minuten");
+    expect(home).toContain("Kostenlos starten");
+    expect(home).toContain('data-testid="home-hero-benefits"');
+    expect(home).not.toContain("Nach dem kostenlosen Check weißt du");
     expect(home).not.toContain("Dein nächster Schritt");
     expect(home).not.toMatch(/pct|Fortschritt.*%/);
   });

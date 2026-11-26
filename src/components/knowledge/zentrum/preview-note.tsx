@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 /** A calm, always visible note: this is a preview of unpublished, not yet reviewed drafts. One line on phones. */
 export function PreviewNote() {
   return (
@@ -9,6 +11,9 @@ export function PreviewNote() {
           <span className="hidden sm:inline"> · Entwurf, fachliche Prüfung durch islamische Fachpersonen und Juristen steht aus. Keine Fatwa, keine Rechtsberatung.</span>
           <span className="sm:hidden"> · fachlich noch ungeprüft</span>
         </span>
+        <Link href="/wissen/redaktion/artikel" className="ml-auto shrink-0 font-semibold underline decoration-[var(--wz-gold)] underline-offset-2" data-testid="preview-editorial-link">
+          Redaktion
+        </Link>
       </p>
     </div>
   );

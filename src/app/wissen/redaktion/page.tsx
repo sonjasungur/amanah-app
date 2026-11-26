@@ -4,6 +4,9 @@ import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { getSourcesByIds } from "@/lib/knowledge/sources";
 import { KNOWLEDGE_AREAS, STATUS_LABELS, getEditorialQueue, getSourceCheck } from "@/modules/islamic-knowledge";
 
+/** Decided per request: the preview switch is read at runtime (staging), never baked in at build time. */
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Redaktion Wissenszentrum — intern",
   robots: { index: false, follow: false },

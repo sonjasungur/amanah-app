@@ -16,41 +16,52 @@ export interface OfferItem {
 export const START_BASIS: readonly OfferItem[] = [
   {
     title: "Vorsorge-Check",
-    text: "In wenigen Minuten siehst du, was noch fehlt, und bekommst einen klaren nächsten Schritt. Ohne Konto.",
+    text: "In wenigen Minuten siehst du, was noch fehlt. Ohne Konto.",
     features: ["vorsorge_check"],
   },
   {
-    title: "Notfallkarte",
-    text: "Die wichtigsten Angaben für den Ernstfall, im Konto gespeichert und zum Ausdrucken.",
-    features: ["vorsorge_start"],
+    title: "Erste Orientierung",
+    text: "Dein Ergebnis mit klaren Prioritäten und dem nächsten Schritt.",
+    features: ["vorsorge_check"],
   },
   {
-    title: "Vermögensübersicht",
-    text: "Eine Bestandsaufnahme mit einfachem Ausdruck. Sie ist kein Testament.",
-    features: ["asset_overview"],
+    title: "Hilfe im Todesfall",
+    text: "„Jemand ist gestorben – was jetzt?“: die ersten Schritte für Angehörige.",
+    features: ["inheritance_janazah_info"],
   },
   {
-    title: "Familiengespräche festhalten",
-    text: "Wann ihr gesprochen habt, worüber und was noch offen ist.",
-    features: ["family_conversation_record"],
-  },
-  {
-    title: "„Jemand ist gestorben – was jetzt?“",
-    text: "Die ersten Schritte für Angehörige.",
+    title: "Islamisches Wissen",
+    text: "Themenseiten zu Janazah, Erbe und Akhira. Das Wissenszentrum folgt nach fachlicher Prüfung – immer kostenlos.",
     features: ["inheritance_janazah_info"],
   },
 ];
 
 export const START_ALWAYS_FREE = "Immer kostenlos: deine Daten exportieren, löschen und die Einwilligung widerrufen.";
 
-/** Planned Plus content in plain words; no price and no purchase until the owner releases them. */
+/**
+ * Planned paid packages (owner decision 26.11.2026): Wasiyya Vorsorge, Wasiyya Komplett, Premium – each paid
+ * once, no subscription, upgrade by paying the difference. Shown without price and without purchase until the
+ * owner releases price, terms and payment. START_PLUS_PLANNED is the content of "Wasiyya Vorsorge".
+ */
 export const START_PLUS_PLANNED: readonly string[] = [
   "Dein vollständiger Vorsorgeordner, verschlüsselt im Konto gespeichert",
-  "Deine Wünsche zu Janazah, Ghusl und Kafan, Bestattung oder Überführung",
-  "Krankheit und Patientenverfügung, Vollmacht und Betreuung als Notizen (keine rechtlichen Dokumente)",
-  "Schulden und Amanah, digitaler Nachlass, Familie und Vertrauenspersonen",
-  "Brief an deine Familie und Druckmappe für Angehörige",
+  "Notfallkarte, Vermögensübersicht, Dokumente, Schulden und Amanah",
+  "Janazah, Ghusl und Kafan, Bestattung oder Überführung",
+  "Krankheit, Vollmacht und Betreuung als Notizen (keine rechtlichen Dokumente)",
+  "Familienbrief, Vertrauenspersonen und professionelle Druckmappe für Angehörige",
+];
+
+export const START_KOMPLETT_PLANNED: readonly string[] = [
+  "Alles aus Wasiyya Vorsorge",
+  "Islamische Nachlassplanung: Familie, Vermögen, Wünsche und das Wasiyya-Drittel",
+  "Testament vorbereiten – Gesprächsunterlage für Notar oder Kanzlei",
+];
+
+export const START_PREMIUM_PLANNED: readonly string[] = [
+  "Alles aus Wasiyya Komplett",
+  "Persönliche Begleitung bis zur Beurkundung",
+  "Gesamtkosten vor dem Auftrag: eigene Leistung, Notar nach Gesetz, bei Bedarf Kanzlei",
 ];
 
 export const START_PLUS_STATUS =
-  "Vorsorge Plus kann man noch nicht kaufen. Preis und Bedingungen nennen wir, bevor es buchbar wird. Bis dahin nutzt du alle Bereiche ohne Einschränkung.";
+  "Die Pakete kann man noch nicht kaufen. Preise und Bedingungen nennen wir, bevor sie buchbar sind. Bis dahin nutzt du alle Bereiche ohne Einschränkung.";

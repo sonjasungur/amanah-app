@@ -556,24 +556,25 @@ body {
    gedämpfter Text #555c6b ≈ 6:1, Goldtext #7a571b ≈ 6,3:1.
    Gold #c9a04a nur für Linien, Flächen und Symbole, nie als Textfarbe (zu wenig Kontrast). */
 .wz {
-  --wz-green: #1f2c4a;
-  --wz-green-dark: #1a2440;
-  --wz-green-soft: #eceff5;
-  --wz-gold: #c9a04a;
-  --wz-gold-text: #7a571b;
-  --wz-gold-soft: #f8edd4;
-  --wz-cream: #fdfaf3;
+  /* Royal Imperial (owner 26.11.2026): night blue, strong gold, white reading surface, no beige. */
+  --wz-green: #142048;
+  --wz-green-dark: #0B1226;
+  --wz-green-soft: #EEF1F7;
+  --wz-gold: #D4A537;
+  --wz-gold-text: #7E5812;
+  --wz-gold-soft: #F6EFD9;
+  --wz-cream: #F6F7FA;
   --wz-paper: #ffffff;
-  --wz-ink: #1c2233;
-  --wz-muted: #555c6b;
-  --wz-line: #ece3cf;
+  --wz-ink: #0E1630;
+  --wz-muted: #48516F;
+  --wz-line: #E2E6EF;
   background: var(--wz-cream);
   color: var(--wz-ink);
-  font-family: var(--font-doc-sans), system-ui, sans-serif;
-  font-size: 1.0625rem;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.125rem;
   line-height: 1.7;
 }
-.wz-serif { font-family: var(--font-doc-serif), Georgia, serif; }
+.wz-serif { font-family: var(--font-display), Georgia, serif; font-weight: 400; font-synthesis: none; }
 .wz-arabic { font-family: var(--font-arabic), "Noto Naskh Arabic", serif; }
 .wz-measure { max-width: 68ch; }
 .wz-eyebrow { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--wz-gold-text); }
@@ -595,9 +596,14 @@ body {
 .wz details > summary { list-style: none; cursor: pointer; }
 .wz details > summary::-webkit-details-marker { display: none; }
 .wz-hairline { border: 0; border-top: 1px solid var(--wz-line); }
-.wz-hero { background: radial-gradient(1200px 400px at 85% -10%, rgba(201, 154, 62, .16), transparent 60%), linear-gradient(180deg, #fffdf8 0%, var(--wz-cream) 100%); }
+.wz-hero { background: radial-gradient(ellipse 55% 65% at 80% 30%, rgba(242, 207, 108, .18) 0%, transparent 70%), radial-gradient(ellipse at 70% 25%, #1F2C5C 0%, #0E1630 48%, #070C1C 100%); color: #fff; }
+.wz-hero h1, .wz-hero h2 { color: #fff; }
+.wz-hero .wz-eyebrow { color: #F2CF6C; }
+.wz-hero p { color: rgba(255,255,255,.85); }
+.wz-hero a.wz-text-link, .wz-hero summary { color: #F2CF6C; }
+.wz-hero a.wz-text-link:hover, .wz-hero summary:hover { color: #fff; }
 .wz-topic { position: relative; overflow: hidden; }
 .wz-topic::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--wz-gold); opacity: .85; }
-.wz-verse-panel { background: linear-gradient(180deg, #fffdf7, #fbf3e2); border-top: 2px solid var(--wz-gold); border-bottom: 1px solid var(--wz-line); }
+.wz-verse-panel { background: linear-gradient(180deg, #ffffff, #F6F7FA); border-top: 2px solid var(--wz-gold); border-bottom: 1px solid var(--wz-line); }
 .wz-prose { max-width: 38rem; margin-inline: auto; }
 .wz-prose p + p { margin-top: 1.1rem; }

@@ -12,11 +12,11 @@ export const BRAND = {
   tagline: "Islamische Vorsorge für Notfall, Janazah und Akhira",
   heroEyebrow: "ISLAMISCHE VORSORGE",
   claim: "Ich entscheide heute, was später wichtig ist.",
-  heroTitle: "Damit meine Familie weiß, was mir wichtig ist.",
+  heroTitle: "Heute vorsorgen. Morgen deine Familie entlasten.",
   heroDescription:
-    "Halte fest, wer für dich handeln darf und welche persönlichen und islamischen Wünsche deine Familie kennen soll.",
+    "Regle deine persönlichen und islamischen Wünsche für Krankheit, Notfall und die Zeit nach deinem Tod – Schritt für Schritt, an einem sicheren Ort.",
   heroDescriptionMobile:
-    "Festhalten, wer handeln darf und welche Wünsche deine Familie kennen soll.",
+    "Regle deine persönlichen und islamischen Wünsche – Schritt für Schritt, an einem sicheren Ort.",
   description:
     "Halte fest, wer für dich handeln darf, wo wichtige Dokumente liegen und welche persönlichen und islamischen Wünsche berücksichtigt werden sollen.",
   trustLine: "Für Muslime in Deutschland · Zur Orientierung · Vertraulich",

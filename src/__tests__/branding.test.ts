@@ -45,9 +45,9 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
     expect(BRAND.fullName).toBe("Wasiyya – Islamische Vorsorge und Testament");
     expect(BRAND.subtitle).toBe("Islamische Vorsorge für Notfall, Janazah und Akhira");
     expect(BRAND.claim).toBe("Ich entscheide heute, was später wichtig ist.");
-    expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
+    expect(BRAND.heroTitle).toBe("Heute vorsorgen. Morgen deine Familie entlasten.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
-    expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
+    expect(BRAND.heroDescription).toContain("Regle deine persönlichen und islamischen Wünsche");
     expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
     expect(BRAND.metadataTitle).toBe("Wasiyya – Islamische Vorsorge und Testament");
     expect(BRAND.themeColor).toBe("#0B1226");
@@ -116,8 +116,9 @@ describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
     expect(home).toContain("START_PLUS_PLANNED");
     expect(home).not.toContain("getTestPriceCents");
     expect(home).toContain("In Vorbereitung");
-    expect(home).toContain("Kauf ist noch nicht möglich");
-    expect(home).toContain("Wartet auf fachliche Freigabe");
+    // Packages (owner 26.11.2026): no purchase yet, will preparation only after legal review.
+    expect(home).toContain("START_PLUS_STATUS");
+    expect(home).toContain("nach juristischer Prüfung");
     expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
     expect(home).not.toContain("Details");
   });

@@ -43,7 +43,7 @@
     "paragraphs": [
      {
       "kind": "einleitung",
-      "text": "Wenn du nichts geregelt hast, entscheiden andere nach festen Regeln für dich. Dein Vermögen geht nach der gesetzlichen Erbfolge des deutschen Rechts an Ehepartner und Verwandte. Diese Anteile sind andere als die Anteile, die der Qurʾān nennt. Wer wo bestattet wird, entscheiden zuerst die Angehörigen in einer Reihenfolge, die das Landesrecht festlegt; findet sich niemand, veranlasst die Gemeinde die Bestattung. Für minderjährige Kinder bestellt das Familiengericht einen Vormund, und für deine Gesundheit kann ein gerichtlich bestellter Betreuer zuständig werden."
+      "text": "Wenn du nichts geregelt hast, entscheiden andere nach festen Regeln für dich. Dein Vermögen geht nach der gesetzlichen Erbfolge des deutschen Rechts an Ehepartner und Verwandte. Diese Anteile sind andere als die Anteile, die der Qurʾān nennt. Wie und wo du bestattet wirst, entscheiden zuerst deine Angehörigen in einer Reihenfolge, die das Landesrecht festlegt; findet sich niemand, veranlasst die Gemeinde die Bestattung. Für minderjährige Kinder bestellt das Familiengericht einen Vormund, und für deine Gesundheit kann ein gerichtlich bestellter Betreuer zuständig werden."
      },
      {
       "kind": "einleitung",
@@ -51,7 +51,7 @@
      },
      {
       "kind": "einleitung",
-      "text": "Fünf Familienbeispiele zeigen, was ohne Regelung passiert; zu jedem Thema folgt ein nächster Schritt. Das ist keine Rechtsberatung und keine Fatwa: Die juristische Einordnung ist nicht juristisch geprüft, islamische Erbanteile im Einzelfall berechnen fachkundige Gelehrte."
+      "text": "Fünf Familienbeispiele zeigen, was ohne Regelung passiert; zu jedem Thema folgt ein nächster Schritt. Das ist keine Rechtsberatung und keine Fatwa: Die rechtlichen Angaben sind nicht juristisch geprüft, und islamische Erbanteile im Einzelfall berechnen fachkundige Gelehrte."
      }
     ]
    },
@@ -1055,6 +1055,14 @@
      "L-BGB-1827",
      "L-BGB-1358"
     ]
+   },
+   {
+    "question": "einleitung[1] sagt, Schulden, anvertraute Güter und ein Vermächtnis hätten „nach dem Qurʾān“ ihren festen Platz vor der Erbverteilung; 4:11/4:12 nennen nur Vermächtnis und Schuld: Soll „nach dem Qurʾān“ auf Schuld und Vermächtnis beschränkt oder für anvertraute Güter ein eigener Beleg (z. B. 4:58) ergänzt werden?",
+    "for": "redaktion",
+    "refs": [
+     "Q4:11",
+     "Q4:12"
+    ]
    }
   ],
   "status": "DRAFT",
@@ -1393,7 +1401,7 @@
       },
       {
        "kind": "praxis",
-       "text": "Für Trauernde ist wichtig: Tränen und Schmerz widersprechen der Geduld nicht – der Prophet ﷺ hat geweint und es Barmherzigkeit genannt. Geduld heißt, nicht an Allah zu verzweifeln und das Gebet aus 2:156 und Muslim 918a zu sprechen, auch wenn es schwerfällt."
+       "text": "Wenn du trauerst: Tränen und Schmerz widersprechen der Geduld nicht – der Prophet ﷺ hat geweint und es Barmherzigkeit genannt. Geduld heißt, nicht an Allah zu verzweifeln und das Gebet aus 2:156 und Muslim 918a zu sprechen, auch wenn es schwerfällt."
       }
      ]
     },
@@ -1417,7 +1425,7 @@
      "paragraphs": [
       {
        "kind": "amanah",
-       "text": "Wasiyya soll helfen, das Gedenken an den Tod in konkrete Schritte zu übersetzen. Du kannst Schulden und anvertraute Güter dokumentieren, deine Wünsche zur Waschung, zum Totengebet und zur Bestattung festhalten, Vertrauenspersonen benennen und vermerken, wo dein Testament liegt. So weiß deine Familie im Ernstfall, was dir wichtig war."
+       "text": "Wasiyya hilft dir, aus dem Gedenken an den Tod konkrete Schritte zu machen. Du kannst Schulden und anvertraute Güter dokumentieren, deine Wünsche zur Waschung, zum Totengebet und zur Bestattung festhalten, Vertrauenspersonen benennen und vermerken, wo dein Testament liegt. So weiß deine Familie im Ernstfall, was dir wichtig war."
       },
       {
        "kind": "amanah",
@@ -2580,6 +2588,14 @@
       "Q4:78",
       "Q31:34"
      ]
+    },
+    {
+     "question": "sunnah[0] und kontext[1] verwenden at-Tirmiḏī 2307 („Gedenkt häufig des Zerstörers der Genüsse“), der nicht zu den zugelassenen Hadith-Quellen (nur Bukhari und Muslim) gehört: Soll der Hadith entfernt oder durch eine Überlieferung aus Bukhari/Muslim zum Gedenken an den Tod (z. B. Bukhari 6416) ersetzt werden?",
+     "for": "redaktion",
+     "refs": [
+      "TI2307",
+      "B6416"
+     ]
     }
    ],
    "status": "DRAFT",
@@ -2629,7 +2645,7 @@
      "paragraphs": [
       {
        "kind": "erklaerung",
-       "text": "Die islamische Bestattung folgt einer festen Reihenfolge: Der Verstorbene wird gewaschen, in schlichte Tücher gehüllt, die Gemeinschaft betet für ihn das Totengebet, und er wird ohne unnötige Verzögerung in der Erde beigesetzt. Das sind Aufgaben der Lebenden. Wer seine Wünsche festhält, nimmt den Angehörigen nichts davon ab, aber er erleichtert ihnen, in einer belastenden Lage das Richtige zu tun."
+       "text": "Die islamische Bestattung folgt einer festen Reihenfolge: Der Verstorbene wird gewaschen, in schlichte Tücher gehüllt, die Gemeinschaft betet für ihn das Totengebet, und er wird ohne unnötige Verzögerung in der Erde beigesetzt. Das sind Aufgaben der Lebenden. Wenn du deine Wünsche festhältst, nimmst du deinen Angehörigen nichts davon ab. Du machst es ihnen aber leichter, in einer belastenden Lage das Richtige zu tun."
       }
      ]
     },
@@ -2938,7 +2954,7 @@
      "paragraphs": [
       {
        "kind": "praxis",
-       "text": "Schreib eine eigene Bestattungsverfügung: kurz, klar, mit Datum, Ort und Unterschrift. Eine Form schreiben die gelesenen Landesgesetze nicht vor; die Unterschrift macht den Wunsch aber nachweisbar. Bei Änderungen eine neue Fassung schreiben und die alte vernichten."
+       "text": "Schreib eine eigene Bestattungsverfügung: kurz, klar, mit Datum, Ort und Unterschrift. Eine Form schreiben die gelesenen Landesgesetze nicht vor; die Unterschrift macht den Wunsch aber nachweisbar. Willst du etwas ändern, schreib eine neue Fassung und vernichte die alte."
       },
       {
        "kind": "praxis",
@@ -3493,6 +3509,28 @@
       "M941a",
       "M970a"
      ]
+    },
+    {
+     "question": "einleitung[2] und recht-hinweis[0] stellen den Vorrang des Willens der Verstorbenen allgemein für die „gelesenen Landesgesetze“ dar, belegt ist er aber nur für NRW und Bayern: Sollen beide Absätze auf NRW und Bayern beschränkt werden, bis die Regelungen in Baden-Württemberg, Berlin, Hessen und Niedersachsen gelesen sind?",
+     "for": "redaktion",
+     "refs": [
+      "L-NW",
+      "L-BY"
+     ]
+    },
+    {
+     "question": "wuensche[0] sagt ohne Beleg „Nach der Sunna waschen Frauen eine verstorbene Frau“: Wer darf eine verstorbene Frau bzw. einen verstorbenen Mann waschen (insbesondere der Ehepartner), welche Ausnahmen gibt es nach den Rechtsschulen, und kann B1253 als Beleg dienen?",
+     "for": "gelehrte",
+     "refs": [
+      "B1253"
+     ]
+    },
+    {
+     "question": "Widerspruch zwischen Artikeln: auffassungen[0] (fiqh) sagt nach Dār al-Iftāʾ 8092, nach hanafitischer Lehre werde der Sarg bei Frauen unabhängig von Notwendigkeit bevorzugt; p27-f-fatwas fatwa[6] sagt nach IslamQA 34511, der Sarg sei ohne Bedarf „nach einhelliger Auffassung verpönt“. Welche Darstellung ist zutreffend, und wie sollen beide Artikel angeglichen werden?",
+     "for": "gelehrte",
+     "refs": [
+      "F-daralifta-8092"
+     ]
     }
    ],
    "status": "DRAFT",
@@ -3527,7 +3565,7 @@
       },
       {
        "kind": "einleitung",
-       "text": "Kein Dokument ersetzt ein anderes. Wer nur ein Testament hat, ist im Krankheitsfall nicht vorbereitet; wer nur einen Brief schreibt, hat rechtlich gar nichts geregelt. Die Angaben zum deutschen Recht beruhen auf dem abgerufenen Gesetzeswortlaut, sind aber nicht juristisch geprüft und ersetzen keine Beratung durch Anwalt oder Notar."
+       "text": "Kein Dokument ersetzt ein anderes. Hast du nur ein Testament, bist du für den Krankheitsfall nicht vorbereitet. Schreibst du nur einen Brief, hast du rechtlich nichts geregelt. Die Angaben zum deutschen Recht beruhen auf dem abgerufenen Gesetzeswortlaut, sind aber nicht juristisch geprüft und ersetzen keine Beratung durch Anwalt oder Notar."
       }
      ]
     },
@@ -4215,6 +4253,13 @@
      "refs": [
       "B893"
      ]
+    },
+    {
+     "question": "ueberblick[3] und praxis[0] empfehlen eine Patientenverfügung ohne islamische Einordnung: Welche Festlegungen darin sind islamisch zulässig, insbesondere Verzicht auf oder Abbruch von lebenserhaltenden Maßnahmen und künstliche Ernährung?",
+     "for": "gelehrte",
+     "refs": [
+      "L1"
+     ]
     }
    ],
    "status": "DRAFT",
@@ -4249,7 +4294,7 @@
       },
       {
        "kind": "einleitung",
-       "text": "Wer sich an den islamischen Anteilen orientieren möchte, braucht deshalb ein formwirksames Testament – und muss wissen, dass auch ein Testament Grenzen hat, vor allem den Pflichtteil naher Angehöriger. Dieser Artikel erklärt die Grundlagen. Er ist keine Rechtsberatung und nicht juristisch geprüft. Die Anteile für deine Familie sollte eine fachkundige Person berechnen, und das Testament solltest du mit einem Notariat oder einer Anwältin bzw. einem Anwalt für Erbrecht besprechen."
+       "text": "Willst du dich an den islamischen Anteilen orientieren, brauchst du deshalb ein formwirksames Testament. Auch ein Testament hat aber Grenzen, vor allem den Pflichtteil naher Angehöriger. Dieser Artikel erklärt die Grundlagen. Er ist keine Rechtsberatung und nicht juristisch geprüft. Die Anteile für deine Familie sollte eine fachkundige Person berechnen, und das Testament solltest du mit einem Notariat oder einer Anwältin bzw. einem Anwalt für Erbrecht besprechen."
       }
      ]
     },
@@ -4454,7 +4499,7 @@
         "L-BGB-2247",
         "L-BGB-125"
        ],
-       "text": "Ein Testament wird in ordentlicher Form entweder zur Niederschrift eines Notars oder eigenhändig errichtet (§ 2231 BGB). Das eigenhändige Testament muss vollständig eigenhändig geschrieben und unterschrieben sein (§ 2247 Abs. 1 BGB). Ein Rechtsgeschäft, dem die gesetzlich vorgeschriebene Form fehlt, ist nichtig (§ 125 BGB). Ein am Computer geschriebenes und nur unterschriebenes „Testament“ wirkt deshalb nicht – dann gilt dasselbe, als gäbe es kein Testament."
+       "text": "Ein Testament wird in ordentlicher Form entweder zur Niederschrift eines Notars oder eigenhändig errichtet (§ 2231 BGB). Das eigenhändige Testament muss vollständig eigenhändig geschrieben und unterschrieben sein (§ 2247 Abs. 1 BGB). Ein Rechtsgeschäft, dem die gesetzlich vorgeschriebene Form fehlt, ist nichtig (§ 125 BGB). Ein am Computer geschriebenes und nur unterschriebenes „Testament“ wirkt deshalb nicht – dann gilt dasselbe wie ohne Testament."
       },
       {
        "kind": "recht",
@@ -5119,6 +5164,13 @@
       "T4:12",
       "T4:176"
      ]
+    },
+    {
+     "question": "hadith[1] stellt nach Bukhari 6764 die Religionsverschiedenheit ohne Hinweis auf Meinungsunterschiede als Erbhindernis dar: Gibt es belegte abweichende Auffassungen (etwa zum Erben eines Muslims von einem Nichtmuslim), oder lässt sich ein Konsens mit Quelle belegen?",
+     "for": "gelehrte",
+     "refs": [
+      "B6764"
+     ]
     }
    ],
    "status": "DRAFT",
@@ -5279,7 +5331,7 @@
         "L-BGB-1937",
         "L-BGB-1939"
        ],
-       "text": "Die Begriffe decken sich nicht. Die islamische Waṣiyya ist das Vermächtnis bis zu einem Drittel, vor allem für Nichterben und gute Zwecke; die Erbanteile stehen fest. Im BGB bestimmt das Testament die Erben (Erbeinsetzung), und ein „Vermächtnis“ ist eine Zuwendung an jemanden, der nicht Erbe wird. Wer islamisch geprägte Wünsche festhält, sollte sie daher in die Begriffe des BGB übersetzen lassen. Dass ein Testament vorher fachlich geprüft wird, entspricht dem Gedanken aus 2:182, Unrecht im Vermächtnis zu vermeiden."
+       "text": "Die Begriffe decken sich nicht. Die islamische Waṣiyya ist das Vermächtnis bis zu einem Drittel, vor allem für Nichterben und gute Zwecke; die Erbanteile stehen fest. Im BGB bestimmt das Testament die Erben (Erbeinsetzung), und ein „Vermächtnis“ ist eine Zuwendung an jemanden, der nicht Erbe wird. Wenn du islamisch geprägte Wünsche festhältst, lass sie daher in die Begriffe des BGB übersetzen. Dass ein Testament vorher fachlich geprüft wird, entspricht dem Gedanken aus 2:182, Unrecht im Vermächtnis zu vermeiden."
       },
       {
        "kind": "kontext",
@@ -7705,6 +7757,17 @@
       "F-nawawi-11-77",
       "F-bulugh-194"
      ]
+    },
+    {
+     "question": "Die Kernaussage „kein Vermächtnis an einen Erben“ in einleitung[1], kontext[0], summary und nextStep stützt sich auf Sunan Abī Dāwūd 3565/2870 und at-Tirmiḏī 2121, die nicht zu den zugelassenen Hadith-Quellen (nur Bukhari und Muslim) gehören: Lässt der Owner hier eine Ausnahme zu, oder sollen die Absätze auf Bukhari 2747 und Ibn Kaṯīr zu 2:180 umgestellt und die Sunan-Hadithe nur noch als von Ibn Kaṯīr angeführt erwähnt werden?",
+     "for": "redaktion",
+     "refs": [
+      "AD3565",
+      "AD2870",
+      "TI2121",
+      "B2747",
+      "T2:180"
+     ]
     }
    ],
    "status": "DRAFT",
@@ -8434,6 +8497,49 @@
       "L-BGB-2231",
       "L-BGB-2247"
      ]
+    },
+    {
+     "question": "einleitung[0] nennt als Übereinstimmung, dass ein Vermächtnis an einen Erben nur mit Zustimmung der übrigen Erben nach dem Tod gilt; nach al-Muġnī 6/141 und 6/147 (vgl. p25-a-wasiyya) gibt es abweichende Auffassungen (Zustimmung in der letzten Krankheit oder zu Lebzeiten; Nichtigkeit auch mit Zustimmung): Soll die Aussage als Mehrheitsmeinung gekennzeichnet werden?",
+     "for": "redaktion",
+     "refs": [
+      "F-islamqa-612406"
+     ]
+    },
+    {
+     "question": "einleitung[0] und fatwa[3] stellen unbezahlte Zakat übereinstimmend als Nachlassschuld vor Vermächtnis und Erbe dar: Gilt das nach allen Rechtsschulen, oder entfällt die Zakat-Schuld nach hanafitischer Lehre mit dem Tod, wenn sie nicht vermacht wurde (mit Quelle prüfen)?",
+     "for": "gelehrte",
+     "refs": [
+      "F-islamqa-270056"
+     ]
+    },
+    {
+     "question": "praxis[1] sagt „Nach den zitierten Fatwas ist ein solcher Wunsch zu beachten“, ausdrücklich belegt ist die Bindung an den schriftlichen Bestattungs- bzw. Überführungswunsch aber nur durch IslamQA 8852: Soll die Formulierung auf diese Quelle eingegrenzt werden?",
+     "for": "redaktion",
+     "refs": [
+      "F-islamqa-8852"
+     ]
+    },
+    {
+     "question": "Widerspruch zwischen Artikeln: fatwa[6] nennt den Sarg ohne Bedarf nach IslamQA 34511 „nach einhelliger Auffassung verpönt“, p27-c-bestattungswuensche auffassungen[0] dagegen eine hanafitische Bevorzugung des Sargs bei Frauen. Welche Darstellung ist zutreffend, und wie sollen beide Artikel angeglichen werden?",
+     "for": "gelehrte",
+     "refs": [
+      "F-islamqa-34511",
+      "F-daralifta-en-8092"
+     ]
+    },
+    {
+     "question": "hadith[1] (Abū Dāwūd 2870) und hadith[4] (Abū Dāwūd 3132) stammen nicht aus den zugelassenen Hadith-Quellen (nur Bukhari und Muslim): Sollen sie entfernt werden (für hadith[4] trägt Bukhari 5417 im selben Absatz die Aussage) bzw. nur als in den Fatwas angeführt erwähnt werden?",
+     "for": "redaktion",
+     "refs": [
+      "AD2870",
+      "AD3132",
+      "B5417"
+     ]
+    },
+    {
+     "question": "Die Quellenregel nennt nur Qurʾān (Bubenheim & Elyas), Tafsir Ibn Kaṯīr und Hadith aus Bukhari und Muslim; dieser Artikel stützt sich auf 26 Fatwa- und Gelehrtenquellen (IslamQA, Dār al-Iftāʾ, islamweb, Ibn Bāz, Ibn Taymiyya), ebenso p27-c-bestattungswuensche (3) und p25-a-wasiyya (10): Sind Fatwas als eigene Quellenkategorie zugelassen, und wenn ja, mit welchen Anforderungen (Institution, Originalfundstelle, Datum)?",
+     "for": "redaktion",
+     "refs": []
     }
    ],
    "status": "DRAFT",

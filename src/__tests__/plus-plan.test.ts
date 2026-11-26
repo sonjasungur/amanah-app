@@ -71,7 +71,7 @@ describe("Plus access without surprise removal", () => {
 
   it("public texts promise only the pre-launch scope and offer no purchase", () => {
     const preise = readFileSync("src/app/preise/page.tsx", "utf8");
-    expect(preise).toContain("die vor der Einführung von Vorsorge Plus verfügbar waren");
+    expect(preise).toContain("die vor der Einführung der Pakete verfügbar waren");
     expect(preise).not.toMatch(/behalten alle Funktionen/);
     const notice = readFileSync("src/components/billing/plus-area-notice.tsx", "utf8");
     expect(notice).not.toMatch(/<Button|checkout|kaufen/i);

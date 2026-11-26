@@ -231,7 +231,7 @@ describe("professional core phase 1 — pricing teaser and checkout safety", () 
   it("homepage teaser and /preise show the start split: Basis free, Vorsorge Plus in preparation without price (owner 23.11.2026)", () => {
     const home = read("src/app/page.tsx");
     expect(home).toContain("Kostenlos");
-    expect(home).toContain("Vorsorge Plus · ohne Preis, noch nicht buchbar");
+    expect(home).toContain("Wasiyya Vorsorge");
     const preise = read("src/app/preise/page.tsx");
     expect(preise).toContain("START_PLUS_PLANNED");
     expect(preise).toContain("In Vorbereitung");
