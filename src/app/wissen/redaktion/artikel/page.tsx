@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
+import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { KNOWLEDGE_AREAS } from "@/modules/islamic-knowledge";
 import {
   FULL_ARTICLES,
@@ -24,7 +24,7 @@ const SHOWN: SourceLevel[] = ["inhalt_geprueft", "wortlaut_abgeglichen", "stelle
 export default async function FullArticleDraftsPage() {
   // Decide per request: the flag is read at runtime, never baked into a prerendered page.
   await connection();
-  if (!isInternalToolsEnabled()) notFound();
+  if (!isEditorialPreviewEnabled()) notFound();
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <p className="rounded-xl border-2 border-warning/50 bg-warning/10 p-3 text-sm font-semibold mb-6" data-testid="draft-banner">

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
+import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { getKnowledgeArea } from "@/modules/islamic-knowledge";
 import {
   HADITH_COLLECTION_LABELS,
@@ -161,7 +161,7 @@ function SourceList({ a }: { a: FullArticle }) {
  * which are listed with edition, locator, link and review state. Printable as review material.
  */
 export default async function FullArticleReviewPage({ params }: { params: Promise<{ id: string }> }) {
-  if (!isInternalToolsEnabled()) notFound();
+  if (!isEditorialPreviewEnabled()) notFound();
   const { id } = await params;
   const a = getFullArticle(id);
   if (!a) notFound();

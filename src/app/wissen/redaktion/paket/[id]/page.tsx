@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
+import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { getSourcesByIds } from "@/lib/knowledge/sources";
 import {
   KNOWLEDGE_CATALOG,
@@ -19,7 +19,7 @@ const REVIEW_TITLES = { source: "Quellenprüfung", scholar: "Prüfung durch isla
 
 /** Printable review package for scholars and lawyers. Internal only; reviewer fields stay empty. */
 export default async function ReviewPackagePage({ params }: { params: Promise<{ id: string }> }) {
-  if (!isInternalToolsEnabled()) notFound();
+  if (!isEditorialPreviewEnabled()) notFound();
   const { id } = await params;
   const article = KNOWLEDGE_CATALOG.find((a) => a.id === id);
   if (!article) notFound();

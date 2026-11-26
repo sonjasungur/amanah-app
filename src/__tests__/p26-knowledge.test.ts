@@ -69,7 +69,7 @@ describe("P2.6 knowledge articles: nothing can be published", () => {
       const src = readFileSync(f, "utf8");
       expect(src, f).not.toMatch(/^["']use client["']/m);
       if (f.startsWith("src/app/")) {
-        expect(src, f).toMatch(/if \(!(isInternalToolsEnabled|isKnowledgePreviewEnabled)\(\)\) notFound\(\);/);
+        expect(src, f).toMatch(/if \(!(isInternalToolsEnabled|isKnowledgePreviewEnabled|isEditorialPreviewEnabled)\(\)\) notFound\(\);/);
         expect(src, f).toContain("index: false");
       }
     }

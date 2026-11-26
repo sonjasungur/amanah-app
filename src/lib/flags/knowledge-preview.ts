@@ -8,3 +8,12 @@
 export function isKnowledgePreviewEnabled(): boolean {
   return process.env.NODE_ENV === "development" || process.env.AMANAH_KNOWLEDGE_PREVIEW === "true";
 }
+
+/**
+ * Editorial review pages (/wissen/redaktion: every draft with its review status). Open with the internal tools or,
+ * on password-protected staging, with the knowledge preview, so the owner can review all articles (owner order
+ * 26.11.2026). Production refuses both switches (validateProductionEnv), so drafts stay unpublished there.
+ */
+export function isEditorialPreviewEnabled(): boolean {
+  return isKnowledgePreviewEnabled() || process.env.AMANAH_INTERNAL_TOOLS === "true";
+}

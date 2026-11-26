@@ -87,3 +87,18 @@ describe("imprint (start blocker 2)", () => {
   });
 });
 
+describe("production release stack limits (shared server, measured 25.11.2026)", () => {
+  it("caps memory, CPU and log size of app and database", () => {
+    const stack = readFileSync("deploy/production/docker-compose.release.yml", "utf8");
+    const app = stack.slice(stack.indexOf("\n  app:"));
+    const db = stack.slice(stack.indexOf("\n  postgres:"), stack.indexOf("\n  app:"));
+    expect(db).toContain("mem_limit: 512m");
+    expect(app).toContain("mem_limit: 768m");
+    expect(app).toContain("pids_limit: 512");
+    for (const part of [db, app]) {
+      expect(part).toContain("cpus: 1.0");
+      expect(part).toContain("<<: *logging");
+    }
+    expect(stack).toContain('max-size: "10m"');
+  });
+});

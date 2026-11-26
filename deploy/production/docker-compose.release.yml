@@ -8,11 +8,23 @@
 #
 name: amanah-app
 
+# Limits from measured peaks (25.11.2026: app 124-150 MB, db 118 MB) with headroom; the server is shared
+# with gemeinsam1 (docs/qa/produktion-20261125/ap14). Log rotation per container needs no Docker restart.
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: amanah-postgres
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+    <<: *logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-amanah}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
@@ -33,6 +45,10 @@ services:
     pull_policy: never
     container_name: amanah-app
     restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 512
+    <<: *logging
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in env file}

@@ -195,7 +195,7 @@ function CheckQuestion({
         <p className="h-5 text-xs uppercase tracking-[0.16em] text-accent font-semibold mb-3">
           {q.category === "profil" ? "Deine Situation" : "Vorbereitung"}
         </p>
-        <div className="h-[7.5rem] sm:h-[6.75rem] overflow-hidden">
+        <div className="h-[7.5rem] sm:h-[8.5rem] overflow-hidden">
           <h2 className="check-question-text text-primary-dark" data-testid="check-question-text">{q.text}</h2>
         </div>
         <p className="h-6 text-sm text-muted mb-6 truncate">Thema: {q.label}</p>

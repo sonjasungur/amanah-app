@@ -96,6 +96,7 @@ const AREAS = [
 /** Start offer (owner order 23.11.2026): only free features that are on at the start; Plus without price. */
 const FREE_TITLES = START_BASIS.map((f) => f.title);
 
+/** What the check tells you – a calm band below the hero, so it never covers the image (owner 26.11.2026). */
 function HeroCheckInfoCard({ className }: { className?: string }) {
   const points = [
     "Welche Bereiche noch offen sind",
@@ -105,24 +106,25 @@ function HeroCheckInfoCard({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "relative rounded-2xl border border-[#D4A537]/45 bg-[#0B1226]/80 backdrop-blur-md p-6 md:p-7 shadow-2xl before:absolute before:inset-x-6 before:top-0 before:h-0.5 before:bg-[#D4A537] before:rounded-full",
+        "rounded-2xl border border-[#D4A537]/40 bg-white/[0.04] px-6 py-5 md:px-8 md:py-6 grid gap-4 lg:grid-cols-[auto_1fr] lg:items-center lg:gap-10",
         className
       )}
+      data-testid="home-hero-check-info"
     >
-      <h2 className="text-lg font-bold text-white mb-4 leading-snug">
-        Nach dem kostenlosen Check weißt du:
-      </h2>
-      <ul className="space-y-3 mb-5">
-        {points.map((point) => (
-          <li key={point} className="flex items-start gap-3 text-base text-white/90">
-            <span className="w-2 h-2 rounded-full bg-emerald shrink-0 mt-2" aria-hidden />
-            {point}
-          </li>
-        ))}
-      </ul>
-      <p className="text-sm text-white/65 leading-relaxed">
-        Dein Ergebnis basiert auf deinen Antworten – ohne Bewertung. Ohne Konto und ohne KI.
-      </p>
+      <h2 className="text-lg font-bold text-white leading-snug">Nach dem kostenlosen Check weißt du:</h2>
+      <div>
+        <ul className="grid gap-3 sm:grid-cols-3 sm:gap-6">
+          {points.map((point) => (
+            <li key={point} className="flex items-start gap-3 text-base text-white/90">
+              <span className="w-2 h-2 rounded-full bg-[#E2B54C] shrink-0 mt-2" aria-hidden />
+              {point}
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm text-white/65 leading-relaxed mt-3">
+          Dein Ergebnis basiert auf deinen Antworten – ohne Bewertung. Ohne Konto und ohne KI.
+        </p>
+      </div>
     </aside>
   );
 }
@@ -138,7 +140,7 @@ export default function HomePage() {
         data-testid="home-hero"
       >
         <div className="relative max-w-7xl mx-auto px-4">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 lg:gap-14 items-center">
+          <div className="grid lg:grid-cols-[0.92fr_1.08fr] gap-8 lg:gap-10 xl:gap-14 items-center">
             <div className="max-w-2xl min-w-0">
               {/* Phones show the descriptor here, because the compact header leaves it out. */}
               <p className="md:hidden flex items-center gap-2.5 mb-4 text-[15px] font-medium text-[#F2CF6C]" data-testid="home-hero-descriptor">
@@ -171,23 +173,24 @@ export default function HomePage() {
                   {BRAND.ctaSecondary}
                 </Link>
               </div>
-              <div className="mt-6 lg:hidden">
-                <HeroCheckInfoCard />
-              </div>
               <div className="mt-6">
                 <TrustStrip items={[...BRAND_TRUST_ITEMS]} />
               </div>
               <p className="text-sm md:text-base text-white/75 mt-4 md:mt-5 italic max-w-lg hidden sm:block">{BRAND.claim}</p>
             </div>
-            <div className="hidden lg:block relative">
-              <figure className="wasiyya-photo wasiyya-arch">
-                <div className="relative aspect-[4/5]">
-                  <Image src={TOPIC_IMAGES.hero.src} alt={TOPIC_IMAGES.hero.alt} fill priority sizes="40vw" className="object-cover" />
-                </div>
-              </figure>
-              <HeroCheckInfoCard className="absolute -left-10 bottom-10 max-w-[330px]" />
-            </div>
+            <figure className="hero-image relative w-full max-w-2xl mx-auto lg:max-w-none" data-testid="home-hero-image">
+              <Image
+                src={TOPIC_IMAGES.startseite.src}
+                alt={TOPIC_IMAGES.startseite.alt}
+                width={1448}
+                height={1086}
+                priority
+                sizes="(min-width: 1280px) 680px, (min-width: 1024px) 52vw, 100vw"
+                className="w-full h-auto"
+              />
+            </figure>
           </div>
+          <HeroCheckInfoCard className="mt-10 md:mt-12" />
         </div>
       </section>
 

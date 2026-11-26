@@ -7,7 +7,7 @@ const read = (p: string) => readFileSync(p, "utf8");
 describe("design Royal Imperial (owner acceptance 25.11.2026)", () => {
   it("uses only own, self-hosted images that exist", () => {
     for (const img of Object.values(TOPIC_IMAGES)) {
-      expect(img.src).toMatch(/^\/images\/wasiyya\/[a-z]+\.jpg$/);
+      expect(img.src).toMatch(/^\/images\/wasiyya\/[a-z-]+\.jpg$/);
       expect(existsSync(`public${img.src}`)).toBe(true);
       expect(img.alt.length).toBeGreaterThan(10);
     }
@@ -40,5 +40,23 @@ describe("design Royal Imperial (owner acceptance 25.11.2026)", () => {
     const preise = read("src/app/preise/page.tsx");
     expect(preise).toContain("Kein Abo");
     expect(preise).not.toMatch(/\d+\s?€|checkout|kaufen/i);
+  });
+});
+
+describe("knowledge review on staging (owner order 26.11.2026)", () => {
+  it("opens the editorial pages only with the preview or internal switch, and production refuses the preview", async () => {
+    const { isEditorialPreviewEnabled } = await import("@/lib/flags/knowledge-preview");
+    const { validateProductionEnv } = await import("@/lib/server/production-config");
+    const old = { ...process.env };
+    try {
+      delete process.env.AMANAH_KNOWLEDGE_PREVIEW;
+      delete process.env.AMANAH_INTERNAL_TOOLS;
+      expect(isEditorialPreviewEnabled()).toBe(false);
+      process.env.AMANAH_KNOWLEDGE_PREVIEW = "true";
+      expect(isEditorialPreviewEnabled()).toBe(true);
+    } finally {
+      process.env = old;
+    }
+    expect(validateProductionEnv({ AMANAH_KNOWLEDGE_PREVIEW: "true" } as unknown as NodeJS.ProcessEnv).errors.join(" ")).toContain("AMANAH_KNOWLEDGE_PREVIEW");
   });
 });

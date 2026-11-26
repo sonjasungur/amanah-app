@@ -179,6 +179,6 @@ describe("former topic pages go through the gate", () => {
   });
 
   it("internal editorial preview is never public", () => {
-    expect(read("src/app/wissen/redaktion/page.tsx")).toContain("if (!isInternalToolsEnabled()) notFound();");
+    expect(read("src/app/wissen/redaktion/page.tsx")).toContain("if (!isEditorialPreviewEnabled()) notFound();");
   });
 });

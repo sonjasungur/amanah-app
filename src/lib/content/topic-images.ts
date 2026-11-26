@@ -3,7 +3,7 @@
  * own computer-generated artwork (no third-party photos, no licences to observe), self-hosted under
  * /public/images/wasiyya. No background patterns and no star ornaments.
  */
-export type TopicImageId = "hero" | "janazah" | "testament" | "licht";
+export type TopicImageId = "startseite" | "janazah" | "testament" | "licht";
 
 export interface TopicImage {
   src: string;
@@ -11,7 +11,10 @@ export interface TopicImage {
 }
 
 export const TOPIC_IMAGES: Record<TopicImageId, TopicImage> = {
-  hero: { src: "/images/wasiyya/hero.jpg", alt: "Eine goldene Laterne leuchtet warm in der Dunkelheit." },
+  startseite: {
+    src: "/images/wasiyya/hero-startseite.jpg",
+    alt: "Unter einem goldenen Bogen: ein dunkelblauer Vorsorgeordner, ein Füller, Datteln und eine leuchtende Laterne vor einem Fenster mit Moschee in der Dämmerung.",
+  },
   janazah: { src: "/images/wasiyya/janazah.jpg", alt: "Eine Moschee mit Kuppel und zwei Minaretten vor dem Licht der Morgendämmerung." },
   testament: { src: "/images/wasiyya/testament.jpg", alt: "Ein aufgeschlagenes Buch mit goldenem Lesebändchen und ein Füller auf einem Holztisch." },
   licht: { src: "/images/wasiyya/licht.jpg", alt: "Warmes Morgenlicht fällt durch ein hohes Bogenfenster in einen ruhigen Raum." },

@@ -14,7 +14,8 @@ async function boxes(page: Page) {
       if (!el) return "missing";
       const target = s.endsWith("check-question-text\"]") ? el.parentElement! : el;
       const r = target.getBoundingClientRect();
-      return `${Math.round(r.top)}/${Math.round(r.left)}/${Math.round(r.width)}/${Math.round(r.height)}`;
+      // Document coordinates: scrolling the window is not movement of the layout.
+      return `${Math.round(r.top + window.scrollY)}/${Math.round(r.left + window.scrollX)}/${Math.round(r.width)}/${Math.round(r.height)}`;
     });
   }, [...PARTS]);
 }
@@ -34,14 +35,19 @@ for (const vp of [
 
     const before = await boxes(page);
     expect(before).not.toContain("missing");
-    for (const answer of ["check-answer-yes", "check-answer-no", "check-answer-yes", "check-answer-no"]) {
+    // All 14 changes from question 1 to question 15 (the longest questions included).
+    for (let i = 0; i < 14; i++) {
+      const answer = i % 2 === 0 ? "check-answer-yes" : "check-answer-no";
       await page.getByTestId(answer).click();
       // Right after the click (while the answer is being saved) and after the next question appeared.
       expect(await boxes(page)).toEqual(before);
       await expect(page.getByTestId("check-saving")).toHaveCount(0);
       await page.mouse.move(0, 0);
       expect(await boxes(page)).toEqual(before);
+      // The fixed question area must hold the whole question; nothing may be cut off.
+      const cut = await page.getByTestId("check-question-text").evaluate((h) => h.parentElement!.scrollHeight > h.parentElement!.clientHeight + 1);
+      expect(cut, `question ${i + 2} is cut off`).toBe(false);
     }
-    await expect(page.getByTestId("check-progress-label")).toContainText("Frage 5");
+    await expect(page.getByTestId("check-progress-label")).toContainText("Frage 15");
   });
 }

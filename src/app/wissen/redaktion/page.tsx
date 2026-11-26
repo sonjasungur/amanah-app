@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { isInternalToolsEnabled } from "@/lib/flags/internal-tools";
+import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { getSourcesByIds } from "@/lib/knowledge/sources";
 import { KNOWLEDGE_AREAS, STATUS_LABELS, getEditorialQueue, getSourceCheck } from "@/modules/islamic-knowledge";
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 /** Internal review queue. Never public: drafts are shown here for reviewers only. */
 export default function KnowledgeEditorialPage() {
-  if (!isInternalToolsEnabled()) notFound();
+  if (!isEditorialPreviewEnabled()) notFound();
   const queue = getEditorialQueue();
 
   return (
