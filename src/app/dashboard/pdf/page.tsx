@@ -211,7 +211,7 @@ function DocumentsPage() {
                 })()}
                 <p className="text-sm text-muted flex-1">
                   {doc.id === "gesamt" ? "Alle Angaben zum Nachschlagen. Kein Testament, keine Vollmacht, keine Patientenverfügung." : doc.description}
-                  {doc.id === "vermoegen" && " Der Ausdruck liegt direkt bei der Vermögensübersicht und gehört nicht zu Vorsorge Plus."}
+                  {doc.id === "vermoegen" && " Der Ausdruck liegt direkt bei der Vermögensübersicht und bleibt kostenlos, sie gehört zu keinem Paket."}
                 </p>
                 {doc.id === "vermoegen" ? (
                   <Link href="/dashboard/vermoegen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center min-h-[44px]" data-testid="export-vermoegen-link">

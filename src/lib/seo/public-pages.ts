@@ -19,7 +19,7 @@ export const PUBLIC_PAGES = {
   },
   "/preise": {
     title: "Pakete — Wasiyya",
-    description: "Wasiyya startet kostenlos: Vorsorge-Check, Notfallkarte und Vermögensübersicht. Vorsorge Plus ist in Vorbereitung.",
+    description: "Wasiyya startet kostenlos: Vorsorge-Check, Notfallkarte, Vermögensübersicht und Familiengespräch. Einmalige Pakete ohne Abo sind in Vorbereitung.",
   },
   "/akuter-todesfall": {
     title: "Akuter Todesfall — Wasiyya",

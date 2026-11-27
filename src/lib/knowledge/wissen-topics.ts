@@ -195,7 +195,7 @@ export const wissenTopics: KnowledgeArticle[] = [
       documents: ["Testament/Erbvertrag", "Vermögensliste", "Schuldenliste"],
       legalNotes: [
         "Deutsches Pflichtteilsrecht kann mit islamischer Verteilung kollidieren — Fachberatung nötig.",
-        "Kein Erbrechner in dieser App — nur Orientierung.",
+        "Keine verbindliche Erbberechnung in dieser App — nur Orientierung. Rechtsverbindlich gestalten Anwalt oder Notar.",
       ],
       safeStorage: "Notar/Safe + Vertrauensperson informiert.",
       tellFamily: "Dass ein Plan existiert und fachliche Hilfe nötig ist.",

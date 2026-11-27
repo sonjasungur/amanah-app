@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { featureForRoute } from "@/lib/billing/plan-matrix";
 
 /**
- * Hint on every dashboard area that the plan matrix assigns to Vorsorge Plus. Informational only:
+ * Hint on every dashboard area that the plan matrix assigns to Plus (public name: Wasiyya Vorsorge). Informational only:
  * it locks nothing and has no buy button (enforcement stays off until the owner approves it).
  */
 export function PlusAreaNotice() {
@@ -16,10 +16,10 @@ export function PlusAreaNotice() {
       className="no-print mb-4 text-xs text-muted"
       data-testid="plus-area-notice"
       data-feature={feature.id}
-      aria-label="Hinweis zu Vorsorge Plus"
+      aria-label="Hinweis zum Paket Wasiyya Vorsorge"
     >
       {/* No price while the package cannot be bought; the price page states it. */}
-      Diesen Bereich nutzt du derzeit ohne Einschränkung. Er gehört später zum Paket Vorsorge Plus;{" "}
+      Diesen Bereich nutzt du derzeit ohne Einschränkung. Er gehört später zum Paket Wasiyya Vorsorge;{" "}
       <Link href="/preise" className="text-primary hover:underline">
         mehr dazu
       </Link>

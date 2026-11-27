@@ -3,7 +3,7 @@ import { BRAND } from "@/lib/brand";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { linkButtonClassName } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { START_ALWAYS_FREE, START_BASIS, START_KOMPLETT_PLANNED, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_PLANNED } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_KOMPLETT_PLANNED, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_PLANNED, START_PREMIUM_SUMMARY } from "@/lib/billing/start-offer";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
 import { Check } from "lucide-react";
 
@@ -29,7 +29,7 @@ const FAQ: readonly { q: string; a: string }[] = [
   },
   {
     q: "Muss ich etwas bezahlen, um anzufangen?",
-    a: "Nein. Vorsorge-Check, Notfallkarte und Vermögensübersicht sind kostenlos. Für den Check brauchst du kein Konto.",
+    a: "Nein. Vorsorge-Check, Notfallkarte, einfache Vermögensübersicht, Familiengespräch und islamisches Wissen sind kostenlos und bleiben es. Für den Check brauchst du kein Konto.",
   },
   {
     q: "Was passiert mit meinen Angaben, wenn die Pakete kommen?",
@@ -41,7 +41,7 @@ const FAQ: readonly { q: string; a: string }[] = [
   },
   {
     q: "Erstellt Wasiyya ein Testament?",
-    a: "Nein. Wasiyya hilft dir, Wünsche und Unterlagen zu ordnen. Ein Testament und die Berechnung von Erbanteilen gehören zu Anwalt, Notar und islamischer Fachperson.",
+    a: "Nein. Wasiyya hilft dir, Wünsche und Unterlagen zu ordnen. Später zeigt Wasiyya nach fachlicher Prüfung eine Gegenüberstellung islamischer und deutscher Erbquoten zur Orientierung. Das Testament und seine rechtsverbindliche Gestaltung bleiben bei Anwalt oder Notar, religiöse Fragen klärst du mit einer islamischen Fachperson.",
   },
 ];
 
@@ -128,7 +128,7 @@ export default function PreisePage() {
           <article className="gold-frame rounded-3xl p-7 flex flex-col" data-testid="pricing-later">
             <p className="inline-block self-start px-3 py-1 rounded-full bg-accent-soft text-primary text-xs font-bold uppercase tracking-wider">Später · individuell</p>
             <h2 className="text-section-title text-primary-dark mt-4">Premium – Rundum-sorglos</h2>
-            <p className="text-body text-muted mt-1">Begleitet bis zum Notar.</p>
+            <p className="text-body text-muted mt-1">{START_PREMIUM_SUMMARY}</p>
             <ul className="mt-6 space-y-3 flex-1">
               {START_PREMIUM_PLANNED.map((t) => (
                 <li key={t} className="flex gap-3 text-foreground">
@@ -137,7 +137,7 @@ export default function PreisePage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-sm text-muted border-t border-border pt-4">Das Testament selbst entsteht immer bei dir, beim Notar oder mit einer Kanzlei. Noch nicht verfügbar.</p>
+            <p className="mt-6 text-sm text-muted border-t border-border pt-4">Das Testament selbst entsteht immer bei dir, beim Notar oder mit einer Kanzlei. Wasiyya bietet keine Rechtsberatung. Noch nicht verfügbar.</p>
           </article>
         </div>
 

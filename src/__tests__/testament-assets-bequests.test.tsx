@@ -100,7 +100,7 @@ describe("asset print: an inventory, not a will", () => {
     render(<I18nProvider><PdfPage /></I18nProvider>);
     const card = screen.getByTestId("export-vermoegen");
     expect(card.querySelector("a")!.getAttribute("href")).toBe("/dashboard/vermoegen");
-    expect(card.textContent).toContain("gehört nicht zu Vorsorge Plus");
+    expect(card.textContent).toContain("bleibt kostenlos, sie gehört zu keinem Paket");
     expect(screen.queryByTestId("asset-print-view")).toBeNull();
   });
 });

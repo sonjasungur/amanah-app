@@ -27,7 +27,7 @@ export default function KonvertiertePage() {
       <TopicHero
         eyebrow="Zielgruppe"
         title="Für Konvertierte & alleinstehende Muslime"
-        image="testament"
+        image="konvertierte"
         intro={
           <p>
             Wenn deine Familie nicht muslimisch ist, du unverheiratet lebst oder niemand deine Janazah-Wünsche kennt —

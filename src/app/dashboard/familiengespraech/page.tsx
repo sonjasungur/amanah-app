@@ -221,7 +221,7 @@ export default function FamilienGespraechPage() {
           Themen zur Vorbereitung
         </h2>
         <p className="text-xs text-muted" data-testid="topics-plus-hint">
-          Gespräche festhalten ist kostenlos. Die Vorbereitungsfragen mit eigenen Notizen gehören später zu Vorsorge Plus;{" "}
+          Gespräche festhalten ist kostenlos. Die Vorbereitungsfragen mit eigenen Notizen gehören später zum Paket Wasiyya Vorsorge;{" "}
           <Link href="/preise" className="text-primary hover:underline">mehr dazu</Link>.
         </p>
         <PlusGate feature="family_people">

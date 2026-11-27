@@ -10,7 +10,7 @@ import {
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
-import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_SUMMARY } from "@/lib/billing/start-offer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
@@ -295,7 +295,7 @@ export default function HomePage() {
             <article className="gold-frame rounded-2xl p-6" data-testid="home-pending">
               <p className="text-xs font-bold uppercase tracking-wider text-primary">Später · individuell</p>
               <h3 className="text-card-title font-bold text-foreground mt-1">Premium – Rundum-sorglos</h3>
-              <p className="text-sm text-muted mt-3">Begleitet bis zum Notar, mit den Gesamtkosten vor dem Auftrag.</p>
+              <p className="text-sm text-muted mt-3">{START_PREMIUM_SUMMARY}</p>
             </article>
           </div>
           <p className="text-sm text-muted mt-6">{START_PLUS_STATUS}</p>
