@@ -56,18 +56,59 @@ export interface MedicalWishes {
   openQuestionsImam: string;
 }
 
+/** Areas a power of attorney can cover (AP22 EA-07.1). Burial is not one of them: it belongs to Janazah. */
+export type PoaAreaId = "health" | "authorities" | "finance" | "housing" | "care" | "mail";
+
+/** Who should act in one area: the preferred person, the substitute, another contact, nobody, or not decided. */
+export type PoaHolder = "authorized" | "substitute" | "other" | "none" | "undecided";
+
+export interface PoaAreaChoice {
+  holder: PoaHolder;
+  /** Only for "other": a person from "Familie & Kontakte", with the name kept as fallback text. */
+  personId?: string;
+  personName?: string;
+}
+
+/**
+ * The person's wishes for a power of attorney, structured (AP22 EA-07). These are wishes for the
+ * conversation with a notary or lawyer, never an effective power of attorney.
+ */
+export interface PowerOfAttorneyWishes {
+  version: 1;
+  /** "all": the preferred person for all matters (default); "split": a choice per area. */
+  scope: "all" | "split";
+  areas: Record<PoaAreaId, PoaAreaChoice>;
+  /** Also for online accounts and digital data. Details live in the digital legacy. */
+  onlineAccounts: "ja" | "nein" | "offen" | "";
+  /** Should it also apply after death? Only noted; a lawyer or notary clarifies the form. */
+  beyondDeath: "ja" | "nein" | "offen" | "";
+  /** The only free text: additional notes. */
+  additionalNotes: string;
+}
+
 export interface PowerOfAttorney {
   authorizedPerson: string;
   substitutePerson: string;
+  /** @deprecated AP22 EA-07: free text of the first version. Kept and shown as "Früher eingetragen", never overwritten. */
   medical: string;
+  /** @deprecated see medical */
   authorities: string;
+  /** @deprecated see medical */
   bank: string;
+  /** @deprecated see medical */
   housing: string;
+  /** @deprecated see medical */
   care: string;
+  /** @deprecated see medical. Burial and the care of the dead belong to the Janazah area. */
   burial: string;
+  /** @deprecated see medical. Places of documents belong to "Wichtige Dokumente". */
   documents: string;
+  /** @deprecated see medical. Digital accounts belong to the digital legacy (D-26). */
   digitalAccounts: string;
+  /** @deprecated see medical */
   excludedPersons: string;
+  /** Structured wishes (AP22 EA-07). Missing in folders from before; read through powerOfAttorneyWishes(). */
+  wishes?: PowerOfAttorneyWishes;
 }
 
 export interface CareDirective {
@@ -186,11 +227,51 @@ export interface DebtAmanahItem {
 
 export type DebtEntry = DebtAmanahItem;
 
+/** Kinds of the first version of the digital legacy. Kept on older entries; new entries use `category`. */
+export type LegacyDigitalType = "email" | "password_manager" | "emergency_access" | "banking" | "paypal" | "subscription" | "social" | "cloud" | "domain" | "file";
+
+/** AP22 EA-18.1 categories (recherche/DIGITALER-NACHLASS.md §3). */
+export type DigitalCategory = "email" | "social" | "cloud_photos" | "subscription" | "telecom" | "insurance" | "bank_payment" | "other";
+
+/** What should happen with an account (several may apply). */
+export type DigitalTreatment = "delete" | "cancel" | "backup_data" | "keep_memories" | "transfer" | "memorialize" | "undecided";
+
+/** How the family can get access safely. Never the password itself. */
+export type DigitalSecureAccess = "pw_manager_emergency" | "provider_legacy_contact" | "sealed_envelope" | "notary_lawyer" | "trusted_person_knows" | "not_arranged";
+
+export interface DigitalProvider {
+  /** Known provider, e.g. "google", "gmx". Never guessed from old text. */
+  knownId?: string;
+  name: string;
+}
+
 export interface DigitalLegacyItem {
   id: string;
-  type: "email" | "password_manager" | "emergency_access" | "banking" | "paypal" | "subscription" | "social" | "cloud" | "domain" | "file";
+  /** @deprecated kind of the first version; kept, read through digitalCategoryOf(). */
+  type?: LegacyDigitalType;
+  /** @deprecated first version: account description. Kept word for word; shown as "Früher eingetragen". */
   description: string;
+  /** @deprecated first version: "Wo liegen die Zugangsdaten?". Kept; taken over into secureAccessNote only after the secret check. */
   locationHint: string;
+  category?: DigitalCategory;
+  /** Finer kind, e.g. "domain", "password_manager", "file". */
+  contractType?: string;
+  provider?: DigitalProvider;
+  /** Short account or contract name. Checked: no more than 4 digits in a row, no IBAN, no password or PIN. */
+  reference?: string;
+  treatments?: DigitalTreatment[];
+  /** Short note to the wish, checked like reference. */
+  treatmentNote?: string;
+  /** Person from "Familie & Kontakte"; the name is kept as fallback text. */
+  trustedPersonId?: string;
+  trustedPersonName?: string;
+  secureAccess?: DigitalSecureAccess;
+  /** E.g. "Notfallzugang bei Person X". Checked, never a password. */
+  secureAccessNote?: string;
+  /** Placeholder for later letters (EA-18.3, recherche/schreibvorlagen-digital.json); not used yet. */
+  templateId?: string;
+  /** ISO time of the last change in the new form. */
+  updatedAt?: string;
 }
 
 export type DigitalAccount = DigitalLegacyItem;
@@ -317,6 +398,13 @@ export interface TestamentPreparation {
     adoptedChildren: YesNoUnsure;
     moreThanOneSpouse: YesNoUnsure;
     otherRelatives: YesNoUnsure;
+    /** Explicit answer, so an untouched child count (default 0) is never read as "no children". */
+    hasChildren: YesNoUnsure;
+    /** Special circumstances outside the rule set: any "ja" blocks, "unsicher"/empty is missing. */
+    expectedChild: YesNoUnsure;
+    unclearParentage: YesNoUnsure;
+    missingRelative: YesNoUnsure;
+    otherSpecialCircumstances: YesNoUnsure;
   };
   legalFacts: {
     maritalStatus: "ledig" | "verheiratet" | "geschieden" | "verwitwet" | "";

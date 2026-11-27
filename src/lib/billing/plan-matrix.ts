@@ -84,7 +84,7 @@ export const PLAN_FEATURES: PlanFeature[] = [
     routes: ["/dashboard/familiengespraech"],
     enforcement: "server",
     availableBeforeLaunch: true,
-    note: "Owner-Entscheidung 18.11.2026 (Variante 1): Gespräche festhalten (Datum, Teilnehmende als Freitext, Themen, Aufgaben, Unterlagen, Ort erklärt, Offenes) ist kostenlos und wird auch ohne Plus im Konto gespeichert. Vorbereitungsfragen mit Notizen und die Auswahl aus „Familie & Kontakte“ bleiben Plus (family_people).",
+    note: "Owner-Entscheidung 27.11.2026: Das Familiengespräch ist komplett kostenlos – Gespräche festhalten und die Vorbereitungsfragen mit eigenen Notizen werden auch ohne Paket im Konto gespeichert. Nur die Personenverwaltung in „Familie & Kontakte“ bleibt Paketinhalt (family_people); ein Gespräch verweist ohne Paket nur auf bereits gespeicherte Personen. (Ersetzt Variante 1 vom 18.11.2026.)",
   },
   {
     id: "persistent_folder",
@@ -149,13 +149,11 @@ export const PLAN_FEATURES: PlanFeature[] = [
 ];
 
 /**
- * Sections of which only some fields are free (owner decision 18.11.2026, Variante 1). Without Plus
- * the server stores these fields and keeps the rest as stored (folder-access.ts).
+ * Sections every account may save on the server, also without Plus and with enforcement on.
+ * familyConversation: owner decision 27.11.2026 – the family conversation is completely free (talks and
+ * preparation notes). A talk may only point to people the folder already holds (folder-access.ts).
  */
-export const PARTLY_FREE_SECTIONS = { familyConversation: ["talks"] } as const;
-
-/** Sections every account may save on the server, also without Plus and with enforcement on. */
-export const FREE_ACCOUNT_SECTIONS = ["assets", "emergencyCard", "checkProgress", "knowledgeBookmarks"] as const;
+export const FREE_ACCOUNT_SECTIONS = ["assets", "emergencyCard", "checkProgress", "knowledgeBookmarks", "familyConversation"] as const;
 
 /** Never paid, whatever the plan: data subject rights and account control. */
 export const ALWAYS_FREE_ACCOUNT_RIGHTS = [

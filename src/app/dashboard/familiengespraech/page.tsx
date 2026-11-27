@@ -220,11 +220,9 @@ export default function FamilienGespraechPage() {
         <h2 id="topics-title" className="text-lg font-semibold text-foreground">
           Themen zur Vorbereitung
         </h2>
-        <p className="text-xs text-muted" data-testid="topics-plus-hint">
-          Gespräche festhalten ist kostenlos. Die Vorbereitungsfragen mit eigenen Notizen gehören später zum Paket Wasiyya Vorsorge;{" "}
-          <Link href="/preise" className="text-primary hover:underline">mehr dazu</Link>.
+        <p className="text-xs text-muted" data-testid="topics-free-hint">
+          Das Familiengespräch ist kostenlos – auch die Vorbereitungsfragen mit deinen eigenen Notizen.
         </p>
-        <PlusGate feature="family_people">
         {FAMILIEN_GESPRAECH_TOPICS.map((topic) => {
           const progress = store.getTopic(topic.id);
           const open = openId === topic.id;
@@ -319,7 +317,6 @@ export default function FamilienGespraechPage() {
             </Card>
           );
         })}
-        </PlusGate>
       </section>
 
       <SaveBar />

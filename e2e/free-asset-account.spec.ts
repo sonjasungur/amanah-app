@@ -205,13 +205,16 @@ test("P1 without Plus: pause point and emergency card survive a second device; n
   await context.close();
 });
 
-test("family conversation (Variante 1): recording a talk is free and kept; notes and people stay Plus", async ({ page }) => {
+test("family conversation (owner decision 27.11.2026): talks and preparation notes are free and kept; people stay Plus", async ({ page }) => {
   await registerFreeAccount(page);
   await page.goto("/dashboard/familiengespraech");
   await expect(page.getByTestId("talk-add")).toBeVisible();
   await expect(page.getByTestId("plus-area-notice")).toHaveCount(0);
-  // Preparation questions with notes are Plus: the page shows the Plus box instead of the questions.
-  await expect(page.getByTestId("plus-gate-family_people").first()).toBeVisible();
+  // Preparation questions with notes are free: no Plus box before a talk exists, no package hint.
+  await expect(page.getByTestId("plus-gate-family_people")).toHaveCount(0);
+  await expect(page.getByTestId("topics-free-hint")).toContainText("kostenlos");
+  await page.getByRole("button", { name: /Vertrauensperson/ }).first().click();
+  await page.locator("#notes-vertrauensperson").fill("Free-Test: Notiz zur Vertrauensperson");
   await page.getByTestId("talk-add").click();
   const card = page.getByTestId("talk-card").first();
   await card.getByTestId("talk-others").fill("Yusuf, Mariam");
@@ -221,6 +224,7 @@ test("family conversation (Variante 1): recording a talk is free and kept; notes
   await expect(page.getByTestId("save-bar")).toHaveAttribute("data-state", "gespeichert");
   const folder = (await (await page.context().request.get("/api/amanah")).json()) as { data: AmanahLike };
   expect(folder.data.familyConversation.talks[0].openPoints).toBe("Free-Test: Grabstelle klären");
+  expect(folder.data.familyConversation.topics.vertrauensperson.notes).toBe("Free-Test: Notiz zur Vertrauensperson");
   await page.reload();
   await expect(page.getByTestId("talk-open")).toHaveValue("Free-Test: Grabstelle klären");
   // People management stays Plus.
@@ -228,4 +232,4 @@ test("family conversation (Variante 1): recording a talk is free and kept; notes
   await expect(page.getByTestId("plus-area-notice")).toHaveAttribute("data-feature", "family_people");
 });
 
-type AmanahLike = { familyConversation: { talks: { openPoints: string }[] } };
+type AmanahLike = { familyConversation: { talks: { openPoints: string }[]; topics: Record<string, { notes: string }> } };

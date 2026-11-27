@@ -24,11 +24,16 @@ function data(islamic: Partial<TestamentPreparation["islamicModel"]> = {}, facts
     adoptedChildren: "nein",
     moreThanOneSpouse: "nein",
     otherRelatives: "nein",
+    hasChildren: "ja",
+    expectedChild: "nein",
+    unclearParentage: "nein",
+    missingRelative: "nein",
+    otherSpecialCircumstances: "nein",
     ...islamic,
   };
   base.testamentPreparation.legalFacts = { ...base.testamentPreparation.legalFacts, maritalStatus: "verheiratet", differentReligionRelatives: "nein", ...facts };
   base.testamentPreparation.personalWishes = { ...base.testamentPreparation.personalWishes, ...wishes };
-  base.inheritanceProfile = { ...base.inheritanceProfile, sons: 1, daughters: 1, siblings: false, spouseAlive: true, ...profile };
+  base.inheritanceProfile = { ...base.inheritanceProfile, sons: 1, daughters: 1, siblings: false, spouseAlive: true, stepchildren: false, fosterChildren: false, ...profile };
   return base;
 }
 

@@ -79,15 +79,14 @@ export function freeVorsorgeMeta(incoming: unknown, existing: VorsorgeMeta | und
 }
 
 /**
- * Family conversation without Plus (Variante 1): the recorded talks are free; the preparation notes
- * (topics) stay as stored, and a talk may only point to people the folder already holds, because
- * managing people is Plus.
+ * Family conversation without Plus (owner decision 27.11.2026: completely free): talks and preparation
+ * notes (topics) are stored as sent, after normalising. Only a talk's links to people are limited to
+ * people the folder already holds, because managing people stays Plus.
  */
 export function freeFamilyConversation(incoming: unknown, existing: AmanahOrdnerData | null): AmanahOrdnerData["familyConversation"] {
   const next = normalizeFamilyConversation(incoming);
-  const before = normalizeFamilyConversation(existing?.familyConversation);
   const known = new Set((existing?.familyMembers ?? []).map((m) => m.id));
-  return { topics: before.topics, talks: next.talks.map((t) => ({ ...t, personIds: t.personIds.filter((id) => known.has(id)) })) };
+  return { topics: next.topics, talks: next.talks.map((t) => ({ ...t, personIds: t.personIds.filter((id) => known.has(id)) })) };
 }
 
 /** Only well-formed free sections from an untrusted body. Sections that were not sent stay as they are. */
@@ -109,11 +108,11 @@ export function notStoredSections(existing: AmanahOrdnerData | null, incoming: P
   const before = (existing ?? normalizeData({})) as unknown as Record<string, unknown>;
   const after = normalizeData(incoming) as unknown as Record<string, unknown>;
   return Object.keys(incoming).filter((key) => {
-    if (NOT_CONTENT.has(key) || (FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key)) return false;
-    // Partly free: "not stored" only if the stored result differs from what was sent.
+    // Free, but links to people not in the folder are dropped: "not stored" only if the result differs from what was sent.
     if (key === "familyConversation") {
       return JSON.stringify(after[key]) !== JSON.stringify(freeFamilyConversation(incoming.familyConversation, existing));
     }
+    if (NOT_CONTENT.has(key) || (FREE_ACCOUNT_SECTIONS as readonly string[]).includes(key)) return false;
     return JSON.stringify(before[key]) !== JSON.stringify(after[key]);
   });
 }

@@ -1,6 +1,7 @@
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { labelForField } from "@/lib/ai/context";
 import { enforceAiSafety } from "@/lib/ai/safety";
+import { isSecretLike } from "@/lib/validation/secret-like";
 import { extractFromFreeText } from "@/lib/ai/rule-based-extract";
 import { getQuestionById } from "./question-plan";
 import { buildPatchPreview } from "./patch-preview";
@@ -128,6 +129,12 @@ function ruleBasedParse(
     } else {
       clarifications.push("Bitte gib einen Namen an.");
     }
+    return { updates, clarifications };
+  }
+
+  if (isSecretLike(trimmed)) {
+    // Never pass passwords, PINs or account numbers on (Datenlandkarte §5, Z-5/Z-10).
+    clarifications.push("Deine Antwort sieht nach Zugangsdaten, einer PIN oder einer Kontonummer aus. Bitte nur einen Hinweis eintragen, z. B. „Notfallzugang im Passwort-Manager eingerichtet“.");
     return { updates, clarifications };
   }
 

@@ -246,8 +246,8 @@ describe("EA-04.4: return to the chosen area after sign-in, registration and con
     const verify = readFileSync("src/components/auth/account-recovery-forms.tsx", "utf8");
     expect(verify).toContain('sanitizeReturnUrl(params.get("returnUrl"))');
     expect(verify).toContain("router.replace(returnUrl)");
-    // The protected area sends the person to sign in with its own path; the consent gate stays on that page.
-    expect(readFileSync("src/components/dashboard/dashboard-auth-gate.tsx", "utf8")).toContain('buildAuthHref("/login", pathname)');
+    // The protected area sends the person to sign in with its own path and query (review 1, B3-1); the consent gate stays on that page.
+    expect(readFileSync("src/components/dashboard/dashboard-auth-gate.tsx", "utf8")).toContain('buildAuthHref("/login", `${pathname}${search}`)');
   });
 
   it("sends the verification link with the sanitised target", async () => {

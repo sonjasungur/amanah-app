@@ -65,6 +65,7 @@ const FIELD_LABELS: Record<string, string> = {
   "emergencyCard.name": "Name auf Notfallkarte",
   "janazahWishes.preferredFuneralDirector": "Gewünschter Bestatter",
   "powerOfAttorney.authorizedPerson": "Bevollmächtigte Person",
+  digitalLegacy: "Digitaler Nachlass (neuer Hinweis)",
 };
 
 export function labelForField(path: string): string {

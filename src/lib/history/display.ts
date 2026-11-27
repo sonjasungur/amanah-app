@@ -58,6 +58,7 @@ const FIELD_LABELS: Record<string, string> = {
   religiousWishes: "Religiöse Wünsche", repatriation: "Überführung", repatriationNotes: "Notizen zur Überführung", repatriationPreferred: "Überführung bevorzugt", siblings: "Geschwister", sons: "Söhne", spouseAlive: "Ehepartner lebt", spouseNote: "Hinweis zum Ehepartner", status: "Status",
   stepchildren: "Stiefkinder", substitutePerson: "Ersatzperson", title: "Titel", trustedContact: "Vertrauensperson", type: "Art", value: "Wert", wantsIslamicDistribution: "Wunsch nach islamischer Verteilung", whatsappMessage: "WhatsApp-Nachricht", whoMayBePresent: "Wer dabei sein darf",
   whoSpeaksToDoctors: "Wer mit Ärzten spricht", wishes: "Wünsche",
+  hasChildren: "Kinder vorhanden", expectedChild: "Erwartetes Kind", unclearParentage: "Kind außerhalb der Ehe oder ungeklärte Abstammung", missingRelative: "Verschollene Angehörige", otherSpecialCircumstances: "Weitere besondere Umstände",
 };
 
 const VALUE_LABELS: Record<string, string> = { ...ASSET_TYPES, ...OWNERSHIP, ...MORTGAGE };

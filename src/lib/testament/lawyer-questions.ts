@@ -26,11 +26,37 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
   }
   if (f.maritalStatus === "verheiratet") {
     q.push({ id: "regime", question: "Wie wirkt sich unser Güterstand auf den Erbteil meines Ehepartners aus?", reference: "§§ 1371, 1931 BGB" });
-    if (f.jointWillWithSpouse !== "nein") q.push({ id: "joint", question: "Bindet mich ein gemeinsames Testament mit meinem Ehepartner?", reference: "§§ 2265 ff., 2270, 2271 BGB" });
   }
-  if (f.existingWill !== "nein") q.push({ id: "existing", question: "Was passiert mit meinem bisherigen Testament, und wie widerrufe ich es?", reference: "§§ 2253 ff. BGB" });
-  if (f.habitualResidence === "ausland" || f.citizenships.split(/[,;/]| und /).filter((c) => c.trim()).length > 1 || (f.citizenships && !/deutsch/i.test(f.citizenships))) {
-    q.push({ id: "international", question: "Welches Erbrecht gilt für mich, und ist eine Rechtswahl sinnvoll?", reference: "EU-Erbrechtsverordnung Art. 21, 22" });
+  // Joint will: asked for married, widowed and divorced people (binding after death, § 2271 Abs. 2 BGB).
+  const jointWillPossible = f.jointWillWithSpouse === "ja" || f.jointWillWithSpouse === "unsicher";
+  if (f.maritalStatus === "verheiratet" && f.jointWillWithSpouse !== "nein") {
+    q.push({ id: "joint", question: "Bindet mich ein gemeinsames Testament oder ein Erbvertrag mit meinem Ehepartner?", reference: "§§ 2265 ff., 2270, 2271 BGB; § 2289 BGB" });
+  }
+  const boundAfterDeath = f.maritalStatus === "verwitwet" && jointWillPossible;
+  if (boundAfterDeath) {
+    q.push({ id: "joint-widowed", question: "Bin ich nach dem Tod meines Ehepartners an unser gemeinsames Testament oder unseren Erbvertrag gebunden, und darf ich überhaupt noch neu verfügen?", reference: "§ 2271 Abs. 2 BGB (Bindungswirkung); §§ 2270, 2289 BGB" });
+  }
+  if (f.maritalStatus === "geschieden" && jointWillPossible) {
+    q.push({ id: "joint-divorced", question: "Gilt unser gemeinsames Testament oder unser Erbvertrag nach der Scheidung noch, ganz oder teilweise?", reference: "§§ 2268, 2077, 2279 BGB" });
+  }
+  if (f.existingWill !== "nein") {
+    q.push(
+      boundAfterDeath
+        ? { id: "existing", question: "Was gilt für mein bisheriges Testament, und kann ich es trotz einer möglichen Bindung noch ändern?", reference: "§§ 2253 ff., 2271 Abs. 2 BGB" }
+        : { id: "existing", question: "Was passiert mit meinem bisherigen Testament, und wie widerrufe ich es?", reference: "§§ 2253 ff. BGB" }
+    );
+  }
+  const nationalities = parseCitizenships(f.citizenships);
+  if (f.habitualResidence === "ausland" || nationalities.multiple || nationalities.foreign) {
+    q.push({ id: "international", question: "Welches Erbrecht gilt für mich, und ist eine Rechtswahl sinnvoll oder überhaupt möglich?", reference: "EU-Erbrechtsverordnung Art. 21, 22" });
+  }
+  const treatyCountries = [...new Set([...nationalities.treaty, ...treatyCountriesIn(f.assetsAbroad === "ja" ? f.assetsAbroadCountries : "")])];
+  if (treatyCountries.length > 0) {
+    q.push({
+      id: "treaty",
+      question: `Gilt für mich ein Staatsvertrag mit ${treatyCountries.join(" oder ")}, der der EU-Erbrechtsverordnung vorgeht, und was bedeutet das für Rechtswahl und Testament?`,
+      reference: "Art. 75 EuErbVO; deutsch-türkisches Nachlassabkommen (1929); deutsch-iranisches Niederlassungsabkommen (1929)",
+    });
   }
   if (f.assetsAbroad === "ja") q.push({ id: "abroad", question: `Welche Regeln gelten für mein Vermögen im Ausland${f.assetsAbroadCountries ? ` (${f.assetsAbroadCountries})` : ""}?`, reference: "Nachlassspaltung, Staatsverträge" });
   if (f.businessInterests === "ja") q.push({ id: "business", question: "Was muss für meine Unternehmensbeteiligung geregelt werden?", reference: "Gesellschaftsvertrag" });
@@ -60,6 +86,33 @@ export function buildLawyerQuestions(data: Pick<AmanahOrdnerData, "testamentPrep
   }
   q.push({ id: "storage", question: "Soll mein Testament amtlich verwahrt werden?", reference: "§ 2248 BGB, Zentrales Testamentsregister" });
   return q;
+}
+
+const GERMAN = /^(deutsch\w*|deutschland|german\w*|de)$/;
+const TREATY: { name: string; pattern: RegExp }[] = [
+  { name: "der Türkei", pattern: /t(ü|ue|u)rk|^tr$/ },
+  { name: "dem Iran", pattern: /iran|persi/ },
+];
+
+/**
+ * Reads the free-text citizenship answer robustly: "deutsch-türkisch", "Deutsch, Türkisch",
+ * "deutsch und iranisch", "doppelte Staatsangehörigkeit" — case, hyphen, comma, slash, "und"/"sowie".
+ */
+export function parseCitizenships(raw: string): { parts: string[]; multiple: boolean; foreign: boolean; treaty: string[] } {
+  const text = (raw ?? "").toLowerCase().trim();
+  const parts = text
+    .split(/[,;/&+|\n]|\s+-\s+|-|\bund\b|\bsowie\b|\bauch\b|\bor\b|\band\b/)
+    .map((c) => c.replace(/staatsangehörigkeit(en)?|staatsbürger(in|schaft)?|nationalität/g, "").replace(/[().]/g, "").trim())
+    .filter(Boolean);
+  const multiple = parts.length > 1 || /doppel|mehrere|zwei staats|mehrfach/.test(text);
+  const foreign = parts.some((c) => !GERMAN.test(c) && !/doppel|mehrere|mehrfach|zwei/.test(c));
+  const treaty = TREATY.filter((t) => parts.some((c) => t.pattern.test(c))).map((t) => t.name);
+  return { parts, multiple, foreign, treaty };
+}
+
+function treatyCountriesIn(countries: string): string[] {
+  const text = (countries ?? "").toLowerCase();
+  return TREATY.filter((t) => t.pattern.test(text)).map((t) => t.name);
 }
 
 function isMinor(birthDate?: string): boolean {

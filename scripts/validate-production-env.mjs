@@ -108,6 +108,9 @@ export function validateProductionEnv(env = process.env) {
   if (env.AMANAH_INTERNAL_TOOLS === "true") {
     errors.push("AMANAH_INTERNAL_TOOLS must not be enabled in production");
   }
+  if (env.AMANAH_KNOWLEDGE_PREVIEW === "true") {
+    errors.push("AMANAH_KNOWLEDGE_PREVIEW must not be enabled in production (unpublished drafts)");
+  }
   if (env.AMANAH_DEV_OUTBOX === "true") {
     errors.push("AMANAH_DEV_OUTBOX must not be enabled in production");
   }

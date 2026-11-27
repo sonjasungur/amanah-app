@@ -131,7 +131,7 @@ export const defaultAmanahData: AmanahOrdnerData = {
   },
   testamentPreparation: {
     personalWishes: { wishes: "", charitableWishes: "", bequests: [], executorWish: "", executorPerson: "", guardianPerson: "", guardianExcluded: "" },
-    islamicModel: { wantsIslamicDistribution: "", preferredSchool: "", ownGender: "", fatherAlive: "", motherAlive: "", grandparentsAlive: "", grandchildrenViaDeceasedSon: "", halfSiblings: "", adoptedChildren: "", moreThanOneSpouse: "", otherRelatives: "" },
+    islamicModel: { wantsIslamicDistribution: "", preferredSchool: "", ownGender: "", fatherAlive: "", motherAlive: "", grandparentsAlive: "", grandchildrenViaDeceasedSon: "", halfSiblings: "", adoptedChildren: "", moreThanOneSpouse: "", otherRelatives: "", hasChildren: "", expectedChild: "", unclearParentage: "", missingRelative: "", otherSpecialCircumstances: "" },
     legalFacts: {
       maritalStatus: "",
       propertyRegime: "",

@@ -23,6 +23,8 @@ const FORBIDDEN = [
   "lib/knowledge/ghusl-kafan.ts",
   "lib/knowledge/sadaqa-jariya.ts",
   "lib/knowledge/patientenverfuegung.ts",
+  // AP22 EA-01.3: field help texts are served by /api/help/[id], never bundled.
+  "lib/help/registry.ts",
 ];
 
 const walk = (dir: string): string[] =>

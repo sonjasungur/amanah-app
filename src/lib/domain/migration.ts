@@ -4,6 +4,8 @@ import type { AmanahOrdnerData, DocumentType, FamilyConversation, FamilyTalk, Te
 import { normalizeCheckProgress } from "@/lib/check/progress";
 import { sanitizeBequests } from "@/lib/testament/bequests";
 import { normalizeVorsorgeMeta } from "@/lib/vorsorge/meta";
+import { normalizePowerOfAttorney } from "@/lib/vorsorge/power-of-attorney";
+import { normalizeDigitalLegacy } from "@/lib/vorsorge/digital-legacy";
 import { toIsoDate } from "@/lib/utils/date-input";
 
 /** Birth dates typed as TT.MM.JJJJ in earlier versions become ISO; anything else stays as typed. */
@@ -91,7 +93,10 @@ export function normalizeData(data: Partial<AmanahOrdnerData>): AmanahOrdnerData
     donations: merged.donations ?? [],
     importantInstructions: merged.importantInstructions ?? [],
     debtsAmanah: merged.debtsAmanah ?? [],
-    digitalLegacy: merged.digitalLegacy ?? [],
+    // AP22 EA-18.1: old entries keep every field; only values of the wrong type are dropped.
+    digitalLegacy: normalizeDigitalLegacy(merged.digitalLegacy ?? []),
+    // AP22 EA-07: old free texts stay untouched; the structured wishes are cleaned if present.
+    powerOfAttorney: normalizePowerOfAttorney(merged.powerOfAttorney),
     knowledgeBookmarks: Array.isArray(merged.knowledgeBookmarks)
       ? merged.knowledgeBookmarks.filter((s): s is string => typeof s === "string").slice(0, 200)
       : [],

@@ -60,7 +60,8 @@ describe("plan matrix", () => {
     expect(feature.tier).toBe("free");
     expect(feature.enforcement).toBe("never");
     expect(feature.note).toContain("Dauerhaft kostenlos");
-    expect([...FREE_ACCOUNT_SECTIONS].sort()).toEqual(["assets", "checkProgress", "emergencyCard", "knowledgeBookmarks"]);
+    // familyConversation: owner decision 27.11.2026 (family conversation completely free).
+    expect([...FREE_ACCOUNT_SECTIONS].sort()).toEqual(["assets", "checkProgress", "emergencyCard", "familyConversation", "knowledgeBookmarks"]);
     expect(planFeature("persistent_folder")?.tier).toBe("plus");
   });
 });

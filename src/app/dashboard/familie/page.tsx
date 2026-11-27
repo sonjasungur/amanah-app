@@ -16,6 +16,8 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { SaveBar } from "@/components/storage/save-bar";
 import { DocumentPanel } from "@/components/documents/document-panel";
+import { LetterPhrases } from "@/components/family-letter/letter-phrases";
+import { appendPhrase } from "@/lib/family-letter/phrases";
 
 const tones: { id: FamilyMessageTone; label: string }[] = [
   { id: "liebevoll", label: "Liebevoll" },
@@ -150,6 +152,10 @@ export default function FamiliePage() {
             {words(body)} Wörter
             {body.trim() && body.trim().length < LETTER_MIN_CHARS ? " · noch sehr kurz" : ""}
           </p>
+          {/* AP22 EA-17.1: optional example sentences; added at the end, never replacing the text. */}
+          <div className="mt-3">
+            <LetterPhrases onTake={(phrase) => update({ familyLetter: appendPhrase(useAmanahStore.getState().familyMessage.familyLetter ?? "", phrase) })} />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">

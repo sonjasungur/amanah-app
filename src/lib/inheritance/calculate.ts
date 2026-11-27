@@ -5,6 +5,8 @@ import type { CalculationStep, FaraidCaseInput, FaraidResult, HeirKey, HeirShare
 const Q_4_11 = "quran-nisa-4-11";
 const Q_4_12 = "quran-nisa-4-12";
 
+const MAX_COUNT = 50;
+
 /** Cases outside the reviewed scope are blocked, never approximated. */
 export function getBlockingReasons(input: FaraidCaseInput): string[] {
   const reasons: string[] = [];
@@ -12,7 +14,8 @@ export function getBlockingReasons(input: FaraidCaseInput): string[] {
   const spouse = input.deceasedGender === "male" ? input.wives > 0 : input.husband;
 
   const counts = [input.wives, input.sons, input.daughters, input.siblings];
-  if (counts.some((n) => !Number.isInteger(n) || n < 0)) {
+  // Upper bound keeps the exact fraction arithmetic far away from overflow (e.g. a mistyped 10^16).
+  if (counts.some((n) => !Number.isInteger(n) || n < 0 || n > MAX_COUNT)) {
     reasons.push("Ungültige Anzahl von Angehörigen.");
   }
   if (input.wives > 1) {
@@ -25,7 +28,7 @@ export function getBlockingReasons(input: FaraidCaseInput): string[] {
     reasons.push("Stief-, Adoptiv- oder Pflegekinder: Gestaltung über Waṣiyya fachlich klären.");
   }
   if (input.otherSpecialCircumstances) {
-    reasons.push("Sonderumstände (z. B. ungeborenes Kind, verschollene Person, gleichzeitiger Tod) werden nicht berechnet.");
+    reasons.push("Sonderumstände (z. B. ungeborenes Kind, Kind außerhalb der Ehe oder ungeklärte Abstammung, verschollene Person, gleichzeitiger Tod) werden nicht berechnet.");
   }
   if (input.grandparents && (!input.father || !input.mother)) {
     reasons.push("Großeltern können erbberechtigt sein — außerhalb des geprüften Umfangs.");

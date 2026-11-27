@@ -32,18 +32,13 @@ export const medicalFields: FieldConfig[] = [
   { key: "openQuestionsImam", label: "Offene Fragen an Imam", type: "textarea" },
 ];
 
+/**
+ * Only the two person fields stay plain inputs (also used by the guided Vorsorge). The area texts of
+ * the first version are replaced by structured wishes (AP22 EA-07, components/vorsorge/poa-wishes-editor.tsx).
+ */
 export const powerOfAttorneyFields: FieldConfig[] = [
   { key: "authorizedPerson", help: "vorsorgevollmacht", label: "Bevollmächtigte Person", type: "text" },
   { key: "substitutePerson", label: "Ersatzperson", type: "text" },
-  { key: "medical", label: "Medizinisch", type: "textarea" },
-  { key: "authorities", label: "Behörden", type: "textarea" },
-  { key: "bank", label: "Bank", type: "textarea" },
-  { key: "housing", label: "Wohnung", type: "textarea" },
-  { key: "care", label: "Pflege", type: "textarea" },
-  { key: "burial", label: "Bestattung", type: "textarea" },
-  { key: "documents", label: "Dokumente", type: "textarea" },
-  { key: "digitalAccounts", label: "Digitale Konten", type: "textarea" },
-  { key: "excludedPersons", label: "Wer soll NICHT entscheiden?", type: "textarea" },
 ];
 
 export const careDirectiveFields: FieldConfig[] = [
@@ -57,9 +52,10 @@ export const careDirectiveFields: FieldConfig[] = [
 export { janazahFields } from "@/lib/modules/janazah-sections";
 
 export const ghuslKafanFields: FieldConfig[] = [
-  { key: "whoMayBePresent", help: "ghusl-personen", label: "Wer darf anwesend sein?", type: "textarea" },
-  { key: "preferredGhuslTeam", help: "ghusl", label: "Bevorzugtes Ghusl-Team", type: "text" },
-  { key: "dignityBoundaries", help: "schamgrenzen", label: "Würde / Schamgrenzen", type: "textarea" },
+  // AP22 EA-01.3: the ⓘ help module with the existing Ghusl texts (lib/help/registry.ts).
+  { key: "whoMayBePresent", fieldHelp: "ghusl-anwesende", label: "Wer darf anwesend sein?", type: "textarea" },
+  { key: "preferredGhuslTeam", fieldHelp: "ghusl-waschung", label: "Bevorzugtes Ghusl-Team", type: "text" },
+  { key: "dignityBoundaries", fieldHelp: "ghusl-wuerde", label: "Würde / Schamgrenzen", type: "textarea" },
   { key: "spouseNote", label: "Ehepartner-Hinweis", type: "textarea" },
   { key: "familyFarewell", label: "Familie darf Abschied nehmen?", type: "select", options: [
     { value: "yes", label: "Ja" }, { value: "no", label: "Nein" }, { value: "conditional", label: "Unter Bedingungen" },

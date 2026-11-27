@@ -1,3 +1,6 @@
+import { digitalEntrySummary } from "@/lib/vorsorge/digital-legacy";
+import { powerOfAttorneyRows } from "@/lib/vorsorge/power-of-attorney";
+import { SECRET_WITHHELD, isSecretLike } from "@/lib/validation/secret-like";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { createEmergencyExportBundle } from "@/lib/domain/schema";
 
@@ -44,9 +47,12 @@ export function buildReadableEmergencySections(data: AmanahOrdnerData): Readable
   const poa = data.powerOfAttorney;
   const jw = data.janazahWishes;
   const fm = data.familyMessage;
-  const digital = data.powerOfAttorney.digitalAccounts || data.digitalLegacy?.length
-    ? `${data.powerOfAttorney.digitalAccounts || ""}${data.digitalLegacy?.length ? ` (${data.digitalLegacy.length} Einträge)` : ""}`.trim()
-    : "";
+  // D-26: digital accounts live in the digital legacy; the old power-of-attorney text is still shown, unless it looks like a secret.
+  const legacyDigital = data.powerOfAttorney.digitalAccounts?.trim() ? (isSecretLike(data.powerOfAttorney.digitalAccounts) ? SECRET_WITHHELD : data.powerOfAttorney.digitalAccounts.trim()) : "";
+  const digitalItems = (data.digitalLegacy ?? []).map((d) => {
+    const s = digitalEntrySummary(data, d);
+    return { label: `${s.kind}: ${s.title}`, value: str(s.detail) };
+  });
 
   return [
     {
@@ -73,11 +79,10 @@ export function buildReadableEmergencySections(data: AmanahOrdnerData): Readable
       ],
     },
     {
-      title: "Vertrauensperson / Vollmacht",
+      title: "Vertrauensperson / Wünsche zur Vollmacht (keine Vollmacht)",
       items: [
-        { label: "Bevollmächtigte Person", value: str(poa.authorizedPerson) },
-        { label: "Ersatzperson", value: str(poa.substitutePerson) },
-        { label: "Dokumente-Hinweis", value: str(poa.documents) },
+        // New structure first, old free texts as "früher eingetragen" (AP22 EA-07.3).
+        ...powerOfAttorneyRows({ powerOfAttorney: poa, familyMembers: data.familyMembers }).map(([label, value]) => ({ label, value: str(value) })),
       ],
     },
     {
@@ -91,7 +96,11 @@ export function buildReadableEmergencySections(data: AmanahOrdnerData): Readable
     },
     {
       title: "Digitaler Nachlass (Hinweise)",
-      items: [{ label: "Digitale Konten", value: str(digital || "—") }],
+      items: [
+        ...digitalItems,
+        ...(legacyDigital ? [{ label: "Digitale Konten (früher in der Vollmacht eingetragen)", value: legacyDigital }] : []),
+        ...(digitalItems.length || legacyDigital ? [] : [{ label: "Digitale Konten", value: "—" }]),
+      ],
     },
     {
       title: "Schulden & Verpflichtungen",

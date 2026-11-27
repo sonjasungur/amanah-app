@@ -32,12 +32,12 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "regime", part: "legalFacts", field: "propertyRegime", question: "Welcher Güterstand gilt in deiner Ehe?", help: "Ohne Ehevertrag ist es in Deutschland meist die Zugewinngemeinschaft. Der Güterstand beeinflusst, was dein Ehepartner erbt.", type: "choice", options: [
     { value: "zugewinn", label: "Zugewinngemeinschaft (kein Ehevertrag)" }, { value: "guetertrennung", label: "Gütertrennung" }, { value: "guetergemeinschaft", label: "Gütergemeinschaft" }, { value: "unbekannt", label: "Weiß ich nicht" },
   ] },
-  { id: "citizenship", part: "legalFacts", field: "citizenships", question: "Welche Staatsangehörigkeit(en) hast du?", help: "Wichtig, weil bei mehreren Staatsangehörigkeiten unterschiedliches Erbrecht in Frage kommen kann.", type: "text" },
+  { id: "citizenship", part: "legalFacts", field: "citizenships", question: "Welche Staatsangehörigkeit(en) hast du?", help: "Wichtig, weil bei mehreren Staatsangehörigkeiten unterschiedliches Erbrecht in Frage kommen kann. Bitte alle nennen, z. B. „deutsch, türkisch“. Für die Türkei und den Iran können besondere Abkommen gelten.", type: "text" },
   { id: "residence", part: "legalFacts", field: "habitualResidence", question: "Wo lebst du überwiegend?", help: "Für Erbfälle in der EU zählt meist der Ort, an dem man gewöhnlich lebt.", type: "choice", options: [
     { value: "deutschland", label: "In Deutschland" }, { value: "ausland", label: "Im Ausland" },
   ] },
   { id: "existingWill", part: "legalFacts", field: "existingWill", question: "Hast du schon ein Testament?", type: "choice", options: YES_NO_UNSURE },
-  { id: "jointWill", part: "legalFacts", field: "jointWillWithSpouse", question: "Gibt es ein gemeinsames Testament mit deinem Ehepartner?", help: "Gemeinsame Testamente können dich binden – das sollte ein Anwalt oder Notar prüfen.", type: "choice", options: YES_NO_UNSURE },
+  { id: "jointWill", part: "legalFacts", field: "jointWillWithSpouse", question: "Gibt es ein gemeinsames Testament oder einen Erbvertrag mit deinem Ehepartner oder früheren Ehepartner?", help: "Zum Beispiel ein „Berliner Testament“. Gemeinsame Testamente können dich binden – auch nach dem Tod des Ehepartners. Das sollte ein Anwalt oder Notar prüfen.", type: "choice", options: YES_NO_UNSURE },
   { id: "realEstate", part: "legalFacts", field: "realEstateGermany", question: "Besitzt du Immobilien in Deutschland?", type: "choice", options: YES_NO_UNSURE },
   { id: "abroad", part: "legalFacts", field: "assetsAbroad", question: "Hast du Vermögen oder Immobilien im Ausland?", type: "choice", options: YES_NO_UNSURE },
   { id: "abroadCountries", part: "legalFacts", field: "assetsAbroadCountries", question: "In welchen Ländern?", type: "text" },
@@ -51,6 +51,7 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "gender", part: "islamicModel", field: "ownGender", question: "Bist du …", help: "Die Erbanteile des Ehepartners hängen davon ab.", type: "choice", options: [
     { value: "female", label: "eine Frau" }, { value: "male", label: "ein Mann" },
   ] },
+  { id: "hasChildren", part: "islamicModel", field: "hasChildren", question: "Hast du lebende Kinder (Söhne oder Töchter)?", help: "Die Anzahl der Söhne und Töchter trägst du im Erbprofil ein. Ohne klare Antwort wird nichts gerechnet.", type: "choice", options: YES_NO_UNSURE },
   { id: "father", part: "islamicModel", field: "fatherAlive", question: "Lebt dein Vater?", type: "choice", options: YES_NO_UNSURE },
   { id: "mother", part: "islamicModel", field: "motherAlive", question: "Lebt deine Mutter?", type: "choice", options: YES_NO_UNSURE },
   { id: "grandparents", part: "islamicModel", field: "grandparentsAlive", question: "Lebt einer deiner Großeltern?", type: "choice", options: YES_NO_UNSURE },
@@ -59,6 +60,10 @@ export const PREPARATION_STEPS: PreparationStep[] = [
   { id: "adoptedChildren", part: "islamicModel", field: "adoptedChildren", question: "Hast du adoptierte Kinder?", help: "Wird für das deutsche Recht und die islamische Modellinformation getrennt betrachtet.", type: "choice", options: YES_NO_UNSURE },
   { id: "moreThanOneSpouse", part: "islamicModel", field: "moreThanOneSpouse", question: "Bist du mit mehr als einer Person verheiratet, auch nach ausländischem Recht?", type: "choice", options: YES_NO_UNSURE },
   { id: "otherRelatives", part: "islamicModel", field: "otherRelatives", question: "Leben Kinder deiner Brüder, Brüder deines Vaters oder deren Söhne?", type: "choice", options: YES_NO_UNSURE },
+  { id: "expectedChild", part: "islamicModel", field: "expectedChild", question: "Wird in deiner Familie gerade ein Kind erwartet, das erben könnte – zum Beispiel weil du oder deine Ehefrau schwanger ist?", help: "Ein ungeborenes Kind kann erben. Solche Fälle werden nicht gerechnet, sondern fachlich geklärt.", type: "choice", options: YES_NO_UNSURE },
+  { id: "unclearParentage", part: "islamicModel", field: "unclearParentage", question: "Gibt es ein Kind, das außerhalb einer Ehe geboren wurde, oder ist bei einem Kind die Abstammung nicht geklärt?", help: "Islamisches und deutsches Recht behandeln solche Kinder unterschiedlich. Das klärt eine Fachperson, nicht die App.", type: "choice", options: YES_NO_UNSURE },
+  { id: "missingRelative", part: "islamicModel", field: "missingRelative", question: "Gilt ein naher Angehöriger als verschollen, oder ist sein Aufenthalt seit langer Zeit unbekannt?", type: "choice", options: YES_NO_UNSURE },
+  { id: "otherSpecialCircumstances", part: "islamicModel", field: "otherSpecialCircumstances", question: "Gibt es sonst besondere Umstände, die das Erbe betreffen könnten?", help: "Zum Beispiel: ein Kind, dessen Geschlecht nicht eindeutig bestimmt ist; ein Angehöriger, von dem dir ernsthafte Gewalt droht; oder nahe Angehörige, mit denen du häufig gemeinsam reist, sodass ein gleichzeitiger Tod möglich ist. Du musst nichts erklären – ein „Ja“ genügt, damit der Fall fachlich geklärt wird.", type: "choice", options: YES_NO_UNSURE },
   { id: "wishes", part: "personalWishes", field: "wishes", question: "Was ist dir für deinen Nachlass persönlich wichtig?", help: "Zum Beispiel bestimmte Gegenstände für bestimmte Personen.", type: "textarea" },
   { id: "charity", part: "personalWishes", field: "charitableWishes", question: "Möchtest du etwas für wohltätige Zwecke bestimmen?", type: "textarea" },
   { id: "bequests", part: "personalWishes", field: "bequests", question: "Möchtest du bestimmten Personen oder Einrichtungen etwas zukommen lassen?", help: "Nur als Wunsch für das Gespräch. Damit wird nichts vermacht. Ob und wie es sich umsetzen lässt, klären Anwalt oder Notar.", type: "bequests" },
@@ -76,9 +81,13 @@ export function writeStepValue(prep: TestamentPreparation, step: PreparationStep
   return { ...prep, [step.part]: { ...prep[step.part], [step.field]: value } };
 }
 
+const JOINT_WILL_STATUSES: string[] = ["verheiratet", "verwitwet", "geschieden"];
+
 /** Steps that do not apply are skipped (e.g. property regime when not married). */
 export function isStepRelevant(prep: TestamentPreparation, step: PreparationStep): boolean {
-  if (step.id === "regime" || step.id === "jointWill") return prep.legalFacts.maritalStatus === "verheiratet";
+  if (step.id === "regime") return prep.legalFacts.maritalStatus === "verheiratet";
+  // A joint will also binds after the spouse's death (§ 2271 Abs. 2 BGB) and may lapse on divorce (§ 2268 BGB).
+  if (step.id === "jointWill") return JOINT_WILL_STATUSES.includes(prep.legalFacts.maritalStatus);
   if (step.id === "abroadCountries") return prep.legalFacts.assetsAbroad === "ja";
   if (step.id === "school") return prep.islamicModel.wantsIslamicDistribution !== "nein";
   if (step.id === "moreThanOneSpouse") return prep.legalFacts.maritalStatus === "verheiratet";

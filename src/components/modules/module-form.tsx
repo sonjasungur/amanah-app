@@ -5,6 +5,8 @@ import { DateInput, Input, Textarea, Label, Select } from "@/components/ui/input
 import { useI18n } from "@/lib/i18n/context";
 import { HelpTip } from "@/components/ui/help-tip";
 import type { HelpTopicId } from "@/lib/content/help-topics";
+import { FieldHelp } from "@/components/help/field-help";
+import type { FieldHelpId } from "@/lib/help/types";
 
 export interface FieldConfig {
   key: string;
@@ -19,6 +21,8 @@ export interface FieldConfig {
   helpText?: string;
   /** A "?" with a short explanation next to the label. */
   help?: HelpTopicId;
+  /** AP22 EA-01.3: the ⓘ help module (term, guidance, views, room, decision, sources, review status). Replaces `help`. */
+  fieldHelp?: FieldHelpId;
 }
 
 interface ModuleFormProps {
@@ -40,7 +44,7 @@ export function ModuleForm({ section, fields, values, onChange }: ModuleFormProp
         <div key={field.key} data-testid={field.testId}>
           <div className="flex flex-wrap items-center">
             <Label htmlFor={id}>{field.label}</Label>
-            {field.help && <HelpTip topic={field.help} />}
+            {field.fieldHelp ? <FieldHelp id={field.fieldHelp} label={field.label} /> : field.help && <HelpTip topic={field.help} />}
           </div>
           {field.helpText && <p id={`${id}-help`} className="text-xs text-muted mb-1.5">{field.helpText}</p>}
           {field.type === "textarea" && (

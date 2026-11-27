@@ -1,4 +1,4 @@
-import type { DebtAmanahItem, DigitalLegacyItem } from "@/lib/domain/types";
+import type { DebtAmanahItem } from "@/lib/domain/types";
 
 export const debtTypeLabels: Record<DebtAmanahItem["type"], string> = {
   debt_owed: "Schuld, die ich schulde",
@@ -12,15 +12,5 @@ export const debtTypeLabels: Record<DebtAmanahItem["type"], string> = {
   document: "Wichtiges Dokument",
 };
 
-export const digitalTypeLabels: Record<DigitalLegacyItem["type"], string> = {
-  email: "E-Mail-Konto",
-  password_manager: "Passwort-Manager",
-  emergency_access: "Notfallzugang",
-  banking: "Online-Banking",
-  paypal: "PayPal / Zahlungsdienst",
-  subscription: "Abonnement",
-  social: "Social Media",
-  cloud: "Cloud-Speicher",
-  domain: "Domain / Website",
-  file: "Wichtige Datei",
-};
+/** @deprecated first version of the digital legacy; use DIGITAL_CATEGORY_LABELS / digitalKindLabel(). */
+export { LEGACY_TYPE_LABELS as digitalTypeLabels } from "@/lib/vorsorge/digital-legacy";

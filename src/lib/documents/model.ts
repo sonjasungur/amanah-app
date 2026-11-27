@@ -2,7 +2,9 @@ import type { AmanahOrdnerData, FamilyRole } from "@/lib/domain/types";
 import { checkBirthDate, formatDisplayDate, toIsoDate } from "@/lib/utils/date-input";
 import { ASSET_TYPES, MORTGAGE, OWNERSHIP } from "@/lib/testament/asset-labels";
 import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS } from "@/lib/vorsorge/documents";
-import { debtTypeLabels, digitalTypeLabels } from "@/lib/vorsorge/labels";
+import { debtTypeLabels } from "@/lib/vorsorge/labels";
+import { digitalEntrySummary } from "@/lib/vorsorge/digital-legacy";
+import { powerOfAttorneyRows } from "@/lib/vorsorge/power-of-attorney";
 import { ROLE_LABELS } from "@/lib/vorsorge/people";
 import { legalDocumentStates } from "@/lib/vorsorge/handover";
 import { inheritanceConversationPoints } from "@/lib/domain/validation";
@@ -632,7 +634,15 @@ const assetList = (data: AmanahOrdnerData): DocBlock | null =>
     : null;
 
 const digitalList = (data: AmanahOrdnerData): DocBlock | null =>
-  data.digitalLegacy.length ? { kind: "list", items: data.digitalLegacy.map((d) => ({ title: `${digitalTypeLabels[d.type] ?? "Konto"}: ${d.description}`, detail: d.locationHint ? `Hinweis: ${d.locationHint}` : undefined })) } : null;
+  data.digitalLegacy.length
+    ? {
+        kind: "list",
+        items: data.digitalLegacy.map((d) => {
+          const s = digitalEntrySummary(data, d);
+          return { title: `${s.kind}: ${s.title}`, detail: s.detail || undefined };
+        }),
+      }
+    : null;
 
 /** What exists and where the papers are. Amounts and free notes are deliberately left out. */
 export function buildVermoegen(data: AmanahOrdnerData): DocModel {
@@ -723,7 +733,6 @@ export const FULL_DOC_NOTICE = "Persönliche Übersicht: kein Testament, keine V
 export function buildGesamt(data: AmanahOrdnerData, options: DocOptions = {}): DocModel {
   const c = data.emergencyCard;
   const m = data.medicalWishes;
-  const v = data.powerOfAttorney;
   const care = data.careDirective;
   const name = docValue(c.name) ?? docValue(data.userProfile?.name);
   const birth = dateForDocument(c.birthDate).display;
@@ -762,7 +771,7 @@ export function buildGesamt(data: AmanahOrdnerData, options: DocOptions = {}): D
       ], { icon: "health" }),
       section("Dokumente und Aufbewahrungsorte", [rows(places)], { icon: "documents", note: "Wo die Originale liegen. Die Angabe hier ersetzt kein Dokument." }),
       section("Vollmacht und Betreuung: meine Angaben", grouped([
-        ["Angaben zur Vollmacht (keine Vollmacht)", [rows([["Vorgesehene Person", docValue(v.authorizedPerson)], ["Ersatzperson", docValue(v.substitutePerson)], ["Wer nicht entscheiden soll", docValue(v.excludedPersons)]])]],
+        ["Wünsche zur Vollmacht (keine Vollmacht)", [rows(powerOfAttorneyRows(data))]],
         ["Wünsche zur Betreuung (keine Betreuungsverfügung)", [rows([["Gewünschter Betreuer", docValue(care.preferredGuardian)], ["Nicht gewünscht", docValue(care.excludedGuardian)], ["Wünsche zu Pflege und Wohnen", docValue(care.careHousingWishes)]])]],
       ]), { icon: "legal", note: "Die Nennung einer Person ist keine Vollmacht." }),
       section("Janazah-Wünsche", janazahBlocks, { icon: "mosque", note: "Persönliche Wünsche, keine rechtliche Verfügung." }),

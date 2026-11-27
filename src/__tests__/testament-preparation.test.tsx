@@ -47,8 +47,8 @@ describe("questionnaire logic", () => {
     const res = toFaraidInput(
       data(
         { maritalStatus: "verheiratet", differentReligionRelatives: "nein" },
-        { ownGender: "male", fatherAlive: "nein", motherAlive: "nein", grandparentsAlive: "nein", grandchildrenViaDeceasedSon: "nein", halfSiblings: "nein", adoptedChildren: "nein", moreThanOneSpouse: "nein" },
-        { sons: 1, daughters: 1, siblings: false, spouseAlive: true }
+        { ownGender: "male", fatherAlive: "nein", motherAlive: "nein", grandparentsAlive: "nein", grandchildrenViaDeceasedSon: "nein", halfSiblings: "nein", adoptedChildren: "nein", moreThanOneSpouse: "nein", hasChildren: "ja", expectedChild: "nein", unclearParentage: "nein", missingRelative: "nein", otherSpecialCircumstances: "nein" },
+        { sons: 1, daughters: 1, siblings: false, spouseAlive: true, stepchildren: false, fosterChildren: false }
       )
     );
     if (!("input" in res)) throw new Error("expected input");
@@ -69,7 +69,7 @@ describe("preparation page", () => {
 
   it("walks one question per step to a separated summary with a locked model", () => {
     vi.stubEnv("NEXT_PUBLIC_AMANAH_TESTAMENT_PREPARATION", "true");
-    useAmanahStore.setState({ inheritanceProfile: { ...defaultAmanahData.inheritanceProfile, sons: 1, daughters: 1, siblings: false } });
+    useAmanahStore.setState({ inheritanceProfile: { ...defaultAmanahData.inheritanceProfile, sons: 1, daughters: 1, siblings: false, spouseAlive: true, stepchildren: false, fosterChildren: false } });
     renderPage();
     const answer = (label: string) => fireEvent.click(screen.getAllByRole("button", { name: label })[0]);
     answer("Verheiratet");
@@ -86,6 +86,7 @@ describe("preparation page", () => {
     answer("Ja"); // islamic wish
     answer("Hanafitisch");
     answer("ein Mann");
+    answer("Ja"); // living children
     answer("Nein"); // father
     answer("Nein"); // mother
     answer("Nein"); // grandparents
@@ -94,6 +95,10 @@ describe("preparation page", () => {
     answer("Nein"); // adopted children
     answer("Nein"); // more than one marriage
     answer("Nein"); // other relatives
+    answer("Nein"); // expected child
+    answer("Nein"); // child outside marriage / unclear parentage
+    answer("Nein"); // missing relative
+    answer("Nein"); // other special circumstances
     fireEvent.click(screen.getByTestId("preparation-next"));
     fireEvent.click(screen.getByTestId("preparation-next"));
     expect(screen.getByTestId("bequest-editor")).toBeTruthy();

@@ -1,7 +1,9 @@
 import type { AmanahOrdnerData, DocumentType } from "@/lib/domain/types";
 import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS } from "@/lib/vorsorge/documents";
 import { ASSET_TYPES } from "@/lib/testament/asset-labels";
-import { debtTypeLabels, digitalTypeLabels } from "@/lib/vorsorge/labels";
+import { debtTypeLabels } from "@/lib/vorsorge/labels";
+import { digitalEntrySummary } from "@/lib/vorsorge/digital-legacy";
+import { powerOfAttorneyRows } from "@/lib/vorsorge/power-of-attorney";
 import { formatDisplayDate, toIsoDate } from "@/lib/utils/date-input";
 
 /**
@@ -98,8 +100,8 @@ function sectionFor(data: AmanahOrdnerData, id: PackageItemId): PackageRow[] {
       ]);
     case "vollmacht":
       return rows([
-        ["Vorgesehene Person (Vollmacht)", data.powerOfAttorney.authorizedPerson],
-        ["Ersatzperson", data.powerOfAttorney.substitutePerson],
+        // Wishes for the power of attorney (new structure, old texts as "früher eingetragen").
+        ...powerOfAttorneyRows(data).map(([label, value]) => [label === "Vorgesehene Person" ? "Vorgesehene Person (Vollmacht)" : label, value ?? ""] as [string, string]),
         ["Patientenverfügung vorhanden", yesNo(card.hasPatientenverfuegung)],
         ["Vorsorgevollmacht vorhanden", yesNo(card.hasVorsorgevollmacht)],
         ["Wo liegt die Patientenverfügung", data.medicalWishes.documentLocation || docLocation(data, "patientenverfuegung")],
@@ -149,10 +151,10 @@ function sectionFor(data: AmanahOrdnerData, id: PackageItemId): PackageRow[] {
         value: [a.description, a.locationHint && `Unterlagen: ${a.locationHint}`].filter(Boolean).join(" – "),
       }));
     case "digital":
-      return data.digitalLegacy.map((d) => ({
-        label: digitalTypeLabels[d.type] ?? "Konto",
-        value: [d.description, d.locationHint && `Hinweis: ${d.locationHint}`].filter(Boolean).join(" – "),
-      }));
+      return data.digitalLegacy.map((d) => {
+        const s = digitalEntrySummary(data, d);
+        return { label: s.kind, value: [s.title, s.detail].filter(Boolean).join(" – ") };
+      });
   }
 }
 

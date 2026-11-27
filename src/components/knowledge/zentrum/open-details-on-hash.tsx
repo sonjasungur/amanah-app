@@ -9,7 +9,12 @@ import { useEffect } from "react";
 export function OpenDetailsOnHash() {
   useEffect(() => {
     const open = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1));
+      let id: string;
+      try {
+        id = decodeURIComponent(window.location.hash.slice(1));
+      } catch {
+        return; // malformed hash such as "#%E0": ignore instead of breaking the article page
+      }
       if (!id) return;
       const el = document.getElementById(id);
       const box = el?.closest("details");
