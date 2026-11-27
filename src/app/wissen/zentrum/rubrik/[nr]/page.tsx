@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { isKnowledgePreviewEnabled } from "@/lib/flags/knowledge-preview";
 import { FULL_ARTICLES } from "@/modules/islamic-knowledge/full-articles";
-import { articlesInRubric, getCentreArticle, getRubric } from "@/modules/islamic-knowledge/full-articles/rubrics";
+import { RUBRICS, articlesInRubric, getCentreArticle, getRubric } from "@/modules/islamic-knowledge/full-articles/rubrics";
 import { ArticleLink, anchor } from "@/components/knowledge/zentrum/article-view";
 import { PreviewNote } from "@/components/knowledge/zentrum/preview-note";
+import { CentreHero, CentreSearchForm, ReviewState } from "@/components/knowledge/zentrum/centre-ui";
 
 /** P2.7 knowledge centre, one rubric. Preview of unpublished drafts: 404 unless the preview switch is on. */
 export const dynamic = "force-dynamic";
@@ -22,22 +23,18 @@ export default async function RubricPage({ params }: { params: Promise<{ nr: str
   return (
     <div className="wz min-h-screen" data-testid="knowledge-rubric">
       <PreviewNote />
-      <main className="mx-auto max-w-[46rem] px-5 pt-6 pb-16 sm:pt-10 space-y-10">
-      <nav className="text-sm flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--wz-muted)]" aria-label="Brotkrumen">
-        <Link href="/wissen/zentrum" className="wz-text-link">
-          Wissenszentrum
-        </Link>
-        <span aria-hidden>›</span>
-        <span>Rubrik {rubric.nr}</span>
-      </nav>
-      <header className="space-y-3">
-        <p className="wz-eyebrow">Rubrik {rubric.nr}</p>
-        <h1 className="wz-serif text-[2rem] leading-[1.15] sm:text-[2.5rem] font-semibold text-[var(--wz-green)]">{rubric.title}</h1>
-        <p className="text-[1.125rem] text-[var(--wz-muted)]">{rubric.description}</p>
-      </header>
+      <CentreHero
+        crumbs={[{ href: "/wissen/zentrum", label: "Islamisches Wissen" }, { label: `Rubrik ${rubric.nr}` }]}
+        eyebrow={`Rubrik ${rubric.nr} von 6 · ${articles.length} ${articles.length === 1 ? "Beitrag" : "Beiträge"}`}
+        title={rubric.title}
+        lead={rubric.description}
+      >
+        <CentreSearchForm className="mt-7" onDark />
+      </CentreHero>
+      <main className="mx-auto max-w-[46rem] px-5 pt-10 pb-16 space-y-10">
       <section className="space-y-3" data-testid="rubric-articles">
         {articles.map((a) => (
-          <ArticleLink key={a.id} a={a} />
+          <ArticleLink key={a.id} a={a} badge={<ReviewState article={a} compact />} />
         ))}
         {articles.length === 0 && <p className="text-[var(--wz-muted)]">In dieser Rubrik gibt es noch keine Beiträge.</p>}
       </section>
@@ -75,6 +72,13 @@ export default async function RubricPage({ params }: { params: Promise<{ nr: str
           ))}
         </section>
       )}
+      <nav className="flex flex-wrap gap-2 border-t border-[var(--wz-line)] pt-6" aria-label="Weitere Rubriken" data-testid="rubric-nav">
+        {RUBRICS.filter((r) => r.nr !== rubric.nr).map((r) => (
+          <Link key={r.nr} href={`/wissen/zentrum/rubrik/${r.nr}`} className="rounded-full border border-[var(--wz-line)] bg-white px-3.5 py-2 text-sm font-semibold text-[var(--wz-green)] hover:border-[var(--wz-gold)]">
+            {r.nr}. {r.title}
+          </Link>
+        ))}
+      </nav>
       </main>
     </div>
   );

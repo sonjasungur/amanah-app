@@ -31,7 +31,8 @@ export async function POST(request: Request) {
     if (!byIp.allowed) return tooManyAttempts(byIp, "Zu viele Anfragen. Bitte kurz warten.");
 
     const body = await request.json();
-    const { email, password, name } = body as { email?: string; password?: string; name?: string };
+    const { email, password, name, returnUrl } = body as { email?: string; password?: string; name?: string; returnUrl?: unknown };
+    const back = typeof returnUrl === "string" ? returnUrl : null;
 
     if (!email || !password || password.length < MIN_PASSWORD_LENGTH) {
       return NextResponse.json({ error: PASSWORD_REQUIREMENT_ERROR }, { status: 400 });
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
     const existing = await repo.findUserByEmail(email);
     if (existing) {
       if (existing.emailVerifiedAt) await sendAccountExistsMail(existing.email);
-      else await sendVerificationMail(repo, existing);
+      else await sendVerificationMail(repo, existing, back);
       return NextResponse.json(CHECK_EMAIL_RESPONSE, { status: 202 });
     }
 
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     if ("error" in result) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-    await sendVerificationMail(repo, result);
+    await sendVerificationMail(repo, result, back);
     return NextResponse.json(CHECK_EMAIL_RESPONSE, { status: 202 });
   } catch (e) {
     if (e instanceof MailNotConfiguredError) {

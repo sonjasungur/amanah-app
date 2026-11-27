@@ -14,6 +14,8 @@ export interface FieldConfig {
   placeholder?: string;
   testId?: string;
   showWhenProfileBirthDateEmpty?: boolean;
+  /** Merged legacy field: shown only while it holds a value that differs from this other field (AP22 EA-12.2). */
+  showWhenLegacyDiffers?: string;
   helpText?: string;
   /** A "?" with a short explanation next to the label. */
   help?: HelpTopicId;

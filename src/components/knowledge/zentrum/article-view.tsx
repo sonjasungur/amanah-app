@@ -69,7 +69,7 @@ function BlockLabel({ children }: { children: ReactNode }) {
 
 export function ArabicText({ text, suffix }: { text: string; suffix?: string }) {
   return (
-    <p lang="ar" dir="rtl" className="text-right text-[1.45rem] leading-[2.15] text-[var(--wz-green-dark)]" style={ARABIC_FONT}>
+    <p lang="ar" dir="rtl" className="wz-arabic text-right text-[1.45rem] leading-[2.2] text-[var(--wz-green-dark)]" style={ARABIC_FONT}>
       {text}
       {suffix ? <span className="whitespace-nowrap"> {suffix}</span> : null}
     </p>
@@ -107,10 +107,17 @@ export function QuranCard({ q }: { q: QuranSource }) {
         <blockquote className="wz-serif text-[1.125rem] leading-relaxed text-[var(--wz-ink)]">„{q.germanVerbatim}“</blockquote>
       </div>
       <figcaption className="text-sm text-[var(--wz-muted)] border-t border-[var(--wz-line)] pt-3">
-        <bdi>Sure {q.surah}, Vers {q.ayah}</bdi> ·{" "}
+        <span className="font-semibold text-[var(--wz-ink)]" data-testid="quran-reference">
+          <bdi>Qurʾān {q.surah}:{q.ayah}</bdi> · Übersetzung Bubenheim/Elyas
+        </span>{" "}
+        ·{" "}
         <a href={q.url} className="wz-text-link" rel="noreferrer">
           vollständige Übersetzung
-        </a>
+        </a>{" "}
+        ·{" "}
+        <Link href={`/wissen/zentrum/vers/${q.surah}-${q.ayah}`} className="wz-text-link" data-testid="verse-page-link">
+          Versseite
+        </Link>
         <span className="block mt-1 text-xs" data-testid="quran-attribution">
           {quranAttribution(q)}
         </span>
@@ -127,6 +134,9 @@ function grading(h: HadithSource): string {
 export function HadithCard({ h }: { h: HadithSource }) {
   return (
     <div className="wz-card rounded-2xl p-5 sm:p-6 space-y-3" data-testid="hadith-card">
+      <p className="text-sm font-semibold text-[var(--wz-ink)]" data-testid="hadith-reference">
+        Hadith · {HADITH_COLLECTION_LABELS[h.collection]} Nr. {h.number}
+      </p>
       {h.arabicExcerpt && (
         <div>
           <BlockLabel>Originaltext (arabischer Auszug)</BlockLabel>
@@ -380,11 +390,12 @@ export function DraftBanner() {
   );
 }
 
-export function ArticleLink({ a }: { a: FullArticle }) {
+export function ArticleLink({ a, badge }: { a: FullArticle; badge?: ReactNode }) {
   return (
     <Link href={`/wissen/zentrum/artikel/${a.id}`} className="wz-card wz-card-link block rounded-2xl p-4 sm:p-5" data-testid="centre-article-link">
-      <span className="font-semibold text-[var(--wz-green)]">{a.readerQuestion ?? a.title}</span>
-      <span className="block text-[0.95rem] text-[var(--wz-muted)] mt-1">{a.summary}</span>
+      <span className="wz-serif text-[1.15rem] leading-snug text-[var(--wz-green)]">{a.readerQuestion ?? a.title}</span>
+      <span className="block text-[0.95rem] text-[var(--wz-muted)] mt-1.5">{a.summary}</span>
+      {badge && <span className="block mt-3">{badge}</span>}
     </Link>
   );
 }

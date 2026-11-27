@@ -8,7 +8,7 @@ import { MailNotConfiguredError } from "@/lib/server/mailer";
 /** Without an e-mail in the body, a signed-in legacy account asks for its own link. */
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return crossOriginRejected();
-  const body = (await request.json().catch(() => ({}))) as { email?: string };
+  const body = (await request.json().catch(() => ({}))) as { email?: string; returnUrl?: unknown };
   let email = body.email;
   if (email === undefined) {
     const userId = await getAuthenticatedUserId(request);
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const repo = getServerRepository();
   const user = await repo.findUserByEmail(email);
   try {
-    if (user && !user.emailVerifiedAt) await sendVerificationMail(repo, user);
+    if (user && !user.emailVerifiedAt) await sendVerificationMail(repo, user, typeof body.returnUrl === "string" ? body.returnUrl : null);
   } catch (e) {
     if (!(e instanceof MailNotConfiguredError)) throw e;
   }

@@ -45,7 +45,8 @@ describe("P2.7 knowledge centre: preview only, nothing published", () => {
 
   it("every centre page checks the switch first, is dynamic and never indexed", () => {
     const pages = files("src/app/wissen/zentrum").filter((f) => f.endsWith("page.tsx"));
-    expect(pages.length).toBe(4);
+    // AP22: the search page joins entry, rubric, article and verse pages.
+    expect(pages.length).toBe(5);
     for (const f of pages) {
       const src = readFileSync(f, "utf8");
       expect(src, f).toContain("if (!isKnowledgePreviewEnabled()) notFound();");
@@ -156,6 +157,8 @@ describe("Start mode without the knowledge centre (switch off, owner order 23.11
     for (const id of ids) await expect(Article({ params: Promise.resolve({ id }) })).rejects.toThrow(notFound);
     for (const r of RUBRICS) await expect(Rubric({ params: Promise.resolve({ nr: String(r.nr) }) })).rejects.toThrow(notFound);
     await expect(Verse({ params: Promise.resolve({ ref: "3-185" }) })).rejects.toThrow(notFound);
+    const { default: Search } = await import("@/app/wissen/zentrum/suche/page");
+    await expect(Search({ searchParams: Promise.resolve({ q: "Ghusl" }) })).rejects.toThrow(notFound);
   });
 
   it("sitemap, published links and the public knowledge APIs deliver none of the centre drafts", async () => {
@@ -179,7 +182,8 @@ describe("Start mode without the knowledge centre (switch off, owner order 23.11
 
   it("the public knowledge page shows no entry into the centre", async () => {
     off();
-    expect(readFileSync("src/app/wissen/page.tsx", "utf8")).toContain("{isKnowledgePreviewEnabled() && <KnowledgeCentrePreviewEntry />}");
+    // AP22 EA-05.1: only with the switch on does /wissen lead into the centre (redirect); otherwise the former overview.
+    expect(readFileSync("src/app/wissen/page.tsx", "utf8")).toMatch(/if \(isKnowledgePreviewEnabled\(\)\) \{[\s\S]*?redirect\(/);
     for (const f of files("src/components").filter((p) => /\.(tsx|ts)$/.test(p))) {
       const src = readFileSync(f, "utf8");
       if (!src.includes('href="/wissen/zentrum')) continue;

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { buildAuthHref } from "@/lib/auth/return-url";
 import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { useAuth } from "@/lib/auth/context";
 import { getStorageMode } from "@/lib/auth/config";
@@ -14,6 +16,8 @@ export function StorageModeBanner({ className }: { className?: string }) {
   const { t } = useI18n();
   const storageMode = getStorageMode();
   const activeLabel = useActiveStorageLabel();
+  // Back to this very page after signing in or registering (EA-04.4).
+  const here = usePathname() || "/dashboard";
 
   const isLocalOnly = activeLabel === "local";
   const isApi = activeLabel === "api";
@@ -79,9 +83,9 @@ export function StorageModeBanner({ className }: { className?: string }) {
         <div className="flex flex-wrap gap-3 pt-1">
           {!session && storageMode === "local" && (
             <p className="text-xs">
-              <Link href="/login" className="text-primary hover:underline">{t("auth.login")}</Link>
+              <Link href={buildAuthHref("/login", here)} className="text-primary hover:underline">{t("auth.login")}</Link>
               {" · "}
-              <Link href="/register" className="text-primary hover:underline">{t("auth.register")}</Link>
+              <Link href={buildAuthHref("/register", here)} className="text-primary hover:underline">{t("auth.register")}</Link>
             </p>
           )}
           <Link href="/dashboard/pdf" className="text-xs text-primary hover:underline inline-flex items-center gap-1">

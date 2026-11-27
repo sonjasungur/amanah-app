@@ -8,7 +8,7 @@ import { PersonPicker } from "@/components/vorsorge/person-picker";
 import { JanazahLegalNotice } from "@/components/modules/janazah-legal-notice";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getJanazahSections, janazahSections } from "@/lib/modules/janazah-sections";
+import { getJanazahSections, graveNameSuggestion, janazahSections, visibleJanazahFields } from "@/lib/modules/janazah-sections";
 import { flushPendingSave } from "@/lib/storage/store-sync";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { useI18n } from "@/lib/i18n/context";
@@ -72,7 +72,9 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
   const router = useRouter();
   const { locale, t } = useI18n();
   const values = store.janazahWishes as unknown as Record<string, unknown>;
-  const profileBirthDate = store.userProfile.birthDate?.trim();
+  // The birth date is entered in the emergency card; the person profile has no input for it (AP22, Datenlandkarte).
+  const knownBirthDate = store.userProfile.birthDate?.trim() || store.emergencyCard?.birthDate?.trim();
+  const nameSuggestion = graveNameSuggestion(store);
 
   const sections = getJanazahSections(locale);
 
@@ -85,9 +87,7 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
 
   const visibleSections = sections.map((section) => ({
     ...section,
-    fields: section.fields.filter(
-      (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
-    ),
+    fields: visibleJanazahFields(section.fields, { values, knownBirthDate }),
   }));
 
   const totalSteps = visibleSections.length;
@@ -198,6 +198,34 @@ export function JanazahGuidedFlow({ initialStep }: JanazahGuidedFlowProps) {
               <PersonPicker field="janazahTrustedContact" label="Vertrauensperson aus Familie & Kontakte" />
             </div>
           )}
+          {section.fields.some((f) => f.key === "fullName") && !String(values.fullName ?? "").trim() && nameSuggestion && (
+            <div className="mb-5 rounded-xl border border-border bg-accent-soft px-4 py-3 text-sm" data-testid="janazah-grave-name-suggestion">
+              <p className="text-foreground">
+                Aus deiner {nameSuggestion.from}: <span className="font-semibold">{nameSuggestion.name}</span>
+              </p>
+              <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => handleChange("fullName", nameSuggestion.name)}>
+                Als Name auf dem Grab übernehmen
+              </Button>
+            </div>
+          )}
+          {section.fields.some((f) => f.key === "preferredMosque") &&
+            !String(values.preferredMosque ?? "").trim() &&
+            String(values.mosqueCommunity ?? "").trim() !== "" && (
+              <div className="mb-5 rounded-xl border border-border bg-accent-soft px-4 py-3 text-sm" data-testid="janazah-mosque-takeover">
+                <p className="text-foreground">
+                  Früher eingetragen: <span className="font-semibold">{String(values.mosqueCommunity)}</span>
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => handleChange("preferredMosque", String(values.mosqueCommunity).trim())}
+                >
+                  Als Moschee oder Gemeinde übernehmen
+                </Button>
+              </div>
+            )}
           <ModuleForm
             section="janazahWishes"
             fields={section.fields}

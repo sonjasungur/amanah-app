@@ -68,7 +68,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     await fetch("/api/auth/verify-email/resend", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, returnUrl }),
     }).catch(() => undefined);
     setResent(true);
   };
@@ -89,7 +89,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     const result =
       mode === "login"
         ? await login({ email: typed.email, password: typed.password })
-        : await register(typed);
+        : await register({ ...typed, returnUrl });
 
     setLoading(false);
     if ("pendingVerification" in result && result.pendingVerification) {

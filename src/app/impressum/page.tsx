@@ -59,14 +59,6 @@ export default function ImpressumPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-primary mb-3">Inhaltlich verantwortlich (§ 18 Abs. 2 MStV)</h2>
-          <p className="leading-relaxed">
-            {IMPRINT.contentResponsibleName}
-            <br />{IMPRINT.contentResponsibleAddress}
-          </p>
-        </section>
-
-        <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Haftungsausschluss</h2>
           <p className="leading-relaxed text-sm">
             Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,

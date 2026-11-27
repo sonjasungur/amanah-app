@@ -4,25 +4,32 @@ import { KnowledgeAreasOverview } from "@/components/islamic-knowledge/knowledge
 import { WissenHubView } from "@/components/wissen/wissen-hub-view";
 import { getPublishedArticles, plannedTopics } from "@/modules/islamic-knowledge";
 import { isKnowledgePreviewEnabled } from "@/lib/flags/knowledge-preview";
-import { KnowledgeCentrePreviewEntry } from "@/components/knowledge/zentrum/preview-entry";
+import { redirect } from "next/navigation";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
 
 export const metadata = publicPageMetadata("/wissen");
 
-/** The preview entry depends on a runtime switch (P2.7), so the page is rendered per request. */
+/** The preview switch (P2.7) is read at runtime, so the page is rendered per request. */
 export const dynamic = "force-dynamic";
 
-/** Filters on the server: only reviewed texts and the titles of planned topics reach the browser. */
-export default function WissenPage() {
+/**
+ * AP22 EA-05.1: where the knowledge centre preview is on (staging behind its password, local development),
+ * "Islamisches Wissen" leads straight into the new centre; a search term is carried over. Where it is off
+ * (production), this page is exactly the former public overview: only reviewed texts and the titles of planned
+ * topics reach the browser.
+ */
+export default async function WissenPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  if (isKnowledgePreviewEnabled()) {
+    const q = (await searchParams).q;
+    const term = typeof q === "string" ? q.trim().slice(0, 120) : "";
+    redirect(term ? `/wissen/zentrum/suche?q=${encodeURIComponent(term)}` : "/wissen/zentrum");
+  }
   return (
-    <>
-      {isKnowledgePreviewEnabled() && <KnowledgeCentrePreviewEntry />}
-      <WissenHubView
+    <WissenHubView
       topics={getPublicWissenTopics().map((t) => ({ ...t, wissenMeta: WISSEN_META[t.id] }))}
       publishedArticles={getPublishedArticles()}
       plannedTopics={plannedTopics()}
       areasOverview={<KnowledgeAreasOverview />}
-      />
-    </>
+    />
   );
 }

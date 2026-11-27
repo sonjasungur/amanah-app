@@ -10,7 +10,9 @@ export const IMPRINT = {
   representedBy: "Geschäftsführerin Sonja Sungur",
   registerCourt: "Amtsgericht Stuttgart",
   commercialRegisterNumber: "HRB 738249",
-  contentResponsibleName: "Sonja Sungur",
-  contentResponsibleAddress: "Karlstraße 14, 74336 Brackenheim, Deutschland",
+  // Owner decision 27.11.2026 (AP22, EA-02.2): no "inhaltlich Verantwortliche nach § 18 Abs. 2 MStV" for now. That
+  // statement is only required for journalistic-editorial offers; the knowledge centre is not public yet. Open question
+  // to the law firm: I2 (is a § 18 Abs. 2 MStV statement needed once the knowledge centre is published, and who is named?).
+  // The managing director's name stays only in `representedBy` (§ 5 Abs. 1 Nr. 1 DDG) and nowhere else (EA-02.3, test).
   isPlaceholder: false,
 } as const;

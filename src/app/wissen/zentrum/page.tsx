@@ -6,6 +6,7 @@ import { ENTRY_ARTICLE } from "@/modules/islamic-knowledge/full-articles";
 import { RUBRICS, articlesInRubric, getCentreArticle } from "@/modules/islamic-knowledge/full-articles/rubrics";
 import { ArticleBody, MixedText, OpenQuestions, SourceList } from "@/components/knowledge/zentrum/article-view";
 import { PreviewNote } from "@/components/knowledge/zentrum/preview-note";
+import { CentreSearchForm } from "@/components/knowledge/zentrum/centre-ui";
 
 /**
  * P2.7 knowledge centre, entry page (design sample, owner feedback 21.11.): one compact opening with the
@@ -121,6 +122,8 @@ export default function KnowledgeCentrePage() {
               </Link>
             ))}
           </div>
+          {/* AP22 EA-05.3: search over all articles and their sources */}
+          <CentreSearchForm className="mt-6 sm:mt-8 max-w-2xl" onDark />
         </div>
       </section>
 

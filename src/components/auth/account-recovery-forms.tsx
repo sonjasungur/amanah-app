@@ -10,6 +10,7 @@ import { Logo } from "@/components/layout/logo";
 import { useAuth } from "@/lib/auth/context";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/config";
 import { typedValue } from "@/lib/utils/form-input";
+import { buildAuthHref, sanitizeReturnUrl } from "@/lib/auth/return-url";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -27,7 +28,10 @@ async function postJson(path: string, body: unknown) {
 
 /** Confirms the e-mail with the token from the link, then signs in. */
 export function VerifyEmailForm() {
-  const token = useSearchParams().get("token");
+  const params = useSearchParams();
+  const token = params.get("token");
+  // Back to the area the person registered from (EA-04.4); only relative paths on this site.
+  const returnUrl = sanitizeReturnUrl(params.get("returnUrl"));
   const { adoptSession } = useAuth();
   const router = useRouter();
   const [state, setState] = useState<"working" | "done" | "failed">(token ? "working" : "failed");
@@ -40,9 +44,9 @@ export function VerifyEmailForm() {
       if (!ok) return setState("failed");
       await adoptSession(body.session);
       setState("done");
-      router.replace("/dashboard");
+      router.replace(returnUrl);
     });
-  }, [token, adoptSession, router]);
+  }, [token, adoptSession, router, returnUrl]);
 
   return (
     <Shell>
@@ -53,7 +57,7 @@ export function VerifyEmailForm() {
         {state === "failed" && "Der Link ist ungültig oder abgelaufen. Melde dich an, um einen neuen Link anzufordern."}
       </p>
       {state === "failed" && (
-        <Link href="/login" className="mt-6 inline-block text-primary font-semibold hover:underline">
+        <Link href={buildAuthHref("/login", returnUrl)} className="mt-6 inline-block text-primary font-semibold hover:underline">
           Zur Anmeldung
         </Link>
       )}

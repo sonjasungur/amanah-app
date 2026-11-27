@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { getJanazahSections } from "@/lib/modules/janazah-sections";
+import { getJanazahSections, visibleJanazahFields } from "@/lib/modules/janazah-sections";
 import { useI18n } from "@/lib/i18n/context";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,6 @@ const CRITICAL_FIELDS = new Set([
   "islamicBurialDesired",
   "preferredMosque",
   "preferredCemetery",
-  "mosqueCommunity",
 ]);
 
 export default function JanazahVorschauPage() {
@@ -38,15 +37,13 @@ export default function JanazahVorschauPage() {
   const router = useRouter();
   const { locale, t } = useI18n();
   const values = store.janazahWishes as unknown as Record<string, unknown>;
-  const profileBirthDate = store.userProfile.birthDate?.trim();
+  const knownBirthDate = store.userProfile.birthDate?.trim() || store.emergencyCard?.birthDate?.trim();
 
   const sections = getJanazahSections(locale);
 
   const visibleSections = sections.map((section) => ({
     ...section,
-    fields: section.fields.filter(
-      (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
-    ),
+    fields: visibleJanazahFields(section.fields, { values, knownBirthDate }),
   }));
 
   const handleDownload = () => {

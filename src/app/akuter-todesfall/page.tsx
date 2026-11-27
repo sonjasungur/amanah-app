@@ -48,7 +48,7 @@ export default function AkuterTodesfallPage() {
           ]}
         />
 
-        <div className="mt-10 rounded-2xl bg-sand p-6 text-center">
+        <div className="mt-10 rounded-2xl gold-frame bg-card p-6 text-center">
           <p className="text-sm text-muted mb-4">Dieser Bereich ist kostenlos und ohne Verkaufsdruck.</p>
           <Link href="/wissen"><Button variant="outline">Wissen zu Janazah</Button></Link>
         </div>

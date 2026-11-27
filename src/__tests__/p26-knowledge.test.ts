@@ -63,6 +63,11 @@ describe("P2.6 knowledge articles: nothing can be published", () => {
         "src/app/wissen/zentrum/artikel/[id]/page.tsx",
         "src/app/wissen/zentrum/vers/[ref]/page.tsx",
         "src/components/knowledge/zentrum/article-view.tsx",
+        // AP22 Welle 1: search, review state, related topics, the editorial main stock and the legacy overview.
+        "src/app/wissen/zentrum/suche/page.tsx",
+        "src/app/wissen/redaktion/page.tsx",
+        "src/components/knowledge/zentrum/centre-ui.tsx",
+        "src/modules/islamic-knowledge/legacy-overview.ts",
       ].sort(),
     );
     for (const f of importers) {

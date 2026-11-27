@@ -15,9 +15,9 @@ export function KnowledgeAreasOverview({ areaIds }: { areaIds?: KnowledgeAreaId[
         const published = getPublishedByArea(area.id);
         const total = coverage.get(area.id)?.subtopics.length ?? 0;
         return (
-          <section key={area.id} className="rounded-2xl border border-border bg-card p-5" aria-labelledby={`area-${area.id}`}>
-            <p className="text-xs font-semibold text-muted mb-1">Bereich {area.letter}</p>
-            <h3 id={`area-${area.id}`} className="text-lg font-bold text-primary mb-1">{area.title}</h3>
+          <section key={area.id} className="rounded-2xl gold-frame bg-card p-5" aria-labelledby={`area-${area.id}`}>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent mb-1">Bereich {area.letter}</p>
+            <h3 id={`area-${area.id}`} className="text-lg font-bold text-primary-dark mb-1">{area.title}</h3>
             <p className="text-sm text-muted mb-3">{area.description}</p>
             {published.length > 0 ? (
               <ul className="space-y-1">

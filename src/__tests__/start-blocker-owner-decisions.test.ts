@@ -68,7 +68,8 @@ describe("backup retention (start blocker 5)", () => {
 describe("partner page hidden (start blocker 10)", () => {
   it("answers 404, is not in the sitemap and is not indexable; the content is kept unrouted", () => {
     const page = readFileSync("src/app/partner/page.tsx", "utf8");
-    expect(page).toContain("notFound()");
+    // AP22 EA-03.1: 404 wherever the editorial preview is off (production); the preview shows the content on staging.
+    expect(page).toContain("if (!isEditorialPreviewEnabled()) notFound();");
     expect(page).toContain("index: false");
     expect(page).not.toContain("Vermittlung");
     expect(Object.keys(PUBLIC_PAGES)).not.toContain("/partner");

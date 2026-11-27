@@ -607,3 +607,12 @@ body {
 .wz-verse-panel { background: linear-gradient(180deg, #ffffff, #F6F7FA); border-top: 2px solid var(--wz-gold); border-bottom: 1px solid var(--wz-line); }
 .wz-prose { max-width: 38rem; margin-inline: auto; }
 .wz-prose p + p { margin-top: 1.1rem; }
+
+/* AP22 EA-05.4: every Arabic text in Noto Naskh Arabic (next/font, --font-arabic), right to left, with room for the
+   vowel marks. Applies wherever lang="ar" is set: verses, hadith excerpts, fatwa excerpts and inline Arabic. */
+[lang="ar"] { font-family: var(--font-arabic), "Noto Naskh Arabic", serif; }
+@layer base {
+  p[lang="ar"], blockquote[lang="ar"], div[lang="ar"] { line-height: 2.1; }
+}
+/* AP22 EA-05.2: reading column of the knowledge centre articles, about 65–75 characters per line. */
+.wz-read { max-width: 68ch; margin-inline: auto; }

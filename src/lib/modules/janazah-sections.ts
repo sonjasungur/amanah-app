@@ -16,7 +16,8 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       title: t(loc, "janazah.section.grunddaten.title"),
       description: t(loc, "janazah.section.grunddaten.desc"),
       fields: [
-        { key: "fullName", label: t(loc, "janazah.field.fullName"), type: "text", testId: "janazah-fullName" },
+        // AP22 EA-10.1: the name for the grave marker. Storage key stays "fullName" (no data migration).
+        { key: "fullName", label: t(loc, "janazah.field.fullName"), helpText: t(loc, "janazah.field.fullName.help"), type: "text", testId: "janazah-fullName" },
         {
           key: "birthDate",
           label: t(loc, "janazah.field.birthDate"),
@@ -34,7 +35,8 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       description: t(loc, "janazah.section.benachrichtigung.desc"),
       fields: [
         { key: "peopleToNotify", label: t(loc, "janazah.field.peopleToNotify"), type: "textarea", testId: "janazah-peopleToNotify" },
-        { key: "mosqueCommunity", label: t(loc, "janazah.field.mosqueCommunity"), type: "text", testId: "janazah-mosqueCommunity" },
+        // AP22 EA-12.2: merged into "preferredMosque". Shown only while an earlier entry differs from it, so no value is lost.
+        { key: "mosqueCommunity", label: t(loc, "janazah.field.mosqueCommunity.legacy"), helpText: t(loc, "janazah.field.mosqueCommunity.legacyHelp"), type: "text", testId: "janazah-mosqueCommunity", showWhenLegacyDiffers: "preferredMosque" },
         { key: "preferredFuneralDirector", help: "moschee-bestatter", label: t(loc, "janazah.field.preferredFuneralDirector"), type: "text", testId: "janazah-preferredFuneralDirector" },
         { key: "additionalContacts", label: t(loc, "janazah.field.additionalContacts"), type: "textarea", testId: "janazah-additionalContacts" },
       ],
@@ -94,6 +96,41 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       ],
     },
   ];
+}
+
+export interface JanazahVisibilityContext {
+  values: Record<string, unknown>;
+  /** Birth date already recorded elsewhere (person profile or emergency card). */
+  knownBirthDate?: string;
+}
+
+const filled = (v: unknown) => typeof v === "string" && v.trim() !== "";
+
+/**
+ * Which fields a section shows (guided flow and preview alike):
+ * - birthDate only while no birth date is recorded elsewhere, or when the Janazah entry itself already holds one
+ *   (before AP22 the check read userProfile.birthDate, which has no input, so the field always appeared).
+ * - a merged legacy field (mosqueCommunity) only while it holds a value that differs from the field it was merged into.
+ */
+export function visibleJanazahFields(fields: FieldConfig[], ctx: JanazahVisibilityContext): FieldConfig[] {
+  return fields.filter((field) => {
+    if (field.showWhenProfileBirthDateEmpty) return !filled(ctx.knownBirthDate) || filled(ctx.values[field.key]);
+    if (field.showWhenLegacyDiffers) {
+      const own = ctx.values[field.key];
+      const target = ctx.values[field.showWhenLegacyDiffers];
+      return filled(own) && String(own).trim() !== String(target ?? "").trim();
+    }
+    return true;
+  });
+}
+
+/** Name suggestion for the grave marker from data the person already entered (EA-10.1); never written silently. */
+export function graveNameSuggestion(data: { userProfile?: { name?: string }; emergencyCard?: { name?: string } }): { name: string; from: string } | null {
+  const card = data.emergencyCard?.name?.trim();
+  if (card) return { name: card, from: "Notfallkarte" };
+  const profile = data.userProfile?.name?.trim();
+  if (profile) return { name: profile, from: "Profil" };
+  return null;
 }
 
 // backward-compat default (DE)

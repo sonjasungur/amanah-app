@@ -21,6 +21,8 @@ export interface RegisterInput {
   email: string;
   password: string;
   name: string;
+  /** Area to return to after the e-mail confirmation (sanitised on the server, EA-04.4). */
+  returnUrl?: string;
 }
 
 export interface LoginInput {

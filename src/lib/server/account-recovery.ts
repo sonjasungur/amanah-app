@@ -1,4 +1,5 @@
 import { IMPRINT } from "@/lib/legal/imprint";
+import { returnUrlQuery } from "@/lib/auth/return-url";
 import { generateSessionToken, hashSessionToken, normalizeEmail } from "./crypto";
 import { sendMail } from "./mailer";
 import type { AuthTokenPurpose, ServerRepository } from "./repository/types";
@@ -35,7 +36,11 @@ async function issueToken(repo: ServerRepository, userId: string, purpose: AuthT
   return token;
 }
 
-export async function sendVerificationMail(repo: ServerRepository, user: { id: string; email: string }): Promise<void> {
+/**
+ * `returnUrl`: the area the person came from (EA-04.4). Only a sanitised relative path is added to the link, so the
+ * confirmation page can send the person back there; anything else is dropped.
+ */
+export async function sendVerificationMail(repo: ServerRepository, user: { id: string; email: string }, returnUrl?: string | null): Promise<void> {
   const token = await issueToken(repo, user.id, "verify_email", VERIFY_EMAIL_TTL_MS);
   await sendMail({
     to: user.email,
@@ -43,7 +48,7 @@ export async function sendVerificationMail(repo: ServerRepository, user: { id: s
     subject: "Bitte bestätige deine E-Mail-Adresse – Wasiyya",
     text:
       "Assalamu alaikum,\n\nbitte bestätige deine E-Mail-Adresse für Wasiyya:\n" +
-      `${getPublicBaseUrl()}/konto/bestaetigen?token=${encodeURIComponent(token)}\n\n` +
+      `${getPublicBaseUrl()}/konto/bestaetigen?token=${encodeURIComponent(token)}${returnUrlQuery(returnUrl)}\n\n` +
       "Der Link ist 24 Stunden gültig und nur einmal nutzbar. Wenn du kein Konto angelegt hast, ignoriere diese E-Mail." + mailFooter(),
   });
 }
