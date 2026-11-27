@@ -13,24 +13,24 @@ function read(rel: string): string {
 }
 
 describe("UX corrections — wordmark, buttons, wissen", () => {
-  it("header and footer use document mark and Mein Wille wordmark", () => {
+  it("header and footer use the Wasiyya lockup", () => {
     const logo = read("src/components/layout/logo.tsx");
     const header = read("src/components/layout/header.tsx");
     const footer = read("src/components/layout/footer.tsx");
-    expect(logo).toContain("DocumentLogoMark");
-    expect(logo).toContain("Mein ");
-    expect(logo).toContain("Wille");
+    expect(logo).toContain("WasiyyaLockup");
     expect(header).toContain("<Logo");
-    expect(footer).toContain("Mein ");
-    expect(footer).toContain("Wille");
+    expect(footer).toContain("WasiyyaLockup");
+    expect(footer).not.toContain("Mein Wille");
   });
 
-  it("header shows Anmelden and Mein Konto labels", () => {
+  it("header shows Anmelden and the account link once; care areas live in the dashboard navigation", () => {
     const header = read("src/components/layout/header.tsx");
     expect(header).toContain("Anmelden");
-    expect(header).toContain("Mein Konto");
+    expect(header).toContain('labelKey: "nav.account"');
+    expect(header).not.toMatch(/>\s*Mein Konto\s*</);
+    expect(header).not.toContain('data-testid="site-mobile-areas"');
     expect(header).toContain('href="/login"');
-    expect(header).toContain('href="/dashboard"');
+    expect(header).toContain('href: "/dashboard"');
   });
 
   it("check start button uses Vorsorge-Check starten", () => {
@@ -39,16 +39,19 @@ describe("UX corrections — wordmark, buttons, wissen", () => {
     expect(read("src/components/check/amanah-check.tsx")).not.toContain("Amanah-Check");
   });
 
-  it("homepage replaces fake progress hero card with check outcome info", () => {
+  it("homepage shows three hero benefits instead of a fake progress card (owner order 26.11.2026)", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain("Nach dem kostenlosen Check weißt du:");
-    expect(home).toContain("Dein Ergebnis basiert auf deinen Antworten");
+    expect(home).toContain("Klare nächste Schritte");
+    expect(home).toContain("Wenige Minuten");
+    expect(home).toContain("Kostenlos starten");
+    expect(home).toContain('data-testid="home-hero-benefits"');
+    expect(home).not.toContain("Nach dem kostenlosen Check weißt du");
     expect(home).not.toContain("Dein nächster Schritt");
     expect(home).not.toMatch(/pct|Fortschritt.*%/);
   });
 
   it("wissen page has scroll-spy section ids and no saved topics", () => {
-    const wissen = read("src/app/wissen/page.tsx");
+    const wissen = read("src/components/wissen/wissen-hub-view.tsx");
     expect(wissen).toContain("useWissenScrollSpy");
     expect(wissen).toContain("WISSEN_SECTION_ID");
     expect(wissen).toContain("WissenTopicRow");

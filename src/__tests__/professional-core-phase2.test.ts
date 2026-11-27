@@ -74,8 +74,9 @@ describe("janazah-guided-flow: file structure", () => {
     expect(flow).toContain("currentStep === 0");
   });
 
-  it("includes SaveStatusIndicator", () => {
-    expect(flow).toContain("SaveStatusIndicator");
+  it("shows no second save status; the dashboard's storage bar carries the single one", () => {
+    expect(flow).not.toContain("<SaveStatusIndicator");
+    expect(read("src/components/auth/storage-mode-banner.tsx")).toContain("<SaveStatusIndicator compact");
   });
 
   it("includes Zurück zum Vorsorgeplan link", () => {
@@ -200,8 +201,8 @@ describe("settings page: structure", () => {
     expect(settings).toContain("resetAmanahStore");
   });
 
-  it("uses getActiveStorageLabel for storage display", () => {
-    expect(settings).toContain("getActiveStorageLabel");
+  it("uses the hydration-safe storage label for storage display", () => {
+    expect(settings).toContain("useActiveStorageLabel");
   });
 
   it("uses isAiUiEnabled gating", () => {
@@ -263,7 +264,9 @@ describe("no external data transfer in PDF export", () => {
   const pdfPage = read("src/app/dashboard/pdf/page.tsx");
 
   it("uses window.print() not external service", () => {
-    expect(pdfPage).toContain("window.print");
+    const panel = read("src/components/documents/document-panel.tsx");
+    expect(panel).toContain("window.print");
+    expect(panel).not.toContain("fetch(");
     expect(pdfPage).not.toContain("fetch(");
     expect(pdfPage).not.toContain("axios");
   });

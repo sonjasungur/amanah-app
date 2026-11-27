@@ -1,5 +1,11 @@
 export const GUIDED_FLOW_STORAGE_KEY = "amanah-guided-flow-state";
 
+/**
+ * Special target: the answer is added as a new entry to the digital legacy list (D-26) instead of
+ * being written into a text field. Nothing existing is overwritten.
+ */
+export const DIGITAL_LEGACY_APPEND_PATH = "digitalLegacy";
+
 export const ALLOWED_FIELD_PATHS = new Set([
   "userProfile.name",
   "emergencyCard.name",
@@ -22,7 +28,7 @@ export const ALLOWED_FIELD_PATHS = new Set([
   "medicalWishes.religiousWishes",
   "powerOfAttorney.authorizedPerson",
   "powerOfAttorney.substitutePerson",
-  "powerOfAttorney.digitalAccounts",
+  DIGITAL_LEGACY_APPEND_PATH,
   "powerOfAttorney.documents",
   "janazahWishes.preferredFuneralDirector",
   "janazahWishes.preferredMosque",

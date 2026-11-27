@@ -2,7 +2,7 @@ import type { FieldConfig } from "@/components/modules/module-form";
 
 export const emergencyCardFields: FieldConfig[] = [
   { key: "name", label: "Name", type: "text" },
-  { key: "birthDate", label: "Geburtsdatum", type: "text", placeholder: "TT.MM.JJJJ" },
+  { key: "birthDate", label: "Geburtsdatum", type: "date", helpText: "Format TT.MM.JJJJ" },
   { key: "emergencyContact1.name", label: "Notfallkontakt 1 — Name", type: "text" },
   { key: "emergencyContact1.phone", label: "Notfallkontakt 1 — Telefon", type: "text" },
   { key: "emergencyContact1.relation", label: "Notfallkontakt 1 — Beziehung", type: "text" },
@@ -13,41 +13,36 @@ export const emergencyCardFields: FieldConfig[] = [
   { key: "medications", label: "Medikamente", type: "textarea" },
   { key: "allergies", label: "Allergien", type: "textarea" },
   { key: "language", label: "Sprache", type: "text" },
-  { key: "mosqueImam", label: "Moschee / Imam", type: "text" },
-  { key: "preferredFuneralDirector", label: "Gewünschter Bestatter", type: "text" },
-  { key: "hasPatientenverfuegung", label: "Patientenverfügung vorhanden?", type: "boolean" },
-  { key: "hasVorsorgevollmacht", label: "Vorsorgevollmacht vorhanden?", type: "boolean" },
+  { key: "mosqueImam", help: "moschee-bestatter", label: "Moschee / Imam", type: "text" },
+  { key: "preferredFuneralDirector", help: "moschee-bestatter", label: "Gewünschter Bestatter", type: "text" },
+  { key: "hasPatientenverfuegung", help: "patientenverfuegung", label: "Patientenverfügung vorhanden?", type: "boolean" },
+  { key: "hasVorsorgevollmacht", help: "vorsorgevollmacht", label: "Vorsorgevollmacht vorhanden?", type: "boolean" },
   { key: "hasJanazahWishes", label: "Janazah-Wünsche vorhanden?", type: "boolean" },
 ];
 
 export const medicalFields: FieldConfig[] = [
-  { key: "medicalWishes", label: "Medizinische Wünsche", type: "textarea" },
+  { key: "medicalWishes", help: "patientenverfuegung", label: "Medizinische Wünsche", type: "textarea" },
   { key: "religiousWishes", label: "Religiöse Wünsche", type: "textarea" },
   { key: "imamSeelsorge", label: "Imam / Seelsorge", type: "text" },
-  { key: "dignityBoundaries", label: "Schamgrenzen / Pflege", type: "textarea" },
+  { key: "dignityBoundaries", help: "schamgrenzen", label: "Schamgrenzen / Pflege", type: "textarea" },
   { key: "whoSpeaksToDoctors", label: "Wer darf mit Ärzten sprechen?", type: "text" },
-  { key: "documentLocation", label: "Wo liegt die offizielle Patientenverfügung?", type: "text" },
+  { key: "documentLocation", help: "patientenverfuegung", label: "Wo liegt die offizielle Patientenverfügung?", type: "text" },
   { key: "openQuestionsDoctor", label: "Offene Fragen an Arzt", type: "textarea" },
   { key: "openQuestionsLawyer", label: "Offene Fragen an Anwalt", type: "textarea" },
   { key: "openQuestionsImam", label: "Offene Fragen an Imam", type: "textarea" },
 ];
 
+/**
+ * Only the two person fields stay plain inputs (also used by the guided Vorsorge). The area texts of
+ * the first version are replaced by structured wishes (AP22 EA-07, components/vorsorge/poa-wishes-editor.tsx).
+ */
 export const powerOfAttorneyFields: FieldConfig[] = [
-  { key: "authorizedPerson", label: "Bevollmächtigte Person", type: "text" },
+  { key: "authorizedPerson", help: "vorsorgevollmacht", label: "Bevollmächtigte Person", type: "text" },
   { key: "substitutePerson", label: "Ersatzperson", type: "text" },
-  { key: "medical", label: "Medizinisch", type: "textarea" },
-  { key: "authorities", label: "Behörden", type: "textarea" },
-  { key: "bank", label: "Bank", type: "textarea" },
-  { key: "housing", label: "Wohnung", type: "textarea" },
-  { key: "care", label: "Pflege", type: "textarea" },
-  { key: "burial", label: "Bestattung", type: "textarea" },
-  { key: "documents", label: "Dokumente", type: "textarea" },
-  { key: "digitalAccounts", label: "Digitale Konten", type: "textarea" },
-  { key: "excludedPersons", label: "Wer soll NICHT entscheiden?", type: "textarea" },
 ];
 
 export const careDirectiveFields: FieldConfig[] = [
-  { key: "preferredGuardian", label: "Gewünschter Betreuer", type: "text" },
+  { key: "preferredGuardian", help: "betreuungsverfuegung", label: "Gewünschter Betreuer", type: "text" },
   { key: "excludedGuardian", label: "Nicht gewünschter Betreuer", type: "text" },
   { key: "religiousWishes", label: "Religiöse Wünsche", type: "textarea" },
   { key: "careHousingWishes", label: "Pflege- / Wohnwünsche", type: "textarea" },
@@ -57,9 +52,10 @@ export const careDirectiveFields: FieldConfig[] = [
 export { janazahFields } from "@/lib/modules/janazah-sections";
 
 export const ghuslKafanFields: FieldConfig[] = [
-  { key: "whoMayBePresent", label: "Wer darf anwesend sein?", type: "textarea" },
-  { key: "preferredGhuslTeam", label: "Bevorzugtes Ghusl-Team", type: "text" },
-  { key: "dignityBoundaries", label: "Würde / Schamgrenzen", type: "textarea" },
+  // AP22 EA-01.3: the ⓘ help module with the existing Ghusl texts (lib/help/registry.ts).
+  { key: "whoMayBePresent", fieldHelp: "ghusl-anwesende", label: "Wer darf anwesend sein?", type: "textarea" },
+  { key: "preferredGhuslTeam", fieldHelp: "ghusl-waschung", label: "Bevorzugtes Ghusl-Team", type: "text" },
+  { key: "dignityBoundaries", fieldHelp: "ghusl-wuerde", label: "Würde / Schamgrenzen", type: "textarea" },
   { key: "spouseNote", label: "Ehepartner-Hinweis", type: "textarea" },
   { key: "familyFarewell", label: "Familie darf Abschied nehmen?", type: "select", options: [
     { value: "yes", label: "Ja" }, { value: "no", label: "Nein" }, { value: "conditional", label: "Unter Bedingungen" },
@@ -79,7 +75,7 @@ export const burialFields: FieldConfig[] = [
 ];
 
 export const inheritanceFields: FieldConfig[] = [
-  { key: "married", label: "Verheiratet?", type: "boolean" },
+  { key: "married", help: "erbprofil", label: "Verheiratet?", type: "boolean" },
   { key: "spouseAlive", label: "Ehepartner lebt?", type: "boolean" },
   { key: "sons", label: "Anzahl Söhne", type: "number" },
   { key: "daughters", label: "Anzahl Töchter", type: "number" },
@@ -93,8 +89,18 @@ export const inheritanceFields: FieldConfig[] = [
   { key: "foreignProperty", label: "Auslandseigentum?", type: "boolean" },
   { key: "approximateWealth", label: "Vermögen grob", type: "text" },
   { key: "debts", label: "Schulden", type: "textarea" },
-  { key: "desiredWasiyyah", label: "Gewünschte Waṣiyya (max. 1/3)", type: "textarea" },
-  { key: "desiredSadaqaJariya", label: "Gewünschte Sadaqa Jariya", type: "textarea" },
+  {
+    key: "desiredWasiyyah", help: "wasiyya",
+    label: "Deine Notizen zur Waṣiyya (unverbindlich)",
+    type: "textarea",
+    helpText: "Nur eine Notiz für das Gespräch. Sie ist kein Testament und regelt nichts. Ob und wie sich ein Wunsch umsetzen lässt, klären Gelehrte und Anwalt oder Notar.",
+  },
+  {
+    key: "desiredSadaqaJariya",
+    label: "Deine Notizen zur Sadaqa Jariya (unverbindlich)",
+    type: "textarea",
+    helpText: "Nur eine Notiz für das Gespräch. Damit wird nichts bestimmt oder angewiesen.",
+  },
   { key: "openQuestionsImam", label: "Offene Fragen an Imam", type: "textarea" },
   { key: "openQuestionsLawyer", label: "Offene Fragen an Anwalt/Notar", type: "textarea" },
 ];
@@ -111,7 +117,7 @@ export const barzakhFields: FieldConfig[] = [
 
 export const sadaqaFields: FieldConfig[] = [
   { key: "joinFoerderkreis", label: "Förderkreis beitreten?", type: "boolean" },
-  { key: "preferredPot", label: "Bevorzugter Topf", type: "select", options: [
+  { key: "preferredPot", help: "sadaqa-jariya", label: "Bevorzugter Topf", type: "select", options: [
     { value: "allgemein", label: "Sadaqa Jariya allgemein" },
     { value: "wasser", label: "Wasser & Infrastruktur" },
     { value: "bildung", label: "Bildung & Wissen" },
@@ -122,7 +128,7 @@ export const sadaqaFields: FieldConfig[] = [
   { key: "monthlyAmount", label: "Monatlicher Wunschbetrag", type: "text" },
   { key: "oneTimeAmount", label: "Einmaliger Wunschbetrag", type: "text" },
   { key: "personToVerify", label: "Person, die nach Tod prüfen soll", type: "text" },
-  { key: "gemeinsam1Link", label: "Link zu Gemeinsam1-Projekt", type: "text" },
+  { key: "gemeinsam1Link", label: "Link zu einem Spendenprojekt (optional)", type: "text" },
 ];
 
 export const familyFields: FieldConfig[] = [

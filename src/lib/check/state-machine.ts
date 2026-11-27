@@ -1,4 +1,5 @@
 import { STORAGE_KEY } from "@/lib/storage/types";
+import { folderBackedStorage } from "@/lib/storage/device-data";
 import { CHECK_QUESTIONS, CHECK_TOTAL } from "./questions";
 import {
   fromPersistedCheckPhase,
@@ -144,7 +145,8 @@ function parseSessionCheck(raw: string): Pick<CheckState, "index" | "answers" | 
 function loadFromFolderStorage(): Pick<CheckState, "index" | "answers" | "phase"> | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    // Where the folder lives: this tab while signed in, localStorage otherwise.
+    const raw = folderBackedStorage.getItem(STORAGE_KEY) as string | null;
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { state?: { checkProgress?: unknown }; checkProgress?: unknown };
     const progress = normalizeCheckProgress(parsed.state?.checkProgress ?? parsed.checkProgress);

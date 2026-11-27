@@ -111,9 +111,9 @@ export const demoAmanahData: AmanahOrdnerData = {
     {
       id: "don-1",
       type: "sadaqa_jariya",
-      description: "Brunnen-Projekt über Gemeinsam1 e.V.",
+      description: "Brunnen-Projekt (Beispiel)",
       amount: "500 EUR",
-      recipient: "Gemeinsam1 e.V.",
+      recipient: "Gemeinnütziger Verein (Beispiel)",
     },
   ],
   importantInstructions: [
@@ -133,8 +133,12 @@ export const demoAmanahData: AmanahOrdnerData = {
     daughters: 1,
   },
   familyMessage: {
+    ...defaultAmanahData.familyMessage,
+    letterGreeting: "Meine Lieben,",
+    letterClosing: "In Liebe",
+    letterSignature: "Ahmed",
     familyLetter: "Liebe Familie, dieser Ordner ist meine Vorbereitung — bitte mit Imam und Anwalt fachlich prüfen lassen.",
-    whatsappMessage: "Meine Vorsorge in Mein Wille liegt im Schreibtisch. Bitte Notfallkontakt Fatima anrufen.",
+    whatsappMessage: "Meine Vorsorge in Wasiyya liegt im Schreibtisch. Bitte Notfallkontakt Fatima anrufen.",
     conversationGuide: "1. Notfallkontakt informieren\n2. Patientenverfügung zeigen\n3. Imam kontaktieren",
     keyWishesSummary: "Islamische Bestattung in Berlin, keine Verzögerung.",
   },

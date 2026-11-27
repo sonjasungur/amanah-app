@@ -1,9 +1,9 @@
+import { IMAGE_CREDIT } from "@/lib/content/topic-images";
+import Link from "next/link";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Impressum — Mein Wille",
-  description: "Impressum und Anbieterkennzeichnung für Mein Wille.",
-};
+export const metadata = publicPageMetadata("/impressum");
 
 export default function ImpressumPage() {
   return (
@@ -36,6 +36,12 @@ export default function ImpressumPage() {
               {IMPRINT.email}
             </a>
           </p>
+          <p className="leading-relaxed mt-2">
+            Kontaktformular:{" "}
+            <Link href="/kontakt" className="text-primary-light underline">
+              Kontaktformular öffnen
+            </Link>
+          </p>
         </section>
 
         <section>
@@ -53,35 +59,23 @@ export default function ImpressumPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-primary mb-3">Inhaltlich verantwortlich (§ 18 Abs. 2 MStV)</h2>
-          <p className="leading-relaxed">
-            {IMPRINT.contentResponsibleName}
-            <br />{IMPRINT.contentResponsibleAddress}
-          </p>
-        </section>
-
-        <section>
           <h2 className="text-lg font-semibold text-primary mb-3">Haftungsausschluss</h2>
           <p className="leading-relaxed text-sm">
             Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit,
             Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.
-            Mein Wille ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
+            Wasiyya ersetzt keine Beratung durch Imam, Gelehrte, Ärzte, Anwälte oder Notare.
           </p>
         </section>
 
+        <section data-testid="imprint-image-credits">
+          <h2 className="text-lg font-semibold text-primary mb-3">Bildnachweise</h2>
+          <p className="leading-relaxed text-sm">{IMAGE_CREDIT}</p>
+        </section>
+
         <section>
-          <h2 className="text-lg font-semibold text-primary mb-3">EU-Streitschlichtung</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">Verbraucherstreitbeilegung</h2>
           <p className="leading-relaxed text-sm">
-            Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{" "}
-            <a
-              href="https://ec.europa.eu/consumers/odr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-light underline"
-            >
-              https://ec.europa.eu/consumers/odr
-            </a>
-            . Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer
+            Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer
             Verbraucherschlichtungsstelle teilzunehmen.
           </p>
         </section>

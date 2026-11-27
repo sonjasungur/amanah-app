@@ -47,7 +47,7 @@ export const wissenTopics: KnowledgeArticle[] = [
         "Vertrauensperson benennen, die den Bestatter anruft",
       ],
       documents: ["Schriftliche Janazah-Wünsche", "Bestatter-Kontakt", "Reisepass-Kopien bei Überführungswunsch"],
-      safeStorage: "In Mein Wille + Ausdruck beim Bestatter und bei Vertrauensperson.",
+      safeStorage: "In Wasiyya + Ausdruck beim Bestatter und bei Vertrauensperson.",
       tellFamily: "Wo der Ordner liegt, wer den Bestatter anruft, dass islamische Grundsätze Vorrang haben.",
       commonMistakes: ["Mündliche Absprachen ohne Dokument", "Kein Bestatter-Kontakt in Deutschland", "Wünsche erst im Sterbebett"],
       nextStepLabel: "Janazah-Wünsche jetzt festhalten",
@@ -70,7 +70,7 @@ export const wissenTopics: KnowledgeArticle[] = [
     todayActions: ["Moschee anrufen und Ghusl-Ablauf klären", "Kafan-Beschaffung prüfen", "Wünsche schriftlich festhalten"],
     documents: ["Schriftliche Ghusl/Kafan-Wünsche", "Moschee-Kontakt"],
     legalNotes: ["In Deutschland regelt das Bestattungsgesetz des Bundeslandes den Ablauf — islamische Wünsche mit Bestatter abstimmen."],
-    safeStorage: "Mein Wille + Kopie bei Moschee/Bestatter.",
+    safeStorage: "Wasiyya + Kopie bei Moschee/Bestatter.",
     tellFamily: "Dass Ghusl islamisch prioritär ist und wer angerufen wird.",
     commonMistakes: ["Keine Klärung bei Meinungsunterschieden", "Kafan nicht vorab organisiert"],
     nextStepLabel: "Ghusl & Kafan dokumentieren",
@@ -117,7 +117,7 @@ export const wissenTopics: KnowledgeArticle[] = [
         "Rechtsgrundlage: § 1901a BGB — wirksam bei konkreten Behandlungssituationen.",
         "BMG bietet offizielle Textbausteine.",
         "Verbraucherzentrale: Muster und Beratung.",
-        "Upload/Ablage des unterschriebenen Dokuments in Mein Wille vorbereiten.",
+        "Upload/Ablage des unterschriebenen Dokuments in Wasiyya vorbereiten.",
       ],
       safeStorage: "Notfallmappe, Foto beim Vertrauensmenschen, ggf. Arztakte.",
       tellFamily: "Dass die Patientenverfügung existiert und wo sie liegt.",
@@ -195,7 +195,7 @@ export const wissenTopics: KnowledgeArticle[] = [
       documents: ["Testament/Erbvertrag", "Vermögensliste", "Schuldenliste"],
       legalNotes: [
         "Deutsches Pflichtteilsrecht kann mit islamischer Verteilung kollidieren — Fachberatung nötig.",
-        "Kein Erbrechner in dieser App — nur Orientierung.",
+        "Keine verbindliche Erbberechnung in dieser App — nur Orientierung. Rechtsverbindlich gestalten Anwalt oder Notar.",
       ],
       safeStorage: "Notar/Safe + Vertrauensperson informiert.",
       tellFamily: "Dass ein Plan existiert und fachliche Hilfe nötig ist.",
@@ -249,7 +249,7 @@ export const wissenTopics: KnowledgeArticle[] = [
       nextStepLabel: "Sadaqa Jariya planen",
       nextStepHref: "/dashboard/sadaqa-jariya",
     },
-    ["hadith-sadaqa-jariya", "quran-al-muminun-23-99", "partner-gemeinsam1-sadaqa"]
+    ["hadith-sadaqa-jariya", "quran-al-muminun-23-99"]
   ),
   topic("w-familie", "familiengespraech", "Gespräch mit Angehörigen", "Der schwerste Moment ist leichter, wenn ihr vorher gesprochen habt.", "familie", {
     whyImportant: "Dokumente allein reichen nicht. Ein ruhiges Gespräch entlastet die Familie im Ernstfall.",
@@ -267,7 +267,7 @@ export const wissenTopics: KnowledgeArticle[] = [
     whyImportant: "Im Notfall zählt jede Minute. Name, Kontakt, Allergien, Vollmacht-Inhaber — ohne Karte greifen Fremde auf leere Taschen.",
     ifMissing: "Familie erfährt zu spät, falsche Behandlung.",
     prepareItems: ["Notfallkontakt 1 & 2", "Allergien falls bekannt", "Hinweis auf Patientenverfügung", "Vollmacht-Verweis"],
-    todayActions: ["Notfallkarte aus Mein Wille drucken", "Kontaktnummern prüfen"],
+    todayActions: ["Notfallkarte aus Wasiyya drucken", "Kontaktnummern prüfen"],
     documents: ["Notfallkarte", "Patientenverfügung-Verweis"],
     safeStorage: "Geldbörse, Handy-Hintergrund, Kühlschrank.",
     tellFamily: "Dass sie auf der Karte stehen und erreichbar sein sollen.",

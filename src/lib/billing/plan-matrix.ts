@@ -1,0 +1,184 @@
+/**
+ * Planned split between the free offer and Vorsorge Plus (owner proposal of 2026-10-31).
+ * CONCEPT ONLY: nothing is locked while AMANAH_BILLING_ENFORCE is off, and existing
+ * accounts keep everything they can use today (see plus-access.ts).
+ */
+export type PlanTier = "free" | "plus";
+
+/** How a lock could be enforced. Client-only features cannot be locked reliably. */
+export type Enforcement = "never" | "server" | "client_hint";
+
+export interface PlanFeature {
+  id: string;
+  title: string;
+  tier: PlanTier;
+  routes: string[];
+  enforcement: Enforcement;
+  /**
+   * Existed before the Plus launch, so accounts created before AMANAH_PLUS_LAUNCH_AT keep it.
+   * Features added after the launch must set this to false: grandfathering covers only the
+   * scope that existed before Plus was introduced.
+   */
+  availableBeforeLaunch: boolean;
+  note?: string;
+}
+
+export const PLAN_FEATURES: PlanFeature[] = [
+  {
+    id: "knowledge_centre",
+    title: "Islamisches Wissenszentrum",
+    tier: "free",
+    routes: ["/wissen"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Sadaqa Jariya: dauerhaft frei, ohne Registrierung, nie Teil eines Pakets. Lesezeichen lassen sich kostenlos im Konto speichern.",
+  },
+  {
+    id: "inheritance_janazah_info",
+    title: "Informationen zu Erbrecht und Janazah",
+    tier: "free",
+    routes: ["/testament-erbe", "/janazah-kompass", "/akuter-todesfall", "/patientenverfuegung", "/konvertierte", "/islam-oder-kultur", "/barzakh", "/sadaqa-jariya"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+  },
+  {
+    id: "vorsorge_check",
+    title: "Grundlegender Vorsorge-Check",
+    tier: "free",
+    routes: ["/check"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Fortschritt und Ergebnis lassen sich kostenlos im Konto speichern.",
+  },
+  {
+    id: "vorsorge_start",
+    title: "Einstieg in persönliche Vorsorge",
+    tier: "free",
+    routes: ["/dashboard", "/dashboard/notfallkarte"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Übersicht und Notfallkarte (kostenlos auch im Konto gespeichert); Ansicht aller Bereiche als Vorschau.",
+  },
+  {
+    id: "asset_overview",
+    title: "Vermögensübersicht mit Speicherung im Konto und einfachem Ausdruck",
+    tier: "free",
+    routes: ["/dashboard/vermoegen"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Dauerhaft kostenlos, auch bei Plus-Zwang (Owner 01.11.2026). Reine Bestandsaufnahme, kein Testament.",
+  },
+  {
+    id: "free_section_history",
+    title: "Verlauf von Vermögensübersicht, Notfallkarte, Vorsorge-Check und Lesezeichen",
+    tier: "free",
+    routes: ["/dashboard/verlauf"],
+    enforcement: "never",
+    availableBeforeLaunch: true,
+    note: "Kostenlos mit Wiederherstellung (Owner 02.11.2026); bis zur Datenschutzfreigabe ausgeschaltet. Der Verlauf anderer Bereiche kann später zu Plus gehören; Einsicht, Export und Löschen bleiben immer frei.",
+  },
+  {
+    id: "family_conversation_record",
+    title: "Familiengespräch festhalten",
+    tier: "free",
+    routes: ["/dashboard/familiengespraech"],
+    enforcement: "server",
+    availableBeforeLaunch: true,
+    note: "Owner-Entscheidung 27.11.2026: Das Familiengespräch ist komplett kostenlos – Gespräche festhalten und die Vorbereitungsfragen mit eigenen Notizen werden auch ohne Paket im Konto gespeichert. Nur die Personenverwaltung in „Familie & Kontakte“ bleibt Paketinhalt (family_people); ein Gespräch verweist ohne Paket nur auf bereits gespeicherte Personen. (Ersetzt Variante 1 vom 18.11.2026.)",
+  },
+  {
+    id: "persistent_folder",
+    title: "Dauerhaft nutzbarer persönlicher Vorsorgeordner (verschlüsselt im Konto)",
+    tier: "plus",
+    routes: ["/api/amanah"],
+    enforcement: "server",
+    availableBeforeLaunch: true,
+    note: "Einzige Leistung, die serverseitig wirksam gesperrt werden kann. Ausgenommen ist FREE_ACCOUNT_SECTIONS.",
+  },
+  {
+    id: "family_people",
+    title: "Familien- und Vertrauenspersonenverwaltung",
+    tier: "plus",
+    routes: ["/dashboard/personen", "/dashboard/familie"],
+    enforcement: "client_hint",
+    availableBeforeLaunch: true,
+  },
+  {
+    id: "documents_overview",
+    title: "Dokumentenübersicht",
+    tier: "plus",
+    routes: ["/dashboard/dokumente"],
+    enforcement: "client_hint",
+    availableBeforeLaunch: true,
+  },
+  {
+    id: "estate_debts",
+    title: "Strukturierte Nachlass- und Schuldeninformationen",
+    tier: "plus",
+    routes: ["/dashboard/schulden-amanah", "/dashboard/digitaler-nachlass", "/dashboard/testament"],
+    enforcement: "client_hint",
+    availableBeforeLaunch: true,
+    note: "Die Testamentsvorbereitung bleibt unabhängig davon gesperrt.",
+  },
+  {
+    id: "personal_wishes",
+    title: "Persönliche Vorsorge- und Janazah-Wünsche",
+    tier: "plus",
+    routes: [
+      "/dashboard/janazah",
+      "/dashboard/ghusl-kafan",
+      "/dashboard/bestattung",
+      "/dashboard/krankheit",
+      "/dashboard/vollmacht",
+      "/dashboard/betreuung",
+      "/dashboard/barzakh",
+      "/dashboard/sadaqa-jariya",
+    ],
+    enforcement: "client_hint",
+    availableBeforeLaunch: true,
+  },
+  {
+    id: "pdf_exports",
+    title: "PDF-Exporte",
+    tier: "plus",
+    routes: ["/dashboard/pdf"],
+    enforcement: "client_hint",
+    availableBeforeLaunch: true,
+    note: "Druck entsteht im Browser; der Konto-Export (Art. 15/20 DSGVO) bleibt immer frei.",
+  },
+];
+
+/**
+ * Sections every account may save on the server, also without Plus and with enforcement on.
+ * familyConversation: owner decision 27.11.2026 – the family conversation is completely free (talks and
+ * preparation notes). A talk may only point to people the folder already holds (folder-access.ts).
+ */
+export const FREE_ACCOUNT_SECTIONS = ["assets", "emergencyCard", "checkProgress", "knowledgeBookmarks", "familyConversation"] as const;
+
+/** Never paid, whatever the plan: data subject rights and account control. */
+export const ALWAYS_FREE_ACCOUNT_RIGHTS = [
+  "Datenexport (Art. 15/20 DSGVO)",
+  "Löschen von Daten und Konto (Art. 17 DSGVO)",
+  "Einwilligung widerrufen",
+  "E-Mail bestätigen, Passwort zurücksetzen",
+];
+
+export function featuresByTier(tier: PlanTier): PlanFeature[] {
+  return PLAN_FEATURES.filter((f) => f.tier === tier);
+}
+
+export function planFeature(id: string): PlanFeature | null {
+  return PLAN_FEATURES.find((f) => f.id === id) ?? null;
+}
+
+/** The plan feature that covers a route, matched by the longest prefix. */
+export function featureForRoute(pathname: string): PlanFeature | null {
+  let best: { feature: PlanFeature; length: number } | null = null;
+  for (const feature of PLAN_FEATURES) {
+    for (const route of feature.routes) {
+      const matches = pathname === route || pathname.startsWith(`${route}/`);
+      if (matches && (!best || route.length > best.length)) best = { feature, length: route.length };
+    }
+  }
+  return best?.feature ?? null;
+}

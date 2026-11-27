@@ -27,7 +27,7 @@ describe("Knowledge entry schema", () => {
       expect(e.content).toBeTruthy();
       expect(e.sourceLabel).toBeTruthy();
       expect(e.tags.length).toBeGreaterThan(0);
-      expect(["draft", "reviewed", "needs_review"]).toContain(e.reviewedStatus);
+      expect(["draft", "reviewed", "needs_review", "orientation"]).toContain(e.reviewedStatus);
       expect(["low", "medium", "sensitive"]).toContain(e.riskLevel);
     }
   });
@@ -39,7 +39,7 @@ describe("Knowledge entry schema", () => {
   });
 
   it("lists reviewed and needs-review entries", () => {
-    expect(getReviewedEntries().length).toBeGreaterThan(10);
+    expect(getReviewedEntries()).toEqual([]);
     expect(getEntriesNeedingReview().length).toBeGreaterThan(0);
   });
 });
@@ -52,9 +52,10 @@ describe("Keyword search", () => {
   });
 
   it("finds Vorsorgevollmacht", () => {
-    const results = retrieveKnowledgeSync("Was ist eine Vorsorgevollmacht?");
+    const results = retrieveKnowledgeSync("Was ist eine Vorsorgevollmacht?", { productionOnly: false });
     expect(results.length).toBeGreaterThan(0);
     expect(results[0].entry.category).toBe("vorsorgevollmacht");
+    expect(retrieveKnowledgeSync("Was ist eine Vorsorgevollmacht?").some((r) => r.entry.category === "vorsorgevollmacht")).toBe(false);
   });
 
   it("returns empty for nonsense query with high min score", () => {
@@ -110,16 +111,16 @@ describe("Knowledge API routes", () => {
     const res = await entriesGET(new Request("http://localhost/api/knowledge/entries"));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.count).toBeGreaterThan(10);
+    expect(body.count).toBe(5);
   });
 
   it("GET /api/knowledge/entries/[id]", async () => {
-    const res = await entryGET(new Request("http://localhost/api/knowledge/entries/kb-sadaqa-jariya"), {
-      params: Promise.resolve({ id: "kb-sadaqa-jariya" }),
+    const res = await entryGET(new Request("http://localhost/api/knowledge/entries/kb-app-grenzen"), {
+      params: Promise.resolve({ id: "kb-app-grenzen" }),
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.entry.title).toContain("Sadaqa");
+    expect(body.entry.id).toBe("kb-app-grenzen");
   });
 
   it("returns 404 for unknown entry", async () => {
@@ -143,7 +144,7 @@ describe("Knowledge AI integration", () => {
       new Request("http://localhost/api/ai/knowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: "Was bedeutet Ghusl und Kafan?" }),
+        body: JSON.stringify({ question: "Was gehört in eine Notfallmappe?" }),
       })
     );
     expect(res.status).toBe(200);
@@ -155,7 +156,7 @@ describe("Knowledge AI integration", () => {
   it("OpenAI path does not crash without key", async () => {
     const r = await answerKnowledgeQuestion("Was ist Sadaqa Jariya?", { useOpenAI: true });
     expect(r.blocked).toBe(false);
-    expect(r.answer).toContain("Sadaqa");
+    expect(r.answer).toContain("fachlich freigegebenen");
   });
 });
 

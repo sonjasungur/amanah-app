@@ -4,6 +4,9 @@ import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/re
 import { AmanahCheck } from "@/components/check/amanah-check";
 import { CHECK_STORAGE_KEY } from "@/lib/check/state-machine";
 import { checkReducer, INITIAL_CHECK_STATE } from "@/lib/check/state-machine";
+import { defaultAmanahData } from "@/lib/domain/defaults";
+import { STORAGE_KEY } from "@/lib/storage/types";
+import { useAmanahStore } from "@/lib/store/use-amanah-store";
 
 function clickStart() {
   fireEvent.click(screen.getByTestId("check-start"));
@@ -54,6 +57,20 @@ describe("AmanahCheck interactions", () => {
   beforeEach(() => {
     cleanup();
     sessionStorage.clear();
+    // The check also writes into the folder, and the folder takes precedence on loading.
+    useAmanahStore.setState({ ...structuredClone(defaultAmanahData) });
+    localStorage.removeItem(STORAGE_KEY);
+  });
+
+  it("writes answers into the folder; an untouched check leaves the folder alone", async () => {
+    useAmanahStore.setState({ checkProgress: { ...defaultAmanahData.checkProgress } });
+    render(<AmanahCheck />);
+    await waitFor(() => screen.getByTestId("check-intro"));
+    expect(useAmanahStore.getState().saveStatus).not.toBe("saving");
+    clickStart();
+    await waitForQuestion();
+    clickYes();
+    await waitFor(() => expect(useAmanahStore.getState().checkProgress.answers).toEqual({ convert: true }));
   });
 
   it("shows intro then starts at question 1", async () => {

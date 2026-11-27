@@ -43,8 +43,88 @@ export function validateProductionEnv(env = process.env) {
     errors.push("SESSION_SECRET still contains a placeholder value");
   }
 
+  // Data encryption at rest (see src/lib/server/data-encryption.ts)
+  const dataKeys = env.AMANAH_DATA_KEYS?.trim();
+  if (!dataKeys) {
+    errors.push("AMANAH_DATA_KEYS is required in production (data encryption at rest)");
+  } else {
+    const entries = dataKeys.split(",").map((e) => e.trim().split(":"));
+    if (entries.some(([kid, b64]) => !kid || !b64 || Buffer.from(b64, "base64").length !== 32)) {
+      errors.push("AMANAH_DATA_KEYS must be kid:base64 entries with 32-byte keys");
+    }
+    const active = env.AMANAH_DATA_KEY_ACTIVE?.trim();
+    if (active && !entries.some(([kid]) => kid === active)) {
+      errors.push("AMANAH_DATA_KEY_ACTIVE is not in AMANAH_DATA_KEYS");
+    }
+  }
+  if (env.AMANAH_DATA_ENCRYPTION === "optional") {
+    errors.push("AMANAH_DATA_ENCRYPTION=optional is not allowed in production");
+  }
+
   if (env.POSTGRES_PASSWORD && isPlaceholderValue(env.POSTGRES_PASSWORD)) {
     errors.push("POSTGRES_PASSWORD still contains a placeholder value");
+  }
+
+  if (env.AMANAH_BILLING_MODE === "sandbox") {
+    errors.push("AMANAH_BILLING_MODE=sandbox is not allowed in production (no live payments are implemented)");
+  }
+  if (env.AMANAH_BILLING_MODE === "stripe_test") {
+    errors.push("AMANAH_BILLING_MODE=stripe_test is not allowed in production (Stripe test mode is for staging only)");
+  }
+  // Live keys are refused everywhere until a live mode is implemented and approved (docs 25).
+  for (const name of ["AMANAH_STRIPE_SECRET_KEY", "AMANAH_STRIPE_PUBLISHABLE_KEY"]) {
+    if (/^(sk|rk|pk)_live_/.test(env[name]?.trim() ?? "")) {
+      errors.push(`${name} is a Stripe live key — only test mode is implemented`);
+    }
+  }
+  if (env.AMANAH_BILLING_ENFORCE === "true" && !env.AMANAH_PLUS_LAUNCH_AT?.trim()) {
+    errors.push("AMANAH_BILLING_ENFORCE=true needs AMANAH_PLUS_LAUNCH_AT so existing accounts keep their features");
+  }
+  if (env.AMANAH_MAIL_TRANSPORT === "brevo" || env.AMANAH_MAIL_TRANSPORT === "postmark") {
+    if (!env.AMANAH_MAIL_API_KEY?.trim() || isPlaceholderValue(env.AMANAH_MAIL_API_KEY)) {
+      errors.push("AMANAH_MAIL_API_KEY is required for the configured mail provider");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for the configured mail provider");
+    }
+  }
+  if (env.AMANAH_MAIL_TRANSPORT === "smtp") {
+    if (!env.AMANAH_SMTP_USER?.trim() || isPlaceholderValue(env.AMANAH_SMTP_USER)) {
+      errors.push("AMANAH_SMTP_USER is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_SMTP_PASSWORD?.trim() || isPlaceholderValue(env.AMANAH_SMTP_PASSWORD)) {
+      errors.push("AMANAH_SMTP_PASSWORD is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+    if (!env.AMANAH_MAIL_FROM?.trim() || isPlaceholderValue(env.AMANAH_MAIL_FROM)) {
+      errors.push("AMANAH_MAIL_FROM is required for AMANAH_MAIL_TRANSPORT=smtp");
+    }
+  }
+  if (env.AMANAH_MAIL_ALLOWLIST?.trim()) {
+    errors.push("AMANAH_MAIL_ALLOWLIST must not be set in production (staging test only)");
+  }
+  if (env.AMANAH_MAIL_TRANSPORT === "outbox") {
+    errors.push("AMANAH_MAIL_TRANSPORT=outbox is for development only");
+  }
+  if (env.AMANAH_INTERNAL_TOOLS === "true") {
+    errors.push("AMANAH_INTERNAL_TOOLS must not be enabled in production");
+  }
+  if (env.AMANAH_KNOWLEDGE_PREVIEW === "true") {
+    errors.push("AMANAH_KNOWLEDGE_PREVIEW must not be enabled in production (unpublished drafts)");
+  }
+  if (env.AMANAH_DEV_OUTBOX === "true") {
+    errors.push("AMANAH_DEV_OUTBOX must not be enabled in production");
+  }
+  if (env.AMANAH_STAGING_DIRECT_LOGIN?.trim()) {
+    errors.push("AMANAH_STAGING_DIRECT_LOGIN must not be set in production (staging acceptance only)");
+  }
+  if (!env.AMANAH_PUBLIC_BASE_URL?.trim() && !env.NEXT_PUBLIC_SITE_URL?.trim() && !env.NEXT_PUBLIC_APP_URL?.trim()) {
+    errors.push("AMANAH_PUBLIC_BASE_URL (or NEXT_PUBLIC_SITE_URL) is required for links in e-mails");
+  }
+  if ((env.AMANAH_MAIL_TRANSPORT ?? "disabled") === "disabled") {
+    warnings.push("No mail transport configured: registration, e-mail confirmation and password reset are unavailable");
+  }
+  if (env.AMANAH_SEARCH_INDEXING === "true") {
+    warnings.push("AMANAH_SEARCH_INDEXING=true: public pages are open to search engines (only after the public-start release)");
   }
 
   if (env.NEXT_PUBLIC_AUTH_MODE !== "api") {
@@ -86,6 +166,8 @@ export function sanitizeEnvForLogs(env = process.env) {
     "AMANAH_AI_PROVIDER",
     "AMANAH_AI_ENABLED",
     "AMANAH_KNOWLEDGE_RETRIEVAL",
+    "AMANAH_BILLING_MODE",
+    "AMANAH_MAIL_TRANSPORT",
   ];
   const out = {};
   for (const key of keys) {
@@ -93,7 +175,11 @@ export function sanitizeEnvForLogs(env = process.env) {
   }
   if (env.DATABASE_URL) out.DATABASE_URL = "[set]";
   if (env.SESSION_SECRET) out.SESSION_SECRET = "[set]";
+  if (env.AMANAH_DATA_KEYS) out.AMANAH_DATA_KEYS = "[set]";
   if (env.OPENAI_API_KEY) out.OPENAI_API_KEY = "[set]";
+  if (env.AMANAH_SMTP_PASSWORD) out.AMANAH_SMTP_PASSWORD = "[set]";
+  if (env.AMANAH_STRIPE_SECRET_KEY) out.AMANAH_STRIPE_SECRET_KEY = "[set]";
+  if (env.AMANAH_STRIPE_WEBHOOK_SECRET) out.AMANAH_STRIPE_WEBHOOK_SECRET = "[set]";
   return out;
 }
 

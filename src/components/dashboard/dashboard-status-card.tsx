@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import Link from "next/link";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
 import { pickDataFields } from "@/lib/store/store-utils";
-import { getActiveStorageLabel } from "@/lib/storage/storage-config";
 import { getAiConsent } from "@/lib/ai/consent-client";
 import { openReadableEmergencyExport } from "@/lib/export/readable-emergency-export";
 import { useI18n } from "@/lib/i18n/context";
@@ -30,7 +30,7 @@ export function DashboardStatusCard() {
       .catch(() => {});
   }, []);
 
-  const storageLabel = getActiveStorageLabel();
+  const storageLabel = useActiveStorageLabel();
   const storageText =
     storageLabel === "api"
       ? t("status.storage.api")

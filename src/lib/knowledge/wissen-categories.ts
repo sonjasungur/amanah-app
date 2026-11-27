@@ -32,13 +32,13 @@ export const WISSEN_CATEGORY_CONFIG: Record<WissenCategoryId, WissenCategoryConf
   vermoegen: {
     id: "vermoegen",
     label: "Vermögen und Verantwortung",
-    accent: "#0F6470",
+    accent: "#2E4A85",
     topicIds: ["w-testament", "w-schulden", "w-digital"],
   },
   akhira: {
     id: "akhira",
     label: "Akhira und Weiterwirken",
-    accent: "#087A4E",
+    accent: "#8A6A22",
     topicIds: ["w-sadaqa", "w-barzakh", "w-akhira"],
   },
 };

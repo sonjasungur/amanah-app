@@ -4,6 +4,7 @@ import type { SourceAuditCategory } from "@/lib/types";
 export const SOURCE_SECTION_LABELS: Record<SourceAuditCategory, string> = {
   QURAN_PRIMARY: "Qur'an und authentische Sunnah",
   SAHIH_PRIMARY: "Qur'an und authentische Sunnah",
+  HADITH_GRADED: "Hadith mit Authentizitätseinstufung",
   LEGAL_GERMANY: "Deutsches Recht und Vorsorgedokumente",
   GENERAL_GUIDANCE: "Praktische Orientierung",
   FIQH_REVIEW_REQUIRED: "Fachliche Prüfung erforderlich",
@@ -12,6 +13,7 @@ export const SOURCE_SECTION_LABELS: Record<SourceAuditCategory, string> = {
 export const SOURCE_SECTION_ORDER: SourceAuditCategory[] = [
   "QURAN_PRIMARY",
   "SAHIH_PRIMARY",
+  "HADITH_GRADED",
   "LEGAL_GERMANY",
   "GENERAL_GUIDANCE",
   "FIQH_REVIEW_REQUIRED",

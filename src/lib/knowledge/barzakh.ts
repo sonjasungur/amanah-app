@@ -53,7 +53,7 @@ export const barzakhArticles: KnowledgeArticle[] = [
     content:
       "Wer um Vergebung bitten möchte, sollte dies zu Lebzeiten tun. Eine Liste von Menschen, bei denen man um Vergebung bittet, entlastet die Familie und das Gewissen.",
     sourceIds: [],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "barzakh",
   },
   {
@@ -64,7 +64,7 @@ export const barzakhArticles: KnowledgeArticle[] = [
     content:
       "Angehörige können Dua machen, Sadaqa spenden, Schulden begleichen und Amanah erfüllen. Vermeide kulturelle Praktiken ohne islamische Grundlage. Allah entscheidet.",
     sourceIds: ["hadith-sadaqa-jariya"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "barzakh",
   },
 ];

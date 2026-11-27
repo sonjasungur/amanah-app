@@ -1,21 +1,28 @@
 import type { AiFeature, AiProviderName } from "./types";
+import { resetMemoryAuthLimits } from "@/lib/server/auth-rate-limit-memory";
 
 const hits = new Map<string, { count: number; resetAt: number }>();
 const MAX = 30;
 const WINDOW_MS = 60_000;
 
-export function checkRateLimit(key: string): { allowed: boolean; retryAfterMs?: number } {
+export function checkRateLimit(key: string, max = MAX, windowMs = WINDOW_MS): { allowed: boolean; retryAfterMs?: number } {
   const now = Date.now();
   const entry = hits.get(key);
   if (!entry || now > entry.resetAt) {
-    hits.set(key, { count: 1, resetAt: now + WINDOW_MS });
+    hits.set(key, { count: 1, resetAt: now + windowMs });
     return { allowed: true };
   }
-  if (entry.count >= MAX) {
+  if (entry.count >= max) {
     return { allowed: false, retryAfterMs: entry.resetAt - now };
   }
   entry.count++;
   return { allowed: true };
+}
+
+/** Clears all counters (tests only). */
+export function resetRateLimits(): void {
+  hits.clear();
+  resetMemoryAuthLimits();
 }
 
 const eventLog: { feature: AiFeature; provider: AiProviderName; createdAt: string; success: boolean; error?: string }[] = [];

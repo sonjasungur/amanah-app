@@ -1,109 +1,29 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { notFound } from "next/navigation";
+import { isEditorialPreviewEnabled } from "@/lib/flags/knowledge-preview";
+import PartnerPageContent from "@/components/partner/partner-page-content";
+import { InternalPreviewBanner } from "@/components/partner/internal-preview-banner";
 
-export const metadata = {
-  title: "Partner werden — Mein Wille",
-  description: "Partnerschaften für Bestatter, Moscheen/Vereine und Anwälte/Notare.",
-};
+// Hidden for the start (owner decision 25.11.2026, start blocker 10): answers 404 in production and stays out of
+// the sitemap and search engines. AP22 EA-03.1: only where the editorial preview is on (password-protected
+// staging, local development) the former information page is shown, marked as an internal preview.
+export const metadata: Metadata = { title: "Partner (interne Vorschau) — Wasiyya", robots: { index: false, follow: false } };
 
-const sections = [
-  {
-    id: "bestatter",
-    icon: "🕌",
-    title: "Bestatter",
-    description:
-      "Islamische Bestattungsdienste können später gelistet werden — erst nach echter Prüfung, ohne erfundene Einträge.",
-    features: [
-      "Kostenloser Basiseintrag mit regionalem Profil",
-      "Partner-Badge erst nach realer Prüfung und Freigabe",
-      "Direkte Verknüpfung mit Mein Wille-Nutzerwünschen",
-    ],
-    cta: { label: "Hinweis zum Verzeichnis", href: "/bestatter" },
-    buttonLabel: "Interesse anmelden",
-  },
-  {
-    id: "moscheen",
-    icon: "🤝",
-    title: "Moscheen & Vereine",
-    description:
-      "Gemeinden und islamische Vereine erhalten kostenlose Materialien: Janazah-Checklisten, QR-Codes für Vorsorge und optionale Workshops vor Ort.",
-    features: [
-      "Kostenloses Infopaket für Janazah-Vorsorge",
-      "QR-Code für Gemeinde-Mitglieder",
-      "Workshop-Paket für Vorträge und Checklisten",
-    ],
-    cta: { label: "Janazah-Kompass", href: "/janazah-kompass" },
-    buttonLabel: "Interesse anmelden",
-  },
-  {
-    id: "anwaelte",
-    icon: "⚖️",
-    title: "Anwälte & Notare",
-    description:
-      "Fachleute für Erbrecht, Patientenverfügung und Testament unterstützen Muslime bei der rechtlichen Umsetzung islamischer Vorsorge in Deutschland.",
-    features: [
-      "Vermittlung für Testament- und Erbberatung",
-      "Patientenverfügung und Vorsorgevollmacht",
-      "Zusammenarbeit mit Imam/Gelehrten empfohlen",
-    ],
-    cta: { label: "Testament & Erbe", href: "/testament-erbe" },
-    buttonLabel: "Interesse anmelden",
-  },
-];
+/** The switch is read at runtime, never baked in at build time. */
+export const dynamic = "force-dynamic";
 
 export default function PartnerPage() {
+  if (!isEditorialPreviewEnabled()) notFound();
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="mb-12 text-center">
-        <p className="text-accent font-medium mb-2">Gemeinsam stärker</p>
-        <h1 className="text-3xl font-bold text-primary mb-3">Partner werden</h1>
-        <p className="text-muted max-w-2xl mx-auto leading-relaxed">
-          Mein Wille verbindet Muslime in Deutschland mit vertrauenswürdigen Partnern —
-          im Alltag und im schwersten Moment.
-        </p>
-      </div>
-
-      <div className="space-y-8">
-        {sections.map((section) => (
-          <Card key={section.id} className="overflow-hidden">
-            <div className="flex items-start gap-4 mb-4">
-              <span className="text-4xl">{section.icon}</span>
-              <div>
-                <CardTitle className="text-xl">{section.title}</CardTitle>
-                <p className="text-muted leading-relaxed mt-2">{section.description}</p>
-              </div>
-            </div>
-
-            <ul className="space-y-2 mb-6 ml-14">
-              {section.features.map((feature) => (
-                <li key={feature} className="text-sm text-muted flex items-start gap-2">
-                  <span className="text-accent">✓</span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex flex-wrap gap-3 ml-14">
-              <Link href={section.cta.href}>
-                <Button variant="outline" size="sm">{section.cta.label}</Button>
-              </Link>
-              <Button variant="secondary" size="sm" disabled>
-                {section.buttonLabel}
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-12 rounded-2xl bg-sand border border-primary/10 p-6 text-center">
-        <p className="text-sm text-muted">
-          Partner-Anfragen werden derzeit manuell bearbeitet. Schreib uns an{" "}
-          <a href="mailto:partner@amanahordner.de" className="text-primary-light underline">
-            partner@amanahordner.de
-          </a>
-        </p>
-      </div>
-    </div>
+    <>
+      <InternalPreviewBanner>
+        Frühere Partner-Informationsseite, unverändert zur Prüfung. Die dort angekündigten Funktionen für Anwälte und Bestatter gibt es noch nicht.{" "}
+        <Link href="/partner/vorschau" className="font-semibold underline decoration-[#D4A537] underline-offset-2" data-testid="partner-platform-preview-link">
+          Zur klickbaren Vorschau der Partnerplattform
+        </Link>
+      </InternalPreviewBanner>
+      <PartnerPageContent />
+    </>
   );
 }

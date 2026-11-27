@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/ui/disclaimer";
 import { IMPRINT } from "@/lib/legal/imprint";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Datenschutz — Mein Wille",
-  description: "Datenschutzerklärung für Mein Wille — lokale und serverseitige Speicherung, KI, Export und Löschung.",
-};
+export const metadata = publicPageMetadata("/datenschutz");
 
 export default function DatenschutzPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
+    <div className="max-w-3xl mx-auto px-4 py-12 break-words">
       <h1 className="text-3xl font-bold text-primary mb-3">Datenschutzerklärung</h1>
       <p className="text-muted mb-10">Stand: Juli 2026</p>
 
@@ -18,10 +16,9 @@ export default function DatenschutzPage() {
           <h2 className="text-xl font-semibold text-primary mb-3">1. Verantwortlicher</h2>
           <p className="leading-relaxed">
             Verantwortlich für die Datenverarbeitung im Rahmen von {IMPRINT.productName} ist die{" "}
-            {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}, vertreten durch{" "}
-            {IMPRINT.representedBy}. Kontakt:{" "}
-            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
-              {IMPRINT.email}
+            {IMPRINT.operatorLegalName}, {IMPRINT.street}, {IMPRINT.city}, {IMPRINT.country}. Kontakt:{" "}
+            <a href={`mailto:${IMPRINT.privacyEmail}`} className="text-primary-light underline">
+              {IMPRINT.privacyEmail}
             </a>
           </p>
         </section>
@@ -29,7 +26,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">2. Welche Daten gespeichert werden</h2>
           <p className="leading-relaxed mb-3">
-            Amanah verarbeitet sehr sensible Vorsorgedaten. Typischerweise speicherst du unter anderem:
+            Wasiyya verarbeitet sehr sensible Vorsorgedaten. Typischerweise speicherst du unter anderem:
           </p>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Profil- und Notfallkontaktdaten</li>
@@ -61,7 +58,9 @@ export default function DatenschutzPage() {
           </p>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
             <li>Speicherung nur für dein angemeldetes Konto.</li>
-            <li>„Amanah-Daten löschen“ entfernt nur Vorsorgedaten — nicht dein Benutzerkonto.</li>
+            <li>„Vorsorgedaten löschen“ entfernt nur Vorsorgedaten — nicht dein Benutzerkonto.</li>
+            <li>Unter „Einstellungen → Mein Konto“ kannst du alle Kontodaten herunterladen und dein Konto mit allen Angaben vollständig löschen.</li>
+            <li>Die Anmeldung erfolgt über ein technisch notwendiges Sitzungs-Cookie (HttpOnly), das beim Abmelden gelöscht wird.</li>
             <li>Session-Token werden gehasht gespeichert, keine Klartext-Passwörter in der Datenbank.</li>
           </ul>
         </section>
@@ -69,20 +68,18 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">5. Keine Passwort-Speicherung für private Konten</h2>
           <p className="leading-relaxed">
-            Mein Wille speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
+            Wasiyya speichert <strong className="text-foreground">keine Zugangspasswörter</strong> zu deinen
             persönlichen Konten (E-Mail, Banking, Social Media). Im Modul „Digitaler Nachlass“ dokumentierst du
             nur Hinweise, wo Zugangsdaten sicher aufbewahrt werden — nicht die Passwörter selbst.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-primary mb-3">6. KI-Assistent</h2>
+          <h2 className="text-xl font-semibold text-primary mb-3">6. Keine KI-Dienste</h2>
           <ul className="list-disc pl-5 space-y-2 leading-relaxed">
-            <li><strong className="text-foreground">Standard:</strong> KI ist in der Produktionskonfiguration deaktiviert.</li>
-            <li><strong className="text-foreground">rules / mock:</strong> Keine externen KI-Dienste — Verarbeitung lokal bzw. regelbasiert auf dem Server.</li>
-            <li><strong className="text-foreground">openai (optional):</strong> Externe KI nur bei aktivierter Funktion und nach ausdrücklicher Zustimmung, mit Datenminimierung.</li>
-            <li>Sende keine vollständigen persönlichen oder medizinischen Daten in Freitextfragen.</li>
-            <li>Der Assistent ersetzt keine Beratung durch Imam, Arzt oder Anwalt.</li>
+            <li>Wasiyya nutzt derzeit keine Dienste künstlicher Intelligenz. Deine Angaben werden nicht an KI-Anbieter übermittelt und nicht zum Training von KI-Modellen verwendet.</li>
+            <li>Der KI-Assistent ist abgeschaltet.</li>
+            <li>Ausfüllhilfe und Vorsorge-Check werten deine Antworten nach festen Regeln aus — in deinem Browser bzw. auf unserem Server, ohne Weitergabe an Dritte.</li>
           </ul>
         </section>
 
@@ -98,7 +95,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">8. Kein Ersatz für Fachberatung</h2>
           <p className="leading-relaxed">
-            Amanah bietet Orientierung und Vorbereitung — keine Rechtsberatung, keine medizinische Beratung,
+            Wasiyya bietet Orientierung und Vorbereitung — keine Rechtsberatung, keine medizinische Beratung,
             keine Fatwa und keine Garantie auf rechtliche Wirksamkeit. Fachliche Prüfung empfohlen.
           </p>
         </section>
@@ -106,7 +103,7 @@ export default function DatenschutzPage() {
         <section>
           <h2 className="text-xl font-semibold text-primary mb-3">9. Cookies & Analytics</h2>
           <p className="leading-relaxed">
-            Mein Wille verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
+            Wasiyya verwendet derzeit keine Tracking-Cookies und kein werbliches Profiling.
             Technisch notwendige Speicherung im Browser (Local Storage) ist für die Funktion erforderlich.
           </p>
         </section>
@@ -120,8 +117,8 @@ export default function DatenschutzPage() {
               Sicherheit
             </Link>
             . Bei Fragen:{" "}
-            <a href={`mailto:${IMPRINT.email}`} className="text-primary-light underline">
-              {IMPRINT.email}
+            <a href={`mailto:${IMPRINT.privacyEmail}`} className="text-primary-light underline">
+              {IMPRINT.privacyEmail}
             </a>.
           </p>
         </section>

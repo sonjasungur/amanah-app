@@ -26,6 +26,15 @@ coverage
 # Local dev
 docker-compose.local.yml
 
+# Docs, tests and test artefacts are not part of the image
+docs
+e2e
+test-results
+playwright-report
+blob-report
+src/__tests__
+AI_HANDOFF.md
+
 # Backups
 backups
 *.sql

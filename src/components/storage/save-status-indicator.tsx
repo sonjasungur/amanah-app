@@ -1,18 +1,26 @@
 "use client";
 
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
+import { useActiveStorageLabel } from "@/lib/storage/use-storage-label";
 import { useI18n } from "@/lib/i18n/context";
-import { getStorageLocationLabel, flushPendingSave } from "@/lib/storage/store-sync";
+import { flushPendingSave } from "@/lib/storage/store-sync";
 import { AlertCircle, Check, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 
-export function SaveStatusIndicator({ className }: { className?: string }) {
+/**
+ * The one save status of a page. `compact` keeps it to a single line (status and time); problems
+ * (error, partial, near the limit) always show their full explanation. `fallback` is shown while
+ * nothing has been changed yet, so the place of storage is never left unsaid.
+ */
+export function SaveStatusIndicator({ className, compact, fallback }: { className?: string; compact?: boolean; fallback?: string }) {
   const saveStatus = useAmanahStore((s) => s.saveStatus);
   const saveError = useAmanahStore((s) => s.saveError);
   const lastSaved = useAmanahStore((s) => s.lastSaved);
-  const { t } = useI18n();
-  const storageLabel = getStorageLocationLabel();
+  const nearLimit = useAmanahStore((s) => s.saveNearLimit);
+  const folderProblem = useAmanahStore((s) => s.folderProblem);
+  const { t, locale } = useI18n();
+  const storageLabel = useActiveStorageLabel();
 
   const statusLabel =
     saveStatus === "saved"
@@ -23,7 +31,9 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
         ? t("storage.status.saving")
         : saveStatus === "error"
           ? t("storage.status.error")
-          : null;
+          : saveStatus === "partial"
+            ? t("storage.status.partial")
+            : null;
 
   const locationHint =
     saveStatus === "saved"
@@ -32,7 +42,16 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
         : t("storage.location.local")
       : null;
 
-  if (!statusLabel && saveStatus === "idle") return null;
+  if (folderProblem) return null;
+  if (!statusLabel && saveStatus === "idle") {
+    return fallback ? (
+      <p className={cn("flex items-center gap-2 text-xs font-medium text-green-700", className)} data-testid="save-status-indicator">
+        <Check size={14} aria-hidden />
+        <span>{fallback}</span>
+      </p>
+    ) : null;
+  }
+  const savedAt = saveStatus === "saved" && lastSaved ? new Date(lastSaved).toLocaleString(locale === "de" ? "de-DE" : locale, { dateStyle: "short", timeStyle: "short" }) : null;
 
   return (
     <div className={cn("flex flex-col gap-1", className)} data-testid="save-status-indicator" aria-live="polite">
@@ -42,18 +61,30 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
             "flex items-center gap-2 text-xs font-medium",
             saveStatus === "saved" && "text-green-700",
             saveStatus === "saving" && "text-primary",
-            saveStatus === "error" && "text-destructive"
+            saveStatus === "error" && "text-destructive",
+            saveStatus === "partial" && "text-warning"
           )}
         >
           {saveStatus === "saved" && <Check size={14} aria-hidden />}
           {saveStatus === "saving" && <Loader2 size={14} className="animate-spin" aria-hidden />}
-          {saveStatus === "error" && <AlertCircle size={14} aria-hidden />}
+          {(saveStatus === "error" || saveStatus === "partial") && <AlertCircle size={14} aria-hidden />}
           <span>{statusLabel}</span>
+          {compact && savedAt && <span className="font-normal text-muted">· {savedAt}</span>}
         </div>
       )}
-      {locationHint && (
+      {!compact && locationHint && (
         <p className="text-xs text-muted" data-testid="save-status-location">
           {locationHint}
+        </p>
+      )}
+      {saveStatus === "partial" && (
+        <p className="text-xs text-muted" data-testid="save-status-partial">
+          {t("storage.location.partial")}
+        </p>
+      )}
+      {nearLimit && saveStatus !== "error" && (
+        <p className="text-xs text-warning" data-testid="save-status-near-limit">
+          {t("storage.nearLimit")}
         </p>
       )}
       {saveStatus === "error" && saveError && (
@@ -74,9 +105,9 @@ export function SaveStatusIndicator({ className }: { className?: string }) {
           {t("storage.retry")}
         </Button>
       )}
-      {saveStatus === "saved" && lastSaved && (
+      {!compact && savedAt && (
         <p className="text-xs text-muted">
-          {t("storage.lastSaved")}: {new Date(lastSaved).toLocaleString()}
+          {t("storage.lastSaved")}: {savedAt}
         </p>
       )}
     </div>

@@ -4,7 +4,7 @@ import { validateImportData } from "@/lib/domain/validation";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { localStorageProvider } from "./local-storage-provider";
 import { resolveStorageProvider } from "./storage-config";
-import { STORAGE_KEY, type StorageProvider } from "./types";
+import { STORAGE_KEY, type FolderWriteScope, type SaveResult, type StorageProvider } from "./types";
 
 export { STORAGE_KEY };
 
@@ -26,8 +26,12 @@ export async function loadAmanahData(): Promise<AmanahOrdnerData> {
   return data ?? normalizeData({});
 }
 
-export async function saveAmanahData(data: AmanahOrdnerData): Promise<void> {
-  await getStorageProvider().save(data);
+export async function saveAmanahData(data: AmanahOrdnerData): Promise<SaveResult | void> {
+  return getStorageProvider().save(data);
+}
+
+export function lastFolderWriteScope(): FolderWriteScope {
+  return getStorageProvider().lastWriteScope?.() ?? "full";
 }
 
 export async function clearAmanahData(): Promise<void> {
@@ -36,12 +40,12 @@ export async function clearAmanahData(): Promise<void> {
 
 export function exportToJson(data: AmanahOrdnerData): void {
   const bundle = createExportBundle(data);
-  downloadJson(bundle, `amanah-ordner-${new Date().toISOString().split("T")[0]}.json`);
+  downloadJson(bundle, `wasiyya-ordner-${new Date().toISOString().split("T")[0]}.json`);
 }
 
 export function exportEmergencyFolder(data: AmanahOrdnerData): void {
   const bundle = createEmergencyExportBundle(data);
-  downloadJson(bundle, `amanah-notfallmappe-${new Date().toISOString().split("T")[0]}.json`);
+  downloadJson(bundle, `wasiyya-notfallmappe-${new Date().toISOString().split("T")[0]}.json`);
 }
 
 function downloadJson(data: unknown, filename: string): void {

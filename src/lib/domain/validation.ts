@@ -171,18 +171,49 @@ export interface InheritanceCheckResult {
   recommendations: string[];
 }
 
+/**
+ * The check only scans a few keywords. Labels must never read as approval:
+ * "green" means "nothing flagged", not "legally or religiously in order".
+ */
+export const INHERITANCE_HINT_LABELS: Record<InheritanceTrafficLight, string> = {
+  green: "Keine Auffälligkeiten erkannt",
+  yellow: "Klärungsbedarf",
+  red: "Möglicher Konflikt mit festen Erbanteilen",
+};
+
+export const INHERITANCE_HINT_NOTICE =
+  "Automatische Stichwort-Hinweise, keine Prüfung. Sie ersetzen weder Gelehrte noch Anwalt/Notar und sind kein Testament.";
+
+export const INHERITANCE_POINTS_NOTICE =
+  "Diese Fragen ergeben sich nur aus deinen Angaben. Sie bewerten deine Wünsche nicht. Ob etwas religiös oder rechtlich passt, klären Gelehrte und Anwalt oder Notar.";
+
+/** Neutral questions for the conversation. Facts only: never reads the free text, never gives a verdict. */
+export function inheritanceConversationPoints(profile: InheritanceProfile): string[] {
+  const points: string[] = [];
+  if (profile.desiredWasiyyah.trim()) points.push("Du hast Notizen zur Waṣiyya festgehalten: Wie lassen sie sich religiös und rechtlich einordnen?");
+  if (profile.desiredSadaqaJariya.trim()) points.push("Du hast Notizen zur Sadaqa Jariya festgehalten: Was davon lässt sich aus dem Nachlass umsetzen?");
+  if (profile.stepchildren) points.push("Du hast Stiefkinder angegeben: Wie sollen sie in deiner Planung berücksichtigt werden?");
+  if (profile.fosterChildren) points.push("Du hast Pflegekinder angegeben: Wie sollen sie in deiner Planung berücksichtigt werden?");
+  if (profile.nonMuslimRelatives) points.push("Du hast nicht-muslimische Angehörige angegeben: Was gilt für sie?");
+  if (profile.foreignProperty) points.push("Du hast Auslandseigentum angegeben: Welches Recht gilt dafür?");
+  if (profile.companyGmbH) points.push("Du hast eine Firma oder GmbH angegeben: Was ist für die Nachfolge zu regeln?");
+  return points;
+}
+
 export function checkInheritance(profile: InheritanceProfile): InheritanceCheckResult {
   const warnings: string[] = [];
   const recommendations: string[] = [];
   let status: InheritanceCheckResult["status"] = "green";
 
-  if (profile.desiredWasiyyah.toLowerCase().includes("alles") || profile.desiredWasiyyah.toLowerCase().includes("100%")) {
-    warnings.push("Alles an eine Person zu vererben widerspricht den festen Erbanteilen (Farāʾiḍ).");
+  const wasiyyah = profile.desiredWasiyyah.toLowerCase();
+
+  if (/\balles\b/.test(wasiyyah) || wasiyyah.includes("100%")) {
+    warnings.push("Alles an eine Person zu geben passt nach islamischen Erbgrundsätzen nicht zu den festen Erbanteilen (Farāʾiḍ).");
     status = "red";
   }
 
-  if (profile.desiredWasiyyah.toLowerCase().includes("tochter") && profile.desiredWasiyyah.toLowerCase().includes("ausschlie")) {
-    warnings.push("Töchter haben festgelegte Erbrechte — sie können nicht vollständig ausgeschlossen werden.");
+  if (/\btöchter|\btochter/.test(wasiyyah) && wasiyyah.includes("ausschlie")) {
+    warnings.push("Nach islamischen Erbgrundsätzen haben Töchter feste Erbanteile. Nach deutschem Recht kann zudem ein Pflichtteil bestehen.");
     status = "red";
   }
 
@@ -207,7 +238,7 @@ export function checkInheritance(profile: InheritanceProfile): InheritanceCheckR
   }
 
   if (warnings.length === 0 && recommendations.length === 0) {
-    recommendations.push("Grunddaten erfasst. Bitte Imam/Gelehrte und Anwalt/Notar für verbindliche Prüfung konsultieren.");
+    recommendations.push("Grunddaten erfasst. Für eine verbindliche Einschätzung Gelehrte und Anwalt/Notar hinzuziehen.");
   }
 
   return { status, warnings, recommendations };

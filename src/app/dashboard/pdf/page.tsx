@@ -1,220 +1,259 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { AlertCircle, CheckCircle2, ClipboardList, FileText, FolderOpen, Printer } from "lucide-react";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { checkInheritance } from "@/lib/utils/progress";
-import {
-  FullPrintView,
-  PrintField,
-  PrintSection,
-} from "@/components/print/print-views";
+import { pickDataFields } from "@/lib/store/store-utils";
+import { useFieldCorrections, withDateDrafts } from "@/lib/store/field-corrections";
+import { DOCUMENTS, type DocumentId } from "@/lib/documents/model";
+import { DocumentPanel } from "@/components/documents/document-panel";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Disclaimer } from "@/components/ui/disclaimer";
-import { FileText, Printer } from "lucide-react";
+import { PlusGate } from "@/components/billing/plus-gate";
+import { cn } from "@/lib/utils/cn";
+import { DOCUMENT_CHECKLIST, DOCUMENT_STATUS_LABELS } from "@/lib/vorsorge/documents";
+import { folderTasks, printoutStates } from "@/lib/vorsorge/folder-tasks";
 
-function NotfallkartePrintView() {
-  const d = useAmanahStore();
+const fmtDate = (iso: string | null | undefined) =>
+  iso && !Number.isNaN(Date.parse(iso)) ? new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) : null;
+const fmtDateTime = (iso: string | null | undefined) =>
+  iso && !Number.isNaN(Date.parse(iso)) ? new Date(iso).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
+
+/** Folder state, open tasks and the originals with their places: the folder before any printout. */
+function FolderOverview({ data }: { data: ReturnType<typeof pickDataFields> }) {
+  const tasks = folderTasks(data);
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? tasks : tasks.slice(0, 6);
+  const reviewed = fmtDate(data.vorsorgeMeta?.reviewedAt);
   return (
-    <div className="print-view max-w-md mx-auto p-6 bg-white">
-      <div className="text-center mb-6 border-b-2 border-primary pb-4">
-        <h1 className="text-xl font-bold text-primary">Notfallkarte</h1>
-        <p className="text-xs text-muted">{new Date().toLocaleDateString("de-DE")}</p>
-      </div>
-      <PrintSection title="Persönlich">
-        <PrintField label="Name" value={d.emergencyCard.name} />
-        <PrintField label="Geburtsdatum" value={d.emergencyCard.birthDate} />
-        <PrintField label="Sprache" value={d.emergencyCard.language} />
-      </PrintSection>
-      <PrintSection title="Notfallkontakte">
-        <PrintField label="Kontakt 1" value={`${d.emergencyCard.emergencyContact1.name} — ${d.emergencyCard.emergencyContact1.phone}`} />
-        <PrintField label="Kontakt 2" value={`${d.emergencyCard.emergencyContact2.name} — ${d.emergencyCard.emergencyContact2.phone}`} />
-        <PrintField label="Hausarzt" value={d.emergencyCard.familyDoctor} />
-      </PrintSection>
-      <PrintSection title="Medizinisch">
-        <PrintField label="Krankheiten" value={d.emergencyCard.illnesses} />
-        <PrintField label="Medikamente" value={d.emergencyCard.medications} />
-        <PrintField label="Allergien" value={d.emergencyCard.allergies} />
-      </PrintSection>
-      <PrintSection title="Islamisch">
-        <PrintField label="Moschee / Imam" value={d.emergencyCard.mosqueImam} />
-        <PrintField label="Bestatter" value={d.emergencyCard.preferredFuneralDirector} />
-      </PrintSection>
-    </div>
-  );
-}
+    <div className="space-y-4">
+      <Card className="p-4" data-testid="folder-status">
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <FolderOpen size={20} className="text-primary" aria-hidden /> Mein Vorsorgeordner
+        </h2>
+        <dl className="mt-2 grid gap-2 sm:grid-cols-3 text-sm">
+          <div>
+            <dt className="text-muted">Zuletzt gespeichert</dt>
+            <dd className="font-semibold" data-testid="folder-last-saved">{fmtDateTime(data.lastSaved) ?? "Noch nicht gespeichert"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">Zuletzt überprüft</dt>
+            <dd className="font-semibold" data-testid="folder-reviewed">{reviewed ?? "Noch nie bestätigt"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted">Offene Punkte</dt>
+            <dd className="font-semibold" data-testid="folder-task-count">{tasks.length === 0 ? "Keine" : tasks.length}</dd>
+          </div>
+        </dl>
+        <Link href="/dashboard/vorsorge/abschluss" className="text-sm font-semibold text-primary hover:underline inline-flex items-center min-h-[44px]">
+          Alles überprüfen und abschließen
+        </Link>
+      </Card>
 
-function JanazahPrintView() {
-  const d = useAmanahStore();
-  return (
-    <div className="print-view max-w-2xl mx-auto p-8 bg-white">
-      <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Janazah-Wünsche</h1>
-        <p className="text-sm text-muted">Mein Wille — {new Date().toLocaleDateString("de-DE")}</p>
-      </div>
-      <PrintSection title="Grundwünsche">
-        <PrintField label="Islamische Bestattung" value={d.janazahWishes.islamicBurialDesired} />
-        <PrintField label="Keine Verzögerung" value={d.janazahWishes.noUnnecessaryDelay} />
-        <PrintField label="Bestatter" value={d.janazahWishes.preferredFuneralDirector} />
-        <PrintField label="Moschee" value={d.janazahWishes.preferredMosque} />
-        <PrintField label="Friedhof" value={d.janazahWishes.preferredCemetery} />
-      </PrintSection>
-      <PrintSection title="Ghusl & Kafan">
-        <PrintField label="Ghusl" value={d.janazahWishes.ghusl} />
-        <PrintField label="Kafan" value={d.janazahWishes.kafan} />
-        <PrintField label="Janazah-Gebet" value={d.janazahWishes.janazahPrayer} />
-      </PrintSection>
-      <PrintSection title="Beisetzung">
-        <PrintField label="Deutschland" value={d.janazahWishes.burialGermany} />
-        <PrintField label="Überführung" value={d.janazahWishes.repatriation} />
-      </PrintSection>
-      <PrintSection title="Nachricht an Familie">
-        <p className="text-sm whitespace-pre-wrap">{d.janazahWishes.messageToFamily || "—"}</p>
-      </PrintSection>
-    </div>
-  );
-}
-
-function TestamentPrintView() {
-  const d = useAmanahStore();
-  const result = checkInheritance(d.inheritanceProfile);
-  const statusLabel = { green: "Grün", yellow: "Gelb", red: "Rot" };
-
-  return (
-    <div className="print-view max-w-2xl mx-auto p-8 bg-white">
-      <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Testament-Vorbereitung</h1>
-        <p className="text-sm text-muted">Ampelcheck: {statusLabel[result.status]} — {new Date().toLocaleDateString("de-DE")}</p>
-      </div>
-      <PrintSection title="Erbprofil">
-        <PrintField label="Verheiratet" value={d.inheritanceProfile.married} />
-        <PrintField label="Ehepartner lebt" value={d.inheritanceProfile.spouseAlive} />
-        <PrintField label="Söhne" value={String(d.inheritanceProfile.sons)} />
-        <PrintField label="Töchter" value={String(d.inheritanceProfile.daughters)} />
-        <PrintField label="Stiefkinder" value={d.inheritanceProfile.stepchildren} />
-        <PrintField label="Nicht-muslimische Angehörige" value={d.inheritanceProfile.nonMuslimRelatives} />
-      </PrintSection>
-      <PrintSection title="Waṣiyya & Sadaqa">
-        <PrintField label="Gewünschte Waṣiyya" value={d.inheritanceProfile.desiredWasiyyah} />
-        <PrintField label="Sadaqa Jariya" value={d.inheritanceProfile.desiredSadaqaJariya} />
-      </PrintSection>
-      {result.warnings.length > 0 && (
-        <PrintSection title="Warnungen">
-          {result.warnings.map((w, i) => <p key={i} className="text-sm mb-1">• {w}</p>)}
-        </PrintSection>
-      )}
-      {result.recommendations.length > 0 && (
-        <PrintSection title="Empfehlungen">
-          {result.recommendations.map((r, i) => <p key={i} className="text-sm mb-1">• {r}</p>)}
-        </PrintSection>
-      )}
-    </div>
-  );
-}
-
-function SchuldenPrintView() {
-  const d = useAmanahStore();
-  return (
-    <div className="print-view max-w-2xl mx-auto p-8 bg-white">
-      <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Schulden & Amanah</h1>
-        <p className="text-sm text-muted">{new Date().toLocaleDateString("de-DE")}</p>
-      </div>
-      <PrintSection title="Einträge">
-        {d.debtsAmanah.length === 0 ? (
-          <p className="text-sm">Keine Einträge</p>
+      <Card className="p-4" data-testid="folder-tasks">
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <ClipboardList size={20} className="text-primary" aria-hidden /> Was noch offen ist
+        </h2>
+        {tasks.length === 0 ? (
+          <p className="text-sm text-muted mt-2 flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald" aria-hidden /> Nach deinen Angaben ist nichts offen. Das sagt nichts über die rechtliche Gültigkeit.
+          </p>
         ) : (
-          d.debtsAmanah.map((item) => (
-            <PrintField key={item.id} label={`${item.type} (${item.priority})`} value={`${item.description} — ${item.person}`} />
-          ))
+          <>
+            <ul className="mt-2 divide-y divide-border">
+              {visible.map((t) => (
+                <li key={t.id} className="py-2 flex items-start justify-between gap-3" data-kind={t.kind}>
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5 font-medium text-sm">
+                      {(t.kind === "widerspruch" || t.kind === "aktualitaet") && <AlertCircle size={14} className="text-warning shrink-0" aria-hidden />}
+                      {t.title}
+                    </span>
+                    {t.detail && <span className="block text-xs text-muted break-words">{t.detail}</span>}
+                  </span>
+                  <Link href={t.path} className="text-sm text-primary hover:underline shrink-0 min-h-[44px] inline-flex items-center">
+                    Öffnen
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {tasks.length > 6 && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+                {showAll ? "Weniger anzeigen" : `Alle ${tasks.length} anzeigen`}
+              </Button>
+            )}
+          </>
         )}
-      </PrintSection>
+      </Card>
+
+      <Card className="p-4" data-testid="folder-originals">
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <FileText size={20} className="text-primary" aria-hidden /> Meine Unterlagen und wo sie liegen
+        </h2>
+        <p className="text-sm text-muted mt-1">
+          Die Originale bleiben bei dir. Wasiyya hält nur fest, ob es sie gibt und wo sie liegen; Dateien werden nicht hochgeladen.
+        </p>
+        <ul className="mt-2 divide-y divide-border text-sm">
+          {DOCUMENT_CHECKLIST.map((c) => {
+            const entry = data.documents.find((d) => d.type === c.type);
+            return (
+              <li key={c.type} className="py-2 grid gap-0.5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:gap-3">
+                <span className="font-medium">{c.title}</span>
+                <span className={cn("break-words", !entry?.status && "text-muted")}>
+                  {entry?.status ? [DOCUMENT_STATUS_LABELS[entry.status], entry.location?.trim() || (entry.status === "vorhanden" ? "Ort noch nicht angegeben" : "")].filter(Boolean).join(" · ") : "Nicht angegeben"}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <Link href="/dashboard/dokumente" className="text-sm font-semibold text-primary hover:underline inline-flex items-center min-h-[44px]">
+          Unterlagen und Orte bearbeiten
+        </Link>
+      </Card>
     </div>
   );
 }
 
-function FamilienbriefPrintView() {
-  const d = useAmanahStore();
+/** Test ids kept from the earlier export page. */
+const CARD_TEST_ID: Record<DocumentId, string> = {
+  notfallkarte: "export-notfallkarte",
+  notfallinfo: "export-notfallinfo",
+  leitfaden: "export-leitfaden",
+  gesamt: "export-full",
+  janazah: "export-janazah",
+  erbprofil: "export-testament",
+  familienbrief: "export-familienbrief",
+  schulden: "export-schulden",
+  vermoegen: "export-vermoegen",
+};
+
+/** "Bereit" only when there is content, nothing required is missing and nothing contradicts. */
+function StatusChip({ ready, missing, warnings = 0 }: { ready: boolean; missing: number; warnings?: number }) {
+  const label = !ready ? "Noch keine Angaben" : warnings > 0 ? "Bitte prüfen" : missing > 0 ? "Unvollständig" : "Bereit";
   return (
-    <div className="print-view max-w-2xl mx-auto p-8 bg-white">
-      <div className="text-center mb-8 border-b-2 border-primary pb-4">
-        <h1 className="text-2xl font-bold text-primary">Familienbrief</h1>
-        <p className="text-sm text-muted">{new Date().toLocaleDateString("de-DE")}</p>
-      </div>
-      <PrintSection title="Brief an die Familie">
-        <p className="text-sm whitespace-pre-wrap leading-relaxed">{d.familyMessage.familyLetter || "—"}</p>
-      </PrintSection>
-      {d.familyMessage.keyWishesSummary && (
-        <PrintSection title="Wichtigste Wünsche">
-          <p className="text-sm whitespace-pre-wrap">{d.familyMessage.keyWishesSummary}</p>
-        </PrintSection>
+    <span
+      className={cn(
+        "text-xs font-semibold rounded-full px-2.5 py-1 shrink-0",
+        !ready ? "bg-border/60 text-muted" : missing > 0 || warnings > 0 ? "bg-warning/15 text-warning" : "bg-emerald/15 text-primary-dark",
       )}
-    </div>
+    >
+      {label}
+    </span>
   );
 }
 
-type PrintTarget = "full" | "notfallkarte" | "janazah" | "testament" | "schulden" | "familienbrief";
+function DocumentsPage() {
+  const store = useAmanahStore();
+  const drafts = useFieldCorrections((s) => s.open);
+  const data = withDateDrafts(pickDataFields(store), drafts);
+  const printouts = printoutStates(data);
+  // "?dokument=janazah" opens that preview, e.g. from the Janazah page.
+  const requested = useSearchParams()?.get("dokument");
+  const fromLink = requested && requested !== "vermoegen" && DOCUMENTS.some((d) => d.id === requested) ? (requested as DocumentId) : null;
+  const [chosen, setChosen] = useState<DocumentId | null>(null);
+  const previewRef = useRef<HTMLElement>(null);
+  /** Shows the chosen document and brings its preview into view (it sits below the list). */
+  const setSelected = (id: DocumentId) => {
+    setChosen(id);
+    window.history.replaceState(null, "", `/dashboard/pdf?dokument=${id}`);
+    requestAnimationFrame(() => {
+      previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      previewRef.current?.focus({ preventScroll: true });
+    });
+  };
+  const selected = chosen ?? fromLink ?? "notfallkarte";
 
-const exportOptions: { id: PrintTarget; title: string; description: string; icon: string }[] = [
-  { id: "full", title: "Mein Wille als PDF speichern", description: "Kompletter Ordner mit allen Modulen", icon: "📁" },
-  { id: "notfallkarte", title: "Notfallkarte", description: "Kompakte Karte für den Notfall", icon: "🆘" },
-  { id: "janazah", title: "Janazah-Bericht", description: "Islamische Bestattungswünsche", icon: "🕌" },
-  { id: "testament", title: "Testament-Bericht", description: "Erbprofil mit Ampelcheck", icon: "📜" },
-  { id: "schulden", title: "Schulden & Amanah", description: "Liste offener Rechte und Pflichten", icon: "⚖️" },
-  { id: "familienbrief", title: "Familienbrief", description: "Brief an deine Familie", icon: "👨‍👩‍👧‍👦" },
-];
+  return (
+    <div className="space-y-6">
+      <div className="no-print space-y-4">
+        <header>
+          <h1 className="text-2xl font-bold text-primary mb-2 flex items-center gap-2">
+            <FileText size={26} aria-hidden /> Meine Dokumente
+          </h1>
+          <p className="text-muted max-w-2xl">
+            Dein Vorsorgeordner auf einen Blick: was gespeichert ist, was noch offen ist und wo deine Unterlagen liegen. Ausdrucke
+            entstehen jedes Mal neu aus deinen aktuellen Angaben und werden nicht gespeichert. Es wird nichts automatisch übertragen. Kein Dokument hier
+            ist ein Testament, eine Vollmacht oder eine Patientenverfügung.
+          </p>
+        </header>
+
+        <FolderOverview data={data} />
+
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 pt-2">
+          <Printer size={20} className="text-primary" aria-hidden /> Ausdrucke
+        </h2>
+
+        <div className="grid gap-3 sm:grid-cols-2" role="list" aria-label="Dokumente">
+          {DOCUMENTS.map((doc) => {
+            const model = doc.build(data);
+            const active = selected === doc.id;
+            const card = (
+              <Card
+                key={doc.id}
+                role="listitem"
+                data-testid={CARD_TEST_ID[doc.id]}
+                className={cn("p-4 flex flex-col gap-2", active && "border-2 border-emerald/50")}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <CardTitle className="text-base text-foreground mb-0">{doc.id === "gesamt" ? "Gesamtübersicht (Vorsorge-Übersicht)" : doc.title}</CardTitle>
+                  <StatusChip ready={model.hasContent} missing={model.missing.length} warnings={model.warnings.length} />
+                </div>
+                {(() => {
+                  const p = printouts.find((x) => x.id === doc.id)!;
+                  const changed = fmtDate(p.updatedAt);
+                  return (
+                    <p className="text-xs text-muted" data-testid={`printout-meta-${doc.id}`}>
+                      {changed ? `Angaben zuletzt geändert: ${changed}` : p.ready ? "Änderungsdatum nicht erfasst" : "Noch keine Angaben"}
+                      {p.warnings > 0 && <span className="text-warning font-semibold"> · {p.warnings === 1 ? "1 Widerspruch" : `${p.warnings} Widersprüche`} prüfen</span>}
+                    </p>
+                  );
+                })()}
+                <p className="text-sm text-muted flex-1">
+                  {doc.id === "gesamt" ? "Alle Angaben zum Nachschlagen. Kein Testament, keine Vollmacht, keine Patientenverfügung." : doc.description}
+                  {doc.id === "vermoegen" && " Der Ausdruck liegt direkt bei der Vermögensübersicht und bleibt kostenlos, sie gehört zu keinem Paket."}
+                </p>
+                {doc.id === "vermoegen" ? (
+                  <Link href="/dashboard/vermoegen" className="text-sm font-semibold text-primary hover:underline inline-flex items-center min-h-[44px]" data-testid="export-vermoegen-link">
+                    Zur Vermögensübersicht
+                  </Link>
+                ) : doc.id === "gesamt" ? (
+                  <PlusGate feature="pdf_exports">
+                    <Button type="button" variant={active ? "secondary" : "outline"} size="sm" onClick={() => setSelected(doc.id)} aria-pressed={active}>
+                      Vorschau ansehen
+                    </Button>
+                  </PlusGate>
+                ) : (
+                  <Button type="button" variant={active ? "secondary" : "outline"} size="sm" onClick={() => setSelected(doc.id)} aria-pressed={active}>
+                    Vorschau ansehen
+                  </Button>
+                )}
+              </Card>
+            );
+            return card;
+          })}
+        </div>
+      </div>
+
+      <section aria-label="Vorschau und Druck" className="space-y-3 scroll-mt-24 focus:outline-none" ref={previewRef} tabIndex={-1} data-testid="pdf-preview-section">
+        <h2 className="no-print text-lg font-semibold text-foreground">{DOCUMENTS.find((d) => d.id === selected)?.title}</h2>
+        {selected === "gesamt" ? (
+          // The complete overview keeps its existing Plus hint (plan matrix: pdf_exports).
+          <PlusGate feature="pdf_exports">
+            <DocumentPanel key={selected} id={selected} />
+          </PlusGate>
+        ) : (
+          <DocumentPanel key={selected} id={selected} />
+        )}
+      </section>
+    </div>
+  );
+}
 
 export default function PdfPage() {
-  const [activePrint, setActivePrint] = useState<PrintTarget>("full");
-
-  const handlePrint = (target: PrintTarget) => {
-    setActivePrint(target);
-    setTimeout(() => window.print(), 150);
-  };
-
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-primary mb-2 flex items-center gap-2">
-          <FileText size={28} /> PDF & Export
-        </h1>
-        <p className="text-muted">
-          Speichere deine Angaben als PDF — zum Ausdrucken, Teilen oder Aufbewahren.
-        </p>
-      </div>
-
-      <Disclaimer />
-
-      <div className="rounded-xl bg-sand border border-accent/30 px-4 py-3 text-sm text-muted">
-        <span className="text-accent mr-1">💡</span>
-        Es wird nichts automatisch übertragen. Du kannst das Dokument über den Browser als PDF speichern oder drucken.
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        {exportOptions.map((opt) => (
-          <Card key={opt.id} className="hover:border-primary/30 transition-all">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">{opt.icon}</span>
-              <div className="flex-1">
-                <CardTitle className="text-base">{opt.title}</CardTitle>
-                <p className="text-sm text-muted mb-4">{opt.description}</p>
-                <Button variant="secondary" size="sm" onClick={() => handlePrint(opt.id)}>
-                  <Printer size={16} className="mr-2" /> Als PDF speichern oder drucken
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div className="print-only">
-        {activePrint === "full" && <FullPrintView />}
-        {activePrint === "notfallkarte" && <NotfallkartePrintView />}
-        {activePrint === "janazah" && <JanazahPrintView />}
-        {activePrint === "testament" && <TestamentPrintView />}
-        {activePrint === "schulden" && <SchuldenPrintView />}
-        {activePrint === "familienbrief" && <FamilienbriefPrintView />}
-      </div>
-    </div>
+    <Suspense fallback={null}>
+      <DocumentsPage />
+    </Suspense>
   );
 }

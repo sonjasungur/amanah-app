@@ -22,7 +22,7 @@ export class MockAIProvider extends RuleBasedAIProvider implements AmanahAIProvi
         return msg.message;
       }
     }
-    return `**Amanah-Assistent (Mock)**\n\nIch helfe beim Ordnen, Formulieren und Erkennen offener Punkte.\n\n${DOMAIN_DISCLAIMER}\n\nFrag mich nach der nächsten Frage, einer Mappe-Prüfung oder nutze die neuen Assistent-Funktionen im Dashboard.`;
+    return `**Wasiyya-Assistent (Mock)**\n\nIch helfe beim Ordnen, Formulieren und Erkennen offener Punkte.\n\n${DOMAIN_DISCLAIMER}\n\nFrag mich nach der nächsten Frage, einer Mappe-Prüfung oder nutze die neuen Assistent-Funktionen im Dashboard.`;
   }
 }
 

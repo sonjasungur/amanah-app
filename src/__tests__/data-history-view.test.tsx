@@ -1,0 +1,190 @@
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DataHistoryView } from "@/components/history/data-history-view";
+import { defaultAmanahData } from "@/lib/domain/defaults";
+import { featureForRoute, FREE_ACCOUNT_SECTIONS } from "@/lib/billing/plan-matrix";
+import { demoAmanahData } from "@/lib/domain/demo-data";
+import { fieldLabel, flattenForDisplay, isHiddenField, sectionLabel, sectionRows } from "@/lib/history/display";
+import { HISTORY_SECTIONS } from "@/lib/server/data-history";
+import { useAmanahStore } from "@/lib/store/use-amanah-store";
+
+const VERSION = { id: "v1", changeType: "save", sections: ["emergencyCard"], createdAt: "2026-11-01T10:00:00.000Z" };
+const DETAIL = { ...VERSION, prior: { emergencyCard: { name: "<img src=x onerror=alert(1)>", allergies: "", contact: { phone: "123" } } } };
+
+type Route = { status?: number; body?: unknown };
+
+function mockApi(routes: Record<string, Route>) {
+  const calls: { url: string; method: string; body?: string }[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string, init: RequestInit = {}) => {
+      const method = init.method ?? "GET";
+      calls.push({ url, method, body: init.body as string | undefined });
+      const route = routes[`${method} ${url}`] ?? { status: 500 };
+      return new Response(JSON.stringify(route.body ?? {}), { status: route.status ?? 200 });
+    }),
+  );
+  return calls;
+}
+
+const listOf = (versions: unknown[]) => ({ body: { versions, retentionDays: 90, maxVersions: 50 } });
+
+beforeEach(() => useAmanahStore.setState({ ...structuredClone(defaultAmanahData) }));
+afterEach(() => vi.unstubAllGlobals());
+
+describe("history view", () => {
+  it("says it is switched off, that the data is safe, and offers only the way back", async () => {
+    mockApi({ "GET /api/amanah/history": { status: 404 } });
+    render(<DataHistoryView />);
+    await waitFor(() => expect(screen.getByTestId("history-unavailable").textContent).toContain("nicht eingeschaltet"));
+    expect(screen.getByTestId("history-unavailable").textContent).toContain("bleiben gespeichert");
+    expect(screen.getByTestId("history-back").getAttribute("href")).toBe("/dashboard");
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("asks to sign in without a session", async () => {
+    mockApi({ "GET /api/amanah/history": { status: 401 } });
+    render(<DataHistoryView />);
+    await waitFor(() => expect(screen.getByTestId("history-unavailable").textContent).toContain("melde dich an"));
+  });
+
+  it("lists dates and areas in plain words and states the retention", async () => {
+    mockApi({ "GET /api/amanah/history": listOf([VERSION]) });
+    render(<DataHistoryView />);
+    await waitFor(() => expect(screen.getByTestId("history-list").textContent).toContain("Notfallkarte"));
+    expect(screen.getByTestId("data-history").textContent).toContain("90 Tage");
+    expect(screen.getByTestId("data-history").textContent).toContain("kein Testament");
+  });
+
+  it("shows content as text, never as markup", async () => {
+    mockApi({ "GET /api/amanah/history": listOf([VERSION]), "GET /api/amanah/history/v1": { body: { version: DETAIL } } });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByRole("button", { name: /ansehen$/ }));
+    const view = await screen.findByTestId("history-version");
+    expect(view.textContent).toContain("<img src=x onerror=alert(1)>");
+    expect(view.querySelector("img")).toBeNull();
+    expect(view.textContent).toContain("123");
+  });
+
+  it("restores only after a second step with a ticked confirmation, then updates the local data", async () => {
+    const restored = { ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Früher" } };
+    const calls = mockApi({
+      "GET /api/amanah/history": listOf([VERSION]),
+      "GET /api/amanah/history/v1": { body: { version: DETAIL } },
+      "POST /api/amanah/history/v1/restore": { body: { data: restored, writeScope: "full" } },
+    });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByRole("button", { name: /ansehen$/ }));
+    fireEvent.click(await screen.findByTestId("history-restore"));
+    expect(calls.some((c) => c.method === "POST")).toBe(false);
+
+    const submit = screen.getByTestId("history-confirm-submit") as HTMLButtonElement;
+    expect(submit.disabled).toBe(true);
+    expect(document.activeElement?.id).toBe("history-confirm-heading");
+    fireEvent.click(submit);
+    expect(calls.some((c) => c.method === "POST")).toBe(false);
+
+    fireEvent.click(screen.getByTestId("history-confirm-check"));
+    await act(async () => fireEvent.click(screen.getByTestId("history-confirm-submit")));
+    await waitFor(() => expect(screen.getByTestId("history-notice").textContent).toContain("Wiederhergestellt"));
+    expect(calls.find((c) => c.method === "POST")?.body).toBe(JSON.stringify({ confirmed: true }));
+    expect(useAmanahStore.getState().emergencyCard.name).toBe("Früher");
+  });
+
+  it("cancelling restores nothing", async () => {
+    const calls = mockApi({ "GET /api/amanah/history": listOf([VERSION]), "GET /api/amanah/history/v1": { body: { version: DETAIL } } });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByRole("button", { name: /ansehen$/ }));
+    fireEvent.click(await screen.findByTestId("history-restore"));
+    fireEvent.click(screen.getByTestId("history-confirm-check"));
+    fireEvent.click(screen.getByRole("button", { name: "Abbrechen" }));
+    expect(screen.queryByTestId("history-confirm")).toBeNull();
+    expect(calls.some((c) => c.method === "POST")).toBe(false);
+  });
+
+  it("a free account gets back only free sections; what lives in this browser stays", async () => {
+    useAmanahStore.setState({ familyMessage: { ...defaultAmanahData.familyMessage, familyLetter: "Nur im Browser" } });
+    const restored = { ...defaultAmanahData, emergencyCard: { ...defaultAmanahData.emergencyCard, name: "Früher" } };
+    mockApi({
+      "GET /api/amanah/history": listOf([VERSION]),
+      "GET /api/amanah/history/v1": { body: { version: DETAIL } },
+      "POST /api/amanah/history/v1/restore": { body: { data: restored, writeScope: "free_sections" } },
+    });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByRole("button", { name: /ansehen$/ }));
+    fireEvent.click(await screen.findByTestId("history-restore"));
+    fireEvent.click(screen.getByTestId("history-confirm-check"));
+    await act(async () => fireEvent.click(screen.getByTestId("history-confirm-submit")));
+    await waitFor(() => expect(screen.getByTestId("history-notice").textContent).toContain("nur die kostenlos"));
+    const state = useAmanahStore.getState();
+    expect(state.emergencyCard.name).toBe("Früher");
+    expect(state.familyMessage.familyLetter).toBe("Nur im Browser");
+  });
+
+  it("a failed restore says that nothing changed", async () => {
+    mockApi({
+      "GET /api/amanah/history": listOf([VERSION]),
+      "GET /api/amanah/history/v1": { body: { version: DETAIL } },
+      "POST /api/amanah/history/v1/restore": { status: 500 },
+    });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByRole("button", { name: /ansehen$/ }));
+    fireEvent.click(await screen.findByTestId("history-restore"));
+    fireEvent.click(screen.getByTestId("history-confirm-check"));
+    await act(async () => fireEvent.click(screen.getByTestId("history-confirm-submit")));
+    await waitFor(() => expect(screen.getByTestId("history-error").textContent).toContain("nichts geändert"));
+  });
+
+  it("deleting asks first and names what stays", async () => {
+    const calls = mockApi({ "GET /api/amanah/history": listOf([VERSION]), "DELETE /api/amanah/history": {} });
+    render(<DataHistoryView />);
+    fireEvent.click(await screen.findByTestId("history-delete-all"));
+    expect(calls.some((c) => c.method === "DELETE")).toBe(false);
+    expect(screen.getByTestId("history-delete-confirm").textContent).toContain("aktuellen Angaben bleiben erhalten");
+    await act(async () => fireEvent.click(screen.getByTestId("history-delete-submit")));
+    expect(calls.some((c) => c.method === "DELETE")).toBe(true);
+  });
+});
+
+describe("display helpers", () => {
+  const leafKeys = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(leafKeys);
+    if (!value || typeof value !== "object") return [];
+    return Object.entries(value).flatMap(([key, v]) => [key, ...leafKeys(v)]);
+  };
+
+  it("has a readable label for every field of the data model", () => {
+    const sections = Object.values({ ...defaultAmanahData, ...demoAmanahData });
+    const unknown = [...new Set(sections.flatMap(leafKeys))].filter((key) => !isHiddenField(key) && fieldLabel(key) === "Weitere Angabe" && !/^[a-z0-9-]+$/.test(key));
+    expect(unknown).toEqual([]);
+  });
+
+  it("flatten nested values into words, skipping empty fields and bookkeeping", () => {
+    expect(flattenForDisplay({ id: "x", name: "", allergies: "Pollen", emergencyContact1: { phone: "123" }, documents: [{ type: "bank", location: "Ordner" }], schemaVersion: 3 })).toEqual([
+      { path: "Allergien", text: "Pollen" },
+      { path: "Notfallkontakt 1 / Telefon", text: "123" },
+      { path: "Dokumente / Eintrag 1 / Art", text: "Bankkonto" },
+      { path: "Dokumente / Eintrag 1 / Ablageort", text: "Ordner" },
+    ]);
+  });
+
+  it("never show technical names for unknown fields or sections", () => {
+    expect(sectionLabel("assets")).toBe("Vermögensübersicht");
+    expect(sectionLabel("somethingNew")).toBe("Weitere Angaben");
+    expect(flattenForDisplay({ somethingNew: "x" })).toEqual([{ path: "Weitere Angabe", text: "x" }]);
+  });
+
+  it("show check answers as questions and bookmarks as a list", () => {
+    expect(sectionRows("checkProgress", { schemaVersion: 1, index: 1, phase: "questions", answers: { convert: true } })).toEqual([{ path: "Bist du konvertiert?", text: "Ja" }]);
+    expect(sectionRows("knowledgeBookmarks", ["artikel-a"])).toEqual([{ path: "Lesezeichen 1", text: "artikel-a" }]);
+  });
+});
+
+describe("the history of free sections stays free", () => {
+  it("covers all four free sections and has a free, unlockable route", () => {
+    for (const section of FREE_ACCOUNT_SECTIONS) expect(HISTORY_SECTIONS as readonly string[]).toContain(section);
+    const feature = featureForRoute("/dashboard/verlauf");
+    expect(feature?.tier).toBe("free");
+    expect(feature?.enforcement).toBe("never");
+  });
+});

@@ -3,11 +3,17 @@ export interface AuthUser {
   email: string;
   name: string;
   createdAt: string;
+  /** API mode only. Legacy accounts confirm their address during a grace period. */
+  emailVerification?: {
+    status: "verified" | "unverified" | "legacy_grace" | "legacy_overdue";
+    deadline: string | null;
+  };
 }
 
 export interface AuthSession {
   user: AuthUser;
-  token: string;
+  /** Only the local browser demo keeps a token. API sessions live in an HttpOnly cookie. */
+  token?: string;
   expiresAt: string;
 }
 
@@ -15,6 +21,8 @@ export interface RegisterInput {
   email: string;
   password: string;
   name: string;
+  /** Area to return to after the e-mail confirmation (sanitised on the server, EA-04.4). */
+  returnUrl?: string;
 }
 
 export interface LoginInput {
@@ -26,6 +34,10 @@ export interface AuthResult {
   success: boolean;
   session?: AuthSession;
   error?: string;
+  /** API mode: account created or already existing — the user must confirm the e-mail first. */
+  pendingVerification?: boolean;
+  /** Machine-readable error, e.g. "email_unverified". */
+  code?: string;
 }
 
 export interface AuthProvider {

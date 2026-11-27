@@ -2,12 +2,15 @@ import { isPostgresStorage } from "../config";
 import { memoryRepository } from "./memory-repository";
 import { postgresRepository } from "./postgres-repository";
 import type { ServerRepository } from "./types";
+import { isDeletionLedgerEnabled, readLedgerConfig } from "../deletion-ledger";
+import { withDeletionLedger } from "../deletion-gate";
 
 let cachedRepo: ServerRepository | null = null;
 
 export function getServerRepository(): ServerRepository {
   if (!cachedRepo) {
-    cachedRepo = isPostgresStorage() ? postgresRepository : memoryRepository;
+    const repo = isPostgresStorage() ? postgresRepository : memoryRepository;
+    cachedRepo = isDeletionLedgerEnabled() ? withDeletionLedger(repo, readLedgerConfig()) : repo;
   }
   return cachedRepo;
 }

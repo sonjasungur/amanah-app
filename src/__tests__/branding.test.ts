@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { BRAND } from "@/lib/brand";
 import { CHECK_LABELS } from "@/lib/design-tokens";
@@ -25,6 +26,7 @@ const USER_FACING_FILES = [
   "src/app/page.tsx",
   "src/app/preise/page.tsx",
   "src/app/wissen/page.tsx",
+  "src/components/wissen/wissen-hub-view.tsx",
   "src/app/layout.tsx",
   "src/components/layout/footer.tsx",
   "src/components/layout/logo.tsx",
@@ -36,23 +38,34 @@ const USER_FACING_FILES = [
   "src/components/print/print-views.tsx",
 ];
 
-describe("branding — Mein Wille", () => {
+describe("branding — Wasiyya (owner approval 22.11.2026)", () => {
   it("exports brand constants", () => {
-    expect(BRAND.name).toBe("Mein Wille");
+    expect(BRAND.name).toBe("Wasiyya");
+    expect(BRAND.descriptor).toBe("Islamische Vorsorge und Testament");
+    expect(BRAND.fullName).toBe("Wasiyya – Islamische Vorsorge und Testament");
     expect(BRAND.subtitle).toBe("Islamische Vorsorge für Notfall, Janazah und Akhira");
     expect(BRAND.claim).toBe("Ich entscheide heute, was später wichtig ist.");
-    expect(BRAND.heroTitle).toBe("Damit meine Familie weiß, was mir wichtig ist.");
+    expect(BRAND.heroTitle).toBe("Heute vorsorgen. Morgen deine Familie entlasten.");
     expect(BRAND.heroEyebrow).toBe("ISLAMISCHE VORSORGE");
-    expect(BRAND.heroDescription).toContain("Halte fest, wer für dich handeln darf");
-    expect(BRAND.ctaPrimary).toBe("Kostenlosen Amanah-Check starten");
-    expect(BRAND.metadataTitle).toBe("Mein Wille – Islamische Vorsorge");
-    expect(BRAND.themeColor).toBe("#071A16");
+    expect(BRAND.heroDescription).toContain("Regle deine persönlichen und islamischen Wünsche");
+    expect(BRAND.ctaPrimary).toBe("Kostenlosen Vorsorge-Check starten");
+    expect(BRAND.metadataTitle).toBe("Wasiyya – Islamische Vorsorge und Testament");
+    expect(BRAND.themeColor).toBe("#0B1226");
   });
 
   it("has no legacy visible brand in key UI files", () => {
     for (const file of USER_FACING_FILES) {
       expect(hasOldBrand(read(file)), `${file} still contains legacy brand`).toBe(false);
     }
+  });
+
+  it("no visible text carries the old brand name „Amanah – Mein Wille“ (renamed to Wasiyya 22.11.2026)", () => {
+    const hits = execSync("grep -rlI 'Amanah – Mein Wille' src public --include=*.ts --include=*.tsx --include=*.json || true", { encoding: "utf8" })
+      .split("\n")
+      .filter((f) => f && !f.includes("__tests__") && !f.endsWith("amanah-seal.tsx") && !f.endsWith("logo-candidates.tsx"));
+    expect(hits).toEqual([]);
+    expect(read("src/app/page.tsx")).not.toMatch(/Mein Wille/);
+    expect(read("src/components/layout/wasiyya-logo.tsx")).toContain("BRAND.descriptor");
   });
 
   it("homepage uses hero without duplicate logo block", () => {
@@ -65,48 +78,57 @@ describe("branding — Mein Wille", () => {
     expect(home).toContain("home-outcome-");
   });
 
-  it("uses Vorsorge-Check label in navigation while keeping /check route", () => {
+  it("keeps the Vorsorge-Check reachable (footer, homepage) while the header shows the five main areas", () => {
     expect(read("src/lib/i18n/translations.ts")).toContain('"nav.check": "Vorsorge-Check"');
-    expect(read("src/components/layout/header.tsx")).toContain('href: "/check"');
+    expect(read("src/components/layout/footer.tsx")).toContain('href="/check"');
+    expect(read("src/components/marketing/home-entry-points.tsx")).toContain('href: "/check"');
+    for (const href of ["/wissen", "/dashboard", "/dashboard/testament", "/dashboard/janazah", "/dashboard/einstellungen"]) {
+      expect(read("src/components/layout/header.tsx")).toContain(`href: "${href}"`);
+    }
     expect(read("src/components/layout/header.tsx")).toContain("Registrieren");
     expect(read("src/components/layout/header.tsx")).toContain("Anmelden");
     expect(read("src/app/check/page.tsx")).toContain("CHECK_LABELS.pageTitle");
     expect(CHECK_LABELS.pageTitle).toBe("Dein islamischer Vorsorge-Check");
   });
 
-  it("wordmark in header uses document logo mark", () => {
+  it("header uses the Wasiyya book-and-seal lockup (Y2, 22.11.); printed documents carry the same mark", () => {
     const logo = read("src/components/layout/logo.tsx");
-    expect(logo).toContain("DocumentLogoMark");
-    expect(logo).toContain("Mein ");
-    expect(logo).toContain("Wille");
+    expect(logo).toContain("WasiyyaLockup");
+    expect(logo).toContain("BRAND.fullName");
+    expect(read("src/components/documents/document-view.tsx")).toContain("WasiyyaMark");
     expect(logo).not.toContain("MW");
     expect(logo).not.toContain("Mihrab");
   });
 
-  it("uses strengthened green palette without orange brand color", () => {
+  it("uses the Royal Imperial palette (owner acceptance 25.11.2026) without orange brand color or background patterns", () => {
     const css = read("src/app/globals.css");
-    expect(css).toContain("#087A4E");
-    expect(css).toContain("#10A865");
-    expect(css).toContain("#071A16");
+    expect(css).toContain("--primary: #142048;");
+    expect(css).toContain("--navy: #0B1226;");
+    expect(css).toContain("--accent-light: #D4A537;");
+    expect(css).not.toMatch(/background-image:\s*url\(/);
     expect(css).not.toMatch(/#C58A2A|#c58a2a/i);
   });
 
-  it("homepage teaser shows all four public prices and no paid purchase button", () => {
+  it("homepage shows the free offer, Vorsorge Plus in preparation and what still waits for review, no purchase button", () => {
     const home = read("src/app/page.tsx");
-    expect(home).toContain('name: "Amanah-Check"');
-    expect(home).toContain('name: "Basic"');
-    expect(home).toContain('name: "Komplett"');
-    expect(home).toContain('name: "Familie"');
-    expect(home).toContain('price: "29 €"');
+    // Start offer (owner 23.11.2026): shared lists, Plus without price.
+    expect(home).toContain("START_BASIS");
+    expect(home).toContain("START_PLUS_PLANNED");
+    expect(home).not.toContain("getTestPriceCents");
     expect(home).toContain("In Vorbereitung");
+    // Packages (owner 26.11.2026): no purchase yet, will preparation only after legal review.
+    expect(home).toContain("START_PLUS_STATUS");
+    expect(home).toContain("nach juristischer Prüfung");
+    expect(home).not.toMatch(/name: "(Basic|Komplett|Familie)"/);
     expect(home).not.toContain("Details");
   });
 
   it("wissen hub has categories, entry topics, search and scroll sections", () => {
     expect(WISSEN_CATEGORIES).toHaveLength(4);
     expect(WISSEN_ENTRY_TOPIC_IDS).toHaveLength(3);
-    const wissen = read("src/app/wissen/page.tsx");
-    expect(wissen).toContain("Wissen, das dir Entscheidungen leichter macht");
+    const wissen = read("src/app/wissen/page.tsx") + read("src/components/wissen/wissen-hub-view.tsx");
+    expect(wissen).toContain("Islamisches Wissenszentrum");
+    expect(wissen).toContain("KnowledgeAreasOverview");
     expect(wissen).toContain("Worüber möchtest du mehr wissen?");
     expect(wissen).toContain("Für deinen Einstieg");
     expect(wissen).toContain("WISSEN_SECTION_ID");
@@ -122,11 +144,11 @@ describe("branding — Mein Wille", () => {
     expect(PROVISIONAL_LOGO_VARIANT).toBe("A");
   });
 
-  it("manifest uses Mein Wille and new theme color", () => {
+  it("manifest uses Wasiyya and the navy theme color", () => {
     const manifest = JSON.parse(read("public/manifest.json"));
-    expect(manifest.name).toBe("Mein Wille – Islamische Vorsorge");
-    expect(manifest.short_name).toBe("Mein Wille");
-    expect(manifest.theme_color).toBe("#071A16");
+    expect(manifest.name).toBe("Wasiyya – Islamische Vorsorge und Testament");
+    expect(manifest.short_name).toBe("Wasiyya");
+    expect(manifest.theme_color).toBe("#0B1226");
   });
 
   it("icon assets exist and are non-empty", () => {

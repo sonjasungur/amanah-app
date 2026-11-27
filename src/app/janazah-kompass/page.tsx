@@ -1,52 +1,22 @@
-import Link from "next/link";
-import { janazahArticles } from "@/lib/knowledge/janazah";
-import { SourcesSection } from "@/components/knowledge/sources-section";
-import { Disclaimer } from "@/components/ui/disclaimer";
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { GatedAreaPage } from "@/components/islamic-knowledge/gated-area-page";
+import { publicPageMetadata } from "@/lib/seo/public-pages";
 
-export const metadata = {
-  title: "Janazah-Kompass — Mein Wille",
-  description: "Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung in Deutschland.",
-};
+export const metadata = publicPageMetadata("/janazah-kompass");
 
+/** Religious content is shown only through the knowledge-centre publication gate. */
 export default function JanazahKompassPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12">
-      <div className="mb-10">
-        <p className="text-accent font-medium mb-2">Wissen & Orientierung</p>
-        <h1 className="text-3xl font-bold text-primary mb-3">Janazah-Kompass</h1>
-        <p className="text-muted leading-relaxed">
-          Alles Wichtige zur islamischen Bestattung — von Ghusl und Kafan bis zur Beisetzung in Deutschland
-          oder Überführung. Orientierung für dich und deine Familie.
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        {janazahArticles.map((article) => (
-          <Card key={article.id} className="hover:border-primary/20 transition-colors">
-            <CardTitle>{article.title}</CardTitle>
-            <p className="text-sm text-accent font-medium mb-3">{article.summary}</p>
-            <p className="text-muted leading-relaxed">{article.content}</p>
-            <SourcesSection sourceIds={article.sourceIds} reviewStatus={article.reviewStatus} />
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-10 rounded-2xl bg-gradient-to-br from-primary/5 to-sand border border-primary/10 p-8 text-center">
-        <h2 className="text-xl font-bold text-primary mb-2">Eigene Janazah-Wünsche dokumentieren</h2>
-        <p className="text-sm text-muted mb-5 max-w-md mx-auto">
-          Im Mein Wille kannst du deine Wünsche zu Ghusl, Kafan, Beisetzung und Familienbotschaft festhalten —
-          damit deine Angehörigen im schwersten Moment Klarheit haben.
-        </p>
-        <Link href="/dashboard/janazah">
-          <Button size="lg">Janazah-Modul im Ordner öffnen</Button>
-        </Link>
-      </div>
-
-      <div className="mt-8 space-y-4">
-        <Disclaimer type="islamic" />
-      </div>
-    </div>
+    <GatedAreaPage
+      eyebrow={"Wissen & Orientierung"}
+      title={"Janazah-Kompass"}
+      intro={"Islamisches Wissen zu Janazah, Ghusl, Kafan und Bestattung — veröffentlicht erst nach fachlicher Prüfung."}
+      image="janazahKompass"
+      actions={[
+        { href: "/dashboard/janazah", label: "Janazah-Wünsche", text: "Gebet, Ort und Wünsche für die Beisetzung festhalten." },
+        { href: "/dashboard/ghusl-kafan", label: "Ghusl und Kafan", text: "Wer die Waschung übernehmen soll und was dir wichtig ist." },
+        { href: "/dashboard/bestattung", label: "Bestattung oder Überführung", text: "Beisetzung in Deutschland oder Überführung, Kontakte und Unterlagen." },
+      ]}
+      areaIds={["janazah", "tod-sterben"]}
+    />
   );
 }

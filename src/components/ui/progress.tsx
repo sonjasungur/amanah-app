@@ -26,7 +26,7 @@ export function Progress({
         aria-valuemax={100}
         aria-label={label ? `${label}: ${clamped} Prozent` : `Fortschritt: ${clamped} Prozent`}
       >
-        <div className="h-full bg-emerald rounded-full transition-all duration-500" style={{ width: `${clamped}%` }} />
+        <div className="h-full rounded-full transition-all duration-500 bg-[linear-gradient(90deg,#A97A18,#E2B54C_55%,#F2CF6C)]" style={{ width: `${clamped}%` }} />
       </div>
     </div>
   );

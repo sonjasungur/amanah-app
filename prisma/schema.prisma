@@ -1,21 +1,29 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
+/// Connection URL: prisma.config.ts (CLI) and the pg adapter in src/lib/server/prisma.ts (runtime).
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  name         String
-  passwordHash String     @map("password_hash")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-  sessions     Session[]
-  amanahData   AmanahData?
+  id              String          @id @default(cuid())
+  email           String          @unique
+  name            String
+  passwordHash    String          @map("password_hash")
+  emailVerifiedAt DateTime?       @map("email_verified_at")
+  /// Set for accounts created before e-mail confirmation existed; they must still confirm.
+  emailVerificationLegacyAt DateTime? @map("email_verification_legacy_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  sessions        Session[]
+  amanahData      AmanahData?
+  dataVersions    AmanahDataVersion[]
+  consents        ConsentRecord[]
+  authTokens      AuthToken[]
+  purchases       Purchase[]
 
   @@map("users")
 }
@@ -42,4 +50,112 @@ model AmanahData {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("amanah_data")
+}
+
+/// Earlier values of changed sections, sealed like amanah_data. Written only with AMANAH_DATA_HISTORY=true.
+/// Section names and values stay inside `data`; retention rules: src/lib/server/data-history.ts.
+model AmanahDataVersion {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seq        Int
+  changeType String   @map("change_type")
+  sizeBytes  Int      @map("size_bytes")
+  data       Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, seq])
+  @@index([createdAt])
+  @@map("amanah_data_versions")
+}
+
+/// Last position of the deletion ledger seen by this database. Reveals a lost or cut-off ledger; holds no personal data.
+model DeletionLedgerAnchor {
+  id        Int      @id @default(1)
+  epoch     Int
+  seq       Int
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("deletion_ledger_anchor")
+}
+
+/// Proof of consent per purpose and text version (Art. 7 Abs. 1 DSGVO). Never pre-ticked.
+model ConsentRecord {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose     String
+  textVersion String    @map("text_version")
+  grantedAt   DateTime  @default(now()) @map("granted_at")
+  revokedAt   DateTime? @map("revoked_at")
+
+  @@index([userId, purpose])
+  @@map("consent_records")
+}
+
+/// Single-use, expiring tokens for e-mail verification and password reset (hash only).
+model AuthToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @map("token_hash")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   String
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, purpose])
+  @@map("auth_tokens")
+}
+
+/// One-time purchase (sandbox until a real provider is approved). Kept, anonymised,
+/// when the account is deleted (possible retention duties — legal review pending).
+model Purchase {
+  id          String   @id @default(cuid())
+  userId      String?  @map("user_id")
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  productId   String   @map("product_id")
+  provider    String
+  providerRef String   @unique @map("provider_ref")
+  status      String
+  amountCents Int      @map("amount_cents")
+  currency    String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("purchases")
+}
+
+/// Processed provider events (idempotency of webhooks).
+model PaymentEvent {
+  id          String   @id
+  provider    String
+  type        String
+  providerRef String   @map("provider_ref")
+  receivedAt  DateTime @default(now()) @map("received_at")
+
+  @@map("payment_events")
+}
+
+/// One reference per key id, sealed with that key: proves the configured keys are the right ones, also
+/// without any folder data. Written only by scripts/key-reference.mjs, never by the app, never replaced.
+model DataKeyReference {
+  kid       String    @id
+  data      Json
+  createdAt DateTime  @default(now()) @map("created_at")
+  retiredAt DateTime? @map("retired_at")
+
+  @@map("data_key_references")
+}
+
+/// Fixed-window counters for login, registration and account-recovery limits. Keys are keyed hashes
+/// (never an e-mail address or IP in clear). Shared by every app instance; rows expire after a day.
+model AuthRateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime @map("window_start")
+
+  @@index([windowStart])
+  @@map("auth_rate_limits")
 }

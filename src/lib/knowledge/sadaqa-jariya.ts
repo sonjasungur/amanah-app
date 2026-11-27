@@ -29,9 +29,9 @@ export const sadaqaJariyaArticles: KnowledgeArticle[] = [
     title: "Förderkreis-Gedanke",
     summary: "Regelmäßige Sadaqa Jariya als Vorsorge für den Barzakh.",
     content:
-      "Ein Förderkreis ermöglicht regelmäßige Sadaqa Jariya — zu Lebzeiten und als Plan für nach dem Tod. Gemeinsam1 e.V. bietet strukturierte Projekte. Spenden laufen direkt über den Verein.",
+      "Ein Förderkreis ermöglicht regelmäßige Sadaqa Jariya — zu Lebzeiten und als Plan für nach dem Tod.",
     sourceIds: ["hadith-sadaqa-jariya", "hadith-wasiyyah-third"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "sadaqa-jariya",
   },
 ];

@@ -1,4 +1,6 @@
+import { moduleText } from "@/lib/content/module-texts";
 import type { GuidedQuestion } from "./types";
+import { DIGITAL_LEGACY_APPEND_PATH } from "./config";
 
 export const GUIDED_QUESTION_PLAN: GuidedQuestion[] = [
   {
@@ -179,7 +181,7 @@ export const GUIDED_QUESTION_PLAN: GuidedQuestion[] = [
     moduleId: "janazah",
     fieldPath: "janazahWishes.messageToFamily",
     questionText: "Gibt es einen kurzen Wunsch zur Bestattung, den deine Familie kennen soll?",
-    helpText: "Freitext — z. B. schlichte Janazah, keine aufwendigen Feiern.",
+    helpText: moduleText("janazah-wish-help"),
     sensitivity: "low",
     expectedAnswerType: "freeform",
     canSkip: true,
@@ -189,9 +191,10 @@ export const GUIDED_QUESTION_PLAN: GuidedQuestion[] = [
   {
     id: "gf-digital-accounts",
     moduleId: "digitaler-nachlass",
-    fieldPath: "powerOfAttorney.digitalAccounts",
+    // D-26: the answer becomes an entry in the digital legacy, no longer a power-of-attorney text.
+    fieldPath: DIGITAL_LEGACY_APPEND_PATH,
     questionText: "Gibt es digitale Konten, auf die deine Familie achten sollte?",
-    helpText: "Nur Hinweise — E-Mail, Cloud, Abos. Keine Passwörter speichern.",
+    helpText: "Nur Hinweise — E-Mail, Cloud, Abos. Keine Passwörter, PINs oder Kontonummern.",
     sensitivity: "low",
     expectedAnswerType: "freeform",
     canSkip: true,

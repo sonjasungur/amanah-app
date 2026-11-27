@@ -9,9 +9,12 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".next-e2e-flags/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Prisma 7 generated client
+    "src/generated/**",
   ]),
 ]);
 

@@ -53,7 +53,10 @@ describe("verified source references", () => {
     expect(janazah?.sourceIds).toContain("hadith-bukhari-janazah-1273");
     const primary = getPrimarySourcesByIds(janazah!.sourceIds);
     expect(primary.some((s) => s.reference.includes("1315"))).toBe(true);
-    expect(primary.some((s) => s.reference.includes("1254"))).toBe(true);
+    // Legacy IDs resolve to the corrected references (2026-10-30): Qirat = Bukhari 1325, graves = Tirmidhi 1054.
+    expect(primary.some((s) => s.reference.includes("Hadith 1325"))).toBe(true);
+    expect(primary.some((s) => s.reference.includes("Tirmidhī, Hadith 1054"))).toBe(true);
+    expect(primary.some((s) => s.reference.includes("Hadith 1254"))).toBe(false);
   });
 
   it("quran verses have quranEnc metadata and bubenheim translator", () => {
@@ -73,11 +76,11 @@ describe("verified source references", () => {
     expect(primary).toHaveLength(0);
   });
 
-  it("sadaqa includes muslim 1631 and partner link", () => {
+  it("sadaqa includes muslim 1631 and names no partner organisation (owner 25.11.2026)", () => {
     const sadaqa = wissenTopics.find((t) => t.slug === "sadaqa-jariya");
     expect(sadaqa?.sourceIds).toContain("hadith-sadaqa-jariya");
-    expect(sadaqa?.sourceIds).toContain("partner-gemeinsam1-sadaqa");
-    expect(islamicSources["partner-gemeinsam1-sadaqa"].url).toMatch(/utm_source=meinwille/);
+    expect(sadaqa?.sourceIds.some((id) => id.startsWith("partner-"))).toBe(false);
+    expect(JSON.stringify(islamicSources)).not.toMatch(/gemeinsam1|utm_source=meinwille/i);
   });
 
   it("detects duplicate content via normalized text", () => {

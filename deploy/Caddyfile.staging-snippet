@@ -1,0 +1,40 @@
+# Superseded by scripts/staging-https.sh, which installs a stricter block without the webhook exception.
+# Staging block for the shared Caddy (container gemeinsam1-prod-caddy) — PREPARED, NOT INSTALLED.
+# Changing the shared Caddy is a production change for gemeinsam1 and needs the owner's approval.
+# Prerequisites (docs 29 §4, variant B):
+#   - DNS for staging.<domain> (A/AAAA to the server; a record used only by Amanah)
+#   - staging app on the network amanah_staging_proxy (docker-compose.staging.proxy.yml) and
+#     Caddy connected to it. Caddy runs in a container: 127.0.0.1:3201 is NOT reachable from there.
+#   - Password hash: docker exec -it gemeinsam1-prod-caddy caddy hash-password  (only the hash goes here)
+# The Caddyfile is bind-mounted as a single file: write it in place (cat new > Caddyfile), never via
+# an editor or sed -i that replaces the file, or the container keeps the old content. Then
+# caddy validate + caddy reload (a failed reload keeps the running config).
+
+staging.REPLACE_WITH_DOMAIN {
+	# Defence in depth: internal editorial and review pages are never served on staging (the app
+	# also answers 404 because AMANAH_INTERNAL_TOOLS is off there).
+	@internal path /intern /intern/* /wissen/redaktion /wissen/redaktion/* /brand-review /brand-review/*
+	respond @internal 404
+	# Stripe cannot send Basic Auth credentials: only the webhook path is reachable without them.
+	# The app accepts only POST there and only with a valid Stripe-Signature (docs 25).
+	@protected not path /api/billing/webhook
+	basic_auth @protected {
+		REPLACE_WITH_USER REPLACE_WITH_BCRYPT_HASH
+	}
+	encode gzip
+	reverse_proxy amanah-staging-app:3000
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+	# Inside the caddy_data volume (persistent; /var/log/caddy is not mounted in this container).
+	# Authorization headers are redacted by Caddy unless log_credentials is set (it is not).
+	log {
+		output file /data/amanah-staging/access.log {
+			roll_size 5MiB
+			roll_keep 3
+		}
+		format json
+	}
+}

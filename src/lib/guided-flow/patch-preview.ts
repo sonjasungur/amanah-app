@@ -1,6 +1,7 @@
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { getNestedValue } from "@/lib/domain/validation";
 import { labelForField } from "@/lib/ai/context";
+import { DIGITAL_LEGACY_APPEND_PATH } from "./config";
 import type { PatchPreviewItem, SuggestedUpdate, UpdateConfidence } from "./types";
 
 function confidenceToStatus(
@@ -23,7 +24,8 @@ export function buildPatchPreview(
     fieldPath: u.fieldPath,
     label: u.label || labelForField(u.fieldPath),
     moduleId: u.moduleId,
-    oldValue: getNestedValue(data, u.fieldPath) ?? "",
+    // A new digital-legacy entry replaces nothing, so there is no old value to show.
+    oldValue: u.fieldPath === DIGITAL_LEGACY_APPEND_PATH ? "" : (getNestedValue(data, u.fieldPath) ?? ""),
     newValue: u.value,
     confidence: u.confidence,
     status: confidenceToStatus(u.confidence, hasClarification && u.confidence !== "high"),
@@ -33,5 +35,6 @@ export function buildPatchPreview(
 export function formatPreviewValue(value: unknown): string {
   if (value === null || value === undefined) return "—";
   if (typeof value === "boolean") return value ? "Ja" : "Nein";
+  if (Array.isArray(value)) return value.length ? `${value.length} Einträge` : "—";
   return String(value);
 }

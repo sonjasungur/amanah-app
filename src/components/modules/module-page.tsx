@@ -5,6 +5,9 @@ import type { AmanahOrdnerData } from "@/lib/types";
 import { ModuleForm, type FieldConfig } from "@/components/modules/module-form";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { HelpTip } from "@/components/ui/help-tip";
+import type { HelpTopicId } from "@/lib/content/help-topics";
+import { SaveBar } from "@/components/storage/save-bar";
 
 interface ModulePageProps {
   title: string;
@@ -13,6 +16,10 @@ interface ModulePageProps {
   fields: FieldConfig[];
   disclaimerType?: "main" | "islamic" | "legal";
   children?: React.ReactNode;
+  /** Shown above the form, e.g. choosing people from "Familie & Kontakte". */
+  intro?: React.ReactNode;
+  /** A "?" next to the title. */
+  help?: HelpTopicId;
 }
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
@@ -31,7 +38,7 @@ function setNestedValue(obj: Record<string, unknown>, path: string, value: unkno
   };
 }
 
-export function ModulePage({ title, description, section, fields, disclaimerType = "main", children }: ModulePageProps) {
+export function ModulePage({ title, description, section, fields, disclaimerType = "main", children, intro, help }: ModulePageProps) {
   const store = useAmanahStore();
   const values = store[section] as unknown as Record<string, unknown>;
 
@@ -47,13 +54,16 @@ export function ModulePage({ title, description, section, fields, disclaimerType
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary mb-2">{title}</h1>
+      <h1 className="text-2xl font-bold text-primary mb-2 flex flex-wrap items-center">{title}{help && <HelpTip topic={help} />}</h1>
       <p className="text-muted mb-6">{description}</p>
       <Disclaimer type={disclaimerType} className="mb-6" />
+      {intro}
       <Card>
         <CardTitle>Deine Angaben</CardTitle>
+        <p className="text-sm text-muted mb-4">Alle Felder sind freiwillig und werden automatisch gespeichert.</p>
         <ModuleForm section={section} fields={fields} values={flatValues} onChange={handleChange} />
       </Card>
+      <SaveBar />
       {children}
     </div>
   );

@@ -13,9 +13,16 @@ test.describe("Janazah wishes persistence", () => {
     await page.goto("/dashboard/janazah");
     await expect(page.getByTestId("janazah-guided-flow")).toBeVisible();
 
-    await page.getByTestId("janazah-fullName").locator("input").fill(JANAZAH_SAMPLE.fullName);
-    await page.getByTestId("janazah-locationRegion").locator("input").fill(JANAZAH_SAMPLE.locationRegion);
-    await page.getByTestId("janazah-trustedContact").locator("input").fill(JANAZAH_SAMPLE.trustedContact);
+    // Input made before hydration never reaches the store: repeat it until it is really stored.
+    await expect(async () => {
+      await page.getByTestId("janazah-fullName").locator("input").fill(JANAZAH_SAMPLE.fullName);
+      await page.getByTestId("janazah-locationRegion").locator("input").fill(JANAZAH_SAMPLE.locationRegion);
+      await page.getByTestId("janazah-trustedContact").locator("input").fill(JANAZAH_SAMPLE.trustedContact);
+      const stored = await page.evaluate(() => JSON.stringify(Object.values({ ...localStorage })));
+      expect(stored).toContain(JANAZAH_SAMPLE.fullName);
+      expect(stored).toContain(JANAZAH_SAMPLE.locationRegion);
+      expect(stored).toContain(JANAZAH_SAMPLE.trustedContact);
+    }).toPass();
 
     await page.getByTestId("janazah-next-button").click();
     await expect(page.getByTestId("janazah-step-progress")).toBeVisible({ timeout: 5000 });
@@ -39,17 +46,21 @@ test.describe("Vorsorgeplan dashboard", () => {
     await page.goto("/dashboard");
     const greeting = page.getByTestId("dashboard-greeting");
     await expect(greeting).toBeVisible();
-    await expect(greeting).toHaveText("Willkommen bei Mein Wille");
+    await expect(greeting).toHaveText("Willkommen bei Wasiyya");
     await expect(greeting).not.toContainText("dort");
     await expect(page.getByTestId("dashboard-next-step")).toBeVisible();
     await expect(page.getByTestId("dashboard-next-step-cta")).toBeVisible();
   });
 
-  test("all care areas are reachable after expanding", async ({ page }) => {
+  test("the six areas are listed directly and further topics stay reachable", async ({ page }) => {
     await page.goto("/dashboard");
+    await expect(page.getByTestId("area-list").getByRole("link")).toHaveCount(6);
     await expect(page.getByTestId("dashboard-module-tiles")).toBeVisible();
-    await page.getByTestId("dashboard-all-areas-toggle").click();
-    await expect(page.getByTestId("dashboard-tile-janazah")).toBeVisible();
+    // A click before hydration does nothing: repeat it until the topics open.
+    await expect(async () => {
+      await page.getByTestId("dashboard-all-areas-toggle").click();
+      await expect(page.getByTestId("dashboard-tile-testament")).toBeVisible({ timeout: 1_000 });
+    }).toPass();
   });
 });
 
@@ -70,12 +81,12 @@ test.describe("Mobile UX and CTAs", () => {
 
   test("check CTA is the homepage primary action", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: /Kostenlosen Amanah-Check starten/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Kostenlosen Vorsorge-Check starten/i }).first()).toBeVisible();
   });
 
   test("pricing page shows check and login CTAs", async ({ page }) => {
     await page.goto("/preise");
-    await expect(page.getByRole("link", { name: /Amanah-Check starten/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Vorsorge-Check starten/i }).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Anmelden/i }).first()).toBeVisible();
   });
 

@@ -1,6 +1,8 @@
+import { MIN_PASSWORD_LENGTH, PASSWORD_REQUIREMENT_ERROR } from "@/lib/auth/config";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { normalizeData } from "@/lib/domain/migration";
 import { hashPasswordSync } from "@/lib/auth/hash";
+import { generateSessionToken } from "./crypto";
 
 export interface StoredUser {
   id: string;
@@ -8,6 +10,24 @@ export interface StoredUser {
   name: string;
   passwordHash: string;
   createdAt: string;
+  emailVerifiedAt?: string | null;
+  emailVerificationLegacyAt?: string | null;
+}
+
+export interface StoredConsent {
+  id: string;
+  userId: string;
+  purpose: string;
+  textVersion: string;
+  grantedAt: string;
+  revokedAt: string | null;
+}
+
+export interface StoredAuthToken {
+  userId: string;
+  purpose: string;
+  expiresAt: string;
+  usedAt: string | null;
 }
 
 export interface StoredSession {
@@ -21,6 +41,22 @@ interface MemoryStoreState {
   usersByEmail: Map<string, string>;
   sessions: Map<string, StoredSession>;
   amanahData: Map<string, AmanahOrdnerData>;
+  consents: StoredConsent[];
+  /** keyed by token hash */
+  authTokens: Map<string, StoredAuthToken>;
+  purchases: import("./repository/types").RepositoryPurchase[];
+  paymentEvents: Set<string>;
+  dataVersions: StoredDataVersion[];
+}
+
+export interface StoredDataVersion {
+  id: string;
+  userId: string;
+  seq: number;
+  changeType: string;
+  sizeBytes: number;
+  data: unknown;
+  createdAt: Date;
 }
 
 declare global {
@@ -33,6 +69,11 @@ function createStore(): MemoryStoreState {
     usersByEmail: new Map(),
     sessions: new Map(),
     amanahData: new Map(),
+    consents: [],
+    authTokens: new Map(),
+    purchases: [],
+    paymentEvents: new Set(),
+    dataVersions: [],
   };
 }
 
@@ -44,14 +85,14 @@ export function getMemoryStore(): MemoryStoreState {
 }
 
 export function createSessionToken(): string {
-  return `srv-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
+  return `srv-${generateSessionToken()}`;
 }
 
 export async function registerUser(email: string, password: string, name: string): Promise<StoredUser | { error: string }> {
   const store = getMemoryStore();
   const normalizedEmail = email.trim().toLowerCase();
-  if (!normalizedEmail || password.length < 6) {
-    return { error: "E-Mail und Passwort (min. 6 Zeichen) erforderlich." };
+  if (!normalizedEmail || password.length < MIN_PASSWORD_LENGTH) {
+    return { error: PASSWORD_REQUIREMENT_ERROR };
   }
   if (store.usersByEmail.has(normalizedEmail)) {
     return { error: "Diese E-Mail ist bereits registriert." };

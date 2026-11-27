@@ -7,8 +7,8 @@ const root = join(import.meta.dirname, "..");
 const modeArg = process.argv.find((arg) => arg.startsWith("--mode="));
 const mode = modeArg ? modeArg.split("=")[1] : "private-review";
 
-if (!["private-review", "public-pilot"].includes(mode)) {
-  console.error("✗ Invalid mode. Use --mode=private-review or --mode=public-pilot");
+if (!["private-review", "public-pilot", "public-release"].includes(mode)) {
+  console.error("✗ Invalid mode. Use --mode=private-review, --mode=public-pilot or --mode=public-release");
   process.exit(1);
 }
 
@@ -68,8 +68,15 @@ if (blockers.length === 0) ok("Required env variable names are present in .env.p
 requireEnv("NEXT_PUBLIC_AUTH_MODE", "api");
 requireEnv("NEXT_PUBLIC_STORAGE_MODE", "api");
 requireEnv("AMANAH_SERVER_STORAGE", "postgres");
-requireEnv("AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
-requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+if (mode === "public-release" && process.env.AMANAH_PUBLIC_REGISTRATION_ENABLED === "true") {
+  // Registration needs confirmed e-mail addresses: without real mail nobody could get in.
+  if (["brevo", "postmark"].includes(process.env.AMANAH_MAIL_TRANSPORT ?? "")) ok("Registration has a real mail transport");
+  else fail("Registration needs a configured mail provider");
+  requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "true");
+} else {
+  requireEnv("AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+  requireEnv("NEXT_PUBLIC_AMANAH_PUBLIC_REGISTRATION_ENABLED", "false");
+}
 requireEnv("AMANAH_AI_ENABLED", "false");
 requireEnv("NEXT_PUBLIC_AMANAH_AI_ENABLED", "false");
 
@@ -96,7 +103,17 @@ if (mode === "private-review") {
   }
 }
 
-if (mode === "public-pilot") {
+if (mode === "public-release") {
+  // Binding for any public release: nothing here can be waived by a passing test.
+  const { freigaben } = JSON.parse(read("docs/release/freigaben.json"));
+  for (const item of freigaben) {
+    const complete = item.status === "freigegeben" && item.pruefer?.trim() && item.datum?.trim() && item.dokument?.trim();
+    if (complete) ok(`Freigabe ${item.id} dokumentiert`);
+    else fail(`Freigabe fehlt: ${item.id}`);
+  }
+}
+
+if (mode === "public-pilot" || mode === "public-release") {
   requireEnv("NEXT_PUBLIC_SITE_URL");
   if (process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.startsWith("https://")) {
     fail("NEXT_PUBLIC_SITE_URL must be HTTPS for public pilot");
@@ -117,10 +134,14 @@ if (mode === "public-pilot") {
   }
 
   const knowledgeEntries = read("src/lib/knowledge/entries.ts");
-  if (!knowledgeEntries.includes('return getAllEntries().filter((e) => e.reviewedStatus === "reviewed");')) {
-    fail("Public knowledge filter is not strict reviewed-only");
+  const knowledgeSafety = read("src/lib/knowledge/safety.ts");
+  if (
+    !knowledgeEntries.includes("return getAllEntries().filter(isProductionSafe);") ||
+    !knowledgeSafety.includes('return hasReviewEvidence(entry) || entry.reviewedStatus === "orientation";')
+  ) {
+    fail("Public knowledge filter does not require a documented review");
   } else {
-    ok("Public knowledge filter is reviewed-only");
+    ok("Public knowledge filter requires a documented review");
   }
 
   const wissenPage = read("src/app/wissen/page.tsx");

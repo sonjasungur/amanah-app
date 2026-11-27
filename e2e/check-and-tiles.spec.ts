@@ -12,16 +12,17 @@ const WISSEN_SLUGS = [
 ];
 
 test.describe("Homepage guided path", () => {
-  test("primary CTA starts the Amanah-Check", async ({ page }) => {
+  test("primary CTA starts the Vorsorge-Check", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /Kostenlosen Amanah-Check starten/i }).first().click();
+    await page.getByRole("link", { name: /Kostenlosen Vorsorge-Check starten/i }).first().click();
     await expect(page).toHaveURL(/\/check$/);
   });
 
   test("homepage has no anonymous dashboard module jumps", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByTestId("home-area-janazah")).toHaveCount(0);
-    await expect(page.getByTestId("document-logo-mark")).toBeVisible();
+    // Brand since 22.11.2026: Wasiyya, book with seal (Y2) in the header.
+    await expect(page.locator('header [data-testid="wasiyya-mark"]:visible')).toHaveCount(1);
   });
 });
 
@@ -81,4 +82,31 @@ test.describe("Mobile layout smoke", () => {
     await expect(page.getByTestId("site-mobile-nav-toggle")).toBeVisible();
     await expect(page.getByRole("button", { name: /Navigation öffnen/i })).toHaveCount(0);
   });
+});
+
+test.describe("Homepage main buttons on small phones", () => {
+  for (const width of [320, 350, 360, 375, 400, 412]) {
+    test(`both Vorsorge-Check buttons stay on one line at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 740 });
+      await page.goto("/");
+      const lines = await page.evaluate(() =>
+        [...document.querySelectorAll<HTMLElement>('[data-testid="home-hero-cta"], [data-testid="home-final-cta"] a.wasiyya-cta')].map((a) => {
+          const range = document.createRange();
+          const tops = new Set<number>();
+          const walker = document.createTreeWalker(a, NodeFilter.SHOW_TEXT);
+          for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            if (!n.textContent?.trim()) continue;
+            range.selectNodeContents(n);
+            for (const r of range.getClientRects()) if (r.width > 0) tops.add(Math.round(r.top / 4));
+          }
+          return { lines: tops.size, right: a.getBoundingClientRect().right };
+        }),
+      );
+      expect(lines).toHaveLength(2);
+      for (const l of lines) {
+        expect(l.lines).toBe(1);
+        expect(l.right).toBeLessThanOrEqual(width);
+      }
+    });
+  }
 });

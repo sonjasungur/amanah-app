@@ -102,14 +102,15 @@ export function FreeVsPaidSummary() {
         <FeatureList
           items={[
             CHECK_LABELS.nav,
-            "Wissensbereich",
+            "Notfallkarte und einfache Vermögensübersicht",
+            "Familiengespräch festhalten",
             "Erste persönliche Orientierung",
             "Empfehlung für den nächsten Schritt",
           ]}
         />
       </div>
       <div className="rounded-2xl border border-border bg-card p-6 md:p-7 shadow-sm">
-        <h3 className="font-bold text-foreground text-card-title mb-4">Mit kostenpflichtigem Paket</h3>
+        <h3 className="font-bold text-foreground text-card-title mb-4">Wasiyya Vorsorge (in Vorbereitung)</h3>
         <FeatureList
           items={[
             "Strukturierte Eingabe und dauerhafte Dokumentation",
@@ -121,7 +122,7 @@ export function FreeVsPaidSummary() {
         <p className="text-sm text-muted mt-5">
           Kauf derzeit in Vorbereitung — siehe{" "}
           <Link href="/preise" className="text-primary font-semibold hover:underline">
-            Preise
+            Pakete
           </Link>
           .
         </p>

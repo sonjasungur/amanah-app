@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { browserRequest, registerVerified } from "./session-helpers";
 import { GET as healthGET } from "@/app/api/health/route";
 import { DELETE as amanahDELETE, GET as amanahGET, PUT as amanahPUT } from "@/app/api/amanah/route";
-import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { demoAmanahData } from "@/lib/domain/demo-data";
 import { defaultAmanahData } from "@/lib/domain/defaults";
 import { resetServerRepository } from "@/lib/server/repository";
@@ -43,38 +43,25 @@ describe("DELETE /api/amanah", () => {
 
   it("deletes amanah data but keeps user session valid", async () => {
     const email = `del-${Date.now()}@test.de`;
-    const regRes = await registerPOST(
-      new Request("http://localhost/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: "testpass1", name: "Delete Test" }),
-      })
-    );
-    const { session } = await regRes.json();
-    const token = session.token as string;
+    const cookie = await registerVerified("http://localhost", email);
 
     await amanahPUT(
-      new Request("http://localhost/api/amanah", {
+      browserRequest("http://localhost/api/amanah", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(demoAmanahData),
-      })
+      }, cookie)
     );
 
     const delRes = await amanahDELETE(
-      new Request("http://localhost/api/amanah", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", { method: "DELETE" }, cookie)
     );
     expect(delRes.status).toBe(200);
     const delBody = await delRes.json();
     expect(delBody.success).toBe(true);
 
     const getRes = await amanahGET(
-      new Request("http://localhost/api/amanah", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      browserRequest("http://localhost/api/amanah", {}, cookie)
     );
     expect(getRes.status).toBe(200);
     const getBody = await getRes.json();
@@ -103,7 +90,7 @@ describe("Readable emergency export", () => {
 
   it("builds HTML without token-like content from demo data", () => {
     const html = buildReadableEmergencyHtml(demoAmanahData);
-    expect(html).toContain("Amanah Notfallmappe");
+    expect(html).toContain("Wasiyya Notfallmappe");
     expect(html).toContain("Orientierung und Vorbereitung");
     expect(html).not.toMatch(/passwordHash/i);
     expect(html).not.toMatch(/sk-[a-zA-Z0-9]{10,}/);
@@ -111,7 +98,7 @@ describe("Readable emergency export", () => {
 
   it("builds markdown with disclaimer", () => {
     const md = buildReadableEmergencyMarkdown(demoAmanahData);
-    expect(md).toContain("# Amanah Notfallmappe");
+    expect(md).toContain("# Wasiyya Notfallmappe");
     expect(md).toContain("Fachliche Prüfung");
     expect(md).not.toContain("passwordHash");
   });

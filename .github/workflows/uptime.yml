@@ -1,0 +1,44 @@
+# Independent availability check from outside the server (owner order 25.11.2026).
+# Works the same whether the repository is public or private: hourly, about 750 runner minutes a month,
+# leaving well over a third of the free quota of a private repository (2,000 minutes) for CI.
+# Needs nothing from the repository being public. Scheduled runs only happen on the default branch (main),
+# so this becomes active with the merge. A failed run is reported by GitHub by e-mail to whoever last
+# changed the schedule.
+#
+# Before the public start: the protected staging host must answer 401 – proves that the server and its
+# proxy are up (the app itself is watched on the server by prod-check, see docs/qa/…/UEBERWACHUNG.md).
+# After the public start: set the repository variable WASIYYA_PUBLIC_CHECK=true to also require
+# https://wasiyya.de/api/health = 200.
+name: Uptime
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Server and proxy reachable (protected staging answers 401)
+        run: |
+          for attempt in 1 2 3; do
+            code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' https://amanah-test.mscisystems.com/api/health || true)
+            echo "attempt $attempt: $code"
+            [ "$code" = 401 ] && exit 0
+            sleep 30
+          done
+          exit 1
+      - name: Public site healthy (only after the public start)
+        if: vars.WASIYYA_PUBLIC_CHECK == 'true'
+        run: |
+          for attempt in 1 2 3; do
+            code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' https://wasiyya.de/api/health || true)
+            echo "attempt $attempt: $code"
+            [ "$code" = 200 ] && exit 0
+            sleep 30
+          done
+          exit 1

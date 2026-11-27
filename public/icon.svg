@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="Mein Wille">
-  <rect width="512" height="512" rx="96" fill="#0B1511"/>
-  <!-- Document body with folded corner -->
-  <path fill="#F8FAFC" d="M120 104h176l96 96v232H120V104z"/>
-  <path fill="#CBD5E1" d="M296 104h96v96L296 104z"/>
-  <!-- Information lines -->
-  <rect x="156" y="248" width="176" height="28" rx="14" fill="#14532D"/>
-  <rect x="156" y="300" width="120" height="28" rx="14" fill="#14532D" opacity="0.6"/>
-  <!-- Confirmation mark -->
-  <circle cx="256" cy="380" r="24" fill="#15803D"/>
-  <path stroke="#F8FAFC" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M244 380l8 8 20-22"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Wasiyya</title><rect width="512" height="512" rx="96" fill="#1F2C4A"/><g transform="translate(17.9 -1.1) scale(2.3810)"><rect x="50" y="24" width="100" height="148" rx="12" fill="#FAF7F0"/><path d="M62 24 V172" stroke="#1F2C4A" stroke-width="4" opacity="0.5"/><path d="M120 150 V192 L128 184 L136 192 V150 Z" fill="#C9A04A"/><circle cx="104" cy="92" r="27" fill="#C9A04A"/><polygon points="104.0,76.0 107.3,84.1 115.3,80.7 111.9,88.7 120.0,92.0 111.9,95.3 115.3,103.3 107.3,99.9 104.0,108.0 100.7,99.9 92.7,103.3 96.1,95.3 88.0,92.0 96.1,88.7 92.7,80.7 100.7,84.1" fill="#FAF7F0"/></g></svg>

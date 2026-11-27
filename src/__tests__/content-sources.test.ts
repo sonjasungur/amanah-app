@@ -26,7 +26,7 @@ describe("content sources, tiles, and article structure", () => {
     expect(card).toContain("Was du mit deiner Familie klären solltest");
     expect(card).toContain("Deutschland: Dokumente und rechtliche Hinweise");
     expect(card).toContain("Was passiert, wenn es ungeklärt bleibt?");
-    expect(card).toContain("Jetzt in Mein Wille festhalten");
+    expect(card).toContain("Jetzt in Wasiyya festhalten");
     expect(card).not.toContain("Mein nächster Schritt");
   });
 
@@ -46,13 +46,15 @@ describe("content sources, tiles, and article structure", () => {
   it("primary source cards use aria-expanded disclosure", () => {
     const psc = read("src/components/ui/primary-source-card.tsx");
     expect(psc).toContain("aria-expanded");
-    expect(read("src/lib/knowledge/quran-verses.ts")).toContain("Bubenheim");
+    expect(read("src/lib/knowledge/data/quran-verbatim.json")).toContain("Bubenheim");
   });
 
-  it("akhira section tiles and source disclosure are functional", () => {
+  it("akhira section has working tiles and shows no unreviewed hadith", () => {
     const akhira = read("src/components/marketing/akhira-section.tsx");
-    expect(akhira).toContain("aria-expanded");
-    expect(akhira).toContain("/wissen/sadaqa-jariya");
+    expect(akhira).not.toMatch(/Hadith|islamicSources|PrimarySourceCard/);
+    expect(akhira).toContain('href: "/sadaqa-jariya"');
+    // Topic slugs under /wissen/ are unpublished until reviewed — no dead links.
+    expect(akhira).not.toMatch(/href: "\/wissen\/[a-z]/);
   });
 
   it("audit document exists", () => {

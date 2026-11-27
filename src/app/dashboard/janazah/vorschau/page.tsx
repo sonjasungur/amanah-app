@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAmanahStore } from "@/lib/store/use-amanah-store";
-import { getJanazahSections } from "@/lib/modules/janazah-sections";
+import { getJanazahSections, visibleJanazahFields } from "@/lib/modules/janazah-sections";
 import { useI18n } from "@/lib/i18n/context";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Download, MessageSquare, ArrowLeft, Pencil } from "lucide-react";
+import { AlertTriangle, FileText, MessageSquare, ArrowLeft, Pencil, ListChecks } from "lucide-react";
+import { SaveBar } from "@/components/storage/save-bar";
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   if (!path.includes(".")) return obj[path];
@@ -29,7 +30,6 @@ const CRITICAL_FIELDS = new Set([
   "islamicBurialDesired",
   "preferredMosque",
   "preferredCemetery",
-  "mosqueCommunity",
 ]);
 
 export default function JanazahVorschauPage() {
@@ -37,19 +37,17 @@ export default function JanazahVorschauPage() {
   const router = useRouter();
   const { locale, t } = useI18n();
   const values = store.janazahWishes as unknown as Record<string, unknown>;
-  const profileBirthDate = store.userProfile.birthDate?.trim();
+  const knownBirthDate = store.userProfile.birthDate?.trim() || store.emergencyCard?.birthDate?.trim();
 
   const sections = getJanazahSections(locale);
 
   const visibleSections = sections.map((section) => ({
     ...section,
-    fields: section.fields.filter(
-      (field) => !field.showWhenProfileBirthDateEmpty || !profileBirthDate
-    ),
+    fields: visibleJanazahFields(section.fields, { values, knownBirthDate }),
   }));
 
   const handleDownload = () => {
-    router.push("/dashboard/pdf");
+    router.push("/dashboard/pdf?dokument=janazah");
   };
 
   return (
@@ -132,29 +130,42 @@ export default function JanazahVorschauPage() {
         })}
       </div>
 
-      <div className="mt-8 flex flex-col sm:flex-row gap-3">
-        <Button
-          type="button"
-          size="lg"
-          onClick={handleDownload}
-          data-testid="janazah-preview-download"
-        >
-          <Download size={16} className="mr-1.5" aria-hidden />
-          {t("janazah.preview.openPdf")}
-        </Button>
-        <Link href="/dashboard/familiengespraech">
-          <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto">
-            <MessageSquare size={16} className="mr-1.5" aria-hidden />
-            {t("janazah.preview.discussWithFamily")}
+      {/* P2.5: save first (with date and time), then the document; preview, PDF and print happen on the documents page. */}
+      <SaveBar className="mt-8" overviewHref="/dashboard" />
+
+      <section className="mt-6 rounded-2xl border border-border p-4 md:p-5" aria-labelledby="janazah-document-title" data-testid="janazah-preview-document">
+        <h2 id="janazah-document-title" className="text-base font-semibold text-foreground flex items-center gap-2">
+          <FileText size={18} className="text-primary" aria-hidden /> Dokument „Janazah-Wünsche“
+        </h2>
+        <p className="text-sm text-muted mt-1">{t("janazah.preview.documentHint")}</p>
+        <div className="mt-3 flex flex-col sm:flex-row gap-3">
+          <Button type="button" size="lg" variant="secondary" onClick={handleDownload} data-testid="janazah-preview-download">
+            <FileText size={16} className="mr-1.5" aria-hidden />
+            {t("janazah.preview.openPdf")}
           </Button>
-        </Link>
+          <Link href="/dashboard/familiengespraech">
+            <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto">
+              <MessageSquare size={16} className="mr-1.5" aria-hidden />
+              {t("janazah.preview.discussWithFamily")}
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <nav className="mt-6 flex flex-col sm:flex-row gap-3" aria-label="Weiter">
         <Link href="/dashboard" data-testid="janazah-preview-back">
           <Button type="button" variant="ghost" size="lg" className="w-full sm:w-auto">
             <ArrowLeft size={16} className="mr-1.5" aria-hidden />
-            {t("nav.backToPlan")}
+            {t("janazah.preview.backToFolder")}
           </Button>
         </Link>
-      </div>
+        <Link href="/dashboard/vorsorge/abschluss" data-testid="janazah-preview-summary">
+          <Button type="button" variant="ghost" size="lg" className="w-full sm:w-auto">
+            <ListChecks size={16} className="mr-1.5" aria-hidden />
+            {t("janazah.preview.toSummary")}
+          </Button>
+        </Link>
+      </nav>
     </div>
   );
 }

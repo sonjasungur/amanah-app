@@ -16,12 +16,12 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       title: t(loc, "janazah.section.grunddaten.title"),
       description: t(loc, "janazah.section.grunddaten.desc"),
       fields: [
-        { key: "fullName", label: t(loc, "janazah.field.fullName"), type: "text", testId: "janazah-fullName" },
+        // AP22 EA-10.1: the name for the grave marker. Storage key stays "fullName" (no data migration).
+        { key: "fullName", label: t(loc, "janazah.field.fullName"), helpText: t(loc, "janazah.field.fullName.help"), type: "text", testId: "janazah-fullName" },
         {
           key: "birthDate",
           label: t(loc, "janazah.field.birthDate"),
-          type: "text",
-          placeholder: t(loc, "janazah.field.birthDatePlaceholder"),
+          type: "date",
           showWhenProfileBirthDateEmpty: true,
           testId: "janazah-birthDate",
         },
@@ -35,8 +35,9 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       description: t(loc, "janazah.section.benachrichtigung.desc"),
       fields: [
         { key: "peopleToNotify", label: t(loc, "janazah.field.peopleToNotify"), type: "textarea", testId: "janazah-peopleToNotify" },
-        { key: "mosqueCommunity", label: t(loc, "janazah.field.mosqueCommunity"), type: "text", testId: "janazah-mosqueCommunity" },
-        { key: "preferredFuneralDirector", label: t(loc, "janazah.field.preferredFuneralDirector"), type: "text", testId: "janazah-preferredFuneralDirector" },
+        // AP22 EA-12.2: merged into "preferredMosque". Shown only while an earlier entry differs from it, so no value is lost.
+        { key: "mosqueCommunity", label: t(loc, "janazah.field.mosqueCommunity.legacy"), helpText: t(loc, "janazah.field.mosqueCommunity.legacyHelp"), type: "text", testId: "janazah-mosqueCommunity", showWhenLegacyDiffers: "preferredMosque" },
+        { key: "preferredFuneralDirector", help: "moschee-bestatter", label: t(loc, "janazah.field.preferredFuneralDirector"), type: "text", testId: "janazah-preferredFuneralDirector" },
         { key: "additionalContacts", label: t(loc, "janazah.field.additionalContacts"), type: "textarea", testId: "janazah-additionalContacts" },
       ],
     },
@@ -47,12 +48,12 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       fields: [
         { key: "islamicBurialDesired", label: t(loc, "janazah.field.islamicBurialDesired"), type: "boolean", testId: "janazah-islamicBurialDesired" },
         { key: "noUnnecessaryDelay", label: t(loc, "janazah.field.noUnnecessaryDelay"), type: "boolean", testId: "janazah-noUnnecessaryDelay" },
-        { key: "ghusl", label: t(loc, "janazah.field.ghusl"), type: "textarea", testId: "janazah-ghusl" },
-        { key: "preferredGhuslPersons", label: t(loc, "janazah.field.preferredGhuslPersons"), type: "text", testId: "janazah-preferredGhuslPersons" },
-        { key: "genderSpecificWishes", label: t(loc, "janazah.field.genderSpecificWishes"), type: "textarea", testId: "janazah-genderSpecificWishes" },
-        { key: "kafan", label: t(loc, "janazah.field.kafan"), type: "textarea", testId: "janazah-kafan" },
-        { key: "janazahPrayer", label: t(loc, "janazah.field.janazahPrayer"), type: "textarea", testId: "janazah-janazahPrayer" },
-        { key: "preferredMosque", label: t(loc, "janazah.field.preferredMosque"), type: "text", testId: "janazah-preferredMosque" },
+        { key: "ghusl", help: "ghusl", label: t(loc, "janazah.field.ghusl"), type: "textarea", testId: "janazah-ghusl" },
+        { key: "preferredGhuslPersons", help: "ghusl-personen", label: t(loc, "janazah.field.preferredGhuslPersons"), type: "text", testId: "janazah-preferredGhuslPersons" },
+        { key: "genderSpecificWishes", help: "ghusl-personen", label: t(loc, "janazah.field.genderSpecificWishes"), type: "textarea", testId: "janazah-genderSpecificWishes" },
+        { key: "kafan", help: "kafan", label: t(loc, "janazah.field.kafan"), type: "textarea", testId: "janazah-kafan" },
+        { key: "janazahPrayer", help: "janazah-gebet", label: t(loc, "janazah.field.janazahPrayer"), type: "textarea", testId: "janazah-janazahPrayer" },
+        { key: "preferredMosque", help: "moschee-bestatter", label: t(loc, "janazah.field.preferredMosque"), type: "text", testId: "janazah-preferredMosque" },
       ],
     },
     {
@@ -60,9 +61,9 @@ export function getJanazahSections(locale: string): JanazahSection[] {
       title: t(loc, "janazah.section.beisetzung.title"),
       description: t(loc, "janazah.section.beisetzung.desc"),
       fields: [
-        { key: "burialGermany", label: t(loc, "janazah.field.burialGermany"), type: "boolean", testId: "janazah-burialGermany" },
+        { key: "burialGermany", help: "bestattung-ort", label: t(loc, "janazah.field.burialGermany"), type: "boolean", testId: "janazah-burialGermany" },
         {
-          key: "repatriation",
+          key: "repatriation", help: "bestattung-ort",
           label: t(loc, "janazah.field.repatriation"),
           type: "select",
           options: [
@@ -88,13 +89,48 @@ export function getJanazahSections(locale: string): JanazahSection[] {
         { key: "peopleToInclude", label: t(loc, "janazah.field.peopleToInclude"), type: "textarea", testId: "janazah-peopleToInclude" },
         { key: "messageToFamily", label: t(loc, "janazah.field.messageToFamily"), type: "textarea", testId: "janazah-messageToFamily" },
         { key: "obligationsNotes", label: t(loc, "janazah.field.obligationsNotes"), type: "textarea", testId: "janazah-obligationsNotes" },
-        { key: "debtsAmanahNotes", label: t(loc, "janazah.field.debtsAmanahNotes"), type: "textarea", testId: "janazah-debtsAmanahNotes" },
-        { key: "donationWishes", label: t(loc, "janazah.field.donationWishes"), type: "textarea", testId: "janazah-donationWishes" },
+        { key: "debtsAmanahNotes", help: "schulden-amanah", label: t(loc, "janazah.field.debtsAmanahNotes"), type: "textarea", testId: "janazah-debtsAmanahNotes" },
+        { key: "donationWishes", help: "sadaqa-jariya", label: t(loc, "janazah.field.donationWishes"), type: "textarea", testId: "janazah-donationWishes" },
         { key: "culturalExclusions", label: t(loc, "janazah.field.culturalExclusions"), type: "textarea", testId: "janazah-culturalExclusions" },
         { key: "additionalWishes", label: t(loc, "janazah.field.additionalWishes"), type: "textarea", testId: "janazah-additionalWishes" },
       ],
     },
   ];
+}
+
+export interface JanazahVisibilityContext {
+  values: Record<string, unknown>;
+  /** Birth date already recorded elsewhere (person profile or emergency card). */
+  knownBirthDate?: string;
+}
+
+const filled = (v: unknown) => typeof v === "string" && v.trim() !== "";
+
+/**
+ * Which fields a section shows (guided flow and preview alike):
+ * - birthDate only while no birth date is recorded elsewhere, or when the Janazah entry itself already holds one
+ *   (before AP22 the check read userProfile.birthDate, which has no input, so the field always appeared).
+ * - a merged legacy field (mosqueCommunity) only while it holds a value that differs from the field it was merged into.
+ */
+export function visibleJanazahFields(fields: FieldConfig[], ctx: JanazahVisibilityContext): FieldConfig[] {
+  return fields.filter((field) => {
+    if (field.showWhenProfileBirthDateEmpty) return !filled(ctx.knownBirthDate) || filled(ctx.values[field.key]);
+    if (field.showWhenLegacyDiffers) {
+      const own = ctx.values[field.key];
+      const target = ctx.values[field.showWhenLegacyDiffers];
+      return filled(own) && String(own).trim() !== String(target ?? "").trim();
+    }
+    return true;
+  });
+}
+
+/** Name suggestion for the grave marker from data the person already entered (EA-10.1); never written silently. */
+export function graveNameSuggestion(data: { userProfile?: { name?: string }; emergencyCard?: { name?: string } }): { name: string; from: string } | null {
+  const card = data.emergencyCard?.name?.trim();
+  if (card) return { name: card, from: "Notfallkarte" };
+  const profile = data.userProfile?.name?.trim();
+  if (profile) return { name: profile, from: "Profil" };
+  return null;
 }
 
 // backward-compat default (DE)

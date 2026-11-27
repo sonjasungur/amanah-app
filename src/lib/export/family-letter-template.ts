@@ -1,3 +1,4 @@
+import { moduleText } from "@/lib/content/module-texts";
 import type { AmanahOrdnerData } from "@/lib/domain/types";
 import { getAllModuleProgress } from "@/lib/domain/validation";
 import { moduleConfigs } from "@/lib/modules/config";
@@ -33,11 +34,11 @@ export function buildFamilyLetterTemplate(data: AmanahOrdnerData): string {
   const lines: string[] = [
     `Liebe Familie,`,
     ``,
-    `ich schreibe euch diesen Brief, damit ihr im Notfall oder nach meinem Tod nicht ratlos seid. Mit Mein Wille halte ich meine persönlichen Wünsche für Vorsorge, Janazah und Notfall fest — als Orientierung für euch, nicht als rechtsgültiges Testament.`,
+    `ich schreibe euch diesen Brief, damit ihr im Notfall oder nach meinem Tod nicht ratlos seid. Mit Wasiyya halte ich meine persönlichen Wünsche für Vorsorge, Janazah und Notfall fest — als Orientierung für euch, nicht als rechtsgültiges Testament.`,
     ``,
     `## Im Notfall — wen zuerst kontaktieren`,
     contact1 ? `- Hauptkontakt: ${contact1}` : `- Hauptkontakt: [bitte im Ordner ergänzen — Notfallkarte]`,
-    vollmacht ? `- Vorsorgevollmacht: ${vollmacht} darf für mich entscheiden (Dokument liegt im Ordner).` : `- Vorsorgevollmacht: [noch nicht dokumentiert — bitte im Ordner prüfen]`,
+    vollmacht ? `- Vorsorgevollmacht: ${vollmacht} ${moduleText("letter-vollmacht")}` : `- Vorsorgevollmacht: [noch nicht dokumentiert — bitte im Ordner prüfen]`,
     pv ? `- Medizinische Wünsche: ${pv.slice(0, 200)}${pv.length > 200 ? "…" : ""}` : `- Patientenverfügung / medizinische Wünsche: [noch offen — Ordner prüfen]`,
   ];
   if (contact2) lines.push(`- Zweitkontakt: ${contact2}`);
@@ -45,12 +46,12 @@ export function buildFamilyLetterTemplate(data: AmanahOrdnerData): string {
     `## Janazah & Bestattung`,
     bestatter ? `- Bevorzugter Bestatter/Kontakt: ${bestatter}` : `- Bestatter: [noch nicht benannt — Moschee oder Ordner prüfen]`,
     burial ? `- Bestattungswunsch: ${burial}` : `- Beisetzung in Deutschland oder Überführung: [bitte im Ordner festhalten]`,
-    `- Mir ist wichtig: islamische Grundsätze, zeitnahe Janazah, Würde bei Ghusl und Kafan. Keine teuren kulturellen Feiern, die euch belasten.`,
+    moduleText("letter-janazah"),
     ``,
     `## Unterlagen & digitaler Nachlass`,
-    `- Alle Details, Dokumente und Kontakte stehen in Mein Wille (Dashboard / Export).`,
+    `- Alle Details, Dokumente und Kontakte stehen in Wasiyya (Dashboard / Export).`,
     digital > 0 ? `- Digitale Konten: ${digital} Einträge dokumentiert — Zugangsanweisung im Ordner.` : `- Digitaler Nachlass: [noch nicht vollständig erfasst]`,
-    schulden > 0 ? `- Schulden & Amanah: ${schulden} Punkte dokumentiert — bitte fachlich klären, bevor der Nachlass verteilt wird.` : `- Schulden & Amanah: [bitte prüfen, ob noch offen]`,
+    schulden > 0 ? `- Schulden & Amanah: ${schulden} Punkte dokumentiert — ${moduleText("letter-schulden")}` : `- Schulden & Amanah: [bitte prüfen, ob noch offen]`,
     ``,
     `## Was noch offen ist`,
   );

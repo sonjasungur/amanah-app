@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { KnowledgeArticle } from "@/lib/types";
 import { SourcesSection } from "@/components/knowledge/sources-section";
 import { ReviewStatusBadge } from "@/components/knowledge/review-status-badge";
-import { PrimarySourcesList } from "@/components/ui/primary-source-card";
+import { PrimarySourcesList } from "@/components/knowledge/primary-sources-list";
 import { Card, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, BookOpen, FileText, Scale, Target, Users } from "lucide-react";
 
@@ -20,7 +20,7 @@ function Section({
 }) {
   const bg =
     variant === "legal"
-      ? "rounded-2xl border-2 border-cat-vermoegen/25 bg-[#FDF8F0] p-5 md:p-6"
+      ? "rounded-2xl border-2 border-cat-vermoegen/25 bg-accent-soft p-5 md:p-6"
       : variant === "risk"
         ? "rounded-2xl border-2 border-warning/30 bg-warning/5 p-5 md:p-6"
         : "space-y-3";
@@ -168,7 +168,7 @@ export function RichArticleCard({ article }: { article: KnowledgeArticle }) {
 export function WissenFormCta({ href, label }: { href: string; label: string }) {
   return (
     <div className="mt-10 rounded-2xl border-2 border-emerald/40 bg-accent-soft p-6 md:p-8 shadow-sm">
-      <h2 className="text-section-title font-bold text-primary-dark mb-3">Jetzt in Mein Wille festhalten</h2>
+      <h2 className="text-section-title font-bold text-primary-dark mb-3">Jetzt in Wasiyya festhalten</h2>
       <p className="text-body text-muted mb-5 leading-relaxed">
         Wenn du bereit bist, kannst du deine Wünsche Schritt für Schritt in deinem persönlichen Ordner dokumentieren.
       </p>

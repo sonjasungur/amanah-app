@@ -42,7 +42,7 @@ export const testamentArticles: KnowledgeArticle[] = [
     content:
       "In Deutschland gelten Formvorschriften (notarielles Testament), Pflichtteilsrechte und gesetzliche Erbfolge. Ein islamisches Erbkonzept braucht die Prüfung durch Imam/Gelehrte UND Anwalt/Notar.",
     sourceIds: ["official-vorsorgevollmacht"],
-    reviewStatus: "reviewed",
+    reviewStatus: "needs_scholar_review",
     category: "testament",
   },
 ];

@@ -12,7 +12,18 @@ export type KnowledgeCategory =
   | "familiennachricht"
   | "app-grenzen";
 
-export type ReviewedStatus = "draft" | "reviewed" | "needs_review";
+/**
+ * "reviewed" counts only together with a documented review (see ReviewEvidence).
+ * "orientation": purely organisational help without religious or legal statements, not reviewed.
+ */
+export type ReviewedStatus = "draft" | "reviewed" | "needs_review" | "orientation";
+
+/** Who reviewed what, and where it is documented. Without this, nothing may appear as reviewed. */
+export interface ReviewEvidence {
+  reviewer: string;
+  reviewedAt: string;
+  document: string;
+}
 export type RiskLevel = "low" | "medium" | "sensitive";
 export type KnowledgeLanguage = "de" | "en" | "tr" | "ar";
 
@@ -29,6 +40,7 @@ export interface KnowledgeEntry {
   riskLevel: RiskLevel;
   tags: string[];
   lastReviewedAt?: string;
+  reviewEvidence?: ReviewEvidence;
 }
 
 export interface KnowledgeSearchResult {

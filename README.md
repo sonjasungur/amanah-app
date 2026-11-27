@@ -289,4 +289,4 @@ BASE_URL=https://your-domain.de ./scripts/prod-smoke-test.sh
 
 ## Lizenz
 
-Privates Projekt — AmanahOrdner / sonjasungur.
+Privates Projekt — Wasiyya (MSC Engineering GmbH).

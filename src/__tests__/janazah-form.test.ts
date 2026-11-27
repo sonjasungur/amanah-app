@@ -19,10 +19,10 @@ describe("product tiles and navigation", () => {
     expect(home).toContain("BRAND.ctaPrimary");
   });
 
-  it("dashboard module tiles reference valid routes under Alle Vorsorgebereiche", () => {
+  it("dashboard module tiles list the topics outside the six areas under Weitere Themen", () => {
     const tiles = read("src/components/dashboard/module-tiles.tsx");
     expect(tiles).toContain("moduleConfigs");
-    expect(tiles).toContain("Alle Vorsorgebereiche");
+    expect(tiles).toContain("Weitere Themen");
     expect(tiles).toContain("dashboard-tile-${mod.id}");
     const paths = moduleConfigs.map((m) => m.path);
     for (const route of ["/dashboard/notfallkarte", "/dashboard/janazah", "/dashboard/vollmacht", "/dashboard/testament", "/dashboard/digitaler-nachlass", "/dashboard/familie"]) {
@@ -44,7 +44,8 @@ describe("Janazah wishes form", () => {
     expect(form).toContain('data-testid="janazah-form"');
     expect(form).toContain('data-testid="janazah-save-success"');
     expect(form).toContain("janazahWishes");
-    expect(form).toContain("SaveStatusIndicator");
+    // The one save status of the page comes from the dashboard's storage bar, not from the form.
+    expect(form).not.toContain("<SaveStatusIndicator");
   });
 
   it("shows legal and religious notice", () => {
@@ -70,7 +71,7 @@ describe("Janazah wishes form", () => {
   it("optional fields have no required constraint in field config", () => {
     for (const field of janazahFields) {
       expect(field.label.length).toBeGreaterThan(0);
-      expect(["text", "textarea", "select", "boolean", "number"]).toContain(field.type);
+      expect(["text", "textarea", "select", "boolean", "number", "date"]).toContain(field.type);
     }
   });
 });
