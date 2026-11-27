@@ -10,7 +10,7 @@ import {
 } from "@/components/marketing/marketing-ui";
 import { BRAND, BRAND_TRUST_ITEMS } from "@/lib/brand";
 import { COLORS } from "@/lib/design-tokens";
-import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_SUMMARY } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_SUMMARY, START_SCOPE_NOTE } from "@/lib/billing/start-offer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { WasiyyaMark } from "@/components/layout/wasiyya-logo";
@@ -298,7 +298,8 @@ export default function HomePage() {
               <p className="text-sm text-muted mt-3">{START_PREMIUM_SUMMARY}</p>
             </article>
           </div>
-          <p className="text-sm text-muted mt-6">{START_PLUS_STATUS}</p>
+          <p className="text-sm text-foreground mt-6" data-testid="home-scope-note">{START_SCOPE_NOTE}</p>
+          <p className="text-sm text-muted mt-2">{START_PLUS_STATUS}</p>
           <Link href="/preise" className="inline-block mt-6">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               Pakete ansehen

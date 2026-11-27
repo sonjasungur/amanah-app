@@ -3,7 +3,7 @@ import { BRAND } from "@/lib/brand";
 import { isPublicRegistrationEnabled } from "@/lib/auth/public-registration";
 import { linkButtonClassName } from "@/components/ui/button";
 import { Disclaimer } from "@/components/ui/disclaimer";
-import { START_ALWAYS_FREE, START_BASIS, START_KOMPLETT_PLANNED, START_PLUS_PLANNED, START_PLUS_STATUS, START_PREMIUM_PLANNED, START_PREMIUM_SUMMARY } from "@/lib/billing/start-offer";
+import { START_ALWAYS_FREE, START_BASIS, START_KOMPLETT_PLANNED, START_PLUS_PLANNED, START_PLUS_STATUS, START_PLUS_SUBTITLE, START_PREMIUM_PLANNED, START_PREMIUM_SUMMARY, START_SCOPE_NOTE } from "@/lib/billing/start-offer";
 import { publicPageMetadata } from "@/lib/seo/public-pages";
 import { Check } from "lucide-react";
 
@@ -23,6 +23,10 @@ const PRINCIPLES = [
 ] as const;
 
 const FAQ: readonly { q: string; a: string }[] = [
+  {
+    q: "Übernimmt Wasiyya die Bestattung oder Überführung?",
+    a: "Nein. Wasiyya führt keine Bestattung, Überführung, Waschung oder Behördengänge durch. Du planst mit Wasiyya deine Wünsche und hältst Unterlagen und Ansprechpartner fest – so weiß deine Familie im Ernstfall, was zu tun ist, und kann es mit Moschee, Bestatter und Behörden schnell umsetzen.",
+  },
   {
     q: "Gibt es ein Abo?",
     a: "Nein. Wasiyya hat kein Abo, keine Mitgliedsgebühr und keine automatische Verlängerung. Pakete bezahlst du später einmal.",
@@ -96,7 +100,7 @@ export default function PreisePage() {
           <article className="on-dark rounded-3xl bg-[radial-gradient(ellipse_at_50%_0%,#24336B,#0E1630_60%,#0B1226)] text-white p-7 ring-1 ring-[#D4A537]/50 shadow-[0_30px_70px_-24px_rgba(11,18,38,0.6)] flex flex-col" data-testid="pricing-plus">
             <p className="inline-block self-start px-3 py-1 rounded-full ring-1 ring-[#F2CF6C]/60 text-[#F2CF6C] text-xs font-bold uppercase tracking-wider">In Vorbereitung · einmalig</p>
             <h2 className="text-section-title mt-4">Wasiyya Vorsorge</h2>
-            <p className="text-body text-white/80 mt-1">Dein vollständiger Vorsorgeordner.</p>
+            <p className="text-body text-white/80 mt-1">{START_PLUS_SUBTITLE}</p>
             <ul className="mt-6 space-y-3 flex-1">
               {START_PLUS_PLANNED.map((t) => (
                 <li key={t} className="flex gap-3 text-white/90">
@@ -147,6 +151,9 @@ export default function PreisePage() {
         </div>
 
         <section className="mt-14" aria-labelledby="pricing-faq">
+          <p className="gold-frame rounded-2xl p-5 mb-10 text-foreground" data-testid="pricing-scope-note">
+            {START_SCOPE_NOTE}
+          </p>
           <h2 id="pricing-faq" className="text-section-title text-primary-dark mb-6">Häufige Fragen</h2>
           <dl className="grid gap-6 md:grid-cols-2">
             {FAQ.map((f) => (

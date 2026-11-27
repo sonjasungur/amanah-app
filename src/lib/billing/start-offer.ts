@@ -64,10 +64,10 @@ export const START_ALWAYS_FREE = "Immer kostenlos: deine Daten exportieren, lös
  */
 export const START_PLUS_PLANNED: readonly string[] = [
   "Dein vollständiger Vorsorgeordner, verschlüsselt im Konto gespeichert",
-  "Dokumente, Schulden, Amanah und digitaler Nachlass",
-  "Janazah, Ghusl und Kafan, Bestattung oder Überführung",
+  "Dokumente, Schulden, Amanah und digitalen Nachlass übersichtlich festhalten",
+  "Deine Wünsche zu Janazah, Ghusl und Kafan sowie Bestattung oder Überführung planen und festhalten",
   "Krankheit, Vollmacht und Betreuung als Notizen (keine rechtlichen Dokumente)",
-  "Familienbrief, Vertrauenspersonen und professionelle Druckmappe für Angehörige",
+  "Familienbrief, Vertrauenspersonen und Druckmappe, damit deine Angehörigen alles Wichtige finden",
 ];
 
 export const START_KOMPLETT_PLANNED: readonly string[] = [
@@ -86,6 +86,14 @@ export const START_PREMIUM_PLANNED: readonly string[] = [
 /** Short line for the Premium card (pricing page and homepage). No legal service, no appointments, no costs taken over. */
 export const START_PREMIUM_SUMMARY =
   "Organisatorische Vorbereitung bis zum Termin bei Notar oder Anwalt – Umfang nach rechtlicher Prüfung. Persönliche Rechtshandlungen nimmst du selbst vor.";
+
+/**
+ * What Wasiyya does and does not do (owner acceptance 27.11.2026): it helps to plan and record, so the family can
+ * organise quickly later. It never carries out a burial, repatriation, ritual washing or dealings with authorities.
+ */
+export const START_PLUS_SUBTITLE = "Du planst in Ruhe – deine Familie weiß später, was zu tun ist.";
+export const START_SCOPE_NOTE =
+  "Wasiyya führt keine Bestattung, Überführung, Waschung oder Behördengänge durch. Wir helfen dir, alles zu planen und festzuhalten – damit deine Familie im Ernstfall schnell und in deinem Sinne handeln kann.";
 
 export const START_PLUS_STATUS =
   "Die Pakete kann man noch nicht kaufen. Preise und Bedingungen nennen wir, bevor sie buchbar sind. Bis dahin nutzt du alle Bereiche ohne Einschränkung.";

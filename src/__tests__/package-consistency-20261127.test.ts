@@ -94,4 +94,12 @@ describe("page images (owner 27.11.2026)", () => {
     expect(TOPIC_IMAGES.testament.src).toBe("/images/wasiyya/testament.jpg");
     expect(read("src/app/bestatter/page.tsx")).not.toMatch(/image="(konvertierte|janazahKompass)"/);
   });
+  it("states that Wasiyya plans and records but never carries out burial or repatriation (owner 27.11.2026)", () => {
+    const offer = readFileSync("src/lib/billing/start-offer.ts", "utf8");
+    expect(offer).toContain("Wasiyya führt keine Bestattung, Überführung, Waschung oder Behördengänge durch");
+    expect(offer).toContain("planen und festhalten");
+    expect(offer).not.toContain('"Janazah, Ghusl und Kafan, Bestattung oder Überführung"');
+    expect(readFileSync("src/app/preise/page.tsx", "utf8")).toContain("START_SCOPE_NOTE");
+    expect(readFileSync("src/app/page.tsx", "utf8")).toContain("START_SCOPE_NOTE");
+  });
 });
