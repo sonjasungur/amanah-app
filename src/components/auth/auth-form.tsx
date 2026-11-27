@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
+import type { AuthSession } from "@/lib/auth/types";
 import { useI18n } from "@/lib/i18n/context";
 import { typedValue } from "@/lib/utils/form-input";
 import { sanitizeReturnUrl, buildAuthHref } from "@/lib/auth/return-url";
@@ -21,7 +22,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
-  const { login, register, authMode } = useAuth();
+  const { login, register, authMode, adoptSession } = useAuth();
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -50,11 +51,15 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError("");
     setLoading(true);
     const res = await fetch("/api/dev/staging-login", { method: "POST" }).catch(() => null);
-    if (!res?.ok) {
+    const data = res?.ok ? ((await res.json().catch(() => null)) as { session?: AuthSession } | null) : null;
+    if (!data?.session) {
       setLoading(false);
       setError("Direktanmeldung war nicht möglich.");
       return;
     }
+    // Keep the local session hint like a normal login; without it the dashboard never asks the server
+    // and sends the user straight back to the login page (owner report 27.11.2026).
+    await adoptSession(data.session);
     // Full reload so the session is read fresh from the server.
     window.location.assign(returnUrl);
   };

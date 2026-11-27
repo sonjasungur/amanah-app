@@ -61,4 +61,10 @@ describe("staging direct login", () => {
     const cross = new Request("http://127.0.0.1:3000/api/dev/staging-login", { method: "POST", headers: { origin: "https://evil.example" } });
     expect((await POST(cross)).status).toBe(403);
   });
+  it("keeps the local session hint after the one-tap login, so the dashboard does not bounce back (27.11.2026)", () => {
+    const form = readFileSync("src/components/auth/auth-form.tsx", "utf8");
+    const handler = form.slice(form.indexOf("const loginAsAcceptanceAccount"), form.indexOf("const resendVerification"));
+    expect(handler).toContain("await adoptSession(data.session)");
+    expect(handler.indexOf("adoptSession")).toBeLessThan(handler.indexOf("window.location.assign"));
+  });
 });
