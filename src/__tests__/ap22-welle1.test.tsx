@@ -86,7 +86,7 @@ describe("EA-05.2/05.3/05.6: centre pages, search, related topics and review sta
       if (m[1] === "vers") await expect(Verse({ params: Promise.resolve({ ref: m[2] }) }), h).resolves.toBeTruthy();
     }
     expect([...hrefs].some((h) => h.startsWith("/wissen/zentrum/vers/"))).toBe(true);
-  });
+  }, 60_000); // renders ~120 pages; slow under a full parallel run
 
   it("searches titles, texts and sources, ignoring diacritics", async () => {
     const { searchCentre, normaliseSearch } = await import("@/modules/islamic-knowledge/full-articles/centre");

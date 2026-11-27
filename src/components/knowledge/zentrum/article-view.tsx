@@ -11,6 +11,8 @@ import {
   type QuranSource,
   type TafsirSource,
 } from "@/modules/islamic-knowledge/full-articles";
+import { explainLaw, shortLawTitle } from "@/lib/knowledge/law-explanations";
+import { OpenDetailsOnHash } from "./open-details-on-hash";
 
 /**
  * Reader view of the knowledge centre (P2.7). Server component only: the drafts never reach browser code.
@@ -346,20 +348,69 @@ export function ArticleBody({ article }: { article: FullArticle }) {
 }
 
 /** All sources with stable anchors, so every "Belege" link and every fatwa link from another article lands here. */
+const SOURCE_GROUPS: { type: AnySource["type"]; label: string }[] = [
+  { type: "quran", label: "Qurʾān" },
+  { type: "tafsir", label: "Tafsīr" },
+  { type: "hadith", label: "Hadithe" },
+  { type: "fatwa", label: "Fatwas und Gelehrte" },
+  { type: "law", label: "Deutsches Recht" },
+];
+
+/** One line per norm: number and title, what it is about, link to the official text (owner acceptance 27.11.2026). */
+function LawRow({ l }: { l: LawSource }) {
+  const explanation = explainLaw(l.title);
+  return (
+    <li id={anchor(l.ref)} className="scroll-mt-24 py-3 border-b border-[var(--wz-line)] last:border-b-0" data-testid="law-row">
+      <p className="font-semibold text-[var(--wz-ink)]">{shortLawTitle(l.title)}</p>
+      {explanation && <p className="text-[0.95rem] text-[var(--wz-ink)]/85 mt-0.5">{explanation}</p>}
+      <p className="text-xs text-[var(--wz-muted)] mt-1">
+        {l.jurisdiction} · abgerufen am {l.retrievedAt} ·{" "}
+        <a href={l.url} className="wz-text-link" rel="noreferrer">
+          Gesetzestext
+        </a>
+      </p>
+    </li>
+  );
+}
+
 export function SourceList({ article }: { article: FullArticle }) {
   const index = sourceIndex(article);
   if (!index.size) return null;
+  const all = [...index.values()];
   return (
-    <section className="space-y-5" aria-labelledby="quellen-titel" data-testid="source-list">
+    <section className="space-y-3" aria-labelledby="quellen-titel" data-testid="source-list">
+      <OpenDetailsOnHash />
       <h2 id="quellen-titel" className="wz-serif text-[1.55rem] sm:text-[1.7rem] font-semibold text-[var(--wz-green)]">
         Quellen dieses Artikels
       </h2>
-      {[...index.values()].map((src) => (
-        <div key={src.s.ref} id={anchor(src.s.ref)} className="scroll-mt-24 space-y-2">
-          <p className="text-sm font-semibold text-[var(--wz-ink)]">{sourceTitle(src)}</p>
-          <SourceCard src={src} />
-        </div>
-      ))}
+      <p className="text-sm text-[var(--wz-muted)]">Nach Art geordnet. Zum Aufklappen auf eine Gruppe tippen.</p>
+      {SOURCE_GROUPS.map(({ type, label }) => {
+        const items = all.filter((s) => s.type === type);
+        if (!items.length) return null;
+        return (
+          <details key={type} className="wz-card rounded-2xl p-4 sm:p-5" data-testid={`source-group-${type}`}>
+            <summary className="cursor-pointer font-semibold text-[var(--wz-green)]">
+              {label} <span className="font-normal text-[var(--wz-muted)]">({items.length})</span>
+            </summary>
+            {type === "law" ? (
+              <ul className="mt-2">
+                {items.map((src) => (
+                  <LawRow key={src.s.ref} l={src.s as LawSource} />
+                ))}
+              </ul>
+            ) : (
+              <div className="mt-4 space-y-5">
+                {items.map((src) => (
+                  <div key={src.s.ref} id={anchor(src.s.ref)} className="scroll-mt-24 space-y-2">
+                    <p className="text-sm font-semibold text-[var(--wz-ink)]">{sourceTitle(src)}</p>
+                    <SourceCard src={src} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </details>
+        );
+      })}
     </section>
   );
 }
